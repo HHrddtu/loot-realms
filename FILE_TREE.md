@@ -23,6 +23,7 @@ WebGame/
 ├── PLAN_BOSS.md              (план босса Трент — реализован)
 ├── PLAN_PROGRESSION.md       (план прогрессии — не реализован)
 ├── PLAN_SNOWY_VILLAGE.md     (план Snowy Village — реализован v0.11.0)
+├── PLAN_ROADMAP.md           (рефакторинг + питы + магазин + мультиплеер — v0.12.0+)
 ├── BUGFIX_CAVE_STAIRS.md     (баги v0.9.8: cave stairs ghost + account equip save)
 └── src/
     ├── main.js               (27 строк — 9 сцен + loadLang)

@@ -56,11 +56,12 @@
 ### Приоритет
 | # | Задача | Статус |
 |---|--------|--------|
-| — | **Мультиплеер кооп (2-4 игрока)** — PeerJS (WebRTC P2P), LobbyScene, sync позиций/урона/лута | План готов |
-| — | Долгосрочная прогрессия — Difficulty Unlock, Prestige, Mastery (детали в PLAN_PROGRESSION.md) | План готов |
+| — | **Рефакторинг GameScene.js → systems/ + zones/** (детали в PLAN_ROADMAP.md) | План готов |
+| — | **Пит-система + Магазин** — PetSystem, ShopScene, Gold/Souls/Tokens | План готов |
+| — | **Баланс + UX** — миникарта, damage numbers, sound effects | План готов |
+| — | **Мультиплеер кооп (2-4 игрока)** — PeerJS (WebRTC P2P), LobbyScene, sync | План готов |
+| — | Долгосрочная прогрессия — Difficulty Unlock, Prestige, Mastery | План готов |
 | — | Перевод описаний Bestiary/Material/Soul Book на RU/DE | Ожидает |
-| — | UI tree — увеличить scroll area для талант-дерева (row 0-14 = 15 строк) | Рекомендация |
-| — | Автоматический деплой — GitHub Actions workflow для автоматического build+deploy при push | Баг |
 
 ### Мультиплеер (план)
 | # | Задача | Описание |
@@ -69,12 +70,54 @@
 | — | LobbyScene | UI: ввод имени, создание/вход в комнату (код) |
 | — | Host mode | Хост запускает GameScene, spawn мобов, проверяет урон |
 | — | Guest mode | Гость отправляет input (позиция, атака, спеллы) |
-| — | Sync позиций | 30 раз/сек: host → все гости (позиции игроков) |
+| — | Sync позиций | 20 раз/сек: host ↔ guest |
 | — | Sync мобов | Host → гости: HP мобов, позиции, alive/dead |
 | — | Sync лута | Host решает кто получил предмет |
 | — | Аватары игроков | Спрайты других игроков в GameScene |
-| — | Совместный HP bar боссов | Отображение для всех игроков |
 | — | Disconnect handling | Если хост отключился — показать сообщение |
+
+### Рефакторинг (план v0.12.0)
+| # | Задача | Файлы | Сложность |
+|---|--------|-------|-----------|
+| 1 | CombatSystem | attack, hitEnemy, killEnemy, _dealAttackDamage | Средняя |
+| 2 | PlayerSystem | createPlayer, recalcStats, takeDamage, heal | Средняя |
+| 3 | SpellSystem | _castSpell, _castProjectile, _castShield, _castHeal | Средняя |
+| 4 | UISystem | openInventory, closeInventory, tooltips | Лёгкая |
+| 5 | NpcSystem | _spawnNPCs, _interactWithNpc, quests UI | Лёгкая |
+| 6 | HellZone | setup, clear, update, camps, boss, lava | Средняя |
+| 7 | SnowyZone | setup, clear, update, camps, boss, campfire | Средняя |
+| 8 | VillageZone | setup, clear, update, camps, decor, cemetery | Средняя |
+| 9 | ForestZone | setup, clear, update, portal, Trent | Средняя |
+| 10 | CaveZone | setup, clear, update, Giant Bat | Средняя |
+| 11 | MineZone | setup, clear, update, Skeleton Lord | Средняя |
+| 12 | config.js → config/ | enemies, bosses, zones, items, spells, crafting | Лёгкая |
+| 13 | textures.js → textures/ | player, enemy, boss, zone, item, ui textures | Лёгкая |
+| 14 | GameScene.js → каркас | Заменить методы на delegation, ~800 строк | Средняя |
+| 15 | Тестирование | Полный прогон всех зон, боссов, квестов | Обязательно |
+
+### Пит-система + Магазин (план v0.13.0)
+| # | Задача | Описание |
+|---|--------|----------|
+| 1 | PET_DB + текстуры | Определить питомцев, нарисовать спрайты |
+| 2 | PetEntity класс | Спрайт, follow AI, attack AI, stats bonus |
+| 3 | PetSystem интеграция | GameScene: spawn питомца, update, recalcStats |
+| 4 | SHOP_DB | Определить товары, цены (Gold/Souls/Tokens) |
+| 5 | ShopScene UI | Сцена магазина с вкладками |
+| 6 | Валюта система | Gold/Souls/Account Tokens, отображение в HUD |
+| 7 | Питомец HUD | Маленький питомец рядом с HP bar |
+| 8 | Эволюция питомцев | UI эволюции, проверка условий |
+| 9 | Тестирование | Баланс цен, проверка бонусов |
+
+### Баланс + UX (план v0.14.0)
+| # | Улучшение | Описание |
+|---|-----------|----------|
+| 1 | Баланс всех зон | HP/damage по зонам, heat damage, lava |
+| 2 | Миникарта | Маленькая карта в углу с метками |
+| 3 | Damage numbers | Красивые всплывающие числа урона |
+| 4 | Boss HP bar | Полоса HP + имя + фаза |
+| 5 | Loot auto-pickup | Автоподбор золота при прохождении |
+| 6 | Death screen | Экран смерти с кнопкой respawn |
+| 7 | Sound effects | Звуки атаки, урона, лута |
 
 ### Новые идеи (обсуждение)
 | # | Задача | Статус |
@@ -88,7 +131,15 @@
 
 **Последнее сделано:** v0.11.0 — Snowy Village + GitHub Pages деплой
 
-**URL игры:** https://hhrddtu.github.io/loot-realms/
+**Следующий шаг:** v0.12.0 — Рефакторинг кода (детали в `PLAN_ROADMAP.md`)
+
+**URL игры:** https://hhrdtu.github.io/loot-realms/
+
+**Roadmap:**
+- v0.12.0: Рефакторинг GameScene.js → systems/ + zones/ + config/ + textures/
+- v0.13.0: Пит-система + Магазин (PetSystem, ShopScene, Gold/Souls/Tokens)
+- v0.14.0: Баланс + UX + Баги (миникарта, damage numbers, sound effects)
+- v0.15.0: Мультиплеер кооп (PeerJS, LobbyScene, Host/Guest, sync)
 
 **Что было в v0.11.0:**
 1. Snowy Village — замороженная деревня после Hell (5 типов мобов, Ice Spirit босс, campfire, Warmth Core, восстановление)
