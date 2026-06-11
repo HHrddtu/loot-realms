@@ -47,6 +47,7 @@
 | 90 | **Snowy Village** — замороженная деревня, 5 типов мобов, Ice Spirit босс, campfire, Warmth Core, восстановление деревни | v0.11.0 |
 | 91 | Snowy Village textures — 13 процедурных текстур (snow_ground, snow_house, icy mobs, campfire, warmth_core, VFX) | v0.11.0 |
 | 92 | Snowy Village bugs — HP:NaN fix, campfire equipBag fix, warmth_core id fix, villageRestored flag, NaN protection | v0.11.0 |
+| 93 | GitHub Pages деплой — .gitignore, .github/workflows/deploy.yml, gh-pages ветка, ручной deploy dist/ | v0.11.0 |
 
 ---
 
@@ -55,36 +56,51 @@
 ### Приоритет
 | # | Задача | Статус |
 |---|--------|--------|
+| — | **Мультиплеер кооп (2-4 игрока)** — PeerJS (WebRTC P2P), LobbyScene, sync позиций/урона/лута | План готов |
 | — | Долгосрочная прогрессия — Difficulty Unlock, Prestige, Mastery (детали в PLAN_PROGRESSION.md) | План готов |
 | — | Перевод описаний Bestiary/Material/Soul Book на RU/DE | Ожидает |
 | — | UI tree — увеличить scroll area для талант-дерева (row 0-14 = 15 строк) | Рекомендация |
+| — | Автоматический деплой — GitHub Actions workflow для автоматического build+deploy при push | Баг |
+
+### Мультиплеер (план)
+| # | Задача | Описание |
+|---|--------|----------|
+| — | Добавить PeerJS | `npm install peerjs`, wrapper в `src/network.js` |
+| — | LobbyScene | UI: ввод имени, создание/вход в комнату (код) |
+| — | Host mode | Хост запускает GameScene, spawn мобов, проверяет урон |
+| — | Guest mode | Гость отправляет input (позиция, атака, спеллы) |
+| — | Sync позиций | 30 раз/сек: host → все гости (позиции игроков) |
+| — | Sync мобов | Host → гости: HP мобов, позиции, alive/dead |
+| — | Sync лута | Host решает кто получил предмет |
+| — | Аватары игроков | Спрайты других игроков в GameScene |
+| — | Совместный HP bar боссов | Отображение для всех игроков |
+| — | Disconnect handling | Если хост отключился — показать сообщение |
 
 ### Новые идеи (обсуждение)
 | # | Задача | Статус |
 |---|--------|--------|
 | — | Процедурные подземелья — рандомные комнаты | Обсуждение |
 | — | Арена/PvP — рейтинговые бои | Обсуждение |
-| — | Гильдии/кооп — совместные рейды | Обсуждение |
 
 ---
 
 ## Текущая точка остановки
 
-**Последнее сделано:** v0.11.0 — Snowy Village (замороженная деревня после Hell)
+**Последнее сделано:** v0.11.0 — Snowy Village + GitHub Pages деплой
+
+**URL игры:** https://hhrddtu.github.io/loot-realms/
 
 **Что было в v0.11.0:**
-1. config.js — 5 зимних мобов, Ice Spirit босс, Warmth Core, 10 позиций сундуков, Bestiary/Soul Book (14 записей)
-2. textures.js — _drawSnowyVillage(): snow_ground, snow_house, snowy_barrel, campfire, campfire_active, warmth_core, ice_shard, frost_wave_vfx, blizzard_vfx, 5 winter mobs + spritesheets, ice_spirit + spritesheet
-3. GameScene.js — villageFrozen flag, _setupVillage(frozen), 4 camps × 4 mobs, Ice Spirit boss AI (Frost Wave/Blizzard/Summon Shards), campfire + Warmth Core interaction, villageRestored flag
-4. Багфиксы — HP:NaN (difficulty string→key), campfire (inventoryBag→equipBag, key→id), villageRestored (no mobs after restore), NaN protection
+1. Snowy Village — замороженная деревня после Hell (5 типов мобов, Ice Spirit босс, campfire, Warmth Core, восстановление)
+2. Багфиксы — HP:NaN, campfire equipBag, warmth_core id, villageRestored flag
+3. GitHub Pages деплой — .gitignore, deploy.yml workflow, gh-pages ветка
 
 **Важно для следующего агента:**
 - `GameScene.js` — ~6830 строк
 - 9 сцен зарегистрировано в main.js
 - Class таланты: 47×3=141, Account таланты: 70, Всего: 211
-- `this.difficulty` — СТРОКА ("Normal"/"Hard"/"Expert"/etc), НЕ число. Boss stats читаются как `boss.hp[diffKey]`
-- `this.diffMulti` — объект множителей `{ hp: 1.5, dmg: 1.3, exp: 1.2 }` из DIFF_MULT[difficulty]
-- Warmth Core хранится в `this.equipBag` (не inventoryBag), ключ `id: 'warmth_core'` (не `key`)
+- `this.difficulty` — СТРОКА ("Normal"/"Hard"/"Expert"/etc), НЕ число
+- `this.diffMulti` — объект множителей `{ hp, dmg, exp }` из DIFF_MULT[difficulty]
+- Warmth Core в `this.equipBag`, ключ `id: 'warmth_core'`
 - `this.villageRestored` — permanente flag, НЕ сбрасывается в `_clearVillage()`
-- Snowy Village flow: Hell → frozen village → kill mobs → Ice Spirit → Warmth Core → campfire → restored village
-- Деревня после восстановления: только декор, мобов нет
+- **Деплой:** `npm run build` → push dist/ на `gh-pages` ветку (force). Корневой `index.html` — dev-ссылки, НЕ для Pages

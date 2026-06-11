@@ -7,8 +7,11 @@ WebGame/
 ├── index.html                (favicon: inline SVG sword)
 ├── package.json              (phaser ^3.80.0, vite ^8.0.16)
 ├── vite.config.js
+├── .gitignore                (node_modules/, dist/)
+├── .github/workflows/
+│   └── deploy.yml            (GitHub Actions → gh-pages)
 ├── node_modules/
-├── dist/
+├── dist/                     (сборка для деплоя, НЕ коммитится)
 ├── инструкция.txt            (правила разработки — ОБЯЗАТЕЛЬНО ЧИТАТЬ)
 ├── GAME_VISION.md            (видение игры)
 ├── GAME_DESIGN.md            (механики, формулы, баланс)
@@ -47,6 +50,34 @@ WebGame/
         ├── SoulBookScene.js  (~295 строк — Soul Book UI)
         └── CraftScene.js     (~425 строк — UI крафта с вкладками)
 ```
+
+---
+
+## Деплой (GitHub Pages)
+
+| Параметр | Значение |
+|----------|----------|
+| URL | https://hhrddtu.github.io/loot-realms/ |
+| Репозиторий | https://github.com/HHrddtu/loot-realms |
+| Ветка деплоя | `gh-pages` (содержимое = `dist/`) |
+| Workflow | `.github/workflows/deploy.yml` (GitHub Actions) |
+| Build команда | `npm run build` → `dist/` |
+
+### Процесс деплоя (ручной)
+```bash
+npm run build
+cd dist
+git init && git checkout -b gh-pages
+git add -A && git commit -m "Deploy v0.11.0"
+git remote add origin https://github.com/HHrddtu/loot-realms.git
+git push -f origin gh-pages
+Remove-Item -Recurse -Force dist/.git
+```
+
+### Важно
+- Корневой `index.html` содержит dev-ссылку `/src/main.js` — НЕ для продакшена
+- `dist/index.html` содержит bundled JS (`./assets/index-*.js`) — для Pages
+- При обновлении: пересобрать (`npm run build`), force push на `gh-pages`
 
 ---
 

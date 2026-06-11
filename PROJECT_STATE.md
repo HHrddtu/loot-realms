@@ -2,7 +2,7 @@
 
 ## Текущий билд: v0.11.0
 
-## Статус: PvE-игра (Forest/Arena/Mine/Cave/Village/Hell/Snowy Village) + таланты + крафт/алхимия + Meadow/Cave зоны + реликвии + Bestiary/Soul Book + Hell Zone + Snowy Village (Ice Spirit boss, campfire, Warmth Core)
+## Статус: PvE-игра (Forest/Arena/Mine/Cave/Village/Hell/Snowy Village) + таланты + крафт/алхимия + Meadow/Cave зоны + реликвии + Bestiary/Soul Book + Hell Zone + Snowy Village (Ice Spirit boss, campfire, Warmth Core) + GitHub Pages деплой
 
 ---
 
@@ -23,6 +23,14 @@
 - Сцены SecretMine/Village/Cemetery полностью удалены (код + документация + текстуры)
 - Осталось 9 сцен (Boot + Menu + ClassSelect + Game + TalentTree + Bestiary + MaterialBook + SoulBook + Craft)
 - Village зона многофункциональная: обычный village → cemetery → Hell → snowy village → восстановление
+
+### Деплой (v0.11.0)
+- **URL:** https://hhrddtu.github.io/loot-realms/
+- **Репозиторий:** https://github.com/HHrddtu/loot-realms
+- **Метод:** GitHub Pages, ветка `gh-pages` (собранный `dist/`)
+- **Workflow:** `.github/workflows/deploy.yml` — GitHub Actions, но пока deploy вручную через force push dist/ на gh-pages
+- **Как обновить:** `npm run build` → зайти в `dist/` → `git init && git checkout -b gh-pages && git add -A && git commit && git remote add origin URL && git push -f origin gh-pages` → удалить `.git` из dist
+- **Важно:** корневой `index.html` содержит dev-ссылку `/src/main.js` — НЕ отдавать через Pages. Только `dist/index.html` (с bundled JS)
 
 ---
 
