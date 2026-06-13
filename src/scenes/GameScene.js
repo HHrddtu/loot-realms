@@ -549,8 +549,6 @@ export default class GameScene extends Phaser.Scene {
 
     _createUI() { if (this.ui) this.ui._createUI(); }
     _createTopBar() { if (this.ui) this.ui._createTopBar(); }
-    _buildStatsPanel() { if (this.ui) this.ui._buildStatsPanel(); }
-    _toggleStats() { if (this.ui) this.ui._toggleStats(); }
     _toggleMute() { if (this.ui) this.ui._toggleMute(); }
     _openTalentTree() { if (this.ui) this.ui._openTalentTree(); }
     _openBestiary() { if (this.ui) this.ui._openBestiary(); }
@@ -642,7 +640,6 @@ export default class GameScene extends Phaser.Scene {
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         this.iKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I);
         this.pKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
-        this.tabKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB);
         this.mKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
         this.tKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.T);
         this.qKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
@@ -777,7 +774,7 @@ export default class GameScene extends Phaser.Scene {
             }
             if (Phaser.Input.Keyboard.JustDown(this.iKey)) this.toggleInventory();
             if (Phaser.Input.Keyboard.JustDown(this.pKey)) this.togglePause();
-            if (Phaser.Input.Keyboard.JustDown(this.tabKey)) this._toggleStats();
+            if (Phaser.Input.Keyboard.JustDown(this.tKey)) this._openTalent();
             if (Phaser.Input.Keyboard.JustDown(this.mKey)) this._toggleMute();
             if (Phaser.Input.Keyboard.JustDown(this.tKey)) this._openTalentTree();
             const spells = this._getClassSpells();

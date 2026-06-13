@@ -16,32 +16,72 @@ export class UISystem {
 
     _createUI() {
         this.scene._createTopBar();
-        this.scene._buildStatsPanel();
     }
 
     _createTopBar() {
-        this.scene.topBarBg = this.scene.add.rectangle(400, 12, 780, 22, 0x000000, 0.5)
-            .setScrollFactor(0).setDepth(20);
-        this.scene.topBarBg.setStrokeStyle(1, 0x333333);
+        const s = (el) => { el.setScrollFactor(0).setDepth(20); return el; };
+        const sx = (el) => { el.setScrollFactor(0).setDepth(23); return el; };
 
-        this.scene.hpBarOuter = this.scene.add.rectangle(200, 12, 200, 14, 0x1a1a2e)
-            .setOrigin(0, 0.5).setScrollFactor(0).setDepth(21);
-        this.scene.hpBarOuter.setStrokeStyle(1, 0x444444);
-        this.scene.hpBarFill = this.scene.add.rectangle(201, 12, 198, 12, 0xe74c3c)
-            .setOrigin(0, 0.5).setScrollFactor(0).setDepth(22);
+        this.scene.heroPanelBg = s(this.scene.add.rectangle(95, 44, 190, 88, 0x0a0a1a, 0.88)
+            .setStrokeStyle(1, 0x444444));
 
-        this.scene.shieldBarFill = this.scene.add.rectangle(201, 12, 0, 12, 0x3498db, 0.4)
-            .setOrigin(0, 0.5).setScrollFactor(0).setDepth(22.5);
+        this.scene.heroIcon = sx(this.scene.add.sprite(30, 44, 'icon_sage').setScale(2));
 
-        this.scene.levelText = this.scene.add.text(10, 12, '', {
-            fontSize: '12px', fill: '#e67e22', fontFamily: 'Arial', fontStyle: 'bold',
+        this.scene.heroClassName = sx(this.scene.add.text(58, 16, '', {
+            fontSize: '13px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 2
-        }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(23);
+        }));
 
-        this.scene.diffText = this.scene.add.text(790, 12, this.scene.difficulty, {
-            fontSize: '10px', fill: '#f39c12', fontFamily: 'Arial', fontStyle: 'bold',
+        this.scene.heroLevel = sx(this.scene.add.text(185, 16, '', {
+            fontSize: '11px', fill: '#e67e22', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 1
-        }).setOrigin(1, 0.5).setScrollFactor(0).setDepth(23);
+        }).setOrigin(1, 0));
+
+        this.scene.heroDmgText = sx(this.scene.add.text(58, 32, '', {
+            fontSize: '11px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 1
+        }));
+
+        this.scene.heroHpBarOuter = s(this.scene.add.rectangle(58, 44, 126, 10, 0x1a1a2e)
+            .setOrigin(0, 0.5).setStrokeStyle(1, 0x444444));
+        this.scene.heroHpBarFill = s(this.scene.add.rectangle(59, 44, 124, 8, 0xe74c3c)
+            .setOrigin(0, 0.5));
+        this.scene.heroShieldFill = s(this.scene.add.rectangle(59, 44, 0, 8, 0x3498db, 0.4)
+            .setOrigin(0, 0.5));
+
+        this.scene.heroHpText = sx(this.scene.add.text(121, 44, '', {
+            fontSize: '8px', fill: '#fff', fontFamily: 'Arial',
+            stroke: '#000', strokeThickness: 1
+        }).setOrigin(0.5));
+
+        this.scene.heroCorLabel = sx(this.scene.add.text(58, 54, 'COR', {
+            fontSize: '8px', fill: '#9b59b6', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 1
+        }));
+
+        this.scene.heroCorBarOuter = s(this.scene.add.rectangle(80, 54, 104, 5, 0x1a1a2e)
+            .setOrigin(0, 0.5).setStrokeStyle(1, 0x333333));
+        this.scene.heroCorBarFill = s(this.scene.add.rectangle(81, 54, 0, 3, 0x9b59b6)
+            .setOrigin(0, 0.5));
+
+        this.scene.heroAccLabel = sx(this.scene.add.text(58, 64, '', {
+            fontSize: '8px', fill: '#e67e22', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 1
+        }));
+
+        this.scene.heroAccBarOuter = s(this.scene.add.rectangle(100, 64, 84, 4, 0x1a1a2e)
+            .setOrigin(0, 0.5).setStrokeStyle(1, 0x333333));
+        this.scene.heroAccBarFill = s(this.scene.add.rectangle(101, 64, 0, 2, 0xe67e22)
+            .setOrigin(0, 0.5));
+
+        this.scene.heroHint = sx(this.scene.add.text(58, 74, '', {
+            fontSize: '8px', fill: '#666', fontFamily: 'Arial'
+        }));
+
+        this.scene.diffText = sx(this.scene.add.text(185, 4, '', {
+            fontSize: '9px', fill: '#f39c12', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 1
+        }).setOrigin(1, 0));
 
         this.scene.hintText = this.scene.add.text(400, 588, '', {
             fontSize: '10px', fill: '#555', fontFamily: 'Arial'
@@ -53,116 +93,29 @@ export class UISystem {
         }).setOrigin(1, 0.5).setScrollFactor(0).setDepth(23).setInteractive({ useHandCursor: true });
         this.scene.muteText.on('pointerdown', () => this._toggleMute());
 
-        this.scene.corruptionLabel = this.scene.add.text(10, 36, 'COR', {
-            fontSize: '9px', fill: '#9b59b6', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 1
-        }).setScrollFactor(0).setDepth(23);
-
-        this.scene.corruptionBarOuter = this.scene.add.rectangle(200, 36, 200, 6, 0x1a1a2e)
-            .setOrigin(0, 0.5).setScrollFactor(0).setDepth(21);
-        this.scene.corruptionBarOuter.setStrokeStyle(1, 0x333333);
-        this.scene.corruptionBarFill = this.scene.add.rectangle(201, 36, 0, 4, 0x9b59b6)
-            .setOrigin(0, 0.5).setScrollFactor(0).setDepth(22);
-
         this.scene.talentText = this.scene.add.text(400, 36, '', {
             fontSize: '9px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 1
         }).setScrollFactor(0).setDepth(23);
-
-        this.scene.accountLevelText = this.scene.add.text(10, 48, '', {
-            fontSize: '9px', fill: '#e67e22', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 1
-        }).setScrollFactor(0).setDepth(23);
-
-        this.scene.accountExpBarOuter = this.scene.add.rectangle(200, 48, 200, 4, 0x1a1a2e)
-            .setOrigin(0, 0.5).setScrollFactor(0).setDepth(21);
-        this.scene.accountExpBarOuter.setStrokeStyle(1, 0x333333);
-        this.scene.accountExpBarFill = this.scene.add.rectangle(201, 48, 0, 2, 0xe67e22)
-            .setOrigin(0, 0.5).setScrollFactor(0).setDepth(22);
 
         this.scene.spellSlots = {};
         const spellKeys = ['fireball', 'shield', 'heal'];
         const spellLabels = ['Q', 'W', 'E'];
         const spellColors = [0xe74c3c, 0x3498db, 0x2ecc71];
         spellKeys.forEach((key, i) => {
-            const sx = 690 + i * 36;
+            const sx2 = 690 + i * 36;
             const sy = 565;
-            const bg = this.scene.add.rectangle(sx, sy, 30, 30, 0x1a1a2e)
+            const bg = this.scene.add.rectangle(sx2, sy, 30, 30, 0x1a1a2e)
                 .setStrokeStyle(2, spellColors[i])
                 .setScrollFactor(0).setDepth(24);
-            const lbl = this.scene.add.text(sx, sy - 2, spellLabels[i], {
+            const lbl = this.scene.add.text(sx2, sy - 2, spellLabels[i], {
                 fontSize: '10px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
             }).setOrigin(0.5).setScrollFactor(0).setDepth(25);
-            const cd = this.scene.add.text(sx, sy + 10, '', {
+            const cd = this.scene.add.text(sx2, sy + 10, '', {
                 fontSize: '8px', fill: '#f39c12', fontFamily: 'Arial'
             }).setOrigin(0.5).setScrollFactor(0).setDepth(25);
             this.scene.spellSlots[key] = { bg, lbl, cd };
         });
-    }
-
-    _buildStatsPanel() {
-        if (this.scene.statsGroup) this.scene.statsGroup.forEach(e => e.destroy());
-        this.scene.statsGroup = [];
-
-        const s = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
-
-        this.scene.statsBarBg = s(this.scene.add.rectangle(110, 60, 200, 22, 0x0a0a1a, 0.8)
-            .setStrokeStyle(1, 0x444444));
-        this.scene.statsBarText = s(this.scene.add.text(15, 60, '', {
-            fontSize: '10px', fill: '#ecf0f1', fontFamily: 'Arial', fontStyle: 'bold'
-        }).setOrigin(0, 0.5));
-        this.scene.statsBarBtn = s(this.scene.add.text(210, 60, '[ + ]', {
-            fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial'
-        }).setOrigin(1, 0.5).setInteractive({ useHandCursor: true }));
-        this.scene.statsBarBtn.on('pointerdown', () => this._toggleStats());
-
-        const px = 10, py = 78, pw = 210, ph = 152;
-        this.scene.statsPanelBg = s(this.scene.add.rectangle(px + pw / 2, py + ph / 2, pw, ph, 0x0a0a1a, 0.9)
-            .setStrokeStyle(1, 0x444444));
-        this.scene.statsPanelBg.setVisible(false);
-
-        this.scene.statsCloseBtn = s(this.scene.add.text(px + pw - 10, py + 4, '[ - ]', {
-            fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial'
-        }).setOrigin(1, 0).setInteractive({ useHandCursor: true }));
-        this.scene.statsCloseBtn.on('pointerdown', () => this._toggleStats());
-        this.scene.statsCloseBtn.setVisible(false);
-
-        this.scene.statsTitle = s(this.scene.add.text(px + 10, py + 6, 'STATS', {
-            fontSize: '12px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
-        }));
-        this.scene.statsTitle.setVisible(false);
-
-        const labels = ['Acc Lv:', 'HP:', 'Damage:', 'Acc EXP:'];
-        const colors = ['#f1c40f', '#27ae60', '#e74c3c', '#f1c40f'];
-        this.scene.statsLabels = [];
-        this.scene.statsValues = [];
-
-        labels.forEach((label, i) => {
-            const y = py + 26 + i * 22;
-            const lt = s(this.scene.add.text(px + 12, y, label, {
-                fontSize: '11px', fill: '#95a5a6', fontFamily: 'Arial'
-            }));
-            lt.setVisible(false);
-            this.scene.statsLabels.push(lt);
-
-            const vt = s(this.scene.add.text(px + pw - 16, y, '', {
-                fontSize: '11px', fill: colors[i], fontFamily: 'Arial', fontStyle: 'bold'
-            }).setOrigin(1, 0));
-            vt.setVisible(false);
-            this.scene.statsValues.push(vt);
-        });
-
-        this.scene._statsExpanded = false;
-    }
-
-    _toggleStats() {
-        this.scene._statsExpanded = !this.scene._statsExpanded;
-        this.scene.statsPanelBg.setVisible(this.scene._statsExpanded);
-        this.scene.statsCloseBtn.setVisible(this.scene._statsExpanded);
-        this.scene.statsTitle.setVisible(this.scene._statsExpanded);
-        this.scene.statsLabels.forEach(e => e.setVisible(this.scene._statsExpanded));
-        this.scene.statsValues.forEach(e => e.setVisible(this.scene._statsExpanded));
-        this.scene.statsBarBtn.setText(this.scene._statsExpanded ? '[ - ]' : '[ + ]');
     }
 
     _toggleMute() {
@@ -244,46 +197,48 @@ export class UISystem {
     }
 
     updateUI() {
-        const req = Math.floor(100 * Math.pow(this.scene.playerLevel, 1.5));
-
         const accReq = getAccountLevelUpReq(this.scene.accountLevel);
-        this.scene.levelText.setText('Lv.' + this.scene.playerLevel);
-        this.scene.hpBarFill.width = Math.max(0, 198 * (this.scene.playerHP / this.scene.playerMaxHP));
-        if (this.scene.playerHP / this.scene.playerMaxHP > 0.6) this.scene.hpBarFill.setFillStyle(0x27ae60);
-        else if (this.scene.playerHP / this.scene.playerMaxHP > 0.3) this.scene.hpBarFill.setFillStyle(0xf39c12);
-        else this.scene.hpBarFill.setFillStyle(0xe74c3c);
+
+        const iconKey = 'icon_' + (this.scene.classKey || 'sage');
+        if (this.scene.heroIcon && this.scene.heroIcon.texture.key !== iconKey) {
+            this.scene.heroIcon.setTexture(iconKey);
+        }
+        const clsNames = { sage: 'SAGE', alchemist: 'ALCHEMIST', angel: 'ANGEL' };
+        if (this.scene.heroClassName) this.scene.heroClassName.setText(clsNames[this.scene.classKey] || 'SAGE');
+        if (this.scene.heroLevel) this.scene.heroLevel.setText('Lv.' + this.scene.playerLevel);
+        if (this.scene.heroDmgText) this.scene.heroDmgText.setText('DMG:' + this.scene.playerDamage);
+
+        const hpRatio = this.scene.playerMaxHP > 0 ? this.scene.playerHP / this.scene.playerMaxHP : 0;
+        if (this.scene.heroHpBarFill) {
+            this.scene.heroHpBarFill.width = Math.max(0, 124 * hpRatio);
+            if (hpRatio > 0.6) this.scene.heroHpBarFill.setFillStyle(0x27ae60);
+            else if (hpRatio > 0.3) this.scene.heroHpBarFill.setFillStyle(0xf39c12);
+            else this.scene.heroHpBarFill.setFillStyle(0xe74c3c);
+        }
+        if (this.scene.heroHpText) this.scene.heroHpText.setText(this.scene.playerHP + '/' + this.scene.playerMaxHP);
 
         if (this.scene.shieldActive && this.scene.shieldHP > 0) {
-            this.scene.shieldBarFill.width = Math.min(198, 198 * (this.scene.shieldHP / this.scene.playerMaxHP));
-            this.scene.shieldBarFill.x = 201 + this.scene.hpBarFill.width;
+            this.scene.heroShieldFill.width = Math.min(124, 124 * (this.scene.shieldHP / this.scene.playerMaxHP));
+            this.scene.heroShieldFill.x = 59 + this.scene.heroHpBarFill.width;
         } else {
-            this.scene.shieldBarFill.width = 0;
+            this.scene.heroShieldFill.width = 0;
         }
 
-        this.scene.corruptionBarFill.width = Math.max(0, 198 * (this.scene.corruption / this.scene.corruptionMax));
-        if (this.scene.corruption / this.scene.corruptionMax > 0.8) this.scene.corruptionBarFill.setFillStyle(0xe74c3c);
-        else if (this.scene.corruption / this.scene.corruptionMax > 0.5) this.scene.corruptionBarFill.setFillStyle(0xe67e22);
-        else this.scene.corruptionBarFill.setFillStyle(0x9b59b6);
+        const corRatio = this.scene.corruptionMax > 0 ? this.scene.corruption / this.scene.corruptionMax : 0;
+        if (this.scene.heroCorBarFill) {
+            this.scene.heroCorBarFill.width = Math.max(0, 102 * corRatio);
+            if (corRatio > 0.8) this.scene.heroCorBarFill.setFillStyle(0xe74c3c);
+            else if (corRatio > 0.5) this.scene.heroCorBarFill.setFillStyle(0xe67e22);
+            else this.scene.heroCorBarFill.setFillStyle(0x9b59b6);
+        }
 
+        if (this.scene.heroAccLabel) this.scene.heroAccLabel.setText('AcLv' + this.scene.accountLevel);
+        if (this.scene.heroAccBarFill) this.scene.heroAccBarFill.width = Math.max(0, 82 * (this.scene.accountExp / accReq));
+
+        if (this.scene.heroHint) this.scene.heroHint.setText(this.scene.talentPoints > 0 ? 'Talents: ' + this.scene.talentPoints + ' [T]' : '');
+
+        if (this.scene.diffText) this.scene.diffText.setText(this.scene.difficulty);
         this.scene.talentText.setText(this.scene.talentPoints > 0 ? 'TALENTS: ' + this.scene.talentPoints + ' [T]' : '');
-
-        this.scene.accountLevelText.setText('Acc Lv.' + this.scene.accountLevel + '  ' + this.scene.accountExp + '/' + accReq);
-        this.scene.accountExpBarFill.width = Math.max(0, 198 * (this.scene.accountExp / accReq));
-
-        this.scene.statsBarText.setText(
-            'Acc Lv.' + this.scene.accountLevel +
-            '  HP:' + this.scene.playerHP + '/' + this.scene.playerMaxHP +
-            '  DMG:' + this.scene.playerDamage +
-            '  EXP:' + this.scene.accountExp + '/' + accReq
-        );
-
-        if (this.scene._statsExpanded && this.scene.statsValues.length >= 4) {
-            this.scene.statsValues[0].setText('' + this.scene.accountLevel);
-            this.scene.statsValues[1].setText(this.scene.playerHP + ' / ' + this.scene.playerMaxHP);
-            this.scene.statsValues[1].setColor(this.scene.playerHP / this.scene.playerMaxHP > 0.3 ? '#27ae60' : '#e74c3c');
-            this.scene.statsValues[2].setText('' + this.scene.playerDamage);
-            this.scene.statsValues[3].setText(this.scene.accountExp + ' / ' + accReq);
-        }
 
         if (this.scene.spellSlots) {
             ['fireball', 'shield', 'heal'].forEach(key => {

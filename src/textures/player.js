@@ -230,4 +230,57 @@ export function drawPlayerTextures(mk) {
         c.fillRect(9, 38, 6, 6);
         c.fillRect(17, 38, 6, 6);
     });
+
+    mk('icon_sage', 32, 32, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#1a1a2e';
+        c.fillRect(0, 0, 32, 32);
+        c.fillStyle = '#7d3c98';
+        c.fillRect(8, 4, 16, 4);
+        c.fillRect(6, 8, 20, 18);
+        c.fillStyle = '#f5f5dc';
+        c.fillRect(10, 12, 12, 10);
+        c.fillStyle = '#5b2c6f';
+        c.fillRect(12, 14, 8, 2);
+        c.fillRect(12, 18, 8, 2);
+        c.fillStyle = '#9b59b6';
+        c.fillRect(14, 26, 4, 4);
+    });
+
+    mk('icon_alchemist', 32, 32, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#1a1a2e';
+        c.fillRect(0, 0, 32, 32);
+        c.fillStyle = '#922b21';
+        c.fillRect(10, 6, 12, 20);
+        c.fillRect(8, 10, 16, 12);
+        c.fillStyle = '#cb4335';
+        c.fillRect(12, 8, 8, 4);
+        c.fillStyle = '#d4ac0d';
+        c.fillRect(13, 14, 6, 6);
+        c.fillStyle = '#e74c3c';
+        c.fillRect(14, 16, 4, 2);
+        c.fillStyle = '#784212';
+        c.fillRect(11, 26, 4, 4);
+        c.fillRect(17, 26, 4, 4);
+    });
+
+    mk('icon_angel', 32, 32, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#1a1a2e';
+        c.fillRect(0, 0, 32, 32);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(12, 2, 8, 4);
+        c.fillRect(10, 6, 12, 18);
+        c.fillStyle = '#f5f5dc';
+        c.fillRect(14, 8, 4, 4);
+        c.fillStyle = '#d4ac0d';
+        c.fillRect(12, 14, 8, 8);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(14, 16, 4, 4);
+        c.fillRect(4, 10, 6, 3);
+        c.fillRect(22, 10, 6, 3);
+        c.fillRect(6, 14, 4, 2);
+        c.fillRect(22, 14, 4, 2);
+    });
 }
