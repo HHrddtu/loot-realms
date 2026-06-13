@@ -6,7 +6,7 @@ import {
     MINE_EXIT_POS, MINE_RETURN_POS, MINE_BOSS_PORTAL_POS,
     MINE_CHEST_COUNT, MINE_CHEST_DROP_CHANCE,
     ARENA_EXIT_POS, DIFF_MULT
-} from '../config.js';
+} from '../config/index.js';
 import { rollEquip } from '../utils.js';
 import { startMusic, playPortal, playBossAoE } from '../sound.js';
 

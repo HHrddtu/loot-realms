@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { NPC_DB, QUEST_DB, CART_DRIVER_NPC, GAME_WIDTH, GAME_HEIGHT } from '../config.js';
+import { NPC_DB, QUEST_DB, CART_DRIVER_NPC, GAME_WIDTH, GAME_HEIGHT } from '../config/index.js';
 import { getNpcQuestStatus, getActiveQuests, getAvailableQuests, acceptQuest, completeQuest, isQuestComplete, saveQuests, getQuestProgress } from '../quests.js';
 import { rollEquip } from '../utils.js';
 import { getLang } from '../i18n.js';

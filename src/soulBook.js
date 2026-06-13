@@ -1,4 +1,4 @@
-import { SOUL_BOOK_LEVELS, SOUL_BOOK_ENTRIES, BESTIARY_ENEMIES, BESTIARY_DIFF_MULT } from './config.js';
+import { SOUL_BOOK_LEVELS, SOUL_BOOK_ENTRIES, BESTIARY_ENEMIES, BESTIARY_DIFF_MULT } from './config/index.js';
 import { loadAccount, saveAccount } from './save.js';
 
 let soulData = {};

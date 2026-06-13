@@ -1,4 +1,4 @@
-import { BESTIARY_LEVELS, BESTIARY_ENEMIES, BESTIARY_DIFF_MULT } from './config.js';
+import { BESTIARY_LEVELS, BESTIARY_ENEMIES, BESTIARY_DIFF_MULT } from './config/index.js';
 import { loadAccount, saveAccount } from './save.js';
 
 let bestiaryData = {};

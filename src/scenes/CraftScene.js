@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, CRAFT_CATEGORIES, CRAFTING_RECIPES, RARITY_COLORS, MATERIAL_DB } from '../config.js';
+import { GAME_WIDTH, GAME_HEIGHT, CRAFT_CATEGORIES, CRAFTING_RECIPES, RARITY_COLORS, MATERIAL_DB } from '../config/index.js';
 import { canCraft, craft, getRecipeStatus, countMaterials, getMaterialName } from '../crafting.js';
 import { getLang, t } from '../i18n.js';
 

@@ -1,4 +1,4 @@
-import { CRAFTING_RECIPES, MATERIAL_BOOK_LEVELS, MATERIAL_BOOK_ENTRIES } from './config.js';
+import { CRAFTING_RECIPES, MATERIAL_BOOK_LEVELS, MATERIAL_BOOK_ENTRIES } from './config/index.js';
 import { getMaterialStudyLevel } from './materialBook.js';
 
 export function getAvailableRecipes() {

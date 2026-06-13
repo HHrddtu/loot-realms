@@ -5,7 +5,7 @@ import {
     WARMTH_CORE,
     SNOWY_VILLAGE_CAMP_POSITIONS, SNOWY_VILLAGE_CHEST_COUNT, SNOWY_VILLAGE_CHEST_DROP_CHANCE,
     VILLAGE_CHEST_EQUIP_DROP_CHANCE
-} from '../config.js';
+} from '../config/index.js';
 import { playBossDeath, playLoot } from '../sound.js';
 import { rollVillageEquip, rollEquip } from '../utils.js';
 

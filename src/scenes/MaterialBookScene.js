@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { getAllMaterialEntries, getNextMaterialLevelInfo } from '../materialBook.js';
-import { GAME_WIDTH, GAME_HEIGHT, MATERIAL_BOOK_LEVELS, BESTIARY_DIFF_MULT } from '../config.js';
+import { GAME_WIDTH, GAME_HEIGHT, MATERIAL_BOOK_LEVELS, BESTIARY_DIFF_MULT } from '../config/index.js';
 import { t, getLang, translateName } from '../i18n.js';
 
 export default class MaterialBookScene extends Phaser.Scene {

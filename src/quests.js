@@ -1,4 +1,4 @@
-import { QUEST_DB, NPC_DB } from './config.js';
+import { QUEST_DB, NPC_DB } from './config/index.js';
 import { loadAccount, saveAccount, loadGame, saveGame } from './save.js';
 
 let activeQuests = [];

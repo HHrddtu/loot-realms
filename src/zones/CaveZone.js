@@ -5,7 +5,7 @@ import {
     CAVE_CHEST_COUNT, CAVE_CHEST_DROP_CHANCE,
     CAVE_CHEST_CLOSED_KEY, CAVE_CHEST_W, CAVE_CHEST_H,
     CAVE_SMALL_BAT, DIFF_MULT
-} from '../config.js';
+} from '../config/index.js';
 import { rollEquip } from '../utils.js';
 import { startMusic, playPortal, playBossAoE } from '../sound.js';
 

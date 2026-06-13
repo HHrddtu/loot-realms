@@ -13,6 +13,7 @@ export const MATERIAL_SLOTS = 6;
 export const EQUIP_BAG_SLOTS = 12;
 export const ACCOUNT_EQUIP_SLOTS = 5;
 export const ACCOUNT_EQUIP_BAG_SLOTS = 10;
+export const EMPTY_ACCOUNT_EQUIPMENT = { hat: null, mantle: null, legs: null, weapon: null, accessory: null };
 
 // Mine
 export const MINE_ROCK_COUNT = 8;

@@ -1,3 +1,5 @@
+import { EMPTY_ACCOUNT_EQUIPMENT } from './config/index.js';
+
 const SAVE_KEY = 'webgame_save';
 const ACCOUNT_KEY = 'webgame_account';
 
@@ -33,6 +35,8 @@ export function hasSave() {
 
 /* ===== ACCOUNT (persistent across all saves) ===== */
 
+let _accountCache = null;
+
 const DEFAULT_ACCOUNT = {
     version: 2,
     accountLevel: 1,
@@ -43,7 +47,7 @@ const DEFAULT_ACCOUNT = {
     totalStumps: 0,
     highestClassLevel: {},
     playTime: 0,
-    accountEquipment: { sage: { hat: null, mantle: null, legs: null, weapon: null, accessory: null }, alchemist: { hat: null, mantle: null, legs: null, weapon: null, accessory: null }, angel: { hat: null, mantle: null, legs: null, weapon: null, accessory: null } },
+    accountEquipment: { sage: { ...EMPTY_ACCOUNT_EQUIPMENT }, alchemist: { ...EMPTY_ACCOUNT_EQUIPMENT }, angel: { ...EMPTY_ACCOUNT_EQUIPMENT } },
     accountEquipBag: { sage: [], alchemist: [], angel: [] }
 };
 
@@ -52,7 +56,7 @@ function migrateAccount(data) {
     if (data.version >= 2) return data;
     const flat = data.accountEquipment;
     if (flat && !flat.sage) {
-        data.accountEquipment = { sage: { ...flat }, alchemist: { hat: null, mantle: null, legs: null, weapon: null, accessory: null }, angel: { hat: null, mantle: null, legs: null, weapon: null, accessory: null } };
+        data.accountEquipment = { sage: { ...flat }, alchemist: { ...EMPTY_ACCOUNT_EQUIPMENT }, angel: { ...EMPTY_ACCOUNT_EQUIPMENT } };
         const oldBag = Array.isArray(data.accountEquipBag) ? data.accountEquipBag : [];
         data.accountEquipBag = { sage: oldBag, alchemist: [], angel: [] };
     }
@@ -65,6 +69,7 @@ export function saveAccount(data) {
         const existing = loadAccount() || {};
         const merged = { ...DEFAULT_ACCOUNT, ...existing, ...data };
         localStorage.setItem(ACCOUNT_KEY, JSON.stringify(merged));
+        _accountCache = null;
         return true;
     } catch (e) {
         return false;
@@ -72,11 +77,13 @@ export function saveAccount(data) {
 }
 
 export function loadAccount() {
+    if (_accountCache) return _accountCache;
     try {
         const json = localStorage.getItem(ACCOUNT_KEY);
         if (!json) return null;
         const data = migrateAccount({ ...DEFAULT_ACCOUNT, ...JSON.parse(json) });
         if (data) localStorage.setItem(ACCOUNT_KEY, JSON.stringify(data));
+        _accountCache = data;
         return data;
     } catch (e) {
         return null;

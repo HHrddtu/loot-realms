@@ -1,4 +1,4 @@
-import { MATERIAL_BOOK_LEVELS, MATERIAL_BOOK_ENTRIES, MATERIAL_DB, BESTIARY_DIFF_MULT } from './config.js';
+import { MATERIAL_BOOK_LEVELS, MATERIAL_BOOK_ENTRIES, MATERIAL_DB, BESTIARY_DIFF_MULT } from './config/index.js';
 import { loadAccount, saveAccount } from './save.js';
 
 let materialData = {};

@@ -3,7 +3,7 @@ import {
     GAME_WIDTH, FOREST_HEIGHT, ENEMY_COUNT, STUMP_COUNT,
     PORTAL_POS, PORTAL_ENTER_DIST, FOREST_RETURN_POS,
     ENEMY_TYPES
-} from '../config.js';
+} from '../config/index.js';
 import { startMusic, playPortal } from '../sound.js';
 import { recordEncounter } from '../bestiary.js';
 

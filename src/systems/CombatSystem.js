@@ -6,7 +6,7 @@ import {
     MINE_CHEST_DROP_CHANCE, SECRET_KEY_ITEM,
     VILLAGE_BOSS_TYPE, VILLAGE_CHEST_OPEN_KEY,
     CAVE_CHEST_OPEN_KEY, CAVE_WIDTH, CAVE_HEIGHT
-} from '../config.js';
+} from '../config/index.js';
 import { rollEquip, rollMaterial, rollAccountEquip, rollCaveRelic } from '../utils.js';
 import { playBossDeath, playEnemyDeath, playLoot, playBreak } from '../sound.js';
 import { recordKill } from '../bestiary.js';
@@ -431,107 +431,24 @@ export class CombatSystem {
     }
 
     killBoss() {
-        const b = this.scene.boss;
-        const exp = b.stats.exp;
-        const expBonus = 1 + (this.scene.accountEffects ? (this.scene.accountEffects.expPercent || 0) / 100 : 0);
-        this.scene.playerExp += exp;
-        this.scene.accountExp += Math.floor(exp * expBonus);
-        this.scene.kills++;
-        this.scene.bossAlive = false;
-        this.scene.bossDefeated = true;
-        playBossDeath();
-        recordKill('ancient_treant');
-        recordSoulCollect('ancient_treant');
-        onKill('ancient_treant');
-        this.scene._updateQuestIcons();
-        if (this.scene.particles) this.scene.particles.spawnBossDeath(b.x, b.y);
-
-        b.body.setVelocity(0);
-        b.setTint(0xff0000);
-        this.scene.tweens.add({
-            targets: b, alpha: 0, scaleX: 1.5, scaleY: 1.5, duration: 800,
-            onComplete: () => {
-                b.hpBg.destroy();
-                b.hpFill.destroy();
-                b.destroy();
-                this.scene.boss = null;
+        this.killGenericBoss({
+            bossRef: 'boss',
+            aliveKey: 'bossAlive',
+            defeatedKey: 'bossDefeated',
+            nameTextKey: 'bossNameText',
+            recordKey: 'ancient_treant',
+            defeatedText: 'BOSS DEFEATED!',
+            defeatedColor: '#f1c40f',
+            secondDropChance: 0.5,
+            textX: 400,
+            textY: 200,
+            onPostKill: () => {
+                this.scene.mineUnlocked = true;
+                this.scene.exitPortal.setTexture('mine_ladder');
+                this.scene.exitPortal.setScale(1);
+                this.scene.exitHint.setText('SPACE to enter the Mine');
             }
         });
-
-        if (b.aoeRing) { b.aoeRing.destroy(); b.aoeRing = null; }
-        if (b.aoeRing2) { b.aoeRing2.destroy(); b.aoeRing2 = null; }
-        if (this.scene.bossNameText) this.scene.bossNameText.destroy();
-
-        this.scene.floatingText(400, 200, '+' + exp + ' EXP', '#f1c40f');
-
-        this.scene.defeatedText = this.scene.add.text(400, 250, 'BOSS DEFEATED!', {
-            fontSize: '32px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 4
-        }).setOrigin(0.5).setScrollFactor(0);
-        this.scene.tweens.add({
-            targets: this.scene.defeatedText, alpha: 0, duration: 5000,
-            onComplete: () => { if (this.scene.defeatedText) this.scene.defeatedText.destroy(); this.scene.defeatedText = null; }
-        });
-
-        this.scene.mineUnlocked = true;
-
-        this.scene.exitPortal.setTexture('mine_ladder');
-        this.scene.exitPortal.setScale(1);
-        this.scene.exitHint.setText('SPACE to enter the Mine');
-
-        this.scene.defeatedLoot = [];
-        const lootItems = [];
-        if (Math.random() < BOSS_DROP_CHANCE) {
-            const item = rollEquip();
-            if (this.scene.addEquip(item)) {
-                lootItems.push(item);
-                playLoot();
-            }
-        }
-        if (Math.random() < 0.5) {
-            const item2 = rollEquip();
-            if (this.scene.addEquip(item2)) {
-                lootItems.push(item2);
-                playLoot();
-            }
-        }
-
-        if (Math.random() < BOSS_DROP_CHANCE) {
-            const accItem = rollAccountEquip();
-            if (this.scene.addAccountEquip(accItem)) {
-                lootItems.push({ ...accItem, name: accItem.name + ' [ACCOUNT]' });
-                playLoot();
-            }
-        }
-
-        lootItems.forEach((item, i) => {
-            const rc = '#' + RARITY_COLORS[item.rarity].toString(16).padStart(6, '0');
-            const lt = this.scene.add.text(400, 300 + i * 24, '+' + item.name, {
-                fontSize: '16px', fill: rc, fontFamily: 'Arial', fontStyle: 'bold',
-                stroke: '#000', strokeThickness: 2
-            }).setOrigin(0.5).setScrollFactor(0);
-            this.scene.defeatedLoot.push(lt);
-            this.scene.tweens.add({
-                targets: lt, alpha: 0, duration: 5000,
-                onComplete: () => { if (lt.active) lt.destroy(); }
-            });
-        });
-
-        if (lootItems.length === 0) {
-            const noLoot = this.scene.add.text(400, 300, 'No drops...', {
-                fontSize: '14px', fill: '#95a5a6', fontFamily: 'Arial',
-                stroke: '#000', strokeThickness: 2
-            }).setOrigin(0.5).setScrollFactor(0);
-            this.scene.defeatedLoot.push(noLoot);
-            this.scene.tweens.add({
-                targets: noLoot, alpha: 0, duration: 5000,
-                onComplete: () => { if (noLoot.active) noLoot.destroy(); }
-            });
-        }
-
-        this.scene.checkLevelUp();
-        this.scene._checkAccountLevelUp();
-        this.scene.updateUI();
     }
 
     killEnemy(enemy) {
@@ -605,124 +522,76 @@ export class CombatSystem {
     }
 
     killMineBoss() {
-        const b = this.scene.mineBoss;
-        const exp = b.stats.exp;
-        const expBonus = 1 + (this.scene.accountEffects ? (this.scene.accountEffects.expPercent || 0) / 100 : 0);
-        this.scene.playerExp += exp;
-        this.scene.accountExp += Math.floor(exp * expBonus);
-        this.scene.kills++;
-        this.scene.mineBossAlive = false;
-        this.scene.mineBossDefeated = true;
-        playBossDeath();
-        recordKill('skeleton_lord');
-        recordSoulCollect('skeleton_lord');
-        onKill('skeleton_lord');
-        this.scene._updateQuestIcons();
-        if (this.scene.particles) this.scene.particles.spawnBossDeath(b.x, b.y);
-
-        b.body.setVelocity(0);
-        b.setTint(0xff0000);
-        this.scene.tweens.add({
-            targets: b, alpha: 0, scaleX: 1.5, scaleY: 1.5, duration: 800,
-            onComplete: () => {
-                b.hpBg.destroy();
-                b.hpFill.destroy();
-                b.destroy();
-                this.scene.mineBoss = null;
+        this.killGenericBoss({
+            bossRef: 'mineBoss',
+            aliveKey: 'mineBossAlive',
+            defeatedKey: 'mineBossDefeated',
+            nameTextKey: 'mineBossNameText',
+            recordKey: 'skeleton_lord',
+            defeatedText: 'SKELETON LORD DEFEATED!',
+            defeatedColor: '#bf77f6',
+            secondDropChance: 0.6,
+            textX: 400,
+            textY: 200,
+            extraLoot: () => {
+                if (!this.scene.hasSecretKey && DIFF_MULT[this.scene.difficulty] && DIFF_MULT[this.scene.difficulty].hp > 1) {
+                    this.scene.hasSecretKey = true;
+                    const keyItem = { ...SECRET_KEY_ITEM };
+                    playLoot();
+                    this.scene.floatingText(400, 280, SECRET_KEY_ITEM.name + ' obtained!', '#f1c40f');
+                    return [keyItem];
+                }
+                return [];
             }
         });
-
-        if (b.aoeRing) { b.aoeRing.destroy(); b.aoeRing = null; }
-        if (b.aoeRing2) { b.aoeRing2.destroy(); b.aoeRing2 = null; }
-        if (this.scene.mineBossNameText) this.scene.mineBossNameText.destroy();
-
-        this.scene.floatingText(400, 200, '+' + exp + ' EXP', '#f1c40f');
-
-        this.scene.defeatedText = this.scene.add.text(400, 250, 'SKELETON LORD DEFEATED!', {
-            fontSize: '28px', fill: '#bf77f6', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 4
-        }).setOrigin(0.5).setScrollFactor(0);
-        this.scene.tweens.add({
-            targets: this.scene.defeatedText, alpha: 0, duration: 5000,
-            onComplete: () => { if (this.scene.defeatedText) this.scene.defeatedText.destroy(); this.scene.defeatedText = null; }
-        });
-
-        this.scene.defeatedLoot = [];
-        const lootItems = [];
-        if (Math.random() < BOSS_DROP_CHANCE) {
-            const item = rollEquip();
-            if (this.scene.addEquip(item)) {
-                lootItems.push(item);
-                playLoot();
-            }
-        }
-        if (Math.random() < 0.6) {
-            const item2 = rollEquip();
-            if (this.scene.addEquip(item2)) {
-                lootItems.push(item2);
-                playLoot();
-            }
-        }
-
-        if (Math.random() < BOSS_DROP_CHANCE) {
-            const accItem = rollAccountEquip();
-            if (this.scene.addAccountEquip(accItem)) {
-                lootItems.push({ ...accItem, name: accItem.name + ' [ACCOUNT]' });
-                playLoot();
-            }
-        }
-
-        if (!this.scene.hasSecretKey && DIFF_MULT[this.scene.difficulty] && DIFF_MULT[this.scene.difficulty].hp > 1) {
-            this.scene.hasSecretKey = true;
-            const keyItem = { ...SECRET_KEY_ITEM };
-            lootItems.push(keyItem);
-            playLoot();
-            this.scene.floatingText(400, 280, SECRET_KEY_ITEM.name + ' obtained!', '#f1c40f');
-        }
-
-        lootItems.forEach((item, i) => {
-            const rc = '#' + RARITY_COLORS[item.rarity].toString(16).padStart(6, '0');
-            const lt = this.scene.add.text(400, 300 + i * 24, '+' + item.name, {
-                fontSize: '16px', fill: rc, fontFamily: 'Arial', fontStyle: 'bold',
-                stroke: '#000', strokeThickness: 2
-            }).setOrigin(0.5).setScrollFactor(0);
-            this.scene.defeatedLoot.push(lt);
-            this.scene.tweens.add({
-                targets: lt, alpha: 0, duration: 5000,
-                onComplete: () => { if (lt.active) lt.destroy(); }
-            });
-        });
-
-        if (lootItems.length === 0) {
-            const noLoot = this.scene.add.text(400, 300, 'No drops...', {
-                fontSize: '14px', fill: '#95a5a6', fontFamily: 'Arial',
-                stroke: '#000', strokeThickness: 2
-            }).setOrigin(0.5).setScrollFactor(0);
-            this.scene.defeatedLoot.push(noLoot);
-            this.scene.tweens.add({
-                targets: noLoot, alpha: 0, duration: 5000,
-                onComplete: () => { if (noLoot.active) noLoot.destroy(); }
-            });
-        }
-
-        this.scene.checkLevelUp();
-        this.scene._checkAccountLevelUp();
-        this.scene.updateUI();
     }
 
     killCaveBoss() {
-        const b = this.scene.caveBoss;
+        const textX = this.scene.caveOffsetX + CAVE_WIDTH / 2;
+        this.killGenericBoss({
+            bossRef: 'caveBoss',
+            aliveKey: 'caveBossAlive',
+            defeatedKey: 'caveBossDefeated',
+            nameTextKey: 'caveBossNameText',
+            recordKey: 'giant_bat',
+            defeatedText: 'GIANT BAT DEFEATED!',
+            defeatedColor: '#bf77f6',
+            secondDropChance: 0.6,
+            textX,
+            textY: 200,
+            extraLoot: () => {
+                const items = [];
+                const relic = rollCaveRelic(this.scene.classKey);
+                if (relic && this.scene.addAccountEquip(relic)) {
+                    items.push({ ...relic, name: relic.name + ' [RELIC]' });
+                    playLoot();
+                    this.scene.floatingText(textX, 280, 'Relic obtained!', '#9b59b6');
+                }
+                return items;
+            },
+            onPostKill: () => {
+                this.scene.caveStairs = this.scene.add.sprite(textX, CAVE_HEIGHT - 80, 'cave_stairs').setDepth(1);
+                this.scene.caveStairsHint = this.scene.add.text(textX, CAVE_HEIGHT - 55, '', {
+                    fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                    stroke: '#000', strokeThickness: 2
+                }).setOrigin(0.5).setDepth(12);
+            }
+        });
+    }
+
+    killGenericBoss(cfg) {
+        const b = this.scene[cfg.bossRef];
         const exp = b.stats.exp;
         const expBonus = 1 + (this.scene.accountEffects ? (this.scene.accountEffects.expPercent || 0) / 100 : 0);
         this.scene.playerExp += exp;
         this.scene.accountExp += Math.floor(exp * expBonus);
         this.scene.kills++;
-        this.scene.caveBossAlive = false;
-        this.scene.caveBossDefeated = true;
+        this.scene[cfg.aliveKey] = false;
+        this.scene[cfg.defeatedKey] = true;
         playBossDeath();
-        recordKill('giant_bat');
-        recordSoulCollect('giant_bat');
-        onKill('giant_bat');
+        recordKill(cfg.recordKey);
+        recordSoulCollect(cfg.recordKey);
+        onKill(cfg.recordKey);
         this.scene._updateQuestIcons();
         if (this.scene.particles) this.scene.particles.spawnBossDeath(b.x, b.y);
 
@@ -734,17 +603,18 @@ export class CombatSystem {
                 if (b.hpBg) b.hpBg.destroy();
                 if (b.hpFill) b.hpFill.destroy();
                 b.destroy();
-                this.scene.caveBoss = null;
+                this.scene[cfg.bossRef] = null;
             }
         });
-        if (b.aoeRing) { b.aoeRing.destroy(); }
-        if (b.aoeRing2) { b.aoeRing2.destroy(); }
-        if (this.scene.caveBossNameText) this.scene.caveBossNameText.destroy();
 
-        this.scene.floatingText(this.scene.caveOffsetX + CAVE_WIDTH / 2, 200, '+' + exp + ' EXP', '#f1c40f');
+        if (b.aoeRing) { b.aoeRing.destroy(); b.aoeRing = null; }
+        if (b.aoeRing2) { b.aoeRing2.destroy(); b.aoeRing2 = null; }
+        if (this.scene[cfg.nameTextKey]) this.scene[cfg.nameTextKey].destroy();
 
-        this.scene.defeatedText = this.scene.add.text(this.scene.caveOffsetX + CAVE_WIDTH / 2, 250, 'GIANT BAT DEFEATED!', {
-            fontSize: '28px', fill: '#bf77f6', fontFamily: 'Arial', fontStyle: 'bold',
+        this.scene.floatingText(cfg.textX, cfg.textY, '+' + exp + ' EXP', '#f1c40f');
+
+        this.scene.defeatedText = this.scene.add.text(cfg.textX, cfg.textY + 50, cfg.defeatedText, {
+            fontSize: '28px', fill: cfg.defeatedColor, fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 4
         }).setOrigin(0.5).setScrollFactor(0);
         this.scene.tweens.add({
@@ -761,7 +631,7 @@ export class CombatSystem {
                 playLoot();
             }
         }
-        if (Math.random() < 0.6) {
+        if (Math.random() < cfg.secondDropChance) {
             const item2 = rollEquip();
             if (this.scene.addEquip(item2)) {
                 lootItems.push(item2);
@@ -776,16 +646,16 @@ export class CombatSystem {
             }
         }
 
-        const relic = rollCaveRelic(this.scene.classKey);
-        if (relic && this.scene.addAccountEquip(relic)) {
-            lootItems.push({ ...relic, name: relic.name + ' [RELIC]' });
-            playLoot();
-            this.scene.floatingText(this.scene.caveOffsetX + CAVE_WIDTH / 2, 280, 'Relic obtained!', '#9b59b6');
+        if (cfg.extraLoot) {
+            const extra = cfg.extraLoot();
+            extra.forEach(item => lootItems.push(item));
         }
+
+        if (cfg.onPostKill) cfg.onPostKill();
 
         lootItems.forEach((item, i) => {
             const rc = '#' + RARITY_COLORS[item.rarity].toString(16).padStart(6, '0');
-            const lt = this.scene.add.text(this.scene.caveOffsetX + CAVE_WIDTH / 2, 300 + i * 24, '+' + item.name, {
+            const lt = this.scene.add.text(cfg.textX, cfg.textY + 100 + i * 24, '+' + item.name, {
                 fontSize: '16px', fill: rc, fontFamily: 'Arial', fontStyle: 'bold',
                 stroke: '#000', strokeThickness: 2
             }).setOrigin(0.5).setScrollFactor(0);
@@ -797,7 +667,7 @@ export class CombatSystem {
         });
 
         if (lootItems.length === 0) {
-            const noLoot = this.scene.add.text(this.scene.caveOffsetX + CAVE_WIDTH / 2, 300, 'No drops...', {
+            const noLoot = this.scene.add.text(cfg.textX, cfg.textY + 100, 'No drops...', {
                 fontSize: '14px', fill: '#95a5a6', fontFamily: 'Arial',
                 stroke: '#000', strokeThickness: 2
             }).setOrigin(0.5).setScrollFactor(0);
@@ -807,12 +677,6 @@ export class CombatSystem {
                 onComplete: () => { if (noLoot.active) noLoot.destroy(); }
             });
         }
-
-        this.scene.caveStairs = this.scene.add.sprite(this.scene.caveOffsetX + CAVE_WIDTH / 2, CAVE_HEIGHT - 80, 'cave_stairs').setDepth(1);
-        this.scene.caveStairsHint = this.scene.add.text(this.scene.caveOffsetX + CAVE_WIDTH / 2, CAVE_HEIGHT - 55, '', {
-            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
 
         this.scene.checkLevelUp();
         this.scene._checkAccountLevelUp();

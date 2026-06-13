@@ -1,15 +1,15 @@
 import Phaser from 'phaser';
-import { drawPlayerTextures } from './textures/player.js';
-import { drawEnemyTextures } from './textures/enemies.js';
-import { drawEffectTextures } from './textures/effects.js';
-import { drawZoneTextures } from './textures/zones.js';
-import { drawItemTextures } from './textures/items.js';
-import { drawNpcTextures } from './textures/npcs.js';
-import { drawBossTextures } from './textures/bosses.js';
-import { drawMineTextures } from './textures/mine.js';
-import { drawSnowyTextures } from './textures/snowy.js';
-import { drawExpansionTextures } from './textures/expansion.js';
-import { generateAnimations } from './textures/animations.js';
+import { drawPlayerTextures } from '../textures/player.js';
+import { drawEnemyTextures } from '../textures/enemies.js';
+import { drawEffectTextures } from '../textures/effects.js';
+import { drawZoneTextures } from '../textures/zones.js';
+import { drawItemTextures } from '../textures/items.js';
+import { drawNpcTextures } from '../textures/npcs.js';
+import { drawBossTextures } from '../textures/bosses.js';
+import { drawMineTextures } from '../textures/mine.js';
+import { drawSnowyTextures } from '../textures/snowy.js';
+import { drawExpansionTextures } from '../textures/expansion.js';
+import { generateAnimations } from '../textures/animations.js';
 
 export default class BootScene extends Phaser.Scene {
     constructor() {

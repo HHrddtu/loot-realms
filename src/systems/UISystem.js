@@ -1,4 +1,4 @@
-import { RARITY_COLORS } from '../config.js';
+import { RARITY_COLORS } from '../config/index.js';
 import { lighten } from '../utils.js';
 import { toggleMute } from '../sound.js';
 import { getAccountLevelUpReq } from '../save.js';
@@ -11,6 +11,8 @@ export class UISystem {
     constructor(scene) {
         this.scene = scene;
     }
+
+    _mkEl(el) { el.setScrollFactor(0).setDepth(100); return el; }
 
     _createUI() {
         this.scene._createTopBar();
@@ -206,13 +208,6 @@ export class UISystem {
         this.scene.scene.pause();
     }
 
-    receiveBestiaryData() {
-        this.scene.menuOpen = false;
-        this.scene.physics.resume();
-        this.scene.scene.resume();
-        this.scene.recalcStats();
-    }
-
     _openCrafting() {
         if (this.scene.menuOpen || this.scene.transitioning) return;
         this.scene.menuOpen = true;
@@ -246,26 +241,6 @@ export class UISystem {
             }
         });
         this.scene.scene.pause();
-    }
-
-    receiveCraftData(materials) {
-        this.scene.materials = materials || this.scene.materials;
-        this.scene.menuOpen = false;
-        this.scene.physics.resume();
-        this.scene.scene.resume();
-        this.scene.recalcStats();
-    }
-
-    receiveTalentData(data) {
-        this.scene.unlockedTalents = data.unlockedTalents || [];
-        this.scene.talentPoints = data.talentPoints || 0;
-        this.scene.talentEffects = getTalentEffects(this.scene.unlockedTalents);
-        this.scene.unlockedAccountTalents = data.unlockedAccountTalents || [];
-        this.scene.accountTalentPoints = data.accountTalentPoints || 0;
-        this.scene.accountEffects = getAccountTalentEffects(this.scene.unlockedAccountTalents);
-        this.scene.recalcStats();
-        this.scene.menuOpen = false;
-        this.scene.physics.resume();
     }
 
     updateUI() {
@@ -448,7 +423,7 @@ export class UISystem {
     _drawEquippedPanel() {
         const equipX = 150;
 
-        const mkInv = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
+        const mkInv = (el) => this._mkEl(el);
 
         this.scene.invGroup.push(mkInv(this.scene.add.rectangle(400, 300, 620, 500, 0x0a0a1a, 0.95)
             .setStrokeStyle(2, 0xf1c40f).setInteractive()));
@@ -501,7 +476,7 @@ export class UISystem {
 
     _drawMaterialsPanel() {
         const matX = 350, matY = 85;
-        const mkInv = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
+        const mkInv = (el) => this._mkEl(el);
 
         this.scene.invGroup.push(mkInv(this.scene.add.text(matX, matY, 'MATERIALS (session)', {
             fontSize: '12px', fill: '#27ae60', fontFamily: 'Arial', fontStyle: 'bold'
@@ -565,7 +540,7 @@ export class UISystem {
 
     _drawEquipmentBagPanel() {
         const eqX = 350, eqY = 310;
-        const mkInv = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
+        const mkInv = (el) => this._mkEl(el);
 
         this.scene.invGroup.push(mkInv(this.scene.add.text(eqX, eqY, 'EQUIPMENT BAG', {
             fontSize: '12px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold'
@@ -617,7 +592,7 @@ export class UISystem {
     }
 
     _drawCloseButton() {
-        const mkInv = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
+        const mkInv = (el) => this._mkEl(el);
         const bg = mkInv(this.scene.add.rectangle(400, 520, 100, 30, 0x34495e)
             .setStrokeStyle(1, 0x5a6c7d)
             .setInteractive({ useHandCursor: true }));
@@ -648,7 +623,7 @@ export class UISystem {
         if (this.scene.stumps) this.scene.stumps.getChildren().forEach(s => { if (s.body) s.body.setVelocity(0); });
 
         this.scene.pauseGroup = [];
-        const mkPause = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
+        const mkPause = (el) => this._mkEl(el);
 
         this.scene.pauseGroup.push(mkPause(this.scene.add.rectangle(400, 300, 400, 260, 0x000000, 0.92)
             .setStrokeStyle(2, 0xf1c40f)));
@@ -689,7 +664,7 @@ export class UISystem {
         if (this.scene.stumps) this.scene.stumps.getChildren().forEach(s => { if (s.body) s.body.setVelocity(0); });
 
         this.scene.pauseGroup = [];
-        const mkPause = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
+        const mkPause = (el) => this._mkEl(el);
 
         this.scene.pauseGroup.push(mkPause(this.scene.add.rectangle(400, 300, 400, 360, 0x000000, 0.92)
             .setStrokeStyle(2, 0x555577)));

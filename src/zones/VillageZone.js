@@ -9,7 +9,7 @@ import {
     SNOWY_VILLAGE_ENEMY_TYPES, SNOWY_VILLAGE_CAMP_POSITIONS, SNOWY_VILLAGE_BOSS_TYPE,
     SNOWY_BOSS_MINION, WARMTH_CORE, SNOWY_VILLAGE_CHEST_COUNT, SNOWY_VILLAGE_CHEST_DROP_CHANCE,
     BOSS_DROP_CHANCE, GAME_WIDTH, GAME_HEIGHT, RARITY_COLORS
-} from '../config.js';
+} from '../config/index.js';
 import { rollVillageEquip, rollEquip, rollVillageAccountEquip, rollAccountEquip } from '../utils.js';
 import {
     playLoot, playBossAoE, playBossDeath, playPortal, playBreak, startMusic
@@ -324,32 +324,6 @@ export class VillageZone {
         return ch;
     }
 
-    breakVillageChest(ch) {
-        if (!ch || ch.broken) return;
-        ch.broken = true;
-        ch.setTexture(VILLAGE_CHEST_OPEN_KEY);
-        ch.hpBg.destroy();
-        ch.hpFill.destroy();
-        playBreak();
-
-        ch.loot.forEach((item, i) => {
-            const rc = '#' + RARITY_COLORS[item.rarity].toString(16).padStart(6, '0');
-            const lt = this.scene.add.text(ch.x, ch.y - 20 - i * 16, '+' + item.name, {
-                fontSize: '11px', fill: rc, fontFamily: 'Arial', fontStyle: 'bold',
-                stroke: '#000', strokeThickness: 2
-            }).setOrigin(0.5).setDepth(13);
-            this.scene.tweens.add({
-                targets: lt, y: lt.y - 20, alpha: 0, duration: 2000,
-                onComplete: () => lt.destroy()
-            });
-            if (item.type === 'equip') this.scene.addEquip(item);
-            else if (item.type === 'accountEquip') this.scene.addAccountEquip(item);
-            playLoot();
-        });
-
-        this.scene.time.delayedCall(2500, () => { if (ch.active) ch.destroy(); });
-    }
-
     _activateCampfire() {
         if (!this.scene.villageFrozen || !this.scene.campfire) return;
         const dist = Phaser.Math.Distance.Between(this.scene.player.x, this.scene.player.y, this.scene.campfire.x, this.scene.campfire.y);
@@ -571,14 +545,6 @@ export class VillageZone {
         });
     }
 
-    _checkVillageCemeteryGate() {
-        if (this.scene.zone !== 'village' || this.scene.villageAllCleared) return;
-        if (!this.scene.player) return;
-        if (this.scene.player.y >= 1980) {
-            this.scene.player.y = 1970;
-        }
-    }
-
     _enterCemetery() {
         if (this.scene.transitioning || this.scene.menuOpen) return;
         if (this.scene.zone !== 'village' || !this.scene.villageAllCleared) return;
@@ -662,10 +628,6 @@ export class VillageZone {
                 this._spawnVillageBoss();
             }
         });
-    }
-
-    clearCemetery() {
-        this.clear();
     }
 
     _spawnVillageBoss() {

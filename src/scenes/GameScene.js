@@ -1,9 +1,9 @@
 import Phaser from 'phaser';
 import {
-    DIFF_MULT, MATERIAL_SLOTS, EQUIP_BAG_SLOTS, ACCOUNT_EQUIP_BAG_SLOTS,
+    DIFF_MULT, MATERIAL_SLOTS, EQUIP_BAG_SLOTS, ACCOUNT_EQUIP_BAG_SLOTS, EMPTY_ACCOUNT_EQUIPMENT,
     CORRUPTION, MINE_BOSS_PORTAL_POS,
     MEADOW_GATE_POS, MEADOW_WIDTH, MEADOW_HEIGHT
-} from '../config.js';
+} from '../config/index.js';
 import { playBossAoE, playPortal, stopMusic } from '../sound.js';
 import { saveGame, loadGame, saveAccount, loadAccount } from '../save.js';
 import { getClassData, getClassStats } from '../classes.js';
@@ -134,7 +134,7 @@ export default class GameScene extends Phaser.Scene {
         this.unlockedAccountTalents = acc.unlockedAccountTalents || [];
         const accEquipPerClass = acc.accountEquipment || {};
         const accBagPerClass = acc.accountEquipBag || {};
-        this.accountEquipment = accEquipPerClass[this.classKey] || { hat: null, mantle: null, legs: null, weapon: null, accessory: null };
+        this.accountEquipment = accEquipPerClass[this.classKey] || { ...EMPTY_ACCOUNT_EQUIPMENT };
         this.accountEquipBag = accBagPerClass[this.classKey] || [];
         this.accountEffects = getAccountTalentEffects(this.unlockedAccountTalents);
         this.recalcStats();
@@ -347,7 +347,7 @@ export default class GameScene extends Phaser.Scene {
         this.equipBag = [];
         this.maxEquipBag = EQUIP_BAG_SLOTS;
         this.equipment = { weapon: null, armor: null, accessory: null };
-        this.accountEquipment = { hat: null, mantle: null, legs: null, weapon: null, accessory: null };
+        this.accountEquipment = { ...EMPTY_ACCOUNT_EQUIPMENT };
         this.accountEquipBag = [];
         this.maxAccountEquipBag = ACCOUNT_EQUIP_BAG_SLOTS;
     }
@@ -457,7 +457,7 @@ export default class GameScene extends Phaser.Scene {
         this.unlockedAccountTalents = acc.unlockedAccountTalents || [];
         const accEquipPerClass2 = acc.accountEquipment || {};
         const accBagPerClass2 = acc.accountEquipBag || {};
-        this.accountEquipment = accEquipPerClass2[this.classKey] || { hat: null, mantle: null, legs: null, weapon: null, accessory: null };
+        this.accountEquipment = accEquipPerClass2[this.classKey] || { ...EMPTY_ACCOUNT_EQUIPMENT };
         this.accountEquipBag = accBagPerClass2[this.classKey] || [];
         this.accountEffects = getAccountTalentEffects(this.unlockedAccountTalents);
         this.classStats = getClassStats(this.classKey, this.playerLevel);
@@ -1032,19 +1032,6 @@ export default class GameScene extends Phaser.Scene {
 
         this.zone = 'meadow';
         this.doSave();
-    }
-
-    _checkMeadowGate() {
-        if (this.zone !== 'meadow' || this.transitioning || this.menuOpen) return;
-        if (!this.meadowGate) return;
-        const dist = Phaser.Math.Distance.Between(
-            this.player.x, this.player.y, MEADOW_GATE_POS.x, MEADOW_GATE_POS.y
-        );
-        if (dist < 70) {
-            this.gateHint.setText('SPACE to unlock the gate');
-        } else {
-            this.gateHint.setText('');
-        }
     }
 
     _unlockMeadowGate() {

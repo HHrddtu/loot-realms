@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { DIFFICULTIES, RARITY_COLORS } from '../config.js';
+import { DIFFICULTIES, RARITY_COLORS, EMPTY_ACCOUNT_EQUIPMENT } from '../config/index.js';
 import { lighten } from '../utils.js';
 import { hasSave, loadGame, deleteSave, hasAccount, loadAccount, getAccountLevelUpReq } from '../save.js';
 import { t, getLang, setLang } from '../i18n.js';
@@ -312,7 +312,7 @@ export default class MenuScene extends Phaser.Scene {
             });
             baseY += 20;
 
-            const ae = aePerClass[cls] || { hat: null, mantle: null, legs: null, weapon: null, accessory: null };
+            const ae = aePerClass[cls] || { ...EMPTY_ACCOUNT_EQUIPMENT };
             let row = '';
             slots.forEach((slot, i) => {
                 const item = ae[slot];

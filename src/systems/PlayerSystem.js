@@ -1,6 +1,6 @@
 import {
-    DIFF_MULT, MATERIAL_SLOTS, EQUIP_BAG_SLOTS, ACCOUNT_EQUIP_BAG_SLOTS
-} from '../config.js';
+    DIFF_MULT, MATERIAL_SLOTS, EQUIP_BAG_SLOTS, ACCOUNT_EQUIP_BAG_SLOTS, EMPTY_ACCOUNT_EQUIPMENT
+} from '../config/index.js';
 import { getClassData, getClassStats } from '../classes.js';
 import { getTalentEffects } from '../talents.js';
 import { getAccountTalentEffects } from '../accountTalents.js';
@@ -170,7 +170,7 @@ export class PlayerSystem {
         this.scene.equipBag = [];
         this.scene.maxEquipBag = EQUIP_BAG_SLOTS;
         this.scene.equipment = { weapon: null, armor: null, accessory: null };
-        this.scene.accountEquipment = { hat: null, mantle: null, legs: null, weapon: null, accessory: null };
+        this.scene.accountEquipment = { ...EMPTY_ACCOUNT_EQUIPMENT };
         this.scene.accountEquipBag = [];
         this.scene.maxAccountEquipBag = ACCOUNT_EQUIP_BAG_SLOTS;
     }

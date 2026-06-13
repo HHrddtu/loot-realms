@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { SPELLS, CORRUPTION, VILLAGE_BOSS_TYPE } from '../config.js';
+import { SPELLS, CORRUPTION, VILLAGE_BOSS_TYPE } from '../config/index.js';
 
 export class SpellSystem {
     constructor(scene) {

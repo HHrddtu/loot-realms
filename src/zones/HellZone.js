@@ -6,7 +6,7 @@ import {
     HELL_ENEMY_TYPES, HELL_CAMP_POSITIONS, HELL_LAVA_POSITIONS,
     HELL_BOSS_TYPE, HELL_BOSS_MINION, HEAT_CRYSTAL,
     BOSS_DROP_CHANCE, RARITY_COLORS, VILLAGE_WIDTH, CEMETERY_HEIGHT
-} from '../config.js';
+} from '../config/index.js';
 import { rollEquip, rollAccountEquip } from '../utils.js';
 import { playBossDeath, playLoot, playPortal } from '../sound.js';
 

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { CLASS_DB } from '../classes.js';
 import { lighten } from '../utils.js';
-import { DIFFICULTIES } from '../config.js';
+import { DIFFICULTIES } from '../config/index.js';
 import { initAccount } from '../save.js';
 import { t, getLang } from '../i18n.js';
 

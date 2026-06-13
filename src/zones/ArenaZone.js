@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, ARENA_EXIT_POS, BOSS_TYPE, RARITY_COLORS } from '../config.js';
+import { GAME_WIDTH, GAME_HEIGHT, ARENA_EXIT_POS, BOSS_TYPE, RARITY_COLORS } from '../config/index.js';
 import { startMusic, playPortal, playBossDeath } from '../sound.js';
 import { rollEquip, rollAccountEquip } from '../utils.js';
 import { recordKill } from '../bestiary.js';

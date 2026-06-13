@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from './config.js';
-import BootScene from './textures.js';
+import { GAME_WIDTH, GAME_HEIGHT } from './config/index.js';
+import BootScene from './scenes/BootScene.js';
 import MenuScene from './scenes/MenuScene.js';
 import ClassSelectScene from './scenes/ClassSelectScene.js';
 import GameScene from './scenes/GameScene.js';

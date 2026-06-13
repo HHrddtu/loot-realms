@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { getAllEntries, getNextLevelInfo } from '../bestiary.js';
-import { GAME_WIDTH, GAME_HEIGHT, BESTIARY_LEVELS, BESTIARY_DIFF_MULT } from '../config.js';
+import { GAME_WIDTH, GAME_HEIGHT, BESTIARY_LEVELS, BESTIARY_DIFF_MULT } from '../config/index.js';
 import { t, getLang, translateName } from '../i18n.js';
 
 export default class BestiaryScene extends Phaser.Scene {
