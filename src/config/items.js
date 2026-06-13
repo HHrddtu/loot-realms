@@ -116,7 +116,7 @@ export const SECRET_KEY_ITEM = {
     rarity: 'legendary',
     type: 'material',
     description: 'A mysterious key that hums with dark energy. The old cart driver might know what it opens.',
-    descriptionRu: 'Загадочный ключ, гудящий тёмной энергией. Старый извозчик或许知道 что он открывает.',
+    descriptionRu: 'Загадочный ключ, гудящий тёмной энергией. Старый извозчик знает, что он открывает.',
     descriptionDe: 'Ein geheimnisvoller Schlüssel, der von dunkler Energie summt. Der alte Kutscher weiß vielleicht, was er öffnet.',
     dropDifficulty: 'Hard'
 };
