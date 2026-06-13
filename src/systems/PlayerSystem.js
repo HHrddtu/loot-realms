@@ -308,7 +308,7 @@ export class PlayerSystem {
     }
 
     checkLevelUp() {
-        const req = Math.floor(100 * Math.pow(this.scene.playerLevel, 1.5));
+        const req = Math.floor(200 * Math.pow(this.scene.playerLevel, 1.5));
         if (this.scene.playerExp >= req) {
             this.scene.playerExp -= req;
             this.scene.playerLevel++;
