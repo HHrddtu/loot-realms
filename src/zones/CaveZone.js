@@ -1,0 +1,571 @@
+import Phaser from 'phaser';
+import {
+    GAME_WIDTH, CAVE_WIDTH, CAVE_HEIGHT,
+    CAVE_ENEMY_TYPES, CAVE_BOSS_TYPE,
+    CAVE_CHEST_COUNT, CAVE_CHEST_DROP_CHANCE,
+    CAVE_CHEST_CLOSED_KEY, CAVE_CHEST_W, CAVE_CHEST_H,
+    CAVE_SMALL_BAT, DIFF_MULT
+} from '../config.js';
+import { rollEquip } from '../utils.js';
+import { startMusic, playPortal, playBossAoE } from '../sound.js';
+
+export class CaveZone {
+    constructor(scene) {
+        this.scene = scene;
+    }
+
+    setup() {
+        const s = this.scene;
+        const caveOffsetX = (GAME_WIDTH - CAVE_WIDTH) / 2;
+        s.cameras.main.setBackgroundColor('#0d0d0d');
+        s.physics.world.setBounds(caveOffsetX, 0, CAVE_WIDTH, CAVE_HEIGHT);
+        s.cameras.main.setBounds(caveOffsetX, 0, CAVE_WIDTH, CAVE_HEIGHT);
+
+        s.caveBg = s.add.tileSprite(caveOffsetX, 0, CAVE_WIDTH, CAVE_HEIGHT, 'cave_ground')
+            .setOrigin(0, 0).setDepth(0);
+
+        s.caveOffsetX = caveOffsetX;
+        s.player.x = caveOffsetX + CAVE_WIDTH / 2;
+        s.player.y = 50;
+        s.player.body.setCollideWorldBounds(true);
+        s.cameras.main.startFollow(s.player, true, 0.08, 0.08);
+        s.cameras.main.setDeadzone(50, 40);
+
+        s.enemies = s.physics.add.group();
+        s.stumps = s.physics.add.group();
+        s.caveChests = s.physics.add.group();
+        s.caveTorches = [];
+
+        this.spawnCaveEnemies();
+        this.spawnCaveChests();
+        this.spawnCaveTorches();
+
+        s.caveDarkness = s.add.image(caveOffsetX + CAVE_WIDTH / 2, 300, 'mine_darkness')
+            .setScale(CAVE_WIDTH / 800, CAVE_HEIGHT / 600)
+            .setDepth(13).setAlpha(0.92).setScrollFactor(0);
+
+        s.caveBossDefeated = false;
+        s.caveBossAlive = false;
+        s.caveBossSpawned = false;
+        s.caveSmallBats = s.physics.add.group();
+
+        s.physics.add.overlap(s.player, s.enemies, (p, e) => {
+            if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
+                s.combat.takeDamage(e.stats.damage);
+            }
+        }, null, s);
+
+        s.physics.add.overlap(s.player, s.caveSmallBats, (p, e) => {
+            if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
+                s.combat.takeDamage(e.stats.damage);
+            }
+        }, null, s);
+
+        s.zone = 'cave';
+        s.npc.spawnNPCs();
+        s.hintText.setText('Q=quests | I=inventory | TAB=stats | T=talents | P=pause');
+        startMusic();
+        if (s.particles) {
+            s.particles.startCaveDrip(500, 1200);
+        }
+    }
+
+    clear() {
+        const s = this.scene;
+        s.physics.world.colliders.destroy();
+        if (s.fireballs) {
+            s.fireballs.forEach(fb => { if (fb.glow) fb.glow.destroy(); fb.destroy(); });
+            s.fireballs = [];
+        }
+        if (s.enemyProjectiles) {
+            s.enemyProjectiles.forEach(p => { if (p && p.destroy) p.destroy(); });
+            s.enemyProjectiles = [];
+        }
+        if (s.shieldActive) {
+            s.shieldActive = false;
+            s.shieldHP = 0;
+            if (s.shieldVfx) { s.shieldVfx.destroy(); s.shieldVfx = null; }
+        }
+        if (s.enemies && s.enemies.getLength && s.enemies.getLength() > 0) {
+            s.enemies.getChildren().forEach(e => {
+                if (e.hpBg) e.hpBg.destroy();
+                if (e.hpFill) e.hpFill.destroy();
+                if (e.nameText) e.nameText.destroy();
+                if (e.aoeRing) { e.aoeRing.destroy(); }
+                if (e.aoeRing2) { e.aoeRing2.destroy(); }
+            });
+            s.enemies.clear(true, true);
+        }
+        if (s.enemies) { s.enemies.destroy(); s.enemies = null; }
+        if (s.stumps && s.stumps.getLength && s.stumps.getLength() > 0) s.stumps.clear(true, true);
+        if (s.stumps) { s.stumps.destroy(); s.stumps = null; }
+        if (s.caveChests && s.caveChests.getLength && s.caveChests.getLength() > 0) {
+            s.caveChests.getChildren().forEach(ch => {
+                if (ch.hintText) ch.hintText.destroy();
+                if (ch.hpBg) ch.hpBg.destroy();
+                if (ch.hpFill) ch.hpFill.destroy();
+            });
+            s.caveChests.clear(true, true);
+        }
+        if (s.caveChests) { s.caveChests.destroy(); s.caveChests = null; }
+        if (s.caveSmallBats && s.caveSmallBats.getLength && s.caveSmallBats.getLength() > 0) {
+            s.caveSmallBats.getChildren().forEach(e => {
+                if (e.hpBg) e.hpBg.destroy();
+                if (e.hpFill) e.hpFill.destroy();
+            });
+            s.caveSmallBats.clear(true, true);
+        }
+        if (s.caveSmallBats) { s.caveSmallBats.destroy(); s.caveSmallBats = null; }
+        if (s.caveBg) { s.caveBg.destroy(); s.caveBg = null; }
+        if (s.caveDarkness) { s.caveDarkness.destroy(); s.caveDarkness = null; }
+        if (s.caveTorches) {
+            s.caveTorches.forEach(t => {
+                if (t.torch) t.torch.destroy();
+                if (t.glow) t.glow.destroy();
+            });
+            s.caveTorches = null;
+        }
+        if (s.caveStairs) { s.caveStairs.destroy(); s.caveStairs = null; }
+        if (s.caveStairsHint) { s.caveStairsHint.destroy(); s.caveStairsHint = null; }
+        if (s.caveBoss) {
+            if (s.caveBoss.hpBg) s.caveBoss.hpBg.destroy();
+            if (s.caveBoss.hpFill) s.caveBoss.hpFill.destroy();
+            if (s.caveBossNameText) s.caveBossNameText.destroy();
+            if (s.caveBoss.aoeRing) { s.caveBoss.aoeRing.destroy(); }
+            if (s.caveBoss.aoeRing2) { s.caveBoss.aoeRing2.destroy(); }
+            s.caveBoss.destroy();
+            s.caveBoss = null;
+        }
+        if (s.caveBossTimer) { s.caveBossTimer.destroy(); s.caveBossTimer = null; }
+        if (s.defeatedText) { s.defeatedText.destroy(); s.defeatedText = null; }
+        if (s.defeatedLoot) {
+            s.defeatedLoot.forEach(t => { if (t && t.destroy) t.destroy(); });
+            s.defeatedLoot = null;
+        }
+    }
+
+    update(time, delta) {
+        const s = this.scene;
+        if (s.zone === 'cave') {
+            this.checkCaveProximity();
+            this.caveBossSpawnCheck();
+            this.updateCaveMobs();
+            this.updateCaveBoss();
+        }
+    }
+
+    spawnCaveEnemies() {
+        const s = this.scene;
+        const ox = s.caveOffsetX;
+        const pairs = [
+            { tank: CAVE_ENEMY_TYPES[2], dps: CAVE_ENEMY_TYPES[0] },
+            { tank: CAVE_ENEMY_TYPES[2], dps: CAVE_ENEMY_TYPES[0] },
+            { tank: CAVE_ENEMY_TYPES[2], dps: CAVE_ENEMY_TYPES[0] },
+            { tank: CAVE_ENEMY_TYPES[2], dps: CAVE_ENEMY_TYPES[0] },
+            { tank: CAVE_ENEMY_TYPES[3], dps: CAVE_ENEMY_TYPES[1] },
+            { tank: CAVE_ENEMY_TYPES[3], dps: CAVE_ENEMY_TYPES[1] },
+            { tank: CAVE_ENEMY_TYPES[3], dps: CAVE_ENEMY_TYPES[1] },
+            { tank: CAVE_ENEMY_TYPES[3], dps: CAVE_ENEMY_TYPES[1] },
+            { tank: CAVE_ENEMY_TYPES[2], dps: CAVE_ENEMY_TYPES[1] },
+            { tank: CAVE_ENEMY_TYPES[2], dps: CAVE_ENEMY_TYPES[1] }
+        ];
+
+        for (let i = 0; i < pairs.length; i++) {
+            const y = 100 + (i * 105);
+            const xTank = ox + 60 + Math.random() * (CAVE_WIDTH - 120);
+            const xDps = xTank + 30 + Math.random() * 40;
+            this.makeCaveEnemy(pairs[i].tank, xTank, y);
+            this.makeCaveEnemy(pairs[i].dps, xDps, y + 15);
+        }
+    }
+
+    makeCaveEnemy(t, x, y) {
+        const s = this.scene;
+        const animKey = t.key === 'cave_spider' ? 'cave_spider_walk_anim' :
+                        t.key === 'cave_bat' ? 'cave_bat_walk_anim' :
+                        t.key === 'stone_golem' ? 'stone_golem_walk_anim' :
+                        'earth_worm_walk_anim';
+        const walkTex = t.key === 'cave_spider' ? 'cave_spider_walk' :
+                        t.key === 'cave_bat' ? 'cave_bat_walk' :
+                        t.key === 'stone_golem' ? 'stone_golem_walk' :
+                        'earth_worm_walk';
+        const e = s.add.sprite(x, y, walkTex).setDepth(5);
+        s.physics.add.existing(e, false);
+        e.body.setSize(t.bw, t.bh);
+        e.body.setCollideWorldBounds(true);
+        e.play(animKey);
+
+        e.stats = {
+            key: t.key, name: t.name,
+            hp: Math.floor(t.hp * s.diffMulti.hp),
+            maxHp: Math.floor(t.hp * s.diffMulti.hp),
+            damage: Math.floor(t.dmg * s.diffMulti.dmg),
+            exp: Math.floor(t.exp * s.diffMulti.exp),
+            bw: t.bw, bh: t.bh,
+            wTimer: 0, wDir: 0
+        };
+
+        const hw = t.bw + 4;
+        e.hpBg = s.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
+        e.hpFill = s.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0xe74c3c).setOrigin(0.5).setDepth(11);
+        s.enemies.add(e);
+        return e;
+    }
+
+    spawnCaveChests() {
+        const s = this.scene;
+        const ox = s.caveOffsetX;
+        for (let i = 0; i < CAVE_CHEST_COUNT; i++) {
+            const cy = 120 + (i * 108);
+            const cx = ox + 40 + Math.random() * (CAVE_WIDTH - 80);
+            this.createCaveChest(cx, cy);
+        }
+    }
+
+    createCaveChest(x, y) {
+        const s = this.scene;
+        const ch = s.add.sprite(x, y, CAVE_CHEST_CLOSED_KEY).setDepth(6);
+        s.physics.add.existing(ch, false);
+        ch.body.setSize(CAVE_CHEST_W, CAVE_CHEST_H);
+        ch.body.setCollideWorldBounds(true);
+        ch.stats = { hp: 50, maxHp: 50 };
+        ch.hpBg = s.add.rectangle(x, y - 14, CAVE_CHEST_W + 4, 3, 0x333333).setOrigin(0.5).setDepth(11);
+        ch.hpFill = s.add.rectangle(x, y - 14, CAVE_CHEST_W + 4, 3, 0xf39c12).setOrigin(0.5).setDepth(11);
+        ch.loot = [];
+        const count = 1 + Math.floor(Math.random() * 2);
+        for (let i = 0; i < count; i++) {
+            if (Math.random() < CAVE_CHEST_DROP_CHANCE) {
+                ch.loot.push(rollEquip());
+            }
+        }
+        ch.hintText = s.add.text(x, y - 18, '', {
+            fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
+        }).setOrigin(0.5).setDepth(12);
+        ch.broken = false;
+        ch.isCaveChest = true;
+        s.caveChests.add(ch);
+        return ch;
+    }
+
+    spawnCaveTorches() {
+        const s = this.scene;
+        s.caveTorches = [];
+        const ox = s.caveOffsetX;
+        const positions = [
+            { x: ox + 30, y: 100 }, { x: ox + CAVE_WIDTH - 30, y: 100 },
+            { x: ox + 30, y: 300 }, { x: ox + CAVE_WIDTH - 30, y: 300 },
+            { x: ox + 30, y: 500 }, { x: ox + CAVE_WIDTH - 30, y: 500 },
+            { x: ox + 30, y: 700 }, { x: ox + CAVE_WIDTH - 30, y: 700 },
+            { x: ox + 30, y: 900 }, { x: ox + CAVE_WIDTH - 30, y: 900 },
+            { x: ox + CAVE_WIDTH / 2, y: 200 }, { x: ox + CAVE_WIDTH / 2, y: 600 },
+            { x: ox + CAVE_WIDTH / 2, y: 1000 }
+        ];
+        positions.forEach(p => {
+            const torch = s.add.sprite(p.x, p.y, 'torch').setDepth(14);
+            const glow = s.add.image(p.x, p.y - 4, 'torch_glow').setDepth(2).setAlpha(0.8);
+            s.tweens.add({
+                targets: [torch, glow], alpha: { from: 0.6, to: 1 },
+                duration: 400 + Math.random() * 300, yoyo: true, repeat: -1,
+                ease: 'Sine.easeInOut', delay: Math.random() * 500
+            });
+            s.tweens.add({
+                targets: glow, scaleX: { from: 0.8, to: 1.2 }, scaleY: { from: 0.8, to: 1.2 },
+                duration: 600 + Math.random() * 400, yoyo: true, repeat: -1,
+                ease: 'Sine.easeInOut', delay: Math.random() * 300
+            });
+            s.caveTorches.push({ torch, glow });
+        });
+    }
+
+    checkCaveProximity() {
+        const s = this.scene;
+        if (s.zone !== 'cave' || s.transitioning || s.menuOpen) return;
+
+        if (s.caveChests) {
+            s.caveChests.getChildren().forEach(ch => {
+                if (!ch.active || ch.broken) return;
+                const cdist = Phaser.Math.Distance.Between(
+                    s.player.x, s.player.y, ch.x, ch.y
+                );
+                ch.hintText.setText(cdist < 45 ? 'Attack!' : '');
+            });
+        }
+
+        if (s.caveStairs && s.caveBossDefeated) {
+            const sdist = Phaser.Math.Distance.Between(
+                s.player.x, s.player.y, s.caveStairs.x, s.caveStairs.y
+            );
+            if (s.caveStairsHint) {
+                s.caveStairsHint.setText(sdist < 50 ? 'SPACE to enter Village' : '');
+            }
+        }
+    }
+
+    enterCaveVillage() {
+        const s = this.scene;
+        if (s.transitioning || s.menuOpen) return;
+        if (s.zone !== 'cave' || !s.caveBossDefeated) return;
+        if (!s.caveStairs) return;
+        const dist = Phaser.Math.Distance.Between(
+            s.player.x, s.player.y, s.caveStairs.x, s.caveStairs.y
+        );
+        if (dist >= 50) return;
+
+        s.transitioning = true;
+        if (s.caveStairsHint) s.caveStairsHint.setText('');
+        playPortal();
+        s.cameras.main.fadeOut(800, 0, 0, 0);
+        s.time.delayedCall(800, () => {
+            this.clear();
+            s._setupZone('village');
+            s.cameras.main.fadeIn(500, 0, 0, 0);
+            s.transitioning = false;
+        });
+    }
+
+    updateCaveMobs() {
+        const s = this.scene;
+        if (s.zone !== 'cave' || s.menuOpen || s.transitioning) return;
+        if (!s.enemies) return;
+
+        s.enemies.getChildren().forEach(e => {
+            if (!e.active || !e.stats) return;
+            if (e === s.caveBoss) return;
+
+            const dx = s.player.x - e.x;
+            const dy = s.player.y - e.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 200) {
+                const speed = 50;
+                if (dist > 30) {
+                    e.body.setVelocity((dx / dist) * speed, (dy / dist) * speed);
+                    e.setFlipX(dx < 0);
+                } else {
+                    e.body.setVelocity(0);
+                }
+            } else {
+                e.body.setVelocity(0);
+            }
+
+            e.hpBg.x = e.x;
+            e.hpBg.y = e.y - e.stats.bh / 2 - 8;
+            e.hpFill.x = e.x;
+            e.hpFill.y = e.y - e.stats.bh / 2 - 8;
+        });
+
+        if (s.caveSmallBats) {
+            s.caveSmallBats.getChildren().forEach(e => {
+                if (!e.active || !e.stats) return;
+                const dx = s.player.x - e.x;
+                const dy = s.player.y - e.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 250) {
+                    const speed = 70;
+                    if (dist > 20) {
+                        e.body.setVelocity((dx / dist) * speed, (dy / dist) * speed);
+                        e.setFlipX(dx < 0);
+                    } else {
+                        e.body.setVelocity(0);
+                    }
+                } else {
+                    e.body.setVelocity(0);
+                }
+                e.hpBg.x = e.x;
+                e.hpBg.y = e.y - e.stats.bh / 2 - 6;
+                e.hpFill.x = e.x;
+                e.hpFill.y = e.y - e.stats.bh / 2 - 6;
+            });
+        }
+    }
+
+    caveBossSpawnCheck() {
+        const s = this.scene;
+        if (s.zone !== 'cave' || s.caveBossSpawned || s.caveBossDefeated) return;
+        if (s.enemies.getChildren().length <= 2) {
+            s.caveBossSpawned = true;
+            this.spawnCaveBoss();
+        }
+    }
+
+    spawnCaveBoss() {
+        const s = this.scene;
+        const bt = CAVE_BOSS_TYPE;
+        const hp = Math.floor(bt.hp[s.difficulty] || bt.hp.Normal);
+        const dmg = Math.floor(bt.dmg[s.difficulty] || bt.dmg.Normal);
+        const exp = Math.floor(bt.exp[s.difficulty] || bt.exp.Normal);
+        const spd = bt.speeds[s.difficulty] || bt.speeds.Normal;
+
+        s.caveBoss = s.add.sprite(s.caveOffsetX + CAVE_WIDTH / 2, CAVE_HEIGHT - 150, 'giant_bat_walk').setDepth(5);
+        s.physics.add.existing(s.caveBoss, false);
+        s.caveBoss.body.setSize(bt.bw, bt.bh);
+        s.caveBoss.body.setCollideWorldBounds(true);
+        s.caveBoss.play('giant_bat_walk_anim');
+
+        s.caveBoss.stats = {
+            name: bt.name, hp: hp, maxHp: hp,
+            damage: dmg, exp: exp, speed: spd,
+            bw: bt.bw, bh: bt.bh,
+            dashTimer: 0, dashInterval: bt.dashInterval,
+            dashSpeed: bt.dashSpeed, dashDmgMul: bt.dashDmgMul,
+            screechTimer: 0, screechCooldown: bt.screechCooldown,
+            screechRadius: bt.screechRadius, screechDmgMul: bt.screechDmgMul,
+            summonHpThreshold: bt.summonHpThreshold,
+            summonCount: bt.summonCount,
+            summoned: false, isDashing: false
+        };
+
+        const hw = bt.bw + 20;
+        s.caveBoss.hpBg = s.add.rectangle(s.caveOffsetX + CAVE_WIDTH / 2, 100, hw, 5, 0x333333).setOrigin(0.5).setDepth(15).setScrollFactor(0);
+        s.caveBoss.hpFill = s.add.rectangle(s.caveOffsetX + CAVE_WIDTH / 2, 100, hw, 5, 0x8e44ad).setOrigin(0.5).setDepth(15).setScrollFactor(0);
+        s.caveBossNameText = s.add.text(s.caveOffsetX + CAVE_WIDTH / 2, 85, bt.name, {
+            fontSize: '12px', fill: '#bf77f6', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
+        }).setOrigin(0.5).setDepth(15).setScrollFactor(0);
+
+        s.caveBossAlive = true;
+        s.enemies.add(s.caveBoss);
+    }
+
+    updateCaveBoss() {
+        const s = this.scene;
+        if (!s.caveBossAlive || !s.caveBoss || !s.caveBoss.active) return;
+        const b = s.caveBoss;
+        const st = b.stats;
+
+        b.hpBg.x = GAME_WIDTH / 2;
+        b.hpBg.y = 100;
+        b.hpFill.x = GAME_WIDTH / 2;
+        b.hpFill.y = 100;
+
+        if (s.menuOpen || s.transitioning) {
+            b.body.setVelocity(0);
+            return;
+        }
+        if (st.isDashing) return;
+
+        const dx = s.player.x - b.x;
+        const dy = s.player.y - b.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist > 50) {
+            b.body.setVelocity((dx / dist) * st.speed, (dy / dist) * st.speed);
+            b.setFlipX(dx < 0);
+        } else {
+            b.body.setVelocity(0);
+        }
+
+        st.dashTimer += s.game.loop.delta;
+        if (st.dashTimer >= st.dashInterval) {
+            st.dashTimer = 0;
+            this.caveBossDash(b);
+        }
+
+        st.screechTimer += s.game.loop.delta;
+        if (st.screechTimer >= st.screechCooldown) {
+            st.screechTimer = 0;
+            this.caveBossScreech(b);
+        }
+
+        if (!st.summoned && st.hp / st.maxHp <= st.summonHpThreshold) {
+            st.summoned = true;
+            this.caveBossSummon(b);
+        }
+    }
+
+    caveBossDash(boss) {
+        const s = this.scene;
+        const st = boss.stats;
+        st.isDashing = true;
+        const dx = s.player.x - boss.x;
+        const dy = s.player.y - boss.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        boss.body.setVelocity((dx / dist) * st.dashSpeed, (dy / dist) * st.dashSpeed);
+        boss.setTint(0x00ffff);
+        s.time.delayedCall(400, () => {
+            if (boss.active) {
+                boss.body.setVelocity(0);
+                boss.clearTint();
+                st.isDashing = false;
+                const pdist = Phaser.Math.Distance.Between(
+                    s.player.x, s.player.y, boss.x, boss.y
+                );
+                if (pdist < 60) {
+                    s.combat.takeDamage(Math.floor(boss.stats.damage * st.dashDmgMul));
+                }
+            }
+        });
+    }
+
+    caveBossScreech(boss) {
+        const s = this.scene;
+        const st = boss.stats;
+        const dmg = Math.floor(boss.stats.damage * st.screechDmgMul);
+        playBossAoE();
+
+        const ring = s.add.sprite(boss.x, boss.y, 'skeleton_lord_aoe')
+            .setAlpha(0.7).setScale(0.2);
+        s.tweens.add({
+            targets: ring, scaleX: 2.0, scaleY: 2.0, alpha: 0, duration: 700,
+            onComplete: () => ring.destroy()
+        });
+
+        s.time.delayedCall(350, () => {
+            const dist = Phaser.Math.Distance.Between(
+                s.player.x, s.player.y, boss.x, boss.y
+            );
+            if (dist < st.screechRadius) {
+                s.combat.takeDamage(dmg);
+                s.floatingText(s.player.x, s.player.y - 30, 'SCREECH!', '#e74c3c');
+            }
+        });
+    }
+
+    caveBossSummon(boss) {
+        const s = this.scene;
+        playBossAoE();
+        s.floatingText(boss.x, boss.y - 40, 'SUMMONING!', '#9b59b6');
+        for (let i = 0; i < boss.stats.summonCount; i++) {
+            const angle = (i / boss.stats.summonCount) * Math.PI * 2;
+            const sx = boss.x + Math.cos(angle) * 80;
+            const sy = boss.y + Math.sin(angle) * 80;
+            this.spawnSmallBat(sx, sy);
+        }
+    }
+
+    spawnSmallBat(x, y) {
+        const s = this.scene;
+        const bt = CAVE_SMALL_BAT;
+        const e = s.add.sprite(x, y, 'small_bat_walk').setDepth(5);
+        s.physics.add.existing(e, false);
+        e.body.setSize(bt.bw, bt.bh);
+        e.body.setCollideWorldBounds(true);
+        e.play('small_bat_walk_anim');
+
+        e.stats = {
+            key: bt.key, name: bt.name,
+            hp: Math.floor(bt.hp * s.diffMulti.hp),
+            maxHp: Math.floor(bt.hp * s.diffMulti.hp),
+            damage: Math.floor(bt.dmg * s.diffMulti.dmg),
+            exp: Math.floor(bt.exp * s.diffMulti.exp),
+            bw: bt.bw, bh: bt.bh
+        };
+
+        const hw = bt.bw + 4;
+        e.hpBg = s.add.rectangle(x, y - bt.bh / 2 - 6, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
+        e.hpFill = s.add.rectangle(x, y - bt.bh / 2 - 6, hw, 3, 0xe74c3c).setOrigin(0.5).setDepth(11);
+        s.caveSmallBats.add(e);
+    }
+
+    destroyOrphanedCaveStairs() {
+        const s = this.scene;
+        if (s.caveStairs) { s.caveStairs.destroy(); s.caveStairs = null; }
+        if (s.caveStairsHint) { s.caveStairsHint.destroy(); s.caveStairsHint = null; }
+        const toRemove = [];
+        s.children.list.forEach(child => {
+            if (child.texture && child.texture.key === 'cave_stairs') toRemove.push(child);
+        });
+        toRemove.forEach(st => st.destroy());
+    }
+}

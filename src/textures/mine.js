@@ -495,6 +495,38 @@ export function drawMineTextures(mk) {
         c.fillRect(0, 0, 14, 14);
     });
 
+    mk('enemy_arrow', 12, 6, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#8B4513';
+        c.fillRect(2, 2, 8, 2);
+        c.fillStyle = '#a0522d';
+        c.fillRect(10, 1, 2, 4);
+        c.fillStyle = '#ccc';
+        c.fillRect(0, 2, 2, 2);
+    });
+
+    mk('enemy_magic', 10, 10, (c) => {
+        c.imageSmoothingEnabled = false;
+        const grd = c.createRadialGradient(5, 5, 0, 5, 5, 5);
+        grd.addColorStop(0, '#fff');
+        grd.addColorStop(0.3, '#9b59b6');
+        grd.addColorStop(0.7, '#6c3483');
+        grd.addColorStop(1, 'rgba(60,0,80,0)');
+        c.fillStyle = grd;
+        c.fillRect(0, 0, 10, 10);
+    });
+
+    mk('enemy_heal', 8, 8, (c) => {
+        c.imageSmoothingEnabled = false;
+        const grd = c.createRadialGradient(4, 4, 0, 4, 4, 4);
+        grd.addColorStop(0, '#fff');
+        grd.addColorStop(0.3, '#2ecc71');
+        grd.addColorStop(0.7, '#27ae60');
+        grd.addColorStop(1, 'rgba(0,80,0,0)');
+        c.fillStyle = grd;
+        c.fillRect(0, 0, 8, 8);
+    });
+
     mk('acid_flask', 12, 16, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#555';
@@ -542,5 +574,125 @@ export function drawMineTextures(mk) {
         grd.addColorStop(1, 'rgba(46,204,113,0)');
         c.fillStyle = grd;
         c.fillRect(0, 0, 32, 32);
+    });
+
+    mk('mine_barrel', 20, 24, (c) => {
+        c.fillStyle = '#6b4423';
+        c.fillRect(3, 2, 14, 20);
+        c.fillStyle = '#8b6914';
+        c.fillRect(3, 2, 14, 2);
+        c.fillRect(3, 20, 14, 2);
+        c.fillRect(3, 10, 14, 2);
+        c.fillStyle = '#5a3d1a';
+        c.fillRect(5, 4, 10, 16);
+        c.fillStyle = '#3d2b1f';
+        c.fillRect(2, 4, 2, 16);
+        c.fillRect(16, 4, 2, 16);
+    });
+
+    mk('mine_crate', 22, 22, (c) => {
+        c.fillStyle = '#8b6914';
+        c.fillRect(2, 2, 18, 18);
+        c.fillStyle = '#6b4423';
+        c.fillRect(2, 2, 18, 2);
+        c.fillRect(2, 18, 18, 2);
+        c.fillRect(10, 2, 2, 18);
+        c.fillRect(2, 10, 18, 2);
+        c.fillStyle = '#5a3d1a';
+        c.fillRect(4, 4, 6, 6);
+        c.fillRect(12, 4, 6, 6);
+        c.fillRect(4, 12, 6, 6);
+        c.fillRect(12, 12, 6, 6);
+    });
+
+    mk('mine_beam', 12, 60, (c) => {
+        c.fillStyle = '#5a3d1a';
+        c.fillRect(2, 0, 8, 60);
+        c.fillStyle = '#6b4423';
+        c.fillRect(0, 0, 12, 6);
+        c.fillRect(0, 54, 12, 6);
+        c.fillStyle = '#4a2e10';
+        c.fillRect(4, 8, 4, 44);
+    });
+
+    mk('mine_sign', 24, 20, (c) => {
+        c.fillStyle = '#6b4423';
+        c.fillRect(10, 12, 4, 8);
+        c.fillStyle = '#8b6914';
+        c.fillRect(2, 2, 20, 12);
+        c.fillStyle = '#6b4423';
+        c.fillRect(2, 2, 20, 2);
+        c.fillRect(2, 12, 20, 2);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(6, 5, 2, 2);
+        c.fillRect(10, 5, 6, 2);
+        c.fillRect(16, 5, 2, 2);
+    });
+
+    mk('mine_skull', 14, 14, (c) => {
+        c.fillStyle = '#ecf0f1';
+        c.fillRect(3, 2, 8, 6);
+        c.fillRect(2, 4, 10, 4);
+        c.fillStyle = '#bdc3c7';
+        c.fillRect(4, 4, 2, 2);
+        c.fillRect(8, 4, 2, 2);
+        c.fillStyle = '#000';
+        c.fillRect(5, 5, 1, 1);
+        c.fillRect(9, 5, 1, 1);
+        c.fillStyle = '#ecf0f1';
+        c.fillRect(4, 8, 6, 2);
+        c.fillStyle = '#000';
+        c.fillRect(5, 8, 1, 1);
+        c.fillRect(7, 8, 1, 1);
+    });
+
+    mk('mine_torch_flame', 8, 12, (c) => {
+        c.fillStyle = '#ff6600';
+        c.fillRect(2, 2, 4, 8);
+        c.fillStyle = '#ffaa00';
+        c.fillRect(3, 1, 2, 6);
+        c.fillStyle = '#ffcc44';
+        c.fillRect(3, 3, 2, 3);
+    });
+
+    mk('mine_skeleton_deco', 20, 24, (c) => {
+        c.fillStyle = '#d4c5a9';
+        c.fillRect(6, 0, 8, 6);
+        c.fillRect(4, 2, 12, 4);
+        c.fillStyle = '#000';
+        c.fillRect(7, 2, 2, 2);
+        c.fillRect(11, 2, 2, 2);
+        c.fillStyle = '#bdc3c7';
+        c.fillRect(7, 6, 6, 2);
+        c.fillRect(6, 8, 8, 6);
+        c.fillRect(4, 10, 2, 4);
+        c.fillRect(14, 10, 2, 4);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(7, 14, 6, 6);
+        c.fillRect(5, 20, 4, 3);
+        c.fillRect(11, 20, 4, 3);
+    });
+
+    mk('mine_ore_vein', 18, 12, (c) => {
+        c.fillStyle = '#555555';
+        c.fillRect(0, 2, 18, 8);
+        c.fillStyle = '#777777';
+        c.fillRect(2, 4, 4, 3);
+        c.fillRect(10, 3, 3, 4);
+        c.fillStyle = '#f39c12';
+        c.fillRect(3, 5, 2, 1);
+        c.fillRect(11, 4, 1, 2);
+        c.fillRect(8, 6, 1, 1);
+    });
+
+    mk('mine_bucket', 14, 16, (c) => {
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(2, 4, 10, 10);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(3, 6, 8, 6);
+        c.fillStyle = '#5d6d7e';
+        c.fillRect(1, 4, 12, 2);
+        c.fillStyle = '#3498db';
+        c.fillRect(4, 8, 6, 4);
     });
 }

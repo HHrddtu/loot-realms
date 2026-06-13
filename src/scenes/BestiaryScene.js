@@ -21,6 +21,8 @@ export default class BestiaryScene extends Phaser.Scene {
         this.listItems = [];
         this.detailElements = [];
         this.previewSprite = null;
+        this.scrollY = 0;
+        this.maxScroll = 0;
 
         const progress = { current: 0, total: 0 };
         this.entries.forEach(e => { progress.current += e.level; });
@@ -37,6 +39,11 @@ export default class BestiaryScene extends Phaser.Scene {
         this._createGrid();
         this._createDetailPanel();
 
+        this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
+            this.scrollY = Phaser.Math.Clamp(this.scrollY + deltaY * 0.5, 0, this.maxScroll);
+            this._updateGridScroll();
+        });
+
         const closeBtn = this.add.rectangle(GAME_WIDTH - 28, 22, 26, 26, 0x34495e)
             .setStrokeStyle(1, 0x556677).setInteractive({ useHandCursor: true }).setDepth(50);
         this.add.text(GAME_WIDTH - 28, 22, 'X', {
@@ -46,7 +53,7 @@ export default class BestiaryScene extends Phaser.Scene {
         closeBtn.on('pointerover', () => closeBtn.setFillStyle(0xc0392b));
         closeBtn.on('pointerout', () => closeBtn.setFillStyle(0x34495e));
 
-        this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 18, '[B] CLOSE', {
+        this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 18, '[B] CLOSE  |  Scroll to browse', {
             fontSize: '14px', fill: '#666', fontFamily: 'Arial'
         }).setOrigin(0.5);
 
@@ -70,6 +77,13 @@ export default class BestiaryScene extends Phaser.Scene {
         const itemW = 85;
         const itemH = 65;
         const cols = 4;
+        const visibleH = GAME_HEIGHT - 90;
+
+        const rows = Math.ceil(this.entries.length / cols);
+        const totalH = rows * (itemH + 8);
+        this.maxScroll = Math.max(0, totalH - visibleH);
+
+        this.gridContainer = this.add.container(0, 0);
 
         this.entries.forEach((entry, i) => {
             const col = i % cols;
@@ -83,9 +97,10 @@ export default class BestiaryScene extends Phaser.Scene {
                 .setStrokeStyle(1, isSeen ? 0x334466 : 0x222233)
                 .setInteractive({ useHandCursor: true });
 
+            let sprite = null;
             if (isSeen && entry.texKey) {
                 try {
-                    this.add.sprite(x + itemW / 2, y + 18, entry.texKey).setDisplaySize(28, 28);
+                    sprite = this.add.sprite(x + itemW / 2, y + 18, entry.texKey).setDisplaySize(28, 28);
                 } catch (e) {}
             } else {
                 this.add.text(x + itemW / 2, y + 18, '?', {
@@ -94,20 +109,46 @@ export default class BestiaryScene extends Phaser.Scene {
             }
 
             const nameText = isSeen ? translateName(entry) : t('bestiary.locked');
-            this.add.text(x + itemW / 2, y + 44, nameText, {
+            const nameT = this.add.text(x + itemW / 2, y + 44, nameText, {
                 fontSize: '11px', fill: isSeen ? '#ddd' : '#444', fontFamily: 'Arial',
                 wordWrap: { width: itemW - 4 }, align: 'center'
             }).setOrigin(0.5);
 
             const lvl = entry.level;
             const lvlColor = lvl >= 5 ? '#f1c40f' : lvl >= 3 ? '#e67e22' : lvl >= 1 ? '#3498db' : '#333';
-            this.add.text(x + itemW / 2, y + 56, lvl > 0 ? 'Lv.' + lvl : '-', {
+            const lvlT = this.add.text(x + itemW / 2, y + 56, lvl > 0 ? 'Lv.' + lvl : '-', {
                 fontSize: '10px', fill: lvlColor, fontFamily: 'Arial'
             }).setOrigin(0.5);
 
             bg.on('pointerdown', () => this._selectEntry(i));
 
-            this.listItems.push({ bg, entry });
+            this.listItems.push({ bg, entry, sprite, nameT, lvlT });
+        });
+
+        this._updateGridScroll();
+    }
+
+    _updateGridScroll() {
+        if (!this.listItems.length) return;
+        const itemH = 65;
+        const cols = 4;
+        const startX = 15;
+        const startY = 70;
+
+        this.listItems.forEach((item, i) => {
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            const x = startX + col * (itemH + 8 + 20);
+            const y = startY + row * (itemH + 8) - this.scrollY;
+
+            const visible = y > 40 && y < GAME_HEIGHT;
+            item.bg.setPosition(x + 42, y + 32);
+            item.bg.setVisible(visible);
+            if (item.sprite) { item.sprite.setPosition(x + 42, y + 18); item.sprite.setVisible(visible); }
+            item.nameT.setPosition(x + 42, y + 44);
+            item.nameT.setVisible(visible);
+            item.lvlT.setPosition(x + 42, y + 56);
+            item.lvlT.setVisible(visible);
         });
     }
 

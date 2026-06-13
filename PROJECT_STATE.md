@@ -1,8 +1,8 @@
 # PROJECT STATE
 
-## Текущий билд: v0.11.0
+## Текущий билд: v0.12.0
 
-## Статус: PvE-игра (Forest/Arena/Mine/Cave/Village/Hell/Snowy Village) + таланты + крафт/алхимия + Meadow/Cave зоны + реликвии + Bestiary/Soul Book + Hell Zone + Snowy Village (Ice Spirit boss, campfire, Warmth Core) + GitHub Pages деплой
+## Статус: Рефакторинг завершён — GameScene.js → systems/ + zones/ + config/ + textures/ (6830 → ~1058 строк delegation skeleton)
 
 ---
 
@@ -24,7 +24,21 @@
 - Осталось 9 сцен (Boot + Menu + ClassSelect + Game + TalentTree + Bestiary + MaterialBook + SoulBook + Craft)
 - Village зона многофункциональная: обычный village → cemetery → Hell → snowy village → восстановление
 
-### Деплой (v0.11.0)
+### Архитектура v0.12.0
+```
+src/
+├── config/        (9 файлов: difficulties, enemies, bosses, zones, items, spells, crafting, quests, rarity)
+├── textures/      (11 файлов: все процедурные текстуры по модулям)
+├── systems/       (5 систем: Combat, Player, Spell, UI, NPC)
+├── zones/         (6 зон: Forest, Arena, Mine, Cave, Village, Hell)
+└── scenes/
+    └── GameScene.js  (~1058 строк delegation skeleton)
+```
+
+GameScene — thin delegation skeleton: systems/zones + _handleInput + save/load + meadow.
+Все зоны используют `this.scene.*` для вызова методов GameScene.
+
+### Деплой (v0.12.0)
 - **URL:** https://hhrddtu.github.io/loot-realms/
 - **Репозиторий:** https://github.com/HHrddtu/loot-realms
 - **Метод:** GitHub Pages, ветка `gh-pages` (собранный `dist/`)
@@ -43,7 +57,7 @@
 
 ---
 
-## Зоны (v0.11.0 — актуальные)
+## Зоны (v0.12.0 — актуальные)
 
 | # | Зона | Босс | Описание |
 |---|------|------|----------|
@@ -169,62 +183,61 @@ src/
 **textures.js:**
 - Метод `_drawSnowyVillage()` (~400 строк): snow_ground (64×64 tile), snow_house (60×50), snowy_barrel (18×22), campfire (24×30), campfire_active (24×30), warmth_core (14×14), ice_shard (10×12), frost_wave_vfx (24×24), blizzard_vfx (32×32), 5 winter enemy spritesheets (4 кадра), ice_spirit spritesheet (40×44, 4 кадра)
 
-**GameScene.js:**
+**VillageZone.js:**
 - `this.villageFrozen` — флаг замороженной деревни
 - `this.villageRestored` — флаг восстановленной деревни (permanente)
-- `_setupVillage(frozen)` — принимает параметр frozen, выбирает текстуры и мобов
-- `_spawnSnowyVillageCamps()` — 4 лагеря × 4 моба = 16 зимних врагов
-- `_makeSnowyVillageEnemy()` — создание зимнего моба с role-dependent AI
-- `_spawnSnowyVillageChests()` — 10 snowy_barrel сундуков
-- `_createSnowyVillageChest()` — создание сундука
+- `setup(frozen)` — принимает параметр frozen, выбирает текстуры и мобов
+- `_spawnVillageCamps()` — 8 лагерей × 4 моба = 32 моба
+- `_spawnSnowyVillageCamps()` — 4 лагеря × 4 моба = 16 зимних мобов
+- `_makeEnemy()` — создание моба с role-dependent AI
+- `_spawnSnowyChests()` — 10 snowy_barrel сундуков
 - `_spawnSnowyCampfire()` — костёр (24×30) вверху деревни
-- `_spawnSnowyVillageBoss()` — Ice Spirit босс с HP bar
-- `_updateSnowyVillageBoss()` — AI: Frost Wave (5с), Blizzard (8с), Summon Ice Shards (12с)
-- `_snowyFrostWave()` — линейная AoE атака
-- `_snowyBlizzard()` — AoE вокруг босса
-- `_snowySummonShards()` — спавн 3 Ice Shards
-- `_snowyIceSpiritDied()` — победа: Warmth Core drop + floating text
+- `_spawnIceSpirit()` — Ice Spirit босс с HP bar
+- `_updateIceSpirit()` — AI: Frost Wave (5с), Blizzard (8с), Summon Ice Shards (12с)
+- `_frostWave()` — линейная AoE атака
+- `_blizzard()` — AoE вокруг босса
+- `_summonIceShards()` — спавн 3 Ice Shards
+- `_iceSpiritDied()` — победа: Warmth Core drop + floating text
 - `_updateSnowyVillageMobs()` — AI зимних мобов (role-dependent)
 - `_checkSnowyVillageProgress()` — после убийства всех мобов спавнится Ice Spirit
 - `_activateCampfire()` — SPACE interaction, проверяет equipBag для warmth_core, fade transition
 - `_clearVillage()` — очистка: campfire, snowyIceSpirit, snowyIceShards, villageRestored/villageFrozen
 - Fireball collision для Ice Spirit + Ice Shards
-- Melee attack (_dealAttackDamage) для Ice Spirit + Ice Shards
+- Melee attack (dealAttackDamage) для Ice Spirit + Ice Shards
 - hitEnemy() — добавлен snowyIceSpirit в bossDamage check
 - SPACE handler — village zone: campfire proximity check, icy boss attack check
 
 ### Поток Snowy Village
 ```
-_exitHell() → _setupVillage(true) → snowy grounds + 4 camps (16 mobs) + chests + campfire
+exitHell() → VillageZone.setup(true) → snowy grounds + 4 camps (16 mobs) + chests + campfire
   → kill all mobs → _checkSnowyVillageProgress() → Ice Spirit spawns
-  → kill Ice Spirit → _snowyIceSpiritDied() → Warmth Core (guaranteed drop)
+  → kill Ice Spirit → _iceSpiritDied() → Warmth Core (guaranteed drop)
   → approach campfire → SPACE → _activateCampfire()
-  → check equipBag for warmth_core → fadeOut → _clearVillage() → _setupVillage(false)
+  → check equipBag for warmth_core → fadeOut → clearVillage() → setup(false)
   → village restored: only decor + NPCs, no mobs, villageRestored = true (permanent)
 ```
 
-### Исправленные баги
-1. **HP:NaN** — boss stats использовали `this.difficulty - 1` (строка "Hard" - 1 = NaN). Исправлено на `SNOWY_VILLAGE_BOSS_TYPE.hp[diffKey]`
-2. **Campfire не работал** — `_activateCampfire()` искал warmth_core в `inventoryBag` (не существует), а предмет в `equipBag`. Исправлено
-3. **Warmth Core key** — проверялся `bag[i].key`, а предмет имеет `id: 'warmth_core'`. Добавлена проверка обеих
-4. **Мобы после восстановления** — деревня после campfire снова спавнила мобов. Добавлен `villageRestored` flag
-5. **NaN защита** — `takeAmount(amount)` теперь `Math.floor(amount) || 0`
+### Исправленные баги (v0.12.0)
+1. **Frozen village child NPC** — `_checkVillageProgress()` спавнил ребёнка-НПС в замороженной деревне. Добавлена проверка `villageFrozen`
+2. **Hell zone currentZone** — `enterHell()` не устанавливал `s.currentZone = this`, из-за чего HellZone.update() не вызывался
+3. **Cave stairs null guard** — `portalHint` мог быть destroyed/null в ForestZone.checkPortalProximity()
+4. **Mine boss arena** — скелеты спавнились до инициализации MineZone
+5. **NpcSystem cart ride** — вызывал `_setupMeadow()` напрямую из GameScene
+6. **recordSoulCollect import** — bestiary.js → soulBook.js
 
-### Изменённые файлы
-- `src/config.js` — +SNOWY_VILLAGE_* константы, +WARMTH_CORE, +7 Bestiary, +7 Soul Book
-- `src/textures.js` — +`_drawSnowyVillage()` (~400 строк)
-- `src/scenes/GameScene.js` — +~500 строк Snowy Village логики
-- `PROJECT_STATE.md` — обновление документации
+### Изменённые файлы (v0.12.0)
+- `src/config/` — 9 новых файлов (difficulties, enemies, bosses, zones, items, spells, crafting, quests, rarity)
+- `src/textures/` — 11 новых файлов (zones, player, npcs, items, enemies, bosses, expansion, effects, animations, snowy, mine)
+- `src/systems/` — 5 новых файлов (Combat, Player, Spell, UI, NPC)
+- `src/zones/` — 6 новых файлов (Forest, Arena, Mine, Cave, Village, Hell)
+- `src/scenes/GameScene.js` — переписан как delegation skeleton (~1058 строк вместо ~6830)
+- `src/scenes/GameScene.js.bak` — бэкап оригинала
 
 ---
 
 ## Следующие шаги
 
 ### Приоритет
-- Долгосрочные планы прогрессии (детали в `PLAN_PROGRESSION.md`)
-
-### Долгосрочные планы
-- Difficulty Unlock — постепенно после боссов
-- Prestige System — сброс прогресса за вечные бонусы
-- Mastery System — пер-классовый прогресс (1-100)
-- Перевод описаний в книгах на RU/DE
+- **v0.13.0:** Пит-система + Магазин (PetSystem, ShopScene, Gold/Souls/Tokens)
+- **v0.14.0:** Баланс + UX (миникарта, damage numbers, sound effects)
+- **v0.15.0:** Мультиплеер кооп (PeerJS, LobbyScene, Host/Guest, sync)

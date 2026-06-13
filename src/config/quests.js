@@ -17,11 +17,12 @@ export const NPC_DB = {
         nameDe: 'Alter Bergmann',
         texKey: 'npc_miner',
         biome: 'mine',
-        x: 680, y: 800,
+        x: 400, y: 160,
         greeting: 'The mines hold treasure... and danger.',
         greetingRu: 'Шахты хранят сокровища... и опасность.',
         greetingDe: 'Die Minen bergen Schätze... und Gefahren.',
-        quests: ['kill_skeletons', 'mine_chests', 'skeleton_lord_boss']
+        quests: ['kill_skeletons', 'mine_chests', 'skeleton_lord_boss'],
+        hideName: true
     }
 };
 

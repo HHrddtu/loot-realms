@@ -30,6 +30,7 @@ export default class BootScene extends Phaser.Scene {
 
     generateAllTextures() {
         const mk = (key, w, h, drawFn) => {
+            if (this.textures.exists(key)) return;
             const canvas = this.textures.createCanvas(key, w, h);
             drawFn(canvas.getContext());
             canvas.refresh();

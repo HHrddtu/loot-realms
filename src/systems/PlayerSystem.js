@@ -1,0 +1,350 @@
+import {
+    DIFF_MULT, MATERIAL_SLOTS, EQUIP_BAG_SLOTS, ACCOUNT_EQUIP_BAG_SLOTS
+} from '../config.js';
+import { getClassData, getClassStats } from '../classes.js';
+import { getTalentEffects } from '../talents.js';
+import { getAccountTalentEffects } from '../accountTalents.js';
+import { getAllBestiaryBonuses } from '../bestiary.js';
+import { getMaterialBonuses } from '../materialBook.js';
+import { getSoulBonuses } from '../soulBook.js';
+import { recordMaterialCollect } from '../materialBook.js';
+import { onCollect } from '../quests.js';
+import { playLevelUp } from '../sound.js';
+import { getAccountLevelUpReq, loadAccount } from '../save.js';
+
+export class PlayerSystem {
+    constructor(scene) {
+        this.scene = scene;
+    }
+
+    _createPlayer() {
+        const cls = getClassData(this.scene.classKey);
+        const walkKey = cls.walkTexKey || 'player_sage_walk';
+        const animKey = cls.walkAnim || 'sage_walk_right';
+        this.scene.player = this.scene.add.sprite(400, 400, walkKey).setDepth(10);
+        this.scene.physics.add.existing(this.scene.player, false);
+        this.scene.player.body.setSize(18, 38);
+        this.scene.player.body.setOffset(7, 8);
+        this.scene.player.body.setCollideWorldBounds(true);
+        this.scene.player.play(animKey);
+    }
+
+    _initStats() {
+        this.scene.diffMulti = DIFF_MULT[this.scene.difficulty] || DIFF_MULT.Normal;
+        this.scene.classData = getClassData(this.scene.classKey);
+        this.scene.classStats = getClassStats(this.scene.classKey, 1);
+        this.scene.playerHP = this.scene.classStats.maxHp;
+        this.scene.playerMaxHP = this.scene.classStats.maxHp;
+        this.scene.playerDamage = this.scene.classStats.damage;
+        this.scene.playerSpeed = this.scene.classStats.speed;
+        this.scene.playerExp = 0;
+        this.scene.playerLevel = 1;
+        this.scene.attackCooldown = false;
+        this.scene.playerAttacking = false;
+        this.scene.facing = 'right';
+        this.scene.invincible = false;
+        this.scene.menuOpen = false;
+        this.scene.kills = 0;
+        this.scene.stumpsBroken = 0;
+        this.scene.talentEffects = getTalentEffects([]);
+
+        const acc = loadAccount() || {};
+        this.scene.accountLevel = acc.accountLevel || 1;
+        this.scene.accountExp = acc.accountExp || 0;
+        this.scene.accountTalentPoints = acc.accountTalentPoints || 0;
+        this.scene.unlockedAccountTalents = acc.unlockedAccountTalents || [];
+        this.scene.accountEffects = getAccountTalentEffects(this.scene.unlockedAccountTalents);
+
+        this.recalcStats();
+    }
+
+    recalcStats() {
+        const hpRatio = this.scene.playerMaxHP > 0 ? this.scene.playerHP / this.scene.playerMaxHP : 1;
+        const cls = this.scene.classData || getClassData(this.scene.classKey);
+        const growth = cls.growth;
+        let bonusHP = 0, bonusDmg = 0, bonusSpeed = 0;
+
+        this.scene.materials.forEach(m => {
+            if (m.stats) {
+                bonusHP += m.stats.hp || 0;
+                bonusDmg += m.stats.dmg || 0;
+                bonusSpeed += m.stats.speed || 0;
+            }
+        });
+
+        const diffMult = DIFF_MULT[this.scene.difficulty] || DIFF_MULT.Normal;
+        [this.scene.equipment.weapon, this.scene.equipment.armor, this.scene.equipment.accessory].forEach(item => {
+            if (item && item.stats) {
+                bonusHP += (item.stats.hp || 0) * diffMult.hp;
+                bonusDmg += (item.stats.dmg || 0) * diffMult.dmg;
+                bonusSpeed += (item.stats.speed || 0) * diffMult.hp;
+            }
+        });
+
+        const lvl = this.scene.playerLevel || 1;
+        const te = this.scene.talentEffects || getTalentEffects(this.scene.unlockedTalents || []);
+        const ae = this.scene.accountEffects || {};
+
+        let accHpPercent = (ae.hpPercent || 0);
+        let accDmgPercent = (ae.damagePercent || 0);
+        let accSpdPercent = (ae.speedPercent || 0);
+        let accSpellPercent = (ae.spellPercent || 0);
+        let accCritPercent = (ae.critPercent || 0);
+        let accDodgePercent = (ae.dodgePercent || 0);
+        let accCorruptionMax = 0;
+
+        const accScale = (1 + lvl * 0.1);
+        const accDiffMult = diffMult.hp;
+
+        Object.values(this.scene.accountEquipment).forEach(item => {
+            if (item && item.stats) {
+                accHpPercent += (item.stats.hpPercent || 0) * accScale * accDiffMult;
+                accDmgPercent += (item.stats.damagePercent || 0) * accScale * accDiffMult;
+                accSpdPercent += (item.stats.speedPercent || 0) * accScale * accDiffMult;
+                accSpellPercent += (item.stats.spellPercent || 0) * accScale * accDiffMult;
+                accCritPercent += (item.stats.critPercent || 0) * accScale * accDiffMult;
+                accDodgePercent += (item.stats.dodgePercent || 0) * accScale * accDiffMult;
+                accCorruptionMax += (item.stats.corruptionMax || 0) * accScale * accDiffMult;
+            }
+        });
+
+        const hpMult = 1 + (te.hpPercent || 0) / 100 + accHpPercent / 100;
+        const dmgMult = 1 + (te.damagePercent || 0) / 100 + accDmgPercent / 100;
+        const moveSpeedBonus = (ae.moveSpeedPercent || 0) + (te.moveSpeedPercent || 0);
+        const spdMult = 1 + accSpdPercent / 100 + moveSpeedBonus / 100;
+
+        this.scene.playerMaxHP = Math.floor((cls.stats.hp + (lvl - 1) * growth.hpPerLevel + bonusHP) * hpMult);
+        this.scene.playerDamage = Math.floor((cls.stats.damage + (lvl - 1) * growth.dmgPerLevel + bonusDmg) * dmgMult);
+        this.scene.playerSpeed = Math.floor((cls.stats.speed + (lvl - 1) * growth.speedPerLevel + bonusSpeed) * spdMult);
+        this.scene.corruptionMax = cls.stats.corruptionMax + (te.corruptionMax || 0) + accCorruptionMax;
+
+        this.scene.bestiaryBonuses = getAllBestiaryBonuses(this.scene.difficulty);
+        this.scene.materialBonuses = getMaterialBonuses(this.scene.difficulty);
+        this.scene.soulBonuses = getSoulBonuses(this.scene.difficulty);
+
+        this.scene.playerMaxHP += (this.scene.materialBonuses.hp || 0) + (this.scene.soulBonuses.hp || 0);
+        this.scene.playerDamage += (this.scene.materialBonuses.dmg || 0) + (this.scene.soulBonuses.dmg || 0);
+        this.scene.playerSpeed += (this.scene.materialBonuses.speed || 0);
+        this.scene.corruptionDecay = (this.scene.classData.decay || 0.08) + (this.scene.soulBonuses.corDecay || 0);
+        this.scene.playerHP = Math.min(this.scene.playerMaxHP, Math.max(1, Math.floor(hpRatio * this.scene.playerMaxHP)));
+
+        this.scene.computedCritChance = (te.critChance || 0) + accCritPercent;
+        this.scene.computedCritDamage = 1.5 + (te.critDamagePercent || 0) / 100;
+        this.scene.computedDodgePercent = (te.dodgePercent || 0) + accDodgePercent;
+        this.scene.computedLifeSteal = (te.lifeSteal || 0) + (ae.lifeSteal || 0);
+        this.scene.computedDamageReduction = (te.damageReduction || 0) + (ae.damageReduction || 0);
+        this.scene.computedDamageReflection = (te.damageReflection || 0) + (ae.damageReflection || 0);
+        this.scene.computedCooldownReduction = (te.cooldownReduction || 0) + (ae.cooldownReduction || 0);
+        this.scene.computedAreaDamage = (te.areaDamage || 0) + (ae.areaDamage || 0);
+        this.scene.computedBossDamage = (te.bossDamagePercent || 0) + (ae.bossDamagePercent || 0);
+        this.scene.computedSpellDamage = (te.spellDamage || 0) + accSpellPercent;
+
+        this.scene.relicEffects = {};
+        Object.values(this.scene.accountEquipment).forEach(item => {
+            if (item && item.effect) {
+                this.scene.relicEffects[item.effect] = true;
+            }
+        });
+        this.scene.computedHealPower = (te.healPower || 0) + (ae.healPower || 0);
+        this.scene.computedRegenPercent = (te.regenPercent || 0) + (ae.regenPercent || 0);
+        this.scene.computedDotPower = te.dotPower || 0;
+        this.scene.computedDotDuration = te.dotDuration || 0;
+        this.scene.computedShieldPercent = te.shieldPercent || 0;
+        this.scene.computedShieldReflect = te.shieldReflect || 0;
+        this.scene.computedShieldDuration = te.shieldDuration || 0;
+        this.scene.computedArmorReduction = te.armorReduction || 0;
+        this.scene.computedSpellSpeed = te.spellSpeed || 0;
+
+        this.scene.computedInventorySlots = (te.inventorySlots || 0) + (ae.inventorySlots || 0);
+        this.scene.maxMaterials = MATERIAL_SLOTS + this.scene.computedInventorySlots;
+        this.scene.maxEquipBag = EQUIP_BAG_SLOTS + Math.floor(this.scene.computedInventorySlots / 2);
+
+        this.scene.computedAccCritPercent = accCritPercent;
+        this.scene.computedAccDodgePercent = accDodgePercent;
+        this.scene.computedAccSpellPercent = accSpellPercent;
+    }
+
+    _initInventory() {
+        this.scene.materials = [];
+        this.scene.maxMaterials = MATERIAL_SLOTS;
+        this.scene.equipBag = [];
+        this.scene.maxEquipBag = EQUIP_BAG_SLOTS;
+        this.scene.equipment = { weapon: null, armor: null, accessory: null };
+        this.scene.accountEquipment = { hat: null, mantle: null, legs: null, weapon: null, accessory: null };
+        this.scene.accountEquipBag = [];
+        this.scene.maxAccountEquipBag = ACCOUNT_EQUIP_BAG_SLOTS;
+    }
+
+    addMaterial(item) {
+        if (this.scene.materials.length >= this.scene.maxMaterials) return false;
+        this.scene.materials.push(item);
+        if (item.id) recordMaterialCollect(item.id);
+        if (item.id) onCollect(item.id);
+        this.recalcStats();
+        return true;
+    }
+
+    addEquip(item) {
+        if (this.scene.equipBag.length >= this.scene.maxEquipBag) return false;
+        this.scene.equipBag.push(item);
+        return true;
+    }
+
+    equipFromBag(idx) {
+        const item = this.scene.equipBag[idx];
+        if (!item) return;
+        const old = this.scene.equipment[item.slot];
+        this.scene.equipment[item.slot] = item;
+        this.scene.equipBag.splice(idx, 1);
+        if (old) this.scene.equipBag.push(old);
+    }
+
+    unequipItem(slot) {
+        if (!this.scene.equipment[slot]) return;
+        if (this.scene.equipBag.length >= this.scene.maxEquipBag) return;
+        this.scene.equipBag.push(this.scene.equipment[slot]);
+        this.scene.equipment[slot] = null;
+        this.recalcStats();
+    }
+
+    getMaterialStatsText() {
+        let hp = 0, dmg = 0, spd = 0;
+        this.scene.materials.forEach(m => {
+            if (m.stats) {
+                hp += m.stats.hp || 0;
+                dmg += m.stats.dmg || 0;
+                spd += m.stats.speed || 0;
+            }
+        });
+        const parts = [];
+        if (hp > 0) parts.push('+' + hp + ' HP');
+        if (dmg > 0) parts.push('+' + dmg + ' DMG');
+        if (spd > 0) parts.push('+' + spd + ' SPD');
+        return parts.length > 0 ? parts.join('  ') : 'No bonuses';
+    }
+
+    addAccountEquip(item) {
+        if (!item || item.type !== 'accountEquip') return false;
+        const slot = item.slot;
+        if (!this.scene.accountEquipment[slot]) {
+            this.scene.accountEquipment[slot] = item;
+        } else {
+            const old = this.scene.accountEquipment[slot];
+            this.scene.accountEquipment[slot] = item;
+            this._returnToAccountEquipBag(old);
+        }
+        this.recalcStats();
+        return true;
+    }
+
+    _returnToAccountEquipBag(item) {
+        if (this.scene.accountEquipBag.length < this.scene.maxAccountEquipBag) {
+            this.scene.accountEquipBag.push({ ...item });
+        }
+    }
+
+    unequipAccountItem(slot) {
+        if (!this.scene.accountEquipment[slot]) return;
+        if (this.scene.accountEquipBag.length >= this.scene.maxAccountEquipBag) return;
+        this.scene.accountEquipBag.push({ ...this.scene.accountEquipment[slot] });
+        this.scene.accountEquipment[slot] = null;
+        this.recalcStats();
+    }
+
+    deleteItem(type, idx) {
+        let item = null;
+        let expGain = 0;
+        const rarityMult = { common: 1, uncommon: 2, rare: 3, epic: 4, legendary: 5 };
+        const lvl = this.scene.playerLevel || 1;
+
+        if (type === 'material') {
+            item = this.scene.materials[idx];
+            if (!item) return 0;
+            this.scene.materials.splice(idx, 1);
+        } else if (type === 'equip') {
+            item = this.scene.equipBag[idx];
+            if (!item) return 0;
+            this.scene.equipBag.splice(idx, 1);
+        } else if (type === 'accountEquip') {
+            const slot = idx;
+            item = this.scene.accountEquipment[slot];
+            if (!item) return 0;
+            this.scene.accountEquipment[slot] = null;
+        } else if (type === 'accountEquipBag') {
+            item = this.scene.accountEquipBag[idx];
+            if (!item) return 0;
+            this.scene.accountEquipBag.splice(idx, 1);
+        } else {
+            return 0;
+        }
+
+        const rm = rarityMult[item.rarity] || 1;
+        expGain = Math.floor(10 * rm * (1 + lvl * 0.05));
+        if (type === 'accountEquipBag') {
+            this.scene.accountExp += expGain;
+            this._checkAccountLevelUp();
+        } else {
+            this.scene.playerExp += expGain;
+            this.scene.accountExp += Math.floor(expGain * 0.5);
+        }
+        this.recalcStats();
+        return expGain;
+    }
+
+    getAccountEquipStatsText() {
+        const ae = this.scene.accountEffects || {};
+        const parts = [];
+        if (ae.hpPercent) parts.push('+' + ae.hpPercent.toFixed(1) + '% HP');
+        if (ae.damagePercent) parts.push('+' + ae.damagePercent.toFixed(1) + '% DMG');
+        if (ae.speedPercent) parts.push('+' + ae.speedPercent.toFixed(1) + '% SPD');
+        if (ae.spellPercent) parts.push('+' + ae.spellPercent.toFixed(1) + '% Spell');
+        if (ae.critPercent) parts.push('+' + ae.critPercent.toFixed(1) + '% Crit');
+        if (ae.dodgePercent) parts.push('+' + ae.dodgePercent.toFixed(1) + '% Dodge');
+        if (ae.expPercent) parts.push('+' + ae.expPercent.toFixed(1) + '% EXP');
+        if (ae.lootPercent) parts.push('+' + ae.lootPercent.toFixed(1) + '% Loot');
+        if (ae.regenPercent) parts.push('+' + ae.regenPercent.toFixed(1) + '% Regen');
+        if (ae.corruptionMax) parts.push('+' + ae.corruptionMax + ' Corr Max');
+        return parts.length > 0 ? parts.join('  ') : 'No bonuses';
+    }
+
+    checkLevelUp() {
+        const req = Math.floor(100 * Math.pow(this.scene.playerLevel, 1.5));
+        if (this.scene.playerExp >= req) {
+            this.scene.playerExp -= req;
+            this.scene.playerLevel++;
+            this.scene.talentPoints++;
+            this.scene.classStats = getClassStats(this.scene.classKey, this.scene.playerLevel);
+            this.recalcStats();
+            this.scene.playerHP = this.scene.playerMaxHP;
+            playLevelUp();
+            this.scene.cameras.main.flash(300, 241, 196, 15);
+            if (this.scene.particles) this.scene.particles.spawnLevelUp(this.scene.player.x, this.scene.player.y);
+            const lt = this.scene.add.text(400, 250, 'LEVEL UP! Lv.' + this.scene.playerLevel + ' [+1 Talent]', {
+                fontSize: '24px', fill: '#f1c40f', fontFamily: 'Arial',
+                fontStyle: 'bold', stroke: '#000', strokeThickness: 3
+            }).setOrigin(0.5);
+            this.scene.tweens.add({
+                targets: lt, y: lt.y - 50, alpha: 0, duration: 1500,
+                onComplete: () => lt.destroy()
+            });
+        }
+    }
+
+    _checkAccountLevelUp() {
+        const req = getAccountLevelUpReq(this.scene.accountLevel);
+        if (this.scene.accountExp >= req) {
+            this.scene.accountExp -= req;
+            this.scene.accountLevel++;
+            this.scene.accountTalentPoints++;
+            this.scene.cameras.main.flash(300, 155, 89, 182);
+            const lt = this.scene.add.text(400, 220, 'ACCOUNT LEVEL UP! Lv.' + this.scene.accountLevel + ' [+1 Talent]', {
+                fontSize: '20px', fill: '#e67e22', fontFamily: 'Arial',
+                fontStyle: 'bold', stroke: '#000', strokeThickness: 3
+            }).setOrigin(0.5);
+            this.scene.tweens.add({
+                targets: lt, y: lt.y - 50, alpha: 0, duration: 2000,
+                onComplete: () => lt.destroy()
+            });
+        }
+    }
+}

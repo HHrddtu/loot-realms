@@ -1,6 +1,6 @@
 # TASK QUEUE
 
-## Текущий билд: v0.11.0
+## Текущий билд: v0.12.0
 
 ---
 
@@ -48,6 +48,39 @@
 | 91 | Snowy Village textures — 13 процедурных текстур (snow_ground, snow_house, icy mobs, campfire, warmth_core, VFX) | v0.11.0 |
 | 92 | Snowy Village bugs — HP:NaN fix, campfire equipBag fix, warmth_core id fix, villageRestored flag, NaN protection | v0.11.0 |
 | 93 | GitHub Pages деплой — .gitignore, .github/workflows/deploy.yml, gh-pages ветка, ручной deploy dist/ | v0.11.0 |
+| **94-108** | **Рефакторинг v0.12.0** — см. ниже | v0.12.0 |
+
+---
+
+## Рефакторинг v0.12.0 — подробности
+
+| # | Задача | Файл | Строк | Статус |
+|---|--------|------|-------|--------|
+| 94 | config/ — 9 файлов (difficulties, enemies, bosses, zones, items, spells, crafting, quests, rarity) | `src/config/` | ~800 | ✅ |
+| 95 | textures/ — 11 файлов (zones, player, npcs, items, enemies, bosses, expansion, effects, animations, snowy, mine) | `src/textures/` | ~1500 | ✅ |
+| 96 | CombatSystem.js | `src/systems/` | ~200 | ✅ |
+| 97 | PlayerSystem.js | `src/systems/` | ~250 | ✅ |
+| 98 | SpellSystem.js | `src/systems/` | ~200 | ✅ |
+| 99 | UISystem.js | `src/systems/` | ~300 | ✅ |
+| 100 | NpcSystem.js | `src/systems/` | ~300 | ✅ |
+| 101 | ForestZone.js | `src/zones/` | ~200 | ✅ |
+| 102 | ArenaZone.js | `src/zones/` | ~180 | ✅ |
+| 103 | MineZone.js | `src/zones/` | ~300 | ✅ |
+| 104 | CaveZone.js | `src/zones/` | ~250 | ✅ |
+| 105 | VillageZone.js | `src/zones/` | ~500 | ✅ |
+| 106 | HellZone.js | `src/zones/` | ~400 | ✅ |
+| 107 | GameScene.js — delegation skeleton | `src/scenes/` | ~1058 | ✅ |
+| 108 | Багфиксы: frozen village child NPC, hell zone currentZone, mine boss arena, snowy progress | — | — | ✅ |
+
+### Ключевые решения v0.12.0
+
+- **Systems** инициализируются в начале `create()` (до `_createUI`, `_initStats`), чтобы delegation stubs работали при инициализации
+- **Zones** используют `this.scene.*` — GameScene загоняет все методы через thin wrapper stubs
+- **Meadow** не вынесена в класс — `_setupMeadow()`/`_clearMeadow()` остаются в GameScene
+- **_handleInput()**, **_updateEnemies()**, **_updateBoss()**, save/load остаются в GameScene
+- **VillageZone** покрывает обычную деревню, cemetery, hell portal и frozen village (snowy)
+- **SnowyZone.js** существует но не используется — snowy village обрабатывается VillageZone(frozen=true)
+- Backup: `src/scenes/GameScene.js.bak` — оригинал для ссылки
 
 ---
 
@@ -56,44 +89,11 @@
 ### Приоритет
 | # | Задача | Статус |
 |---|--------|--------|
-| — | **Рефакторинг GameScene.js → systems/ + zones/** (детали в PLAN_ROADMAP.md) | План готов |
 | — | **Пит-система + Магазин** — PetSystem, ShopScene, Gold/Souls/Tokens | План готов |
 | — | **Баланс + UX** — миникарта, damage numbers, sound effects | План готов |
 | — | **Мультиплеер кооп (2-4 игрока)** — PeerJS (WebRTC P2P), LobbyScene, sync | План готов |
 | — | Долгосрочная прогрессия — Difficulty Unlock, Prestige, Mastery | План готов |
 | — | Перевод описаний Bestiary/Material/Soul Book на RU/DE | Ожидает |
-
-### Мультиплеер (план)
-| # | Задача | Описание |
-|---|--------|----------|
-| — | Добавить PeerJS | `npm install peerjs`, wrapper в `src/network.js` |
-| — | LobbyScene | UI: ввод имени, создание/вход в комнату (код) |
-| — | Host mode | Хост запускает GameScene, spawn мобов, проверяет урон |
-| — | Guest mode | Гость отправляет input (позиция, атака, спеллы) |
-| — | Sync позиций | 20 раз/сек: host ↔ guest |
-| — | Sync мобов | Host → гости: HP мобов, позиции, alive/dead |
-| — | Sync лута | Host решает кто получил предмет |
-| — | Аватары игроков | Спрайты других игроков в GameScene |
-| — | Disconnect handling | Если хост отключился — показать сообщение |
-
-### Рефакторинг (план v0.12.0)
-| # | Задача | Файлы | Сложность |
-|---|--------|-------|-----------|
-| 1 | CombatSystem | attack, hitEnemy, killEnemy, _dealAttackDamage | Средняя |
-| 2 | PlayerSystem | createPlayer, recalcStats, takeDamage, heal | Средняя |
-| 3 | SpellSystem | _castSpell, _castProjectile, _castShield, _castHeal | Средняя |
-| 4 | UISystem | openInventory, closeInventory, tooltips | Лёгкая |
-| 5 | NpcSystem | _spawnNPCs, _interactWithNpc, quests UI | Лёгкая |
-| 6 | HellZone | setup, clear, update, camps, boss, lava | Средняя |
-| 7 | SnowyZone | setup, clear, update, camps, boss, campfire | Средняя |
-| 8 | VillageZone | setup, clear, update, camps, decor, cemetery | Средняя |
-| 9 | ForestZone | setup, clear, update, portal, Trent | Средняя |
-| 10 | CaveZone | setup, clear, update, Giant Bat | Средняя |
-| 11 | MineZone | setup, clear, update, Skeleton Lord | Средняя |
-| 12 | config.js → config/ | enemies, bosses, zones, items, spells, crafting | Лёгкая |
-| 13 | textures.js → textures/ | player, enemy, boss, zone, item, ui textures | Лёгкая |
-| 14 | GameScene.js → каркас | Заменить методы на delegation, ~800 строк | Средняя |
-| 15 | Тестирование | Полный прогон всех зон, боссов, квестов | Обязательно |
 
 ### Пит-система + Магазин (план v0.13.0)
 | # | Задача | Описание |
@@ -119,39 +119,48 @@
 | 6 | Death screen | Экран смерти с кнопкой respawn |
 | 7 | Sound effects | Звуки атаки, урона, лута |
 
-### Новые идеи (обсуждение)
-| # | Задача | Статус |
-|---|--------|--------|
-| — | Процедурные подземелья — рандомные комнаты | Обсуждение |
-| — | Арена/PvP — рейтинговые бои | Обсуждение |
+### Мультиплеер (план v0.15.0)
+| # | Задача | Описание |
+|---|--------|----------|
+| — | Добавить PeerJS | `npm install peerjs`, wrapper в `src/network.js` |
+| — | LobbyScene | UI: ввод имени, создание/вход в комнату (код) |
+| — | Host mode | Хост запускает GameScene, spawn мобов, проверяет урон |
+| — | Guest mode | Гость отправляет input (позиция, атака, спеллы) |
+| — | Sync позиций | 20 раз/сек: host ↔ guest |
+| — | Sync мобов | Host → гости: HP мобов, позиции, alive/dead |
+| — | Sync лута | Host решает кто получил предмет |
+| — | Аватары игроков | Спрайты других игроков в GameScene |
+| — | Disconnect handling | Если хост отключился — показать сообщение |
 
 ---
 
 ## Текущая точка остановки
 
-**Последнее сделано:** v0.11.0 — Snowy Village + GitHub Pages деплой
+**Последнее сделано:** v0.12.0 — Рефакторинг GameScene.js → systems/ + zones/ + config/ + textures/
 
-**Следующий шаг:** v0.12.0 — Рефакторинг кода (детали в `PLAN_ROADMAP.md`)
+**Следующий шаг:** v0.13.0 — Пит-система + Магазин
 
 **URL игры:** https://hhrdtu.github.io/loot-realms/
 
 **Roadmap:**
-- v0.12.0: Рефакторинг GameScene.js → systems/ + zones/ + config/ + textures/
 - v0.13.0: Пит-система + Магазин (PetSystem, ShopScene, Gold/Souls/Tokens)
 - v0.14.0: Баланс + UX + Баги (миникарта, damage numbers, sound effects)
 - v0.15.0: Мультиплеер кооп (PeerJS, LobbyScene, Host/Guest, sync)
 
-**Что было в v0.11.0:**
-1. Snowy Village — замороженная деревня после Hell (5 типов мобов, Ice Spirit босс, campfire, Warmth Core, восстановление)
-2. Багфиксы — HP:NaN, campfire equipBag, warmth_core id, villageRestored flag
-3. GitHub Pages деплой — .gitignore, deploy.yml workflow, gh-pages ветка
+**Что было в v0.12.0:**
+1. config/ — 9 файлов: difficulties, enemies, bosses, zones, items, spells, crafting, quests, rarity
+2. textures/ — 11 файлов: все процедурные текстуры по модулям
+3. systems/ — 5 систем: Combat, Player, Spell, UI, NPC
+4. zones/ — 6 зон: Forest, Arena, Mine, Cave, Village, Hell
+5. GameScene.js — delegation skeleton (~1058 строк вместо ~6830)
+6. Багфиксы: frozen village child NPC, hell zone currentZone, cave stairs null guard, snowy village progress
 
 **Важно для следующего агента:**
-- `GameScene.js` — ~6830 строк
-- 9 сцен зарегистрировано в main.js
-- Class таланты: 47×3=141, Account таланты: 70, Всего: 211
+- `GameScene.js` — ~1058 строк (delegation skeleton)
+- Systems/zones инициализируются в начале `create()` (до `_createUI`)
+- `_handleInput()`, `_updateEnemies()`, `_updateBoss()`, save/load остаются в GameScene
+- Meadow не вынесена в класс — `_setupMeadow()`/`_clearMeadow()` в GameScene
+- VillageZone покрывает обычную деревню + cemetery + frozen village
 - `this.difficulty` — СТРОКА ("Normal"/"Hard"/"Expert"/etc), НЕ число
-- `this.diffMulti` — объект множителей `{ hp, dmg, exp }` из DIFF_MULT[difficulty]
-- Warmth Core в `this.equipBag`, ключ `id: 'warmth_core'`
-- `this.villageRestored` — permanente flag, НЕ сбрасывается в `_clearVillage()`
-- **Деплой:** `npm run build` → push dist/ на `gh-pages` ветку (force). Корневой `index.html` — dev-ссылки, НЕ для Pages
+- `this.diffMulti` — объект множителей `{ hp, dmg, exp }`
+- **Деплой:** `npm run build` → push dist/ на `gh-pages` ветку (force)
