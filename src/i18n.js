@@ -64,6 +64,9 @@ const LOCALES = {
         'accEquip.legs': 'Legs',
         'accEquip.weapon': 'Weapon',
         'accEquip.acc': 'Acc',
+        'accEquip.ring': 'Ring',
+        'accEquip.charm': 'Charm',
+        'accEquip.relic': 'Relic',
 
         // === CLASS SELECT ===
         'class.title': 'CHOOSE YOUR CLASS',
@@ -287,6 +290,9 @@ const LOCALES = {
         'accEquip.legs': 'Штаны',
         'accEquip.weapon': 'Оружие',
         'accEquip.acc': 'Акс.',
+        'accEquip.ring': 'Кольцо',
+        'accEquip.charm': 'Талисман',
+        'accEquip.relic': 'Реликвия',
 
         // === CLASS SELECT ===
         'class.title': 'ВЫБЕРИТЕ КЛАСС',
@@ -510,6 +516,9 @@ const LOCALES = {
         'accEquip.legs': 'Beine',
         'accEquip.weapon': 'Waffe',
         'accEquip.acc': 'Zub.',
+        'accEquip.ring': 'Ring',
+        'accEquip.charm': 'Talisman',
+        'accEquip.relic': 'Relikt',
 
         // === CLASS SELECT ===
         'class.title': 'WÄHLE DEINE KLASSE',

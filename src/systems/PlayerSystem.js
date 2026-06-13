@@ -240,6 +240,8 @@ export class PlayerSystem {
     _returnToAccountEquipBag(item) {
         if (this.scene.accountEquipBag.length < this.scene.maxAccountEquipBag) {
             this.scene.accountEquipBag.push({ ...item });
+        } else if (this.scene.player) {
+            this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, 'Bag full! ' + item.name + ' lost', '#e74c3c');
         }
     }
 

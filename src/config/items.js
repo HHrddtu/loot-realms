@@ -39,34 +39,71 @@ export const EQUIP_DB = [
 ];
 
 export const ACCOUNT_EQUIP_DB = [
-    { id: 'sage_hat',     name: 'Wise Cap',         nameRu: 'Мудрая Шапка',      nameDe: 'Weise Mütze',         rarity: 'rare',      slot: 'hat',      texKey: 'acc_hat',      chance: 0.30, stats: { hpPercent: 3, regenPercent: 1 } },
-    { id: 'sage_mantle',  name: 'Arcane Mantle',    nameRu: 'Тайная Мантия',     nameDe: 'Geheimnisumantel',    rarity: 'rare',      slot: 'mantle',   texKey: 'acc_mantle',   chance: 0.25, stats: { spellPercent: 4, corruptionMax: 5 } },
-    { id: 'sage_legs',    name: 'Traveler Leggings',nameRu: 'Штаны Путника',     nameDe: 'Wanderhose',          rarity: 'rare',      slot: 'legs',     texKey: 'acc_legs',     chance: 0.25, stats: { speedPercent: 3, dodgePercent: 2 } },
-    { id: 'sage_book',    name: 'Grimoire of Shadows', nameRu: 'Гримуар Теней',  nameDe: 'Grimuar der Schatten', rarity: 'epic',   slot: 'weapon',   texKey: 'acc_book',     chance: 0.12, stats: { damagePercent: 5, critPercent: 2 }, effect: 'slow_dark_stun' },
-    { id: 'sage_amulet',  name: 'Amulet of Foresight', rarity: 'epic',          nameRu: 'Амулет Предвидения', nameDe: 'Amulett der Vorschau', slot: 'accessory', texKey: 'acc_amulet', chance: 0.08, stats: { expPercent: 2, lootPercent: 2, hpPercent: 3 } },
-    { id: 'sage_hat_e',   name: 'Mystic Crown',     nameRu: 'Мистическая Корона', nameDe: 'Mystische Krone',   rarity: 'epic',      slot: 'hat',      texKey: 'acc_hat',      chance: 0.08, stats: { hpPercent: 5, regenPercent: 2 } },
-    { id: 'sage_mantle_e',name: 'Void Shroud',      nameRu: 'Покров Пустоты',   nameDe: 'Leere Schleier',      rarity: 'epic',      slot: 'mantle',   texKey: 'acc_mantle',   chance: 0.07, stats: { spellPercent: 7, corruptionMax: 10 } },
-    { id: 'sage_legs_e',  name: 'Phase Walkers',    nameRu: 'Фазовые Шаги',     nameDe: 'Phasenläufer',        rarity: 'epic',      slot: 'legs',     texKey: 'acc_legs',     chance: 0.07, stats: { speedPercent: 5, dodgePercent: 3 } },
-    { id: 'sage_book_l',  name: 'Tome of Eternal Wisdom', nameRu: 'Том Вечной Мудрости', nameDe: 'Buch der Ewigen Weisheit', rarity: 'legendary', slot: 'weapon', texKey: 'acc_book', chance: 0.03, stats: { damagePercent: 8, critPercent: 4 }, effect: 'slow_dark_stun' },
-    { id: 'sage_amulet_l',name: 'Necklace of the Sage', nameRu: 'Ожерелье Мудреца', nameDe: 'Halskette des Weisen', rarity: 'legendary', slot: 'accessory', texKey: 'acc_amulet', chance: 0.02, stats: { expPercent: 4, lootPercent: 4, hpPercent: 5 } }
+    { id: 'sage_hat',     name: 'Wise Cap',         nameRu: 'Мудрая Шапка',      nameDe: 'Weise Mütze',         rarity: 'rare',      slot: 'hat',      texKey: 'sage_hat',      chance: 0.30, stats: { hpPercent: 3, regenPercent: 1 } },
+    { id: 'sage_mantle',  name: 'Arcane Mantle',    nameRu: 'Тайная Мантия',     nameDe: 'Geheimnisumantel',    rarity: 'rare',      slot: 'mantle',   texKey: 'sage_mantle',   chance: 0.25, stats: { spellPercent: 4, corruptionMax: 5 } },
+    { id: 'sage_legs',    name: 'Traveler Leggings',nameRu: 'Штаны Путника',     nameDe: 'Wanderhose',          rarity: 'rare',      slot: 'legs',     texKey: 'sage_legs',     chance: 0.25, stats: { speedPercent: 3, dodgePercent: 2 } },
+    { id: 'sage_book',    name: 'Grimoire of Shadows', nameRu: 'Гримуар Теней',  nameDe: 'Grimuar der Schatten', rarity: 'epic',   slot: 'weapon',   texKey: 'sage_book',     chance: 0.12, stats: { damagePercent: 5, critPercent: 2 }, effect: 'slow_dark_stun' },
+    { id: 'sage_amulet',  name: 'Amulet of Foresight', rarity: 'epic',          nameRu: 'Амулет Предвидения', nameDe: 'Amulett der Vorschau', slot: 'accessory', texKey: 'sage_amulet', chance: 0.08, stats: { expPercent: 2, lootPercent: 2, hpPercent: 3 } },
+    { id: 'sage_hat_e',   name: 'Mystic Crown',     nameRu: 'Мистическая Корона', nameDe: 'Mystische Krone',   rarity: 'epic',      slot: 'hat',      texKey: 'sage_hat',      chance: 0.08, stats: { hpPercent: 5, regenPercent: 2 } },
+    { id: 'sage_mantle_e',name: 'Void Shroud',      nameRu: 'Покров Пустоты',   nameDe: 'Leere Schleier',      rarity: 'epic',      slot: 'mantle',   texKey: 'sage_mantle',   chance: 0.07, stats: { spellPercent: 7, corruptionMax: 10 } },
+    { id: 'sage_legs_e',  name: 'Phase Walkers',    nameRu: 'Фазовые Шаги',     nameDe: 'Phasenläufer',        rarity: 'epic',      slot: 'legs',     texKey: 'sage_legs',     chance: 0.07, stats: { speedPercent: 5, dodgePercent: 3 } },
+    { id: 'sage_book_l',  name: 'Tome of Eternal Wisdom', nameRu: 'Том Вечной Мудрости', nameDe: 'Buch der Ewigen Weisheit', rarity: 'legendary', slot: 'weapon', texKey: 'sage_book', chance: 0.03, stats: { damagePercent: 8, critPercent: 4 }, effect: 'slow_dark_stun' },
+    { id: 'sage_amulet_l',name: 'Necklace of the Sage', nameRu: 'Ожерелье Мудреца', nameDe: 'Halskette des Weisen', rarity: 'legendary', slot: 'accessory', texKey: 'sage_amulet', chance: 0.02, stats: { expPercent: 4, lootPercent: 4, hpPercent: 5 } },
+
+    { id: 'alch_hat',     name: "Alchemist's Hood",  nameRu: 'Капюшон Алхимика',   nameDe: 'Alchemistenhut',      rarity: 'rare',      slot: 'hat',      texKey: 'alch_hat',      chance: 0.30, stats: { hpPercent: 4, damageReduction: 2 } },
+    { id: 'alch_mantle',  name: 'Transmutation Robe',nameRu: 'Мантия Трансмутации', nameDe: 'Transmutationsrobe', rarity: 'rare',      slot: 'mantle',   texKey: 'alch_mantle',   chance: 0.25, stats: { spellPercent: 3, hpPercent: 3 } },
+    { id: 'alch_legs',    name: 'Boots of Endurance',nameRu: 'Сапоги Выносливости', nameDe: 'Ausdauerstiefel',   rarity: 'rare',      slot: 'legs',     texKey: 'alch_legs',     chance: 0.25, stats: { speedPercent: 2, hpPercent: 4 } },
+    { id: 'alch_wand',    name: 'Corrosive Wand',    nameRu: 'Коррозийная Палочка', nameDe: 'Korrosionsstab',    rarity: 'epic',      slot: 'weapon',   texKey: 'alch_wand',     chance: 0.12, stats: { damagePercent: 4, critPercent: 3 } },
+    { id: 'alch_amulet',  name: "Philosopher's Stone", nameRu: 'Камень Философа',  nameDe: 'Stein der Weisen',   rarity: 'epic',      slot: 'accessory', texKey: 'alch_amulet',  chance: 0.08, stats: { damagePercent: 3, spellPercent: 3, hpPercent: 2 } },
+    { id: 'alch_hat_e',   name: 'Crown of Potency',  nameRu: 'Корона Мощи',        nameDe: 'Krone der Macht',    rarity: 'epic',      slot: 'hat',      texKey: 'alch_hat',      chance: 0.08, stats: { hpPercent: 6, damageReduction: 4 } },
+    { id: 'alch_mantle_e',name: 'Volatile Shroud',   nameRu: 'Нестабильный Покров', nameDe: 'Instabiler Schleier', rarity: 'epic',     slot: 'mantle',   texKey: 'alch_mantle',   chance: 0.07, stats: { spellPercent: 6, hpPercent: 5 } },
+    { id: 'alch_legs_e',  name: 'Greaves of the Forge', nameRu: 'Поножи Горнила',  nameDe: 'Schienbein des Ofens', rarity: 'epic',    slot: 'legs',     texKey: 'alch_legs',     chance: 0.07, stats: { speedPercent: 4, hpPercent: 6 } },
+    { id: 'alch_wand_l',  name: 'Alembic of Eternity', nameRu: 'Аламбик Вечности', nameDe: 'Alembik der Ewigkeit', rarity: 'legendary', slot: 'weapon', texKey: 'alch_wand', chance: 0.03, stats: { damagePercent: 7, critPercent: 5, spellPercent: 3 } },
+    { id: 'alch_amulet_l',name: 'Blessing of the Flask', nameRu: 'Благословение Фляги', nameDe: 'Segen der Flasche', rarity: 'legendary', slot: 'accessory', texKey: 'alch_amulet', chance: 0.02, stats: { hpPercent: 8, damagePercent: 5, spellPercent: 3 } },
+
+    { id: 'angel_hat',    name: 'Halo of Grace',     nameRu: 'Нимб Благодати',     nameDe: 'Halo der Gnade',      rarity: 'rare',      slot: 'hat',      texKey: 'angel_hat',      chance: 0.30, stats: { hpPercent: 3, regenPercent: 2 } },
+    { id: 'angel_mantle', name: 'Wings of Light',    nameRu: 'Крылья Света',       nameDe: 'Flügel des Lichts',   rarity: 'rare',      slot: 'mantle',   texKey: 'angel_mantle',   chance: 0.25, stats: { speedPercent: 3, dodgePercent: 3 } },
+    { id: 'angel_legs',   name: 'Swift Sandals',     nameRu: 'Лёгкие Сандалии',    nameDe: 'Schnelle Sandalen',   rarity: 'rare',      slot: 'legs',     texKey: 'angel_legs',     chance: 0.25, stats: { speedPercent: 4, dodgePercent: 2 } },
+    { id: 'angel_staff',  name: 'Smite Staff',       nameRu: 'Посох Карателя',     nameDe: 'Bestrafungsstab',     rarity: 'epic',      slot: 'weapon',   texKey: 'angel_staff',    chance: 0.12, stats: { damagePercent: 4, spellPercent: 4 } },
+    { id: 'angel_amulet', name: 'Soul Pendant',      nameRu: 'Подвеска Души',      nameDe: 'Seelenanhänger',      rarity: 'epic',      slot: 'accessory', texKey: 'angel_amulet',  chance: 0.08, stats: { hpPercent: 4, corruptionMax: 8, spellPercent: 2 } },
+    { id: 'angel_hat_e',  name: 'Crown of Devotion', nameRu: 'Корона Преданности', nameDe: 'Krone der Hingabe',   rarity: 'epic',      slot: 'hat',      texKey: 'angel_hat',      chance: 0.08, stats: { hpPercent: 5, regenPercent: 3 } },
+    { id: 'angel_mantle_e',name: 'Aegis Shroud',     nameRu: 'Покров Щита',       nameDe: 'Schildschleier',      rarity: 'epic',      slot: 'mantle',   texKey: 'angel_mantle',   chance: 0.07, stats: { speedPercent: 5, dodgePercent: 4 } },
+    { id: 'angel_legs_e', name: 'Boots of Ascension', nameRu: 'Сапоги Вознесения', nameDe: 'Stiefel der Himmelfahrt', rarity: 'epic', slot: 'legs', texKey: 'angel_legs', chance: 0.07, stats: { speedPercent: 6, dodgePercent: 3 } },
+    { id: 'angel_staff_l',name: 'Judgment Scepter',  nameRu: 'Жезл Суда',          nameDe: 'Urteilszepter',       rarity: 'legendary', slot: 'weapon',   texKey: 'angel_staff',    chance: 0.03, stats: { damagePercent: 6, spellPercent: 6, critPercent: 3 } },
+    { id: 'angel_amulet_l',name: 'Tear of the Angel', nameRu: 'Слеза Ангела',      nameDe: 'Träne des Engels',    rarity: 'legendary', slot: 'accessory', texKey: 'angel_amulet',  chance: 0.02, stats: { hpPercent: 6, regenPercent: 4, corruptionMax: 12 } },
+
+    { id: 'sage_ring',    name: 'Scholar Ring',      nameRu: 'Кольцо Учёного',     nameDe: 'Gelehrtenring',       rarity: 'rare',      slot: 'ring',     texKey: 'sage_ring',     chance: 0.30, stats: { spellPercent: 2, critPercent: 1 } },
+    { id: 'sage_charm',   name: 'Tome Fragment',     nameRu: 'Фрагмент Тома',      nameDe: 'Tomb fragment',       rarity: 'rare',      slot: 'charm',    texKey: 'sage_charm',    chance: 0.30, stats: { hpPercent: 2, corruptionMax: 3 } },
+    { id: 'sage_ring_e',  name: 'Ring of Insight',   nameRu: 'Кольцо Прозрения',   nameDe: 'Ring der Einsicht',   rarity: 'epic',      slot: 'ring',     texKey: 'sage_ring',     chance: 0.08, stats: { spellPercent: 4, critPercent: 3 } },
+    { id: 'sage_charm_e', name: 'Soul Cipher',       nameRu: 'Шифр Души',          nameDe: 'Seelencipher',        rarity: 'epic',      slot: 'charm',    texKey: 'sage_charm',    chance: 0.08, stats: { hpPercent: 4, corruptionMax: 8 } },
+
+    { id: 'alch_ring',    name: 'Alchemist Band',    nameRu: 'Кольцо Алхимика',    nameDe: 'Alchemistenband',     rarity: 'rare',      slot: 'ring',     texKey: 'alch_ring',     chance: 0.30, stats: { damagePercent: 2, hpPercent: 2 } },
+    { id: 'alch_charm',   name: 'Reagent Pouch',     nameRu: 'Мешочек с Реагентом', nameDe: 'Reagenztasche',     rarity: 'rare',      slot: 'charm',    texKey: 'alch_charm',    chance: 0.30, stats: { hpPercent: 3, damagePercent: 1 } },
+    { id: 'alch_ring_e',  name: 'Transmutation Ring', nameRu: 'Кольцо Трансмутации', nameDe: 'Transmutationsring', rarity: 'epic',    slot: 'ring',     texKey: 'alch_ring',     chance: 0.08, stats: { damagePercent: 4, spellPercent: 2 } },
+    { id: 'alch_charm_e', name: 'Volatile Essence',   nameRu: 'Нестабильная Эссенция', nameDe: 'Flüchtige Essenz', rarity: 'epic', slot: 'charm',    texKey: 'alch_charm',    chance: 0.08, stats: { hpPercent: 5, damagePercent: 3 } },
+
+    { id: 'angel_ring',   name: 'Ring of Devotion',  nameRu: 'Кольцо Преданности', nameDe: 'Ring der Hingabe',    rarity: 'rare',      slot: 'ring',     texKey: 'angel_ring',    chance: 0.30, stats: { hpPercent: 2, regenPercent: 1 } },
+    { id: 'angel_charm',  name: 'Holy Symbol',        nameRu: 'Священный Символ',   nameDe: 'Heiliges Symbol',     rarity: 'rare',      slot: 'charm',    texKey: 'angel_charm',   chance: 0.30, stats: { hpPercent: 2, dodgePercent: 2 } },
+    { id: 'angel_ring_e', name: 'Covenant Ring',     nameRu: 'Кольцо Завета',      nameDe: 'Bundesring',          rarity: 'epic',      slot: 'ring',     texKey: 'angel_ring',    chance: 0.08, stats: { hpPercent: 4, regenPercent: 3 } },
+    { id: 'angel_charm_e',name: 'Ward of Grace',     nameRu: 'Оберег Благодати',   nameDe: 'Wächter der Gnade',   rarity: 'epic',      slot: 'charm',    texKey: 'angel_charm',   chance: 0.08, stats: { hpPercent: 5, dodgePercent: 4 } }
 ];
 
 export const ACCOUNT_EQUIP_DB_CAVE = [
-    { id: 'relic_cave_sage',     name: 'Relic of Depths',       nameRu: 'Реликвия Глубин',      nameDe: 'Reliktiefe',          rarity: 'legendary', slot: 'relic', texKey: 'acc_book',   chance: 0.33, stats: {}, effect: 'fireball_chain', classes: ['sage'] },
-    { id: 'relic_cave_alchemist', name: 'Relic of Fermentation', nameRu: 'Реликвия Брожения',   nameDe: 'Reliktgärung',        rarity: 'legendary', slot: 'relic', texKey: 'acc_book',   chance: 0.33, stats: {}, effect: 'craft_bonus',   classes: ['alchemist'] },
-    { id: 'relic_cave_angel',    name: 'Relic of Grace',        nameRu: 'Реликвия Благодати',   nameDe: 'Reliktder Gnade',     rarity: 'legendary', slot: 'relic', texKey: 'acc_book',   chance: 0.34, stats: {}, effect: 'purify_heal',  classes: ['angel'] }
+    { id: 'relic_cave_sage',     name: 'Relic of Depths',       nameRu: 'Реликвия Глубин',      nameDe: 'Reliktiefe',          rarity: 'legendary', slot: 'relic', texKey: 'sage_book',   chance: 0.33, stats: {}, effect: 'fireball_chain', classes: ['sage'] },
+    { id: 'relic_cave_alchemist', name: 'Relic of Fermentation', nameRu: 'Реликвия Брожения',   nameDe: 'Reliktgärung',        rarity: 'legendary', slot: 'relic', texKey: 'alch_wand',   chance: 0.33, stats: {}, effect: 'craft_bonus',   classes: ['alchemist'] },
+    { id: 'relic_cave_angel',    name: 'Relic of Grace',        nameRu: 'Реликвия Благодати',   nameDe: 'Reliktder Gnade',     rarity: 'legendary', slot: 'relic', texKey: 'angel_staff', chance: 0.34, stats: {}, effect: 'purify_heal',  classes: ['angel'] }
 ];
 export const CAVE_RELIC_CLASSES = ['sage', 'alchemist', 'angel'];
 
 export const ACCOUNT_EQUIP_DB_VILLAGE = [
-    { id: 'relic_village_sage',      name: 'Tome of Flames',     nameRu: 'Том Пламени',       nameDe: 'Flammenschaft',    rarity: 'legendary', slot: 'accessory', texKey: 'acc_book', chance: 0.50, stats: { spellPercent: 8, critPercent: 5 } },
-    { id: 'relic_village_alchemist', name: 'Alchemist Belt',     nameRu: 'Пояс Алхимика',     nameDe: 'Alchemistengürtel', rarity: 'legendary', slot: 'accessory', texKey: 'acc_ring', chance: 0.50, stats: { hpPercent: 10, damagePercent: 6 } }
+    { id: 'relic_village_sage',      name: 'Tome of Flames',     nameRu: 'Том Пламени',       nameDe: 'Flammenschaft',    rarity: 'legendary', slot: 'accessory', texKey: 'sage_book', chance: 0.50, stats: { spellPercent: 8, critPercent: 5 } },
+    { id: 'relic_village_alchemist', name: 'Alchemist Belt',     nameRu: 'Пояс Алхимика',     nameDe: 'Alchemistengürtel', rarity: 'legendary', slot: 'accessory', texKey: 'alch_ring', chance: 0.50, stats: { hpPercent: 10, damagePercent: 6 } }
 ];
 
 export const VILLAGE_CHEST_DROP_ITEMS = [
-    { id: 'village_ring',  name: 'Village Signet',  nameRu: 'Печать Деревни',  nameDe: 'Dorfsignet',  rarity: 'uncommon', slot: 'accessory', texKey: 'acc_ring',  chance: 0.40, stats: { hpPercent: 3, damagePercent: 2 } },
-    { id: 'village_amulet', name: 'Damned Amulet', nameRu: 'Проклятый Амулет', nameDe: 'Verfluchtes Amulett', rarity: 'rare', slot: 'accessory', texKey: 'acc_book', chance: 0.35, stats: { spellPercent: 5, critPercent: 3 } },
-    { id: 'village_cloak',  name: 'Torn Cloak',    nameRu: 'Рваный Плащ',      nameDe: 'Zerrissener Umhang', rarity: 'uncommon', slot: 'armor', texKey: 'acc_book', chance: 0.25, stats: { hpPercent: 5, speedPercent: 2 } }
+    { id: 'village_ring',  name: 'Village Signet',  nameRu: 'Печать Деревни',  nameDe: 'Dorfsignet',  rarity: 'uncommon', slot: 'accessory', texKey: 'item_crown',  chance: 0.40, stats: { hpPercent: 3, damagePercent: 2 } },
+    { id: 'village_amulet', name: 'Damned Amulet', nameRu: 'Проклятый Амулет', nameDe: 'Verfluchtes Amulett', rarity: 'rare', slot: 'accessory', texKey: 'item_ruby', chance: 0.35, stats: { spellPercent: 5, critPercent: 3 } },
+    { id: 'village_cloak',  name: 'Torn Cloak',    nameRu: 'Рваный Плащ',      nameDe: 'Zerrissener Umhang', rarity: 'uncommon', slot: 'armor', texKey: 'item_dscale', chance: 0.25, stats: { hpPercent: 5, speedPercent: 2 } }
 ];
 
 // Special items

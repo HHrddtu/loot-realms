@@ -302,8 +302,8 @@ export default class MenuScene extends Phaser.Scene {
         const classes = ['sage', 'alchemist', 'angel'];
         const classColors = { sage: '#f1c40f', alchemist: '#e67e22', angel: '#3498db' };
         const classNames = { sage: 'Sage', alchemist: 'Alchemist', angel: 'Angel' };
-        const slots = ['hat', 'mantle', 'legs', 'weapon', 'accessory'];
-        const slotLabels = [t('accEquip.hat'), t('accEquip.mantle'), t('accEquip.legs'), t('accEquip.weapon'), t('accEquip.acc')];
+        const slots = ['hat', 'mantle', 'legs', 'weapon', 'accessory', 'ring', 'charm', 'relic'];
+        const slotLabels = [t('accEquip.hat'), t('accEquip.mantle'), t('accEquip.legs'), t('accEquip.weapon'), t('accEquip.acc'), t('accEquip.ring'), t('accEquip.charm'), t('accEquip.relic')];
 
         let baseY = 85;
         classes.forEach(cls => {

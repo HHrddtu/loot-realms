@@ -122,6 +122,15 @@ function drawItemShape(c, shape, color) {
             c.fillRect(6, 5, 4, 2);
             c.fillRect(7, 12, 2, 1);
             break;
+        case 'charm':
+            c.fillRect(6, 2, 4, 2);
+            c.fillRect(5, 4, 6, 2);
+            c.fillRect(4, 6, 8, 6);
+            c.fillStyle = lighten(parseInt(color.slice(1), 16), 0.4);
+            c.fillRect(6, 8, 4, 2);
+            c.fillStyle = '#fff';
+            c.fillRect(7, 7, 2, 2);
+            break;
     }
 }
 
@@ -144,7 +153,32 @@ export function drawItemTextures(mk) {
         { key: 'acc_legs',     color: '#1a5276', shape: 'legs' },
         { key: 'acc_book',     color: '#8e44ad', shape: 'book' },
         { key: 'acc_amulet',   color: '#f39c12', shape: 'amulet' },
-        { key: 'acc_ring',     color: '#e67e22', shape: 'ring' }
+        { key: 'acc_ring',     color: '#e67e22', shape: 'ring' },
+        { key: 'acc_charm',    color: '#27ae60', shape: 'charm' },
+        // Sage (purple tones)
+        { key: 'sage_hat',     color: '#9b59b6', shape: 'hat' },
+        { key: 'sage_mantle',  color: '#7d3c98', shape: 'mantle' },
+        { key: 'sage_legs',    color: '#1a5276', shape: 'legs' },
+        { key: 'sage_book',    color: '#8e44ad', shape: 'book' },
+        { key: 'sage_amulet',  color: '#f39c12', shape: 'amulet' },
+        { key: 'sage_ring',    color: '#8e44ad', shape: 'ring' },
+        { key: 'sage_charm',   color: '#7d3c98', shape: 'charm' },
+        // Alchemist (red/orange tones)
+        { key: 'alch_hat',     color: '#c0392b', shape: 'hat' },
+        { key: 'alch_mantle',  color: '#922b21', shape: 'mantle' },
+        { key: 'alch_legs',    color: '#784212', shape: 'legs' },
+        { key: 'alch_wand',    color: '#cb4335', shape: 'book' },
+        { key: 'alch_amulet',  color: '#d4ac0d', shape: 'amulet' },
+        { key: 'alch_ring',    color: '#dc7633', shape: 'ring' },
+        { key: 'alch_charm',   color: '#cb4335', shape: 'charm' },
+        // Angel (gold/white tones)
+        { key: 'angel_hat',    color: '#f1c40f', shape: 'hat' },
+        { key: 'angel_mantle', color: '#d4ac0d', shape: 'mantle' },
+        { key: 'angel_legs',   color: '#b7950b', shape: 'legs' },
+        { key: 'angel_staff',  color: '#f5f5dc', shape: 'book' },
+        { key: 'angel_amulet', color: '#f39c12', shape: 'amulet' },
+        { key: 'angel_ring',   color: '#f1c40f', shape: 'ring' },
+        { key: 'angel_charm',  color: '#d4ac0d', shape: 'charm' }
     ];
 
     defs.forEach(({ key, color, shape }) => {

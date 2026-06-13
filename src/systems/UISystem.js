@@ -726,90 +726,94 @@ export class UISystem {
         this.scene.accountEquipGroup = [];
         const mk = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
 
-        this.scene.accountEquipGroup.push(mk(this.scene.add.rectangle(400, 300, 620, 560, 0x000000, 0.94)
+        const W = 520, H = 520;
+        this.scene.accountEquipGroup.push(mk(this.scene.add.rectangle(400, 300, W, H, 0x000000, 0.94)
             .setStrokeStyle(2, 0xf39c12)));
 
-        this.scene.accountEquipGroup.push(mk(this.scene.add.text(400, 35, t('accEquip.title'), {
-            fontSize: '20px', fill: '#f39c12', fontFamily: 'Arial', fontStyle: 'bold'
+        this.scene.accountEquipGroup.push(mk(this.scene.add.text(400, 28, t('accEquip.title'), {
+            fontSize: '18px', fill: '#f39c12', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5)));
 
         const statsText = this.scene.getAccountEquipStatsText();
-        this.scene.accountEquipGroup.push(mk(this.scene.add.text(400, 55, statsText, {
-            fontSize: '12px', fill: '#2ecc71', fontFamily: 'Arial'
+        this.scene.accountEquipGroup.push(mk(this.scene.add.text(400, 48, statsText, {
+            fontSize: '11px', fill: '#2ecc71', fontFamily: 'Arial'
         }).setOrigin(0.5)));
 
-        const slots = ['hat', 'mantle', 'legs', 'weapon', 'accessory', 'relic'];
-        const slotLabels = [t('accEquip.hat'), t('accEquip.mantle'), t('accEquip.legs'), t('accEquip.weapon'), t('accEquip.acc'), 'Relic'];
-        const slotY = [85, 120, 155, 190, 225, 260];
+        this.scene.accountEquipGroup.push(mk(this.scene.add.rectangle(400, 65, W - 40, 1, 0x333)));
+
+        const slots = ['hat', 'mantle', 'legs', 'weapon', 'accessory', 'ring', 'charm', 'relic'];
+        const slotLabels = [t('accEquip.hat'), t('accEquip.mantle'), t('accEquip.legs'), t('accEquip.weapon'), t('accEquip.acc'), t('accEquip.ring'), t('accEquip.charm'), t('accEquip.relic')];
+
+        const colX = [165, 385];
+        const rowY = [95, 135, 175, 215];
+        const slotSize = 30;
+        const labelW = 55;
+        const nameX = 40;
 
         slots.forEach((slot, i) => {
+            const col = i < 4 ? 0 : 1;
+            const row = i % 4;
+            const cx = colX[col];
+            const cy = rowY[row];
             const item = this.scene.accountEquipment[slot];
-            const y = slotY[i];
 
-            this.scene.accountEquipGroup.push(mk(this.scene.add.text(120, y, slotLabels[i] + ':', {
-                fontSize: '13px', fill: '#aaa', fontFamily: 'Arial', fontStyle: 'bold'
+            this.scene.accountEquipGroup.push(mk(this.scene.add.text(cx - labelW, cy, slotLabels[i], {
+                fontSize: '11px', fill: '#888', fontFamily: 'Arial'
             }).setOrigin(0, 0.5)));
 
-            const bg = mk(this.scene.add.rectangle(210, y, 36, 36, 0x1a1a2e)
+            const bg = mk(this.scene.add.rectangle(cx, cy, slotSize, slotSize, 0x1a1a2e)
                 .setStrokeStyle(1, 0x444));
             this.scene.accountEquipGroup.push(bg);
 
             if (item) {
-                const spr = mk(this.scene.add.sprite(210, y, item.texKey).setScale(1.6));
+                const spr = mk(this.scene.add.sprite(cx, cy, item.texKey).setScale(1.3));
                 this.scene.accountEquipGroup.push(spr);
                 const rc = RARITY_COLORS[item.rarity] || 0xaaaaaa;
                 bg.setStrokeStyle(2, rc);
 
                 const hex = '#' + rc.toString(16).padStart(6, '0');
-                this.scene.accountEquipGroup.push(mk(this.scene.add.text(235, y - 6, item.name, {
-                    fontSize: '12px', fill: hex, fontFamily: 'Arial', fontStyle: 'bold'
-                }).setOrigin(0, 0.5)));
-
-                const st = this._getAccountItemStatsText(item);
-                this.scene.accountEquipGroup.push(mk(this.scene.add.text(235, y + 6, st, {
-                    fontSize: '10px', fill: '#2ecc71', fontFamily: 'Arial'
+                this.scene.accountEquipGroup.push(mk(this.scene.add.text(cx + slotSize / 2 + 6, cy, item.name, {
+                    fontSize: '11px', fill: hex, fontFamily: 'Arial', fontStyle: 'bold'
                 }).setOrigin(0, 0.5)));
 
                 bg.setInteractive({ useHandCursor: true });
-                bg.on('pointerover', () => this._showItemTooltip(560, y, item));
-                bg.on('pointerout', () => this._hideItemTooltip());
-
-                const ub = mk(this.scene.add.rectangle(520, y, 50, 18, 0xc0392b)
-                    .setStrokeStyle(1, 0xe74c3c)
-                    .setInteractive({ useHandCursor: true }));
-                const ut = mk(this.scene.add.text(520, y, 'REMOVE', {
-                    fontSize: '10px', fill: '#fff', fontFamily: 'Arial'
-                }).setOrigin(0.5));
-                ub.on('pointerdown', () => {
-                    this.scene.unequipAccountItem(slot);
-                    this._closeAccountEquipOverlay();
-                    this._openAccountEquipOverlay();
+                bg.on('pointerover', () => {
+                    bg.setScale(1.1);
+                    this._showItemTooltip(cx + slotSize, cy, item);
                 });
-                ub.on('pointerover', () => ub.setFillStyle(0xe74c3c));
-                ub.on('pointerout', () => ub.setFillStyle(0xc0392b));
-                this.scene.accountEquipGroup.push(ub, ut);
+                bg.on('pointerout', () => {
+                    bg.setScale(1);
+                    this._hideItemTooltip();
+                });
+                bg.on('pointerdown', (pointer) => {
+                    if (pointer.rightButtonDown()) {
+                        this.scene.unequipAccountItem(slot);
+                        this._closeAccountEquipOverlay();
+                        this._openAccountEquipOverlay();
+                    }
+                });
             } else {
-                this.scene.accountEquipGroup.push(mk(this.scene.add.text(210, y, 'Empty', {
-                    fontSize: '11px', fill: '#555', fontFamily: 'Arial'
-                }).setOrigin(0.5)));
+                this.scene.accountEquipGroup.push(mk(this.scene.add.text(cx + slotSize / 2 + 6, cy, '—', {
+                    fontSize: '11px', fill: '#444', fontFamily: 'Arial'
+                }).setOrigin(0, 0.5)));
             }
         });
 
-        this.scene.accountEquipGroup.push(mk(this.scene.add.rectangle(400, 300, 560, 1, 0x444)));
+        this.scene.accountEquipGroup.push(mk(this.scene.add.rectangle(400, 250, W - 40, 1, 0x333)));
 
-        this.scene.accountEquipGroup.push(mk(this.scene.add.text(400, 315, 'INVENTORY', {
-            fontSize: '15px', fill: '#f39c12', fontFamily: 'Arial', fontStyle: 'bold'
+        this.scene.accountEquipGroup.push(mk(this.scene.add.text(400, 262, 'BAG', {
+            fontSize: '13px', fill: '#f39c12', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5)));
 
-        this.scene.accountEquipGroup.push(mk(this.scene.add.text(400, 332, this.scene.accountEquipBag.length + '/' + this.scene.maxAccountEquipBag + '  (SHIFT+click = sell for Account EXP)', {
-            fontSize: '11px', fill: '#888', fontFamily: 'Arial'
+        this.scene.accountEquipGroup.push(mk(this.scene.add.text(400, 278, this.scene.accountEquipBag.length + '/' + this.scene.maxAccountEquipBag + '  LMB=equip  RMB=unequip  SHIFT+click=sell', {
+            fontSize: '9px', fill: '#666', fontFamily: 'Arial'
         }).setOrigin(0.5)));
 
-        const bagSlotsPerRow = 5;
-        const bagSlotSize = 38;
-        const bagSpacing = 48;
+        const bagSlotsPerRow = 6;
+        const bagSlotSize = 32;
+        const bagSpacing = 40;
         const bagStartX = 400 - (bagSlotsPerRow * bagSpacing) / 2 + bagSpacing / 2;
-        const bagStartY = 370;
+        const bagStartY = 310;
 
         for (let i = 0; i < this.scene.maxAccountEquipBag; i++) {
             const row = Math.floor(i / bagSlotsPerRow);
@@ -818,23 +822,27 @@ export class UISystem {
             const sy = bagStartY + row * bagSpacing;
 
             const bg = mk(this.scene.add.rectangle(sx, sy, bagSlotSize, bagSlotSize, 0x1a1a2e)
-                .setStrokeStyle(1, 0x444));
+                .setStrokeStyle(1, 0x333));
             this.scene.accountEquipGroup.push(bg);
 
             if (i < this.scene.accountEquipBag.length) {
                 const item = this.scene.accountEquipBag[i];
-                const spr = mk(this.scene.add.sprite(sx, sy, item.texKey).setScale(1.6));
+                const spr = mk(this.scene.add.sprite(sx, sy, item.texKey).setScale(1.3));
                 this.scene.accountEquipGroup.push(spr);
                 const rc = RARITY_COLORS[item.rarity] || 0xaaaaaa;
                 bg.setStrokeStyle(2, rc);
 
-                this.scene.accountEquipGroup.push(mk(this.scene.add.text(sx + bagSlotSize / 2 - 2, sy - bagSlotSize / 2 + 2, 'x', {
-                    fontSize: '9px', fill: '#c0392b', fontFamily: 'Arial', fontStyle: 'bold'
-                }).setOrigin(1, 0)));
-
                 bg.setInteractive({ useHandCursor: true });
+                bg.on('pointerover', () => {
+                    bg.setScale(1.15);
+                    this._showItemTooltip(sx + bagSlotSize, sy, item);
+                });
+                bg.on('pointerout', () => {
+                    bg.setScale(1);
+                    this._hideItemTooltip();
+                });
                 bg.on('pointerdown', (pointer) => {
-                    if (this.scene.input.keyboard.checkDown(this.scene.input.keyboard.addKey('SHIFT'))) {
+                    if (pointer.rightButtonDown() || this.scene.input.keyboard.checkDown(this.scene.input.keyboard.addKey('SHIFT'))) {
                         const expGain = this.scene.deleteItem('accountEquipBag', i);
                         if (expGain > 0) {
                             this.floatingText(sx, sy - 20, '+' + expGain + ' Account EXP', '#f39c12');
@@ -842,28 +850,32 @@ export class UISystem {
                         this._closeAccountEquipOverlay();
                         this._openAccountEquipOverlay();
                     } else {
-                        const emptySlot = slots.find(s => !this.scene.accountEquipment[s]);
-                        if (emptySlot) {
+                        const targetSlot = item.slot;
+                        if (targetSlot && this.scene.accountEquipment[targetSlot] !== undefined) {
+                            const old = this.scene.accountEquipment[targetSlot];
                             this.scene.accountEquipBag.splice(i, 1);
-                            this.scene.accountEquipment[emptySlot] = item;
+                            this.scene.accountEquipment[targetSlot] = item;
+                            if (old) {
+                                if (this.scene.accountEquipBag.length < this.scene.maxAccountEquipBag) {
+                                    this.scene.accountEquipBag.push(old);
+                                } else {
+                                    this.floatingText(sx, sy - 20, 'Bag full! Item lost', '#e74c3c');
+                                }
+                            }
                             this.scene.recalcStats();
                             this._closeAccountEquipOverlay();
                             this._openAccountEquipOverlay();
                         }
                     }
                 });
-            } else {
-                this.scene.accountEquipGroup.push(mk(this.scene.add.text(sx, sy, 'Empty', {
-                    fontSize: '10px', fill: '#333', fontFamily: 'Arial'
-                }).setOrigin(0.5)));
             }
         }
 
-        const closeBg = mk(this.scene.add.rectangle(400, 530, 100, 26, 0x34495e)
+        const closeBg = mk(this.scene.add.rectangle(400, 490, 100, 24, 0x34495e)
             .setStrokeStyle(1, 0x555)
             .setInteractive({ useHandCursor: true }));
-        const closeTxt = mk(this.scene.add.text(400, 530, 'CLOSE', {
-            fontSize: '14px', fill: '#fff', fontFamily: 'Arial'
+        const closeTxt = mk(this.scene.add.text(400, 490, 'CLOSE', {
+            fontSize: '13px', fill: '#fff', fontFamily: 'Arial'
         }).setOrigin(0.5));
         closeBg.on('pointerdown', () => this._closeAccountEquipOverlay());
         closeBg.on('pointerover', () => closeBg.setFillStyle(0x4a6a8e));
