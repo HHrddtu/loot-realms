@@ -25,6 +25,7 @@ import { MineZone } from '../zones/MineZone.js';
 import { CaveZone } from '../zones/CaveZone.js';
 import { VillageZone } from '../zones/VillageZone.js';
 import { HellZone } from '../zones/HellZone.js';
+import { SnowyZone } from '../zones/SnowyZone.js';
 
 
 export default class GameScene extends Phaser.Scene {
@@ -74,7 +75,8 @@ export default class GameScene extends Phaser.Scene {
             mine: new MineZone(this),
             cave: new CaveZone(this),
             village: new VillageZone(this),
-            hell: new HellZone(this)
+            hell: new HellZone(this),
+            snowy: new SnowyZone(this)
         };
         this.currentZone = null;
 
