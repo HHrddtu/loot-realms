@@ -26,6 +26,7 @@ import { CaveZone } from '../zones/CaveZone.js';
 import { VillageZone } from '../zones/VillageZone.js';
 import { HellZone } from '../zones/HellZone.js';
 import { SnowyZone } from '../zones/SnowyZone.js';
+import { CastleZone } from '../zones/CastleZone.js';
 
 
 export default class GameScene extends Phaser.Scene {
@@ -76,7 +77,8 @@ export default class GameScene extends Phaser.Scene {
             cave: new CaveZone(this),
             village: new VillageZone(this),
             hell: new HellZone(this),
-            snowy: new SnowyZone(this)
+            snowy: new SnowyZone(this),
+            castle: new CastleZone(this)
         };
         this.currentZone = null;
 
@@ -127,6 +129,14 @@ export default class GameScene extends Phaser.Scene {
         this.enemyProjectiles = [];
         this.villageFrozen = false;
         this.villageRestored = false;
+        this.villageThriving = false;
+        this.castleQuestDone = false;
+        this.castleRoom = 0;
+        this.castleBossDefeated = false;
+        this.castleKeyObtained = false;
+        this.castleRescued = false;
+        this.castleChildNPC = null;
+        this.castleChildHint = null;
 
         const acc = loadAccount() || {};
         this.accountLevel = acc.accountLevel || 1;
@@ -149,6 +159,17 @@ export default class GameScene extends Phaser.Scene {
                 this._setupZone('cave');
             } else if (this._savedZone === 'meadow') {
                 this._setupMeadow();
+            } else if (this._savedZone === 'village') {
+                this._setupZone('village', this.villageFrozen);
+            } else if (this._savedZone === 'cemetery') {
+                this._setupZone('village', false);
+                this.zone = 'cemetery';
+            } else if (this._savedZone === 'hell') {
+                this._setupZone('hell');
+            } else if (this._savedZone === 'snowy') {
+                this._setupZone('village', true);
+            } else if (this._savedZone === 'castle') {
+                this._setupZone('castle', this.castleRoom || 0);
             } else {
                 this._setupZone('forest');
             }
@@ -293,6 +314,18 @@ export default class GameScene extends Phaser.Scene {
         if (!anims.exists('red_demon_walk_anim')) {
             anims.create({ key: 'red_demon_walk_anim', frames: anims.generateFrameNumbers('red_demon_walk', { start: 0, end: 3 }), frameRate: 4, repeat: -1 });
         }
+        if (!anims.exists('bandit_melee_walk_anim')) {
+            anims.create({ key: 'bandit_melee_walk_anim', frames: [{ key: 'bandit_melee', frame: 0 }], frameRate: 1, repeat: -1 });
+        }
+        if (!anims.exists('bandit_ranger_walk_anim')) {
+            anims.create({ key: 'bandit_ranger_walk_anim', frames: [{ key: 'bandit_ranger', frame: 0 }], frameRate: 1, repeat: -1 });
+        }
+        if (!anims.exists('bandit_elite_walk_anim')) {
+            anims.create({ key: 'bandit_elite_walk_anim', frames: [{ key: 'bandit_elite', frame: 0 }], frameRate: 1, repeat: -1 });
+        }
+        if (!anims.exists('bandit_leader_walk_anim')) {
+            anims.create({ key: 'bandit_leader_walk_anim', frames: [{ key: 'bandit_leader', frame: 0 }], frameRate: 1, repeat: -1 });
+        }
     }
 
     /* ===== PLAYER ===== */
@@ -383,7 +416,13 @@ export default class GameScene extends Phaser.Scene {
             villageRestored: this.villageRestored,
             villageAllCleared: this.villageAllCleared || false,
             villageBossDefeated: this.villageBossDefeated || false,
-            hellBossDefeated: this.hellBossDefeated || false
+            hellBossDefeated: this.hellBossDefeated || false,
+            villageThriving: this.villageThriving || false,
+            castleQuestDone: this.castleQuestDone || false,
+            castleRoom: this.castleRoom || 0,
+            castleBossDefeated: this.castleBossDefeated || false,
+            castleKeyObtained: this.castleKeyObtained || false,
+            castleRescued: this.castleRescued || false
         };
     }
 
@@ -449,6 +488,12 @@ export default class GameScene extends Phaser.Scene {
         this.villageAllCleared = data.villageAllCleared || false;
         this.villageBossDefeated = data.villageBossDefeated || false;
         this.hellBossDefeated = data.hellBossDefeated || false;
+        this.villageThriving = data.villageThriving || false;
+        this.castleQuestDone = data.castleQuestDone || false;
+        this.castleRoom = data.castleRoom || 0;
+        this.castleBossDefeated = data.castleBossDefeated || false;
+        this.castleKeyObtained = data.castleKeyObtained || false;
+        this.castleRescued = data.castleRescued || false;
         this._savedZone = data.zone || 'forest';
         this._loadAccountTalents();
         const acc = loadAccount() || {};
@@ -503,7 +548,19 @@ export default class GameScene extends Phaser.Scene {
         if (zone) {
             this.currentZone = zone;
             this.zone = zoneName;
-            zone.setup(...args);
+            if (zoneName === 'castle') {
+                const savedFlags = {
+                    castleBossDefeated: this.castleBossDefeated,
+                    castleKeyObtained: this.castleKeyObtained,
+                    castleRescued: this.castleRescued,
+                    castleAtticUnlocked: this.castleAtticUnlocked,
+                    castleQuestDone: this.castleQuestDone
+                };
+                zone.setup(...args);
+                Object.assign(this, savedFlags);
+            } else {
+                zone.setup(...args);
+            }
         }
     }
 
@@ -752,6 +809,10 @@ export default class GameScene extends Phaser.Scene {
                         this.player.x, this.player.y, this.villageCemeteryGate.x, this.villageCemeteryGate.y
                     ) < 50) {
                         this._enterCemetery();
+                    } else if (!this.villageFrozen && this.villageRestored && !this.villageThriving && !this.castleQuestDone && this.castleChildNPC && Phaser.Math.Distance.Between(
+                        this.player.x, this.player.y, this.castleChildNPC.x, this.castleChildNPC.y
+                    ) < 50) {
+                        this.zones.village._talkToCastleChild();
                     } else {
                         this.attack();
                     }
@@ -771,13 +832,14 @@ export default class GameScene extends Phaser.Scene {
                     } else {
                         this.attack();
                     }
+                } else if (this.zone === 'castle') {
+                    this.zones.castle.handleSpace();
                 }
             }
             if (Phaser.Input.Keyboard.JustDown(this.iKey)) this.toggleInventory();
             if (Phaser.Input.Keyboard.JustDown(this.pKey)) this.togglePause();
-            if (Phaser.Input.Keyboard.JustDown(this.tKey)) this._openTalent();
-            if (Phaser.Input.Keyboard.JustDown(this.mKey)) this._toggleMute();
             if (Phaser.Input.Keyboard.JustDown(this.tKey)) this._openTalentTree();
+            if (Phaser.Input.Keyboard.JustDown(this.mKey)) this._toggleMute();
             const spells = this._getClassSpells();
             if (Phaser.Input.Keyboard.JustDown(this.qKey)) this._castSpell(spells.q);
             if (Phaser.Input.Keyboard.JustDown(this.wKey)) this._castSpell(spells.w);

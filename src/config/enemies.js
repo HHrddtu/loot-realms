@@ -173,6 +173,34 @@ export const SNOWY_BOSS_MINION = {
     bw: 10, bh: 12, hp: 80, dmg: 15, exp: 20
 };
 
+// Castle enemies (Bandits)
+export const BANDIT_TYPES = {
+    melee:   { key: 'bandit_melee',   name: 'Bandit Thug',     nameRu: 'Бандит Головорез',    nameDe: 'Banditen-Schläger',    hp: 300, dmg: 20, exp: 75,  bw: 18, bh: 22, role: 'melee' },
+    ranger:  { key: 'bandit_ranger',  name: 'Bandit Archer',   nameRu: 'Бандит Лучник',       nameDe: 'Banditen-Bogenschütze', hp: 180, dmg: 25, exp: 70,  bw: 16, bh: 20, role: 'ranger' },
+    elite:   { key: 'bandit_elite',   name: 'Bandit Enforcer', nameRu: 'Бандит Каратель',      nameDe: 'Banditen-Vollstrecker', hp: 400, dmg: 30, exp: 100, bw: 22, bh: 26, role: 'elite' }
+};
+export const CASTLE_CHEST_COUNT = 6;
+export const CASTLE_CHEST_DROP_CHANCE = 0.40;
+
+// Castle boss
+export const BANDIT_LEADER_BOSS = {
+    key: 'bandit_leader', name: 'Bandit Leader', nameRu: 'Лидер Бандитов', nameDe: 'Banditenanführer',
+    texKey: 'bandit_leader',
+    bw: 50, bh: 60,
+    speeds: { Normal: 55, Hard: 62, Expert: 70, Nightmare: 80, Hell: 95, Abyss: 110 },
+    hp:  { Normal: 4000, Hard: 6000, Expert: 10000, Nightmare: 16000, Hell: 28000, Abyss: 48000 },
+    dmg: { Normal: 40,   Hard: 55,   Expert: 85,    Nightmare: 135,  Hell: 225,  Abyss: 360 },
+    exp: { Normal: 1200, Hard: 1800, Expert: 3000,  Nightmare: 4800, Hell: 8400, Abyss: 14400 },
+    windupTime: 1500,
+    strikeTime: 300,
+    strikeDmgMul: 2.5,
+    whirlwindInterval: 8000,
+    whirlwindRadius: 100,
+    whirlwindDmgMul: 1.8,
+    summonInterval: 12000,
+    summonCount: 3
+};
+
 // Bestiary
 export const BESTIARY_LEVELS = [
     { level: 0, killsRequired: 0,   dmgBonus: 0,   expBonus: 0,   info: 'description' },
@@ -384,6 +412,36 @@ export const BESTIARY_ENEMIES = {
         weaknesses: ['fire', 'holy'], resistances: ['ice'], abilities: ['Frost wave', 'Blizzard', 'Summon ice shards', 'Absolute zero'],
         description: 'An ancient entity of primordial cold. It froze the village in a moment of rage and now guards its frozen domain with lethal frost.',
         lore: 'The Ice Spirit was once a winter deity, worshipped for snowfall and frost. When the village burned its shrine, the spirit retaliated — freezing everything it had once blessed.'
+    },
+    ice_shard: {
+        name: 'Ice Shard', nameRu: 'Ледяной Осколок', nameDe: 'Eisscherbe', texKey: 'ice_shard', biome: 'snowy_village',
+        weaknesses: ['fire'], resistances: ['ice'], abilities: ['Pierce', 'Shatter'],
+        description: 'A crystallized fragment of the Ice Spirit\'s fury. It flies through the air with razor-sharp edges, freezing anything it touches.',
+        lore: 'Ice Shards are born from the Ice Spirit\'s rage — fragments of pure cold given form and purpose. They exist only to destroy, shattering on impact and leaving behind a trail of frost.'
+    },
+    bandit_melee: {
+        name: 'Bandit Thug', nameRu: 'Бандит Головорез', nameDe: 'Banditen-Schläger', texKey: 'bandit_melee', biome: 'castle',
+        weaknesses: ['fire', 'magic'], resistances: [], abilities: ['Charge', 'Cleave', 'Intimidate'],
+        description: 'A brute-force bandit that charges headfirst into combat. Simple-minded but dangerously strong.',
+        lore: 'Bandit thugs are the foot soldiers of every raiding party. They live for the fight and die for the cause — usually by swinging first and thinking never.'
+    },
+    bandit_ranger: {
+        name: 'Bandit Archer', nameRu: 'Бандит Лучник', nameDe: 'Banditen-Bogenschütze', texKey: 'bandit_ranger', biome: 'castle',
+        weaknesses: ['melee', 'fire'], resistances: [], abilities: ['Aimed shot', 'Volley', 'Quick draw'],
+        description: 'A ranged bandit that picks off intruders from a distance. Fast and deadly with a bow.',
+        lore: 'Bandit archers were once village hunters who turned to crime. Their aim is still true — just pointed at different targets.'
+    },
+    bandit_elite: {
+        name: 'Bandit Enforcer', nameRu: 'Бандит Каратель', nameDe: 'Banditen-Vollstrecker', texKey: 'bandit_elite', biome: 'castle',
+        weaknesses: ['fire'], resistances: ['physical'], abilities: ['Shield bash', 'Whirlwind', 'Heavy armor'],
+        description: 'An elite bandit with heavy armor and a shield. Tough to crack and hits like a truck.',
+        lore: 'Enforcers are the bandit leader\'s personal guard. They were soldiers once — deserters who found a new army in the castle\'s dark halls.'
+    },
+    bandit_leader: {
+        name: 'Bandit Leader', nameRu: 'Лидер Бандитов', nameDe: 'Banditenanführer', texKey: 'bandit_leader', biome: 'castle_boss',
+        weaknesses: ['holy'], resistances: ['physical'], abilities: ['Machete windup', 'Fast strike', 'Whirlwind', 'Summon guards'],
+        description: 'A towering bandit warlord wielding a massive machete. His slow windup hides a devastatingly fast strike.',
+        lore: 'The Bandit Leader was once a general who lost his kingdom. He rebuilt it in the castle — a kingdom of fear, iron, and blood.'
     }
 };
 
@@ -588,5 +646,29 @@ export const SOUL_BOOK_ENTRIES = {
         weakness: 'Holy fire and concentrated warmth disrupt its form. The Warmth Core is its antithesis.',
         essence: 'Primordial winter energy. The Ice Spirit\'s soul embodies absolute cold — the absence of all warmth.',
         purification: 'Purifying the Ice Spirit releases a wave of warmth that spreads across the frozen village. The ice cracks. The snow melts. For the first time in centuries, the village remembers spring.',
-        lore: 'The Ice Spirit was once a winter deity, worshipped for snowfall and frost. When the village burned its shrine, the spirit retaliated — freezing everything it had once blessed. Its rage was absolute. Its regret, eternal.' }
+        lore: 'The Ice Spirit was once a winter deity, worshipped for snowfall and frost. When the village burned its shrine, the spirit retaliated — freezing everything it had once blessed. Its rage was absolute. Its regret, eternal.' },
+    bandit_melee:       { name: 'Bandit Thug', nameRu: 'Бандит Головорез', nameDe: 'Banditen-Schläger', texKey: 'bandit_melee', biome: 'castle',
+        description: 'A brute-force thug, simple-minded but devastatingly strong. Lives for the fight.',
+        weakness: 'Fire burns through their crude armor. Magic bypasses their guard entirely.',
+        essence: 'Brute force energy. Thug souls enhance raw physical power but dull the mind.',
+        purification: 'Purifying a thug soul releases a burst of suppressed fear. Beneath the rage, they were all cowards.',
+        lore: 'Bandit thugs are the lowest rung of the castle\'s hierarchy. They were deserters, outcasts, and criminals who found purpose in the Bandit Leader\'s iron fist.' },
+    bandit_ranger:      { name: 'Bandit Archer', nameRu: 'Бандит Лучник', nameDe: 'Banditen-Bogenschütze', texKey: 'bandit_ranger', biome: 'castle',
+        description: 'A sharp-eyed marksman who picks off intruders from the shadows.',
+        weakness: 'Melee attacks disrupt their aim. Fire burns their bowstrings.',
+        essence: 'Precision energy. Archer souls enhance accuracy and reaction time.',
+        purification: 'Purifying a bandit archer soul releases a volley of spectral arrows. They arc upward and dissolve into light.',
+        lore: 'Bandit archers were once village hunters who turned to crime. Their aim remained true — just pointed at different targets.' },
+    bandit_elite:       { name: 'Bandit Enforcer', nameRu: 'Бандит Каратель', nameDe: 'Banditen-Vollstrecker', texKey: 'bandit_elite', biome: 'castle',
+        description: 'An armored enforcer with a shield. Tough to crack and hits like a falling wall.',
+        weakness: 'Fire melts their heavy armor. Flanking bypasses their shield.',
+        essence: 'Guardian energy. Enforcer souls enhance physical defense and damage absorption.',
+        purification: 'Purifying an enforcer soul releases the ghost of military discipline. They were soldiers once — before they chose a darker path.',
+        lore: 'Enforcers are the Bandit Leader\'s personal guard. Deserters who found a new army in the castle\'s dark halls. They follow orders without question.' },
+    bandit_leader:      { name: 'Bandit Leader', nameRu: 'Лидер Бандитов', nameDe: 'Banditenanführer', texKey: 'bandit_leader', biome: 'castle_boss',
+        description: 'A towering warlord wielding a massive machete. His slow windup hides a devastatingly fast strike.',
+        weakness: 'Holy power disrupts his command. His overconfidence is his greatest flaw.',
+        essence: 'Command energy. The Leader\'s soul radiates authority — lesser bandits obey involuntarily.',
+        purification: 'Purifying the Bandit Leader releases a cascade of stolen lives. Dozens of voices cry out, then fall silent. The leader himself smiles as he burns — he finally respects his opponent.',
+        lore: 'The Bandit Leader was once a general who lost his kingdom in a losing war. He rebuilt it in the castle — a kingdom of fear, iron, and blood. He rules not through loyalty, but through terror.' }
 };

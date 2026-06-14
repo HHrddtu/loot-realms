@@ -595,4 +595,147 @@ export function drawEnemyTextures(mk) {
         c.fillRect(4, 11, 4, 2);
         c.fillRect(10, 11, 4, 2);
     });
+
+    // Castle bandits
+    mk('bandit_melee', 28, 30, (c) => {
+        c.imageSmoothingEnabled = false;
+        // Head
+        c.fillStyle = '#8b6914';
+        c.fillRect(10, 0, 8, 6);
+        c.fillStyle = '#a07828';
+        c.fillRect(10, 0, 8, 2);
+        // Eyes
+        c.fillStyle = '#e74c3c';
+        c.fillRect(11, 3, 2, 2);
+        c.fillRect(15, 3, 2, 2);
+        c.fillStyle = '#000';
+        c.fillRect(12, 4, 1, 1);
+        c.fillRect(16, 4, 1, 1);
+        // Body (brown tunic)
+        c.fillStyle = '#6d4c2a';
+        c.fillRect(8, 6, 12, 10);
+        c.fillStyle = '#5a3d1a';
+        c.fillRect(10, 6, 8, 10);
+        // Belt
+        c.fillStyle = '#2c1e14';
+        c.fillRect(8, 12, 12, 2);
+        // Arms
+        c.fillStyle = '#8b6914';
+        c.fillRect(4, 8, 4, 6);
+        c.fillRect(20, 8, 4, 6);
+        // Sword (right hand)
+        c.fillStyle = '#bdc3c7';
+        c.fillRect(22, 4, 2, 8);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(23, 2, 1, 4);
+        c.fillStyle = '#8b4513';
+        c.fillRect(20, 12, 6, 2);
+        // Legs
+        c.fillStyle = '#4a2d10';
+        c.fillRect(8, 16, 4, 8);
+        c.fillRect(16, 16, 4, 8);
+        // Boots
+        c.fillStyle = '#2c1e14';
+        c.fillRect(7, 22, 6, 4);
+        c.fillRect(15, 22, 6, 4);
+    });
+
+    mk('bandit_ranger', 26, 28, (c) => {
+        c.imageSmoothingEnabled = false;
+        // Head (hood)
+        c.fillStyle = '#2c3e50';
+        c.fillRect(9, 0, 8, 6);
+        c.fillStyle = '#34495e';
+        c.fillRect(8, 0, 10, 3);
+        // Eyes
+        c.fillStyle = '#e67e22';
+        c.fillRect(10, 3, 2, 2);
+        c.fillRect(14, 3, 2, 2);
+        c.fillStyle = '#000';
+        c.fillRect(11, 4, 1, 1);
+        c.fillRect(15, 4, 1, 1);
+        // Body (dark leather)
+        c.fillStyle = '#2c3e50';
+        c.fillRect(7, 6, 12, 10);
+        c.fillStyle = '#34495e';
+        c.fillRect(9, 6, 8, 10);
+        // Bow (left)
+        c.fillStyle = '#8b4513';
+        c.fillRect(2, 6, 2, 10);
+        c.fillStyle = '#a0522d';
+        c.fillRect(1, 6, 1, 10);
+        c.fillStyle = '#bdc3c7';
+        c.fillRect(2, 4, 1, 14);
+        // Quiver (back)
+        c.fillStyle = '#6d4c2a';
+        c.fillRect(20, 4, 3, 8);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(21, 2, 1, 4);
+        c.fillRect(21, 10, 1, 4);
+        // Arms
+        c.fillStyle = '#8b6914';
+        c.fillRect(3, 8, 4, 4);
+        c.fillRect(19, 8, 4, 4);
+        // Legs
+        c.fillStyle = '#1a252f';
+        c.fillRect(7, 16, 4, 6);
+        c.fillRect(15, 16, 4, 6);
+        // Boots
+        c.fillStyle = '#4a2d10';
+        c.fillRect(6, 20, 6, 4);
+        c.fillRect(14, 20, 6, 4);
+    });
+
+    mk('bandit_elite', 32, 34, (c) => {
+        c.imageSmoothingEnabled = false;
+        // Head (helmet)
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(11, 0, 10, 7);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(12, 0, 8, 3);
+        c.fillStyle = '#6c7a7d';
+        c.fillRect(11, 2, 10, 1);
+        // Eyes
+        c.fillStyle = '#e74c3c';
+        c.fillRect(13, 4, 2, 2);
+        c.fillRect(17, 4, 2, 2);
+        c.fillStyle = '#000';
+        c.fillRect(14, 5, 1, 1);
+        c.fillRect(18, 5, 1, 1);
+        // Body (heavy armor)
+        c.fillStyle = '#566573';
+        c.fillRect(8, 7, 16, 12);
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(10, 7, 12, 12);
+        // Armor plates
+        c.fillStyle = '#95a5a6';
+        c.fillRect(10, 9, 12, 2);
+        c.fillRect(10, 13, 12, 2);
+        // Shield (left)
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(2, 8, 6, 10);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(3, 9, 4, 8);
+        c.fillStyle = '#e74c3c';
+        c.fillRect(4, 11, 2, 4);
+        // Sword (right)
+        c.fillStyle = '#bdc3c7';
+        c.fillRect(24, 4, 2, 12);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(25, 2, 1, 6);
+        c.fillStyle = '#8b4513';
+        c.fillRect(22, 14, 6, 2);
+        // Arms
+        c.fillStyle = '#566573';
+        c.fillRect(4, 10, 4, 6);
+        c.fillRect(22, 10, 4, 6);
+        // Legs
+        c.fillStyle = '#3d3d3d';
+        c.fillRect(8, 19, 6, 8);
+        c.fillRect(18, 19, 6, 8);
+        // Boots
+        c.fillStyle = '#2c2c2c';
+        c.fillRect(7, 25, 8, 5);
+        c.fillRect(17, 25, 8, 5);
+    });
 }

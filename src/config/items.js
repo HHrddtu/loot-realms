@@ -142,6 +142,15 @@ export const WARMTH_CORE = {
     description: 'A warm soul extracted from the Ice Spirit. Place it in the campfire to restore the village.'
 };
 
+export const CASTLE_KEY = {
+    id: 'castle_key', name: 'Castle Key', nameRu: 'Ключ от Замка', nameDe: 'Schlossschlüssel',
+    rarity: 'legendary', slot: 'accessory', texKey: 'item_key',
+    stats: { hp: 40, dmg: 20, speed: 8 },
+    description: 'A heavy iron key taken from the Bandit Leader. It unlocks the attic where the villagers are held.',
+    descriptionRu: 'Тяжёлый железный ключ, отнятый у Лидера Бандитов. Открывает чердак, где заключены жители.',
+    descriptionDe: 'Ein schwerer eiserner Schlüssel, dem Banditenanführer abgenommen. Er öffnet den Dachboden, auf dem die Dorfbewohner gefangen sind.'
+};
+
 // Material book
 export const MATERIAL_BOOK_LEVELS = [
     { level: 0, countRequired: 0,   hpBonus: 0, dmgBonus: 0, speedBonus: 0, info: 'description' },

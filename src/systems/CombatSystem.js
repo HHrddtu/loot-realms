@@ -224,6 +224,7 @@ export class CombatSystem {
                     s.stats.hp -= this.scene.playerDamage;
                     this.scene.floatingText(s.x, s.y - 15, '-' + this.scene.playerDamage, '#3498db');
                     if (s.stats.hp <= 0) {
+                        recordKill('ice_shard');
                         if (s.hpBg) s.hpBg.destroy();
                         if (s.hpFill) s.hpFill.destroy();
                         s.destroy();
@@ -249,7 +250,7 @@ export class CombatSystem {
                 finalDamage = Math.floor(finalDamage * (1 + bb.dmgBonus / 100));
             }
         }
-        if (this.scene.computedBossDamage && enemy.stats && (enemy === this.scene.boss || enemy === this.scene.mineBoss || enemy === this.scene.caveBoss || enemy === this.scene.villageBoss || enemy === this.scene.hellBoss || enemy === this.scene.snowyIceSpirit)) {
+        if (this.scene.computedBossDamage && enemy.stats && (enemy === this.scene.boss || enemy === this.scene.mineBoss || enemy === this.scene.caveBoss || enemy === this.scene.villageBoss || enemy === this.scene.hellBoss || enemy === this.scene.snowyIceSpirit || enemy === this.scene.castleBoss)) {
             finalDamage = Math.floor(finalDamage * (1 + this.scene.computedBossDamage / 100));
         }
         if (this.scene.playerHP <= this.scene.playerMaxHP * 0.3 && (te.damagePercentLowHp || ae.damagePercentLowHp)) {
@@ -305,6 +306,8 @@ export class CombatSystem {
                 this.scene._victoryHellBoss();
             } else if (enemy === this.scene.snowyIceSpirit) {
                 this.scene._snowyIceSpiritDied();
+            } else if (enemy === this.scene.castleBoss) {
+                // Castle boss handled by CastleZone._updateBoss -> _banditLeaderDied
             } else if (enemy.stats && enemy.stats.isBossClone) {
                 this.scene._killBossClone(enemy);
             } else {

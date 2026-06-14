@@ -103,6 +103,26 @@ export const HELL_LAVA_POSITIONS = [
 export const HELL_CHEST_COUNT = 8;
 export const HELL_CHEST_DROP_CHANCE = 0.45;
 
+// Castle (Bandit stronghold)
+export const CASTLE_WIDTH = 800;
+export const CASTLE_ROOM_HEIGHT = 600;
+export const CASTLE_TOTAL_HEIGHT = CASTLE_ROOM_HEIGHT * 8;
+export const CASTLE_ROOMS = 7;
+export const CASTLE_ATTIC_INDEX = 8;
+export const CASTLE_CHEST_POSITIONS = [
+    { room: 2, x: 150, y: 200 },
+    { room: 3, x: 620, y: 380 },
+    { room: 4, x: 150, y: 280 },
+    { room: 5, x: 620, y: 200 },
+    { room: 6, x: 400, y: 480 }
+];
+export const CASTLE_VILLAGER_POSITIONS = [
+    { x: 220, y: 170 }, { x: 580, y: 170 },
+    { x: 220, y: 330 }, { x: 580, y: 330 },
+    { x: 400, y: 250 }, { x: 280, y: 460 }, { x: 520, y: 460 }
+];
+export const CASTLE_SPAWN_POS = { x: 400, y: 500 };
+
 // Snowy Village
 export const SNOWY_VILLAGE_CAMP_POSITIONS = [
     { x: 350, y: 200 },  { x: 200, y: 450 },  { x: 500, y: 700 },

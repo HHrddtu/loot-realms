@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { SPELLS, CORRUPTION, VILLAGE_BOSS_TYPE } from '../config/index.js';
+import { recordKill } from '../bestiary.js';
 
 export class SpellSystem {
     constructor(scene) {
@@ -334,6 +335,7 @@ export class SpellSystem {
                         this.scene.floatingText(s.x, s.y - 15, '-' + fb.damage, '#3498db');
                         hit = true;
                         if (s.stats.hp <= 0) {
+                            recordKill('ice_shard');
                             if (s.hpBg) s.hpBg.destroy();
                             if (s.hpFill) s.hpFill.destroy();
                             s.destroy();

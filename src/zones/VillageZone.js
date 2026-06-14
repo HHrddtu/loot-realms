@@ -62,6 +62,8 @@ export class VillageZone {
         this.scene.snowyIceShards = null;
         this.scene.campfire = null;
         this.scene.campfireHint = null;
+        this.scene.castleChildNPC = null;
+        this.scene.castleChildHint = null;
 
         if (frozen) {
             this._spawnSnowyVillageCamps();
@@ -74,6 +76,11 @@ export class VillageZone {
         } else {
             this._spawnVillageDecor();
             this._showVillageClearedDecor();
+            if (!this.scene.villageThriving && !this.scene.castleQuestDone) {
+                this.scene.time.delayedCall(1500, () => {
+                    this._spawnCastleChild();
+                });
+            }
         }
 
         this.scene.physics.add.overlap(this.scene.player, this.scene.enemies, (p, e) => {
@@ -165,6 +172,8 @@ export class VillageZone {
         if (this.scene.hellPortalHint) { if (this.scene.hellPortalHint.destroy) this.scene.hellPortalHint.destroy(); this.scene.hellPortalHint = null; }
         if (this.scene.campfire) { if (this.scene.campfire.destroy) this.scene.campfire.destroy(); this.scene.campfire = null; }
         if (this.scene.campfireHint) { if (this.scene.campfireHint.destroy) this.scene.campfireHint.destroy(); this.scene.campfireHint = null; }
+        if (this.scene.castleChildNPC) { if (this.scene.castleChildNPC.destroy) this.scene.castleChildNPC.destroy(); this.scene.castleChildNPC = null; }
+        if (this.scene.castleChildHint) { if (this.scene.castleChildHint.destroy) this.scene.castleChildHint.destroy(); this.scene.castleChildHint = null; }
         if (this.scene.snowyIceSpirit) {
             if (this.scene.snowyIceSpirit.hpBg) this.scene.snowyIceSpirit.hpBg.destroy();
             if (this.scene.snowyIceSpirit.hpFill) this.scene.snowyIceSpirit.hpFill.destroy();
@@ -197,6 +206,20 @@ export class VillageZone {
         this._updateSnowyVillageBoss();
         this._checkVillageProgress();
         this._checkSnowyVillageProgress();
+        this._updateCastleChildHint();
+    }
+
+    _updateCastleChildHint() {
+        if (!this.scene.castleChildNPC || !this.scene.castleChildHint) return;
+        const dist = Phaser.Math.Distance.Between(
+            this.scene.player.x, this.scene.player.y,
+            this.scene.castleChildNPC.x, this.scene.castleChildNPC.y
+        );
+        if (dist < 50) {
+            this.scene.castleChildHint.setText('SPACE to talk');
+        } else {
+            this.scene.castleChildHint.setText('');
+        }
     }
 
     _spawnVillageCamps() {
@@ -356,6 +379,108 @@ export class VillageZone {
 
             this.scene.time.delayedCall(500, () => {
                 this.scene.floatingText(this.scene.villageOffsetX + VILLAGE_WIDTH / 2, 200, 'The village is restored!', '#ff6600');
+                if (!this.scene.villageThriving && !this.scene.castleQuestDone) {
+                    this.scene.time.delayedCall(2000, () => {
+                        this._spawnCastleChild();
+                    });
+                }
+            });
+        });
+    }
+
+    _spawnCastleChild() {
+        if (this.scene.castleChildNPC) return;
+        const ox = this.scene.villageOffsetX;
+        const house = VILLAGE_HOUSE_POSITIONS[1];
+        const x = ox + house.x + 35;
+        const y = house.y + 10;
+
+        this.scene.castleChildNPC = this.scene.add.sprite(x, y, 'child_npc').setDepth(6);
+        this.scene.castleChildHint = this.scene.add.text(x, y - 20, '', {
+            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
+        }).setOrigin(0.5).setDepth(12);
+
+        this.scene.tweens.add({
+            targets: this.scene.castleChildNPC,
+            y: y - 3, duration: 1500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
+        });
+
+        this.scene.time.delayedCall(1000, () => {
+            if (this.scene.castleChildHint && this.scene.castleChildHint.active) {
+                this.scene.castleChildHint.setText('SPACE to talk');
+            }
+        });
+    }
+
+    _talkToCastleChild() {
+        if (!this.scene.castleChildNPC || !this.scene.castleChildHint) return;
+        const dist = Phaser.Math.Distance.Between(
+            this.scene.player.x, this.scene.player.y, this.scene.castleChildNPC.x, this.scene.castleChildNPC.y
+        );
+        if (dist >= 50) return;
+
+        this.scene.castleChildHint.setText('');
+
+        const msgText = this.scene.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 80,
+            'They took everyone! Bandits from the east castle!\nPlease, you have to save them!', {
+            fontSize: '16px', fill: '#f1c40f', fontFamily: 'Georgia', fontStyle: 'italic',
+            stroke: '#000', strokeThickness: 3, wordWrap: { width: 450 }, align: 'center'
+        }).setOrigin(0.5).setDepth(20).setScrollFactor(0);
+
+        const box = this.scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 70, 480, 60, 0x000000, 0.7)
+            .setDepth(19).setScrollFactor(0);
+
+        this.scene.time.delayedCall(4000, () => {
+            if (msgText) msgText.destroy();
+            if (box) box.destroy();
+        });
+
+        this.scene.time.delayedCall(4500, () => {
+            this._startCastleSkip();
+        });
+    }
+
+    _startCastleSkip() {
+        if (this.scene.transitioning) return;
+        this.scene.transitioning = true;
+        this.scene.menuOpen = true;
+        this.scene.physics.pause();
+
+        this.scene.cameras.main.fadeOut(800, 0, 0, 0);
+        this.scene.time.delayedCall(800, () => {
+            this.clear();
+
+            this.scene.cameras.main.setBackgroundColor('#1a0e05');
+            const cartImg = this.scene.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'cart_ride').setDepth(0);
+
+            const cartText = this.scene.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 20, 'Riding to the castle...', {
+                fontSize: '20px', fill: '#f5cba7', fontFamily: 'Georgia', fontStyle: 'italic'
+            }).setOrigin(0.5).setDepth(10).setScrollFactor(0);
+
+            const dots = ['...', '....', '.....', 'The castle looms ahead...'];
+            let dotIdx = 0;
+            const dotTimer = this.scene.time.addEvent({
+                delay: 800, repeat: dots.length - 1,
+                callback: () => {
+                    dotIdx++;
+                    if (dotIdx < dots.length) cartText.setText(dots[dotIdx]);
+                }
+            });
+
+            this.scene.cameras.main.fadeIn(500, 0, 0, 0);
+
+            this.scene.time.delayedCall(3500, () => {
+                this.scene.cameras.main.fadeOut(800, 0, 0, 0);
+                this.scene.time.delayedCall(800, () => {
+                    cartImg.destroy();
+                    cartText.destroy();
+                    this.scene.zones.castle.setup(0);
+                    this.scene.cameras.main.fadeIn(500, 0, 0, 0);
+                    this.scene.transitioning = false;
+                    this.scene.menuOpen = false;
+                    this.scene.physics.resume();
+                });
             });
         });
     }

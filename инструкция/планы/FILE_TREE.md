@@ -1,6 +1,6 @@
 # FILE TREE
 
-## Текущая структура (v0.12.0)
+## Текущая структура (v0.13.0)
 
 ```
 WebGame/
@@ -42,10 +42,10 @@ WebGame/
     ├── config/               (НОВОЕ v0.12.0)
     │   ├── index.js          (реэкспорт всех данных)
     │   ├── difficulties.js   (DIFF_MULT — множители по сложностям)
-    │   ├── enemies.js        (ENEMY_TYPES, MINE/CAVE/VILLAGE/HELL/SNOWY_ENEMY_TYPES)
-    │   ├── bosses.js         (BOSS_TYPES, ARENA/MINE/CAVE/VILLAGE/HELL/SNOWY_BOSS)
-    │   ├── zones.js          (ZONE_CONFIGS, VILLAGE_CAMP_POSITIONS, HELL_CAMP_POSITIONS, SNOWY_VILLAGE_CAMP_POSITIONS)
-    │   ├── items.js          (ALL_ITEMS — шлемы, броня, оружие, зелья, лут, реликвии)
+    │   ├── enemies.js        (ENEMY_TYPES, MINE/CAVE/VILLAGE/HELL/SNOWY_ENEMY_TYPES, BANDIT_TYPES)
+    │   ├── bosses.js         (BOSS_TYPES, ARENA/MINE/CAVE/VILLAGE/HELL/SNOWY_BOSS, BANDIT_LEADER_BOSS)
+    │   ├── zones.js          (ZONE_CONFIGS, VILLAGE_CAMP_POSITIONS, HELL_CAMP_POSITIONS, SNOWY_VILLAGE_CAMP_POSITIONS, CASTLE_* constants)
+    │   ├── items.js          (ALL_ITEMS — шлемы, броня, оружие, зелья, лут, реликвии, CASTLE_KEY)
     │   ├── spells.js         (SPELLS, SPELL_UPGRADES, CLASS_SPELLS)
     │   ├── crafting.js       (CRAFT_RECIPES, MATERIAL_ITEMS)
     │   ├── quests.js         (QUESTS — 6 квестов с наградами)
@@ -53,12 +53,12 @@ WebGame/
     │   └── rarity.js         (RARITY_COLORS, RARITY_MULT, RARITY_STARS)
     ├── textures/             (НОВОЕ v0.12.0)
     │   ├── index.js          (generateAllTextures — вызывает все генераторы)
-    │   ├── zones.js          (meadow, forest, mine, cave, hell, village, snowy, cemetery)
+    │   ├── zones.js          (meadow, forest, mine, cave, hell, village, snowy, cemetery, castle_ground, castle_door, castle_bars, castle_stairs)
     │   ├── player.js         (hero, walk cycle, attack)
-    │   ├── npcs.js           (merchant, blacksmith, elder, child_npc, sage, alchemist, angel, snowy_npc_*)
+    │   ├── npcs.js           (merchant, blacksmith, elder, child_npc, sage, alchemist, angel, snowy_npc_*, villager_rescued, village_shop)
     │   ├── items.js          (loot textures, equipment, potions, gems)
-    │   ├── enemies.js        (goblin, skeleton, wolf, spider, bat, golem, wraith, elemental, mage, imp, frozen_*)
-    │   ├── bosses.js         (treant, skeleton_lord, giant_bat, demon, demon_minion, purple_demon, ice_spirit, ice_shard)
+    │   ├── enemies.js        (goblin, skeleton, wolf, spider, bat, golem, wraith, elemental, mage, imp, frozen_*, bandit_melee/ranger/elite)
+    │   ├── bosses.js         (treant, skeleton_lord, giant_bat, demon, demon_minion, purple_demon, ice_spirit, ice_shard, bandit_leader)
     │   ├── expansion.js      (village textures: house, corpse, garden, fence, cemetery gate)
     │   ├── effects.js        (projectiles: fireball, ice_shard, purify, corruption, shield, heal)
     │   ├── animations.js     (slash, hit, level_up, arrow, meteor, fire_wave, frost_wave, blizzard)
@@ -75,13 +75,14 @@ WebGame/
     │   ├── ArenaZone.js      (setup, clear, update: arena, skeleton lord boss, exit)
     │   ├── MineZone.js       (setup, clear, update: mine, rocks, crystals, chests, boss arena, skeleton lord)
     │   ├── CaveZone.js       (setup, clear, update: cave, corridor, giant bat boss, stairs)
-    │   ├── VillageZone.js    (setup, clear, update: village, camps, decor, cemetery, hell boss, child NPC, snowy village)
+    │   ├── VillageZone.js    (setup, clear, update: village, camps, decor, cemetery, hell boss, child NPC, snowy village, castle child NPC, castle skip)
     │   ├── HellZone.js       (setup, clear, update: hell, lava, camps, red demon boss, imps, portals)
-    │   └── SnowyZone.js      (unused standalone — snowy village handled by VillageZone)
+    │   ├── SnowyZone.js      (unused standalone — snowy village handled by VillageZone)
+    │   └── CastleZone.js     (НОВОЕ v0.13.0 — 7 rooms + attic, bandits, Bandit Leader boss, chest, rescue, time skip)
     └── scenes/
         ├── MenuScene.js      (~370 строк — меню + advanced overlay + язык)
         ├── ClassSelectScene.js (~157 строк — 3 карточки + локализация)
-        ├── GameScene.js      (~1058 строк — delegation skeleton: systems/zones + _handleInput + save/load + meadow)
+        ├── GameScene.js      (~1102 строк — delegation skeleton: systems/zones + _handleInput + save/load + meadow + castle)
         ├── TalentScene.js    (~330 строк — дерево талантов со скроллом)
         ├── BestiaryScene.js  (~297 строк — Bestiary UI + локализация)
         ├── MaterialBookScene.js (~281 строк — Material Book UI)
@@ -91,11 +92,11 @@ WebGame/
 
 ---
 
-## Архитектура v0.12.0
+## Архитектура v0.13.0
 
 ### Делегирование в GameScene.js
 
-GameScene (~1058 строк) — thin delegation skeleton:
+GameScene (~1102 строки) — thin delegation skeleton:
 
 1. **Systems** (constructor):
    - `this.combat = new CombatSystem(this)` —攻击, урон, killEnemy
@@ -109,8 +110,9 @@ GameScene (~1058 строк) — thin delegation skeleton:
    - `this.arenaZone = new ArenaZone(this)` — arena
    - `this.mineZone = new MineZone(this)` — mine
    - `this.caveZone = new CaveZone(this)` — cave
-   - `this.villageZone = new VillageZone(this)` — village + cemetery + snowy village
+   - `this.villageZone = new VillageZone(this)` — village + cemetery + snowy village + castle child
    - `this.hellZone = new HellZone(this)` — hell
+   - `this.castleZone = new CastleZone(this)` — castle (7 rooms + attic, Bandit Leader boss, rescue, time skip)
 
 3. **Оставлено в GameScene:**
    - `_handleInput()` — весь ввод
@@ -158,9 +160,10 @@ GameScene (~1058 строк) — thin delegation skeleton:
 | `zones/ArenaZone.js` | — | Арена: Skeleton Lord boss |
 | `zones/MineZone.js` | — | Шахта: мобы, сундуки, Skeleton Lord boss |
 | `zones/CaveZone.js` | — | Пещера: Giant Bat boss, ступени |
-| `zones/VillageZone.js` | — | Деревня: лагери, decor, cemetery, Hell boss, snowy village |
+| `zones/VillageZone.js` | — | Деревня: лагери, decor, cemetery, Hell boss, snowy village, castle child NPC, castle skip |
 | `zones/HellZone.js` | — | Ад: лава, лагери, Red Demon, imps |
-| `scenes/GameScene.js` | systems, zones | Delegation skeleton + ввод + save/load + meadow |
+| `zones/CastleZone.js` | — | Замок: 7 комнат + чердак, бандиты, Bandit Leader boss, спасение пленников, time skip |
+| `scenes/GameScene.js` | systems, zones | Delegation skeleton + ввод + save/load + meadow + castle |
 | `scenes/TalentScene.js` | talents, accountTalents | UI дерева талантов |
 | `scenes/BestiaryScene.js` | bestiary, config, i18n | Bestiary UI |
 | `scenes/MaterialBookScene.js` | materialBook, config, i18n | Material Book UI |

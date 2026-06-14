@@ -168,4 +168,85 @@ export function drawBossTextures(mk) {
         c.fillRect(4, 72, 12, 8);
         c.fillRect(48, 72, 12, 8);
     });
+
+    // Bandit Leader boss
+    mk('bandit_leader', 50, 64, (c) => {
+        c.imageSmoothingEnabled = false;
+        // Head (scarred, bandana)
+        c.fillStyle = '#8b6914';
+        c.fillRect(18, 0, 14, 10);
+        c.fillStyle = '#c0392b';
+        c.fillRect(17, 2, 16, 4);
+        c.fillStyle = '#e74c3c';
+        c.fillRect(18, 1, 14, 2);
+        // Eyes (angry)
+        c.fillStyle = '#fff';
+        c.fillRect(20, 5, 3, 3);
+        c.fillRect(27, 5, 3, 3);
+        c.fillStyle = '#000';
+        c.fillRect(21, 6, 1, 1);
+        c.fillRect(28, 6, 1, 1);
+        c.fillStyle = '#c0392b';
+        c.fillRect(20, 4, 3, 1);
+        c.fillRect(27, 4, 3, 1);
+        // Scar
+        c.fillStyle = '#a0522d';
+        c.fillRect(24, 3, 2, 6);
+        // Mouth
+        c.fillStyle = '#000';
+        c.fillRect(22, 9, 6, 1);
+        // Body (heavy leather + chain)
+        c.fillStyle = '#4a2d10';
+        c.fillRect(12, 10, 26, 18);
+        c.fillStyle = '#5a3d1a';
+        c.fillRect(14, 10, 22, 18);
+        // Chain mail
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(16, 12, 18, 2);
+        c.fillRect(16, 16, 18, 2);
+        c.fillRect(16, 20, 18, 2);
+        // Belt
+        c.fillStyle = '#2c1e14';
+        c.fillRect(12, 24, 26, 3);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(23, 24, 4, 3);
+        // Arms (muscular)
+        c.fillStyle = '#8b6914';
+        c.fillRect(4, 12, 8, 10);
+        c.fillRect(38, 12, 8, 10);
+        c.fillStyle = '#a07828';
+        c.fillRect(6, 14, 4, 6);
+        c.fillRect(40, 14, 4, 6);
+        // Machete (right hand - big!)
+        c.fillStyle = '#95a5a6';
+        c.fillRect(42, 2, 3, 16);
+        c.fillStyle = '#bdc3c7';
+        c.fillRect(43, 0, 2, 6);
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(41, 16, 6, 3);
+        c.fillStyle = '#8b4513';
+        c.fillRect(40, 18, 8, 3);
+        // Left hand (fist)
+        c.fillStyle = '#8b6914';
+        c.fillRect(2, 18, 6, 4);
+        // Legs
+        c.fillStyle = '#3d2b1f';
+        c.fillRect(14, 28, 8, 18);
+        c.fillRect(28, 28, 8, 18);
+        c.fillStyle = '#4a2d10';
+        c.fillRect(16, 28, 4, 16);
+        c.fillRect(30, 28, 4, 16);
+        // Boots (heavy)
+        c.fillStyle = '#2c1e14';
+        c.fillRect(12, 42, 12, 8);
+        c.fillRect(26, 42, 12, 8);
+        c.fillStyle = '#1a1408';
+        c.fillRect(12, 46, 12, 4);
+        c.fillRect(26, 46, 12, 4);
+        // Armor plate (chest)
+        c.fillStyle = '#566573';
+        c.fillRect(18, 12, 14, 4);
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(20, 13, 10, 2);
+    });
 }

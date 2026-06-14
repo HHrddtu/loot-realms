@@ -1,6 +1,6 @@
 # TASK QUEUE
 
-## Текущий билд: v0.12.0
+## Текущий билд: v0.13.0
 
 ---
 
@@ -49,6 +49,7 @@
 | 92 | Snowy Village bugs — HP:NaN fix, campfire equipBag fix, warmth_core id fix, villageRestored flag, NaN protection | v0.11.0 |
 | 93 | GitHub Pages деплой — .gitignore, .github/workflows/deploy.yml, gh-pages ветка, ручной deploy dist/ | v0.11.0 |
 | **94-108** | **Рефакторинг v0.12.0** — см. ниже | v0.12.0 |
+| **109-115** | **Castle Questline v0.13.0** — см. ниже | v0.13.0 |
 
 ---
 
@@ -84,6 +85,29 @@
 
 ---
 
+## Castle Questline v0.13.0 — подробности
+
+| # | Задача | Файл | Строк | Статус |
+|---|--------|------|-------|--------|
+| 109 | Config — BANDIT_TYPES, BANDIT_LEADER_BOSS, CASTLE_* constants, CASTLE_KEY | `src/config/` | ~100 | ✅ |
+| 110 | Textures — bandit_melee/ranger/elite, bandit_leader, castle_ground/door/bars/stairs, villager_rescued, village_shop | `src/textures/` | ~300 | ✅ |
+| 111 | CastleZone.js — 7 rooms + attic, bandit AI (melee/range/elite), boss AI (windup/strike/whirlwind/summon), chests, rescue, time skip | `src/zones/CastleZone.js` | ~1020 | ✅ |
+| 112 | VillageZone.js — castle child NPC after campfire, dialogue, cart skip to castle | `src/zones/VillageZone.js` | +100 | ✅ |
+| 113 | GameScene.js — CastleZone import, delegation, SPACE handler, save/load for castle flags | `src/scenes/GameScene.js` | +50 | ✅ |
+| 114 | Village thriving — villageThriving flag, child NPC spawning, time skip transition | — | — | ✅ |
+| 115 | Bug fixes — boss room → attic transitions, defeatedLoot array mutation, attic door visibility, stairsUp/bossDoor hints | — | — | ✅ |
+
+### Ключевые решения v0.13.0
+
+- **CastleZone** — 7 комнат (400×350) + чердак (room 8). Бандиты: melee, ranger, elite. Boss: Bandit Leader (slow windup → fast strike, whirlwind AoE, summon guards)
+- **Rescue mechanic** — спасение пленников в attic через текст + cutscene (как cart ride)
+- **Time skip** — fade to black → "20 years later..." → fade in to thriving village
+- **Village thriving** — villageThriving flag, новый child NPC у 2-го дома, диалог про бандитов, cart skip в castle
+- **Room transitions** — fade in/out, stairs up/down, boss door → attic (после ключа от босса)
+- **Chests** — breakable barrels с loot (equip или gold), hint "SPACE = open"
+
+---
+
 ## Оставшиеся задачи
 
 ### Приоритет
@@ -95,7 +119,7 @@
 | — | Долгосрочная прогрессия — Difficulty Unlock, Prestige, Mastery | План готов |
 | — | Перевод описаний Bestiary/Material/Soul Book на RU/DE | Ожидает |
 
-### Пит-система + Магазин (план v0.13.0)
+### Пит-система + Магазин (план v0.14.0)
 | # | Задача | Описание |
 |---|--------|----------|
 | 1 | PET_DB + текстуры | Определить питомцев, нарисовать спрайты |
@@ -108,7 +132,7 @@
 | 8 | Эволюция питомцев | UI эволюции, проверка условий |
 | 9 | Тестирование | Баланс цен, проверка бонусов |
 
-### Баланс + UX (план v0.14.0)
+### Баланс + UX (план v0.15.0)
 | # | Улучшение | Описание |
 |---|-----------|----------|
 | 1 | Баланс всех зон | HP/damage по зонам, heat damage, lava |
@@ -119,7 +143,7 @@
 | 6 | Death screen | Экран смерти с кнопкой respawn |
 | 7 | Sound effects | Звуки атаки, урона, лута |
 
-### Мультиплеер (план v0.15.0)
+### Мультиплеер (план v0.16.0)
 | # | Задача | Описание |
 |---|--------|----------|
 | — | Добавить PeerJS | `npm install peerjs`, wrapper в `src/network.js` |
@@ -136,31 +160,32 @@
 
 ## Текущая точка остановки
 
-**Последнее сделано:** v0.12.0 — Рефакторинг GameScene.js → systems/ + zones/ + config/ + textures/
+**Последнее сделано:** v0.13.0 — Castle Questline (7 rooms + attic, Bandit Leader boss, rescue, time skip, village thriving)
 
-**Следующий шаг:** v0.13.0 — Пит-система + Магазин
+**Следующий шаг:** v0.14.0 — Пит-система + Магазин (PetSystem, ShopScene, Gold/Souls/Tokens)
 
 **URL игры:** https://hhrdtu.github.io/loot-realms/
 
 **Roadmap:**
-- v0.13.0: Пит-система + Магазин (PetSystem, ShopScene, Gold/Souls/Tokens)
-- v0.14.0: Баланс + UX + Баги (миникарта, damage numbers, sound effects)
-- v0.15.0: Мультиплеер кооп (PeerJS, LobbyScene, Host/Guest, sync)
+- v0.14.0: Пит-система + Магазин (PetSystem, ShopScene, Gold/Souls/Tokens)
+- v0.15.0: Баланс + UX + Баги (миникарта, damage numbers, sound effects)
+- v0.16.0: Мультиплеер кооп (PeerJS, LobbyScene, Host/Guest, sync)
 
-**Что было в v0.12.0:**
-1. config/ — 9 файлов: difficulties, enemies, bosses, zones, items, spells, crafting, quests, rarity
-2. textures/ — 11 файлов: все процедурные текстуры по модулям
-3. systems/ — 5 систем: Combat, Player, Spell, UI, NPC
-4. zones/ — 6 зон: Forest, Arena, Mine, Cave, Village, Hell
-5. GameScene.js — delegation skeleton (~1058 строк вместо ~6830)
-6. Багфиксы: frozen village child NPC, hell zone currentZone, cave stairs null guard, snowy village progress
+**Что было в v0.13.0:**
+1. Config — BANDIT_TYPES (melee/ranger/elite), BANDIT_LEADER_BOSS, CASTLE_* constants, CASTLE_KEY
+2. Textures — 10 новых процедурных текстур (bandits, castle elements, villager_rescued, village_shop)
+3. CastleZone.js — 1020 строк: 7 комнат + чердак, bandit AI, boss AI (idle→windup→strike), chest system, rescue, time skip
+4. VillageZone.js — castle child NPC + dialogue + cart skip to castle
+5. GameScene.js — CastleZone delegation, SPACE handler for castle, save/load for 5 new flags
+6. Bug fixes — attic transitions, defeatedLoot mutation, stairsUp/bossDoor hints, castleQuestDone flag
 
 **Важно для следующего агента:**
-- `GameScene.js` — ~1058 строк (delegation skeleton)
+- `GameScene.js` — ~1102 строк (delegation skeleton)
 - Systems/zones инициализируются в начале `create()` (до `_createUI`)
 - `_handleInput()`, `_updateEnemies()`, `_updateBoss()`, save/load остаются в GameScene
 - Meadow не вынесена в класс — `_setupMeadow()`/`_clearMeadow()` в GameScene
-- VillageZone покрывает обычную деревню + cemetery + frozen village
+- VillageZone покрывает обычную деревню + cemetery + frozen village + castle child NPC
+- CastleZone — 7 комнат (0-6) + attic (room 8). Boss в room 6. Ключ от attic в луте босса.
 - `this.difficulty` — СТРОКА ("Normal"/"Hard"/"Expert"/etc), НЕ число
 - `this.diffMulti` — объект множителей `{ hp, dmg, exp }`
 - **Деплой:** `npm run build` → push dist/ на `gh-pages` ветку (force)
