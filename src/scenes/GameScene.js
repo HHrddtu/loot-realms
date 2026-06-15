@@ -27,7 +27,7 @@ import { VillageZone } from '../zones/VillageZone.js';
 import { HellZone } from '../zones/HellZone.js';
 import { SnowyZone } from '../zones/SnowyZone.js';
 import { CastleZone } from '../zones/CastleZone.js';
-import { isHost, getMyId, getPlayerNames, onStateUpdate, onLoot, onKey, sendInput, sendLootPickup, sendKeyPickup } from '../network.js';
+import { isHost, getMyId, getPlayerNames, onStateUpdate, onLoot, onKey, sendInput, sendGameState, sendLootPickup, sendKeyPickup } from '../network.js';
 
 
 export default class GameScene extends Phaser.Scene {
