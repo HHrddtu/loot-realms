@@ -1,4 +1,5 @@
 import { EMPTY_ACCOUNT_EQUIPMENT } from './config/index.js';
+import { saveAccountToFirestore, loadAccountFromFirestore, getCurrentUser, isAnonymous } from './auth.js';
 
 const SAVE_KEY = 'webgame_save';
 const ACCOUNT_KEY = 'webgame_account';
@@ -47,6 +48,7 @@ const DEFAULT_ACCOUNT = {
     totalStumps: 0,
     highestClassLevel: {},
     playTime: 0,
+    gold: 0,
     accountEquipment: { sage: { ...EMPTY_ACCOUNT_EQUIPMENT }, alchemist: { ...EMPTY_ACCOUNT_EQUIPMENT }, angel: { ...EMPTY_ACCOUNT_EQUIPMENT } },
     accountEquipBag: { sage: [], alchemist: [], angel: [] }
 };
@@ -70,6 +72,10 @@ export function saveAccount(data) {
         const merged = { ...DEFAULT_ACCOUNT, ...existing, ...data };
         localStorage.setItem(ACCOUNT_KEY, JSON.stringify(merged));
         _accountCache = null;
+
+        if (getCurrentUser() && !isAnonymous()) {
+            saveAccountToFirestore(merged).catch(() => {});
+        }
         return true;
     } catch (e) {
         return false;
@@ -87,6 +93,28 @@ export function loadAccount() {
         return data;
     } catch (e) {
         return null;
+    }
+}
+
+export async function syncAccountFromCloud() {
+    const user = getCurrentUser();
+    if (!user || isAnonymous()) return loadAccount();
+
+    try {
+        const cloudData = await loadAccountFromFirestore();
+        if (cloudData) {
+            const migrated = migrateAccount({ ...DEFAULT_ACCOUNT, ...cloudData });
+            localStorage.setItem(ACCOUNT_KEY, JSON.stringify(migrated));
+            _accountCache = migrated;
+            return migrated;
+        }
+        const local = loadAccount();
+        if (local) {
+            saveAccountToFirestore(local).catch(() => {});
+        }
+        return local;
+    } catch (e) {
+        return loadAccount();
     }
 }
 

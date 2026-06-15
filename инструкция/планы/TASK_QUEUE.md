@@ -1,6 +1,6 @@
 # TASK QUEUE
 
-## Текущий билд: v0.13.0
+## Текущий билд: v0.15.0
 
 ---
 
@@ -50,6 +50,7 @@
 | 93 | GitHub Pages деплой — .gitignore, .github/workflows/deploy.yml, gh-pages ветка, ручной deploy dist/ | v0.11.0 |
 | **94-108** | **Рефакторинг v0.12.0** — см. ниже | v0.12.0 |
 | **109-115** | **Castle Questline v0.13.0** — см. ниже | v0.13.0 |
+| **116-126** | **Shop & Inn v0.14.0** — см. ниже | v0.14.0 |
 
 ---
 
@@ -108,12 +109,53 @@
 
 ---
 
+## Shop & Inn v0.14.0 — подробности
+
+| # | Задача | Файл | Статус |
+|---|--------|------|--------|
+| 116 | Config — gold.js: GOLD_DROPS, CONSUMABLES (6 potions), SHOP_MATERIALS, SHOP_EQUIP_PRICES, SELL_PRICE_RATIO | `src/config/gold.js` | ✅ |
+| 117 | Gold drops — CombatSystem: per-zone scaling (mob/chest/boss), accountEffects.goldPercent bonus | `src/systems/CombatSystem.js` | ✅ |
+| 118 | Gold drops — chest loot в Mine/Cave/Village/Castle | `src/systems/CombatSystem.js` | ✅ |
+| 119 | Consumables — 6 зелий (heal small/medium/large, damage, speed, defense) в gold.js | `src/config/gold.js` | ✅ |
+| 120 | Consumable slot — playerSystem: consumable, useConsumable(); UISystem: consumable HUD slot, click to use | `src/systems/PlayerSystem.js`, `UISystem.js` | ✅ |
+| 121 | Consumable use — SPACE/useConsumable: heal, damage_boost, speed_boost, defense_boost с duration | `src/systems/PlayerSystem.js` | ✅ |
+| 122 | Villager merchant texture — procedurally generated 28×36 sprite | `src/textures/npcs.js` | ✅ |
+| 123 | Merchant NPC — spawn в restored village, proximity check, SPACE = shop | `src/zones/VillageZone.js` | ✅ |
+| 124 | Shop UI overlay — CONSUMABLES grid, gold price, buy, tooltip, close | `src/zones/VillageZone.js` | ✅ |
+| 125 | Inn/healing — village_bed sprite, one-time heal to full + 50 EXP, proximity hint | `src/zones/VillageZone.js` | ✅ |
+| 126 | Equipment selling — shift+click in inventory, 50% of rarity price → gold, gold HUD update | `src/systems/UISystem.js` | ✅ |
+
+---
+
+## Firebase Auth v0.15.0 — НЕ ЗАВЕРШЕНО
+
+| # | Задача | Файл | Статус |
+|---|--------|------|--------|
+| 127 | Firebase SDK + конфиг | `src/firebase.js` | ✅ |
+| 128 | Auth модуль | `src/auth.js` | ⚠️ Баг ника |
+| 129 | LoginScene UI | `src/scenes/LoginScene.js` | ⚠️ HTML инпуты |
+| 130 | BootScene auth check | `src/scenes/BootScene.js` | ✅ |
+| 131 | MenuScene ник + Logout | `src/scenes/MenuScene.js` | ✅ |
+| 132 | save.js Firestore sync | `src/save.js` | ✅ |
+| 133 | i18n login.* ключи | `src/i18n.js` | ✅ |
+| 134 | main.js LoginScene + dom | `src/main.js` | ✅ |
+| 135 | index.html CSS override | `index.html` | ✅ |
+
+### Известные баги (требуют доработки)
+1. **Баг ника:** displayName может не отображаться при повторном логине (race condition onAuthStateChanged)
+2. **HTML инпуты:** позиционирование через DOM поверх canvas — нестабильно при resize
+3. **Offline:** нет fallback если нет интернета
+4. **Не тестировано:** полный цикл register → login → logout → sync
+
+---
+
 ## Оставшиеся задачи
 
 ### Приоритет
 | # | Задача | Статус |
 |---|--------|--------|
-| — | **Пит-система + Магазин** — PetSystem, ShopScene, Gold/Souls/Tokens | План готов |
+| — | **Firebase Auth доработка** — баг ника, тестирование, offline | Требует завершения |
+| — | **Пит-система** — PetSystem, follow AI, attack AI, эволюция, HUD | План готов |
 | — | **Баланс + UX** — миникарта, damage numbers, sound effects | План готов |
 | — | **Мультиплеер кооп (2-4 игрока)** — PeerJS (WebRTC P2P), LobbyScene, sync | План готов |
 | — | Долгосрочная прогрессия — Difficulty Unlock, Prestige, Mastery | План готов |
@@ -160,16 +202,29 @@
 
 ## Текущая точка остановки
 
-**Последнее сделано:** v0.13.0 — Castle Questline (7 rooms + attic, Bandit Leader boss, rescue, time skip, village thriving)
+**Последнее сделано:** v0.15.0 — Firebase Auth (базовый, НЕ ЗАВЕРШЕНО — баг ника, requires testing)
 
-**Следующий шаг:** v0.14.0 — Пит-система + Магазин (PetSystem, ShopScene, Gold/Souls/Tokens)
+**Следующий шаг:** v0.15.1 — Firebase Auth доработка (баг ника, offline fallback, тестирование)
 
 **URL игры:** https://hhrdtu.github.io/loot-realms/
 
 **Roadmap:**
-- v0.14.0: Пит-система + Магазин (PetSystem, ShopScene, Gold/Souls/Tokens)
-- v0.15.0: Баланс + UX + Баги (миникарта, damage numbers, sound effects)
-- v0.16.0: Мультиплеер кооп (PeerJS, LobbyScene, Host/Guest, sync)
+- v0.15.1: Firebase Auth доработка (баг ника, тестирование, offline)
+- v0.16.0: Пит-система (PetSystem, follow AI, attack AI, эволюция, HUD)
+- v0.17.0: Баланс + UX (миникарта, damage numbers, sound effects)
+- v0.18.0: Мультиплеер кооп (PeerJS, LobbyScene, Host/Guest, sync)
+
+**Важно для следующего агента (Firebase Auth):**
+- Firebase проект: oot-realms (Spark plan, бесплатно)
+- `src/firebase.js` — конфиг (apiKey, projectId: oot-realms)
+- `src/auth.js` — register/login/logout + Firestore sync. Баг: `onAuthStateChanged` может затирать `_cachedDisplayName`
+- `src/scenes/LoginScene.js` — HTML инпуты через document.createElement поверх canvas
+- `src/scenes/BootScene.js` — onAuthChange → Login или Menu
+- `src/scenes/MenuScene.js` — ник золотом, Logout, syncAccountFromCloud
+- `src/save.js` — saveAccount пишет в Firestore (для залогиненных)
+- Firestore коллекция: `users/{uid}` → { email, displayName, createdAt, accountData }
+- **Нужно включить в Firebase Console:** Authentication → Email/Password + Anonymous, Firestore Database → test mode
+- **Не забыть:** проверить Firestore Rules, протестировать полный цикл
 
 **Что было в v0.13.0:**
 1. Config — BANDIT_TYPES (melee/ranger/elite), BANDIT_LEADER_BOSS, CASTLE_* constants, CASTLE_KEY

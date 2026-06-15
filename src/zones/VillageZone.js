@@ -10,6 +10,7 @@ import {
     SNOWY_BOSS_MINION, WARMTH_CORE, SNOWY_VILLAGE_CHEST_COUNT, SNOWY_VILLAGE_CHEST_DROP_CHANCE,
     BOSS_DROP_CHANCE, GAME_WIDTH, GAME_HEIGHT, RARITY_COLORS
 } from '../config/index.js';
+import { CONSUMABLES } from '../config/gold.js';
 import { rollVillageEquip, rollEquip, rollVillageAccountEquip, rollAccountEquip } from '../utils.js';
 import {
     playLoot, playBossAoE, playBossDeath, playPortal, playBreak, startMusic
@@ -81,6 +82,8 @@ export class VillageZone {
                     this._spawnCastleChild();
                 });
             }
+            this._spawnVillageShop();
+            this._spawnVillageInn();
         }
 
         this.scene.physics.add.overlap(this.scene.player, this.scene.enemies, (p, e) => {
@@ -97,7 +100,7 @@ export class VillageZone {
 
         this.scene.zone = 'village';
         if (!frozen) this.scene._spawnNPCs();
-        this.scene.hintText.setText('SPACE=attack | I=inventory | TAB=stats | T=talents | C=craft | Q=quests | P=pause');
+        this.scene.hintText.setText('SPACE=interact/attack | I=inventory | T=talents | C=craft | Q=quests | F=potion | P=pause');
         startMusic();
         if (frozen && this.scene.particles) {
             this.scene.particles.startSnowfall(VILLAGE_WIDTH, VILLAGE_TOTAL_HEIGHT);
@@ -174,6 +177,11 @@ export class VillageZone {
         if (this.scene.campfireHint) { if (this.scene.campfireHint.destroy) this.scene.campfireHint.destroy(); this.scene.campfireHint = null; }
         if (this.scene.castleChildNPC) { if (this.scene.castleChildNPC.destroy) this.scene.castleChildNPC.destroy(); this.scene.castleChildNPC = null; }
         if (this.scene.castleChildHint) { if (this.scene.castleChildHint.destroy) this.scene.castleChildHint.destroy(); this.scene.castleChildHint = null; }
+        if (this.scene.villageMerchantNPC) { if (this.scene.villageMerchantNPC.destroy) this.scene.villageMerchantNPC.destroy(); this.scene.villageMerchantNPC = null; }
+        if (this.scene.villageMerchantHint) { if (this.scene.villageMerchantHint.destroy) this.scene.villageMerchantHint.destroy(); this.scene.villageMerchantHint = null; }
+        if (this.scene.villageInn) { if (this.scene.villageInn.destroy) this.scene.villageInn.destroy(); this.scene.villageInn = null; }
+        if (this.scene.villageInnHint) { if (this.scene.villageInnHint.destroy) this.scene.villageInnHint.destroy(); this.scene.villageInnHint = null; }
+        if (this.scene.shopGroup) { this.scene.shopGroup.forEach(e => { if (e && e.destroy) e.destroy(); }); this.scene.shopGroup = []; }
         if (this.scene.snowyIceSpirit) {
             if (this.scene.snowyIceSpirit.hpBg) this.scene.snowyIceSpirit.hpBg.destroy();
             if (this.scene.snowyIceSpirit.hpFill) this.scene.snowyIceSpirit.hpFill.destroy();
@@ -207,6 +215,138 @@ export class VillageZone {
         this._checkVillageProgress();
         this._checkSnowyVillageProgress();
         this._updateCastleChildHint();
+    }
+
+    _spawnVillageShop() {
+        if (this.scene.villageMerchantNPC) return;
+        const ox = this.scene.villageOffsetX;
+        const house = VILLAGE_HOUSE_POSITIONS[2] || VILLAGE_HOUSE_POSITIONS[0];
+        const x = ox + house.x + 40;
+        const y = house.y + 30;
+
+        this.scene.villageMerchantNPC = this.scene.add.sprite(x, y, 'villager_merchant').setDepth(6);
+        this.scene.villageMerchantHint = this.scene.add.text(x, y - 20, '', {
+            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
+        }).setOrigin(0.5).setDepth(12);
+
+        this.scene.tweens.add({
+            targets: this.scene.villageMerchantNPC,
+            y: y - 3, duration: 1500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
+        });
+
+        this.scene.time.delayedCall(1000, () => {
+            if (this.scene.villageMerchantHint && this.scene.villageMerchantHint.active) {
+                this.scene.villageMerchantHint.setText('SPACE = shop');
+            }
+        });
+    }
+
+    _spawnVillageInn() {
+        if (this.scene.villageInn) return;
+        const ox = this.scene.villageOffsetX;
+        const house = VILLAGE_HOUSE_POSITIONS[3] || VILLAGE_HOUSE_POSITIONS[1];
+        const x = ox + house.x;
+        const y = house.y + 25;
+
+        this.scene.villageInn = this.scene.add.image(x, y, 'village_bed').setDepth(4);
+        this.scene.physics.add.existing(this.scene.villageInn, true);
+        this.scene.villageInn.body.setSize(32, 20);
+
+        this.scene.villageInnHint = this.scene.add.text(x, y - 18, '', {
+            fontSize: '10px', fill: '#2ecc71', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
+        }).setOrigin(0.5).setDepth(12);
+    }
+
+    _useInn() {
+        if (this.scene.innUsed) {
+            if (this.scene.villageInnHint) this.scene.villageInnHint.setText('Already rested!');
+            return;
+        }
+        this.scene.innUsed = true;
+        this.scene.playerHP = this.scene.playerMaxHP;
+        this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, 'Fully healed!', '#2ecc71');
+        if (this.scene.villageInnHint) this.scene.villageInnHint.setText('Rest (+50 EXP)');
+        this.scene.playerExp += 50;
+        this.scene.checkLevelUp();
+    }
+
+    _openShop() {
+        if (this.scene.menuOpen) return;
+        this.scene.menuOpen = true;
+        this.scene.physics.pause();
+        if (this.scene.enemies) this.scene.enemies.getChildren().forEach(e => { if (e.body) e.body.setVelocity(0); });
+        this.scene.shopGroup = [];
+        const mk = (el) => { el.setScrollFactor(0).setDepth(200); return el; };
+
+        const W = 400, H = 380;
+        this.scene.shopGroup.push(mk(this.scene.add.rectangle(400, 300, W, H, 0x0a0a1a, 0.95).setStrokeStyle(2, 0xf1c40f)));
+        this.scene.shopGroup.push(mk(this.scene.add.text(400, 130, 'VILLAGE MERCHANT', {
+            fontSize: '18px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5)));
+        this.scene.shopGroup.push(mk(this.scene.add.text(400, 150, 'Gold: ' + (this.scene.gold || 0), {
+            fontSize: '12px', fill: '#f1c40f', fontFamily: 'Arial'
+        }).setOrigin(0.5)));
+
+        const items = CONSUMABLES.slice();
+        const cols = 3, slotSize = 50, gap = 10;
+        const startX = 400 - (cols * (slotSize + gap)) / 2 + slotSize / 2;
+        const startY = 190;
+
+        items.forEach((item, i) => {
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            const sx = startX + col * (slotSize + gap);
+            const sy = startY + row * (slotSize + gap + 16);
+
+            const bg = mk(this.scene.add.rectangle(sx, sy, slotSize, slotSize, 0x1a1a2e).setStrokeStyle(1, 0x444));
+            this.scene.shopGroup.push(bg);
+            this.scene.shopGroup.push(mk(this.scene.add.sprite(sx, sy - 4, item.texKey).setScale(1.5)));
+
+            const rc = '#' + (RARITY_COLORS[item.rarity] || 0xaaaaaa).toString(16).padStart(6, '0');
+            this.scene.shopGroup.push(mk(this.scene.add.text(sx, sy + slotSize / 2 - 4, item.name.split(' ').slice(0, 2).join(' '), {
+                fontSize: '7px', fill: rc, fontFamily: 'Arial'
+            }).setOrigin(0.5)));
+
+            this.scene.shopGroup.push(mk(this.scene.add.text(sx, sy + slotSize / 2 + 8, item.price + 'g', {
+                fontSize: '9px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+            }).setOrigin(0.5)));
+
+            bg.setInteractive({ useHandCursor: true });
+            bg.on('pointerover', () => { bg.setScale(1.1); this.scene._showItemTooltip(sx + 35, sy, item); });
+            bg.on('pointerout', () => { bg.setScale(1); this.scene._hideItemTooltip(); });
+            bg.on('pointerdown', () => {
+                if ((this.scene.gold || 0) >= item.price) {
+                    this.scene.gold -= item.price;
+                    const consumableItem = { ...item, type: 'consumable' };
+                    this.scene.consumable = consumableItem;
+                    this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, '+' + item.name, '#2ecc71');
+                    this._closeShop();
+                    this._openShop();
+                } else {
+                    this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, 'Not enough gold!', '#e74c3c');
+                }
+            });
+        });
+
+        const closeBg = mk(this.scene.add.rectangle(400, 480, 100, 24, 0x34495e)
+            .setStrokeStyle(1, 0x5a6c7d).setInteractive({ useHandCursor: true }));
+        const closeTxt = mk(this.scene.add.text(400, 480, 'CLOSE', {
+            fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5));
+        closeBg.on('pointerdown', () => this._closeShop());
+        this.scene.shopGroup.push(closeBg, closeTxt);
+    }
+
+    _closeShop() {
+        this.scene._hideItemTooltip();
+        if (this.scene.shopGroup) {
+            this.scene.shopGroup.forEach(e => e.destroy());
+            this.scene.shopGroup = [];
+        }
+        this.scene.menuOpen = false;
+        this.scene.physics.resume();
     }
 
     _updateCastleChildHint() {

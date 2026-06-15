@@ -170,6 +170,7 @@ export class PlayerSystem {
         this.scene.equipBag = [];
         this.scene.maxEquipBag = EQUIP_BAG_SLOTS;
         this.scene.equipment = { weapon: null, armor: null, accessory: null };
+        this.scene.consumable = null;
         this.scene.accountEquipment = { ...EMPTY_ACCOUNT_EQUIPMENT };
         this.scene.accountEquipBag = [];
         this.scene.maxAccountEquipBag = ACCOUNT_EQUIP_BAG_SLOTS;
@@ -187,6 +188,36 @@ export class PlayerSystem {
     addEquip(item) {
         if (this.scene.equipBag.length >= this.scene.maxEquipBag) return false;
         this.scene.equipBag.push(item);
+        return true;
+    }
+
+    addConsumable(item) {
+        this.scene.consumable = item;
+        return true;
+    }
+
+    useConsumable() {
+        if (!this.scene.consumable) return false;
+        const c = this.scene.consumable;
+        if (c.effect === 'heal') {
+            const healAmt = Math.floor(this.scene.playerMaxHP * c.value);
+            this.scene.playerHP = Math.min(this.scene.playerMaxHP, this.scene.playerHP + healAmt);
+            this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, '+' + healAmt + ' HP', '#2ecc71');
+        } else if (c.effect === 'damage_boost') {
+            this.scene._consumableBonusDmg = c.value;
+            this.scene._consumableBonusDmgTimer = c.duration || 60000;
+            this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, '+' + Math.floor(c.value * 100) + '% DMG', '#e74c3c');
+        } else if (c.effect === 'speed_boost') {
+            this.scene._consumableBonusSpd = c.value;
+            this.scene._consumableBonusSpdTimer = c.duration || 60000;
+            this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, '+' + Math.floor(c.value * 100) + '% SPD', '#3498db');
+        } else if (c.effect === 'defense_boost') {
+            this.scene._consumableBonusDef = c.value;
+            this.scene._consumableBonusDefTimer = c.duration || 60000;
+            this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, '+' + Math.floor(c.value * 100) + '% DEF', '#f39c12');
+        }
+        this.scene.consumable = null;
+        this.scene.updateUI();
         return true;
     }
 

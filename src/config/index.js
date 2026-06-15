@@ -54,6 +54,9 @@ export { SPELLS } from './spells.js';
 // Crafting
 export { QUEST_REWARD_CHANCE, CRAFT_CATEGORIES, CRAFTING_RECIPES } from './crafting.js';
 
+// Gold & Shop
+export { GOLD_DROPS, rollGold, rollBossGold, rollChestGold, CONSUMABLES, SHOP_MATERIALS, SHOP_EQUIP_RARITY_CHANCE, SHOP_EQUIP_PRICES, SELL_PRICE_RATIO } from './gold.js';
+
 // Quests & NPCs
 export { NPC_DB, QUEST_DB, CART_DRIVER_NPC } from './quests.js';
 

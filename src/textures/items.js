@@ -131,6 +131,15 @@ function drawItemShape(c, shape, color) {
             c.fillStyle = '#fff';
             c.fillRect(7, 7, 2, 2);
             break;
+        case 'potion':
+            c.fillStyle = '#8b4513';
+            c.fillRect(5, 2, 6, 3);
+            c.fillRect(4, 5, 8, 2);
+            c.fillStyle = color;
+            c.fillRect(3, 7, 10, 7);
+            c.fillStyle = lighten(parseInt(color.slice(1), 16), 0.3);
+            c.fillRect(5, 8, 3, 3);
+            break;
     }
 }
 
@@ -178,7 +187,8 @@ export function drawItemTextures(mk) {
         { key: 'angel_staff',  color: '#f5f5dc', shape: 'book' },
         { key: 'angel_amulet', color: '#f39c12', shape: 'amulet' },
         { key: 'angel_ring',   color: '#f1c40f', shape: 'ring' },
-        { key: 'angel_charm',  color: '#d4ac0d', shape: 'charm' }
+        { key: 'angel_charm',  color: '#d4ac0d', shape: 'charm' },
+        { key: 'consumable_potion', color: '#e74c3c', shape: 'potion' }
     ];
 
     defs.forEach(({ key, color, shape }) => {

@@ -3,6 +3,8 @@ import { DIFFICULTIES, RARITY_COLORS, EMPTY_ACCOUNT_EQUIPMENT } from '../config/
 import { lighten } from '../utils.js';
 import { hasSave, loadGame, deleteSave, hasAccount, loadAccount, getAccountLevelUpReq } from '../save.js';
 import { t, getLang, setLang } from '../i18n.js';
+import { getCurrentUser, getDisplayName, isAnonymous, logout } from '../auth.js';
+import { syncAccountFromCloud } from '../save.js';
 
 export default class MenuScene extends Phaser.Scene {
     constructor() {
@@ -13,6 +15,17 @@ export default class MenuScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor('#0a0a1a');
         this.diffIdx = 0;
         this.overlayEls = [];
+
+        if (getCurrentUser() && !isAnonymous()) {
+            syncAccountFromCloud();
+        }
+
+        const userName = getDisplayName();
+        const userTag = isAnonymous() ? ' (Guest)' : '';
+        this.add.text(400, 20, '\u{1F464} ' + userName + userTag, {
+            fontSize: '13px', fill: isAnonymous() ? '#555' : '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
+        }).setOrigin(0.5);
 
         this.titleText = this.add.text(400, 80, t('menu.title'), {
             fontSize: '48px', fill: '#f1c40f', fontFamily: 'Georgia', fontStyle: 'bold'
@@ -37,6 +50,11 @@ export default class MenuScene extends Phaser.Scene {
         this.accountBtn = this.menuBtn(400, 310, t('menu.account'), 0x2980b9, () => this.showAccount());
 
         this.advBtn = this.menuBtn(400, 370, t('menu.advanced'), 0x555577, () => this.showAdvanced());
+
+        this.logoutBtn = this.menuBtn(400, 430, t('menu.logout'), 0xc0392b, async () => {
+            await logout();
+            this.scene.start('Login');
+        });
 
         this.versionText = this.add.text(400, 610, t('menu.version'), {
             fontSize: '12px', fill: '#444', fontFamily: 'Arial'

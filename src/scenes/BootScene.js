@@ -10,6 +10,7 @@ import { drawMineTextures } from '../textures/mine.js';
 import { drawSnowyTextures } from '../textures/snowy.js';
 import { drawExpansionTextures } from '../textures/expansion.js';
 import { generateAnimations } from '../textures/animations.js';
+import { onAuthChange, getCurrentUser } from '../auth.js';
 
 export default class BootScene extends Phaser.Scene {
     constructor() {
@@ -25,7 +26,22 @@ export default class BootScene extends Phaser.Scene {
 
     create() {
         this.generateAllTextures();
-        this.scene.start('Menu');
+
+        const unsub = onAuthChange((user) => {
+            unsub();
+            if (user) {
+                this.scene.start('Menu');
+            } else {
+                this.scene.start('Login');
+            }
+        });
+
+        this.time.delayedCall(5000, () => {
+            if (!getCurrentUser()) {
+                unsub();
+                this.scene.start('Login');
+            }
+        });
     }
 
     generateAllTextures() {

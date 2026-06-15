@@ -108,6 +108,8 @@ export default class GameScene extends Phaser.Scene {
         this.npcSprites = [];
         this.questIcons = [];
         this.nearbyNpc = null;
+        this.nearbyShop = null;
+        this.nearbyInn = null;
         this.questLogOpen = false;
         this.questLogGroup = [];
 
@@ -131,12 +133,27 @@ export default class GameScene extends Phaser.Scene {
         this.villageRestored = false;
         this.villageThriving = false;
         this.castleQuestDone = false;
+        this.villageMerchantNPC = null;
+        this.villageMerchantHint = null;
+        this.villageInn = null;
+        this.villageInnHint = null;
+        this.shopGroup = [];
         this.castleRoom = 0;
         this.castleBossDefeated = false;
         this.castleKeyObtained = false;
         this.castleRescued = false;
         this.castleChildNPC = null;
         this.castleChildHint = null;
+        this._consumableBonusDmg = 0;
+        this._consumableBonusDmgTimer = 0;
+        this._consumableBonusSpd = 0;
+        this._consumableBonusSpdTimer = 0;
+        this._consumableBonusDef = 0;
+        this._consumableBonusDefTimer = 0;
+        this.gold = 0;
+        this.innUsed = false;
+        this.nearbyShop = null;
+        this.nearbyInn = null;
 
         const acc = loadAccount() || {};
         this.accountLevel = acc.accountLevel || 1;
@@ -148,6 +165,7 @@ export default class GameScene extends Phaser.Scene {
         this.accountEquipment = accEquipPerClass[this.classKey] || { ...EMPTY_ACCOUNT_EQUIPMENT };
         this.accountEquipBag = accBagPerClass[this.classKey] || [];
         this.accountEffects = getAccountTalentEffects(this.unlockedAccountTalents);
+        this.gold = acc.gold || 0;
         this.recalcStats();
 
         if (this.loadOnStart) this.doLoad();
@@ -401,7 +419,9 @@ export default class GameScene extends Phaser.Scene {
             zone: this.zone,
             equipment: this.equipment,
             materials: this.materials,
+            consumable: this.consumable || null,
             equipBag: this.equipBag,
+            gold: this.gold || 0,
             kills: this.kills,
             stumpsBroken: this.stumpsBroken,
             corruption: this.corruption,
@@ -422,7 +442,8 @@ export default class GameScene extends Phaser.Scene {
             castleRoom: this.castleRoom || 0,
             castleBossDefeated: this.castleBossDefeated || false,
             castleKeyObtained: this.castleKeyObtained || false,
-            castleRescued: this.castleRescued || false
+            castleRescued: this.castleRescued || false,
+            innUsed: this.innUsed || false
         };
     }
 
@@ -438,6 +459,7 @@ export default class GameScene extends Phaser.Scene {
             accountExp: this.accountExp,
             accountTalentPoints: this.accountTalentPoints,
             unlockedAccountTalents: this.unlockedAccountTalents,
+            gold: this.gold || 0,
             accountEquipment: eqPerClass,
             accountEquipBag: bagPerClass
         };
@@ -474,7 +496,10 @@ export default class GameScene extends Phaser.Scene {
         if (data.playerY !== undefined) this.player.y = data.playerY;
         this.equipment = data.equipment || { weapon: null, armor: null, accessory: null };
         this.materials = data.materials || [];
+        this.consumable = data.consumable || null;
         this.equipBag = data.equipBag || [];
+        this.gold = data.gold || 0;
+        this.innUsed = data.innUsed || false;
         this.kills = data.kills || 0;
         this.stumpsBroken = data.stumpsBroken || 0;
         this.corruption = data.corruption || 0;
@@ -506,6 +531,7 @@ export default class GameScene extends Phaser.Scene {
         this.accountEquipment = accEquipPerClass2[this.classKey] || { ...EMPTY_ACCOUNT_EQUIPMENT };
         this.accountEquipBag = accBagPerClass2[this.classKey] || [];
         this.accountEffects = getAccountTalentEffects(this.unlockedAccountTalents);
+        this.gold = acc.gold || 0;
         this.classStats = getClassStats(this.classKey, this.playerLevel);
         this.talentEffects = getTalentEffects(this.unlockedTalents);
         this.corruptionMax = this.classStats.corruptionMax + (this.talentEffects.corruptionMax || 0);
@@ -526,6 +552,30 @@ export default class GameScene extends Phaser.Scene {
     }
 
     /* ===== UTILITY ===== */
+
+    _updateConsumableBonuses(delta) {
+        if (this._consumableBonusDmgTimer > 0) {
+            this._consumableBonusDmgTimer -= delta;
+            if (this._consumableBonusDmgTimer <= 0) {
+                this._consumableBonusDmg = 0;
+                this.floatingText(this.player.x, this.player.y - 30, 'DMG boost expired', '#95a5a6');
+            }
+        }
+        if (this._consumableBonusSpdTimer > 0) {
+            this._consumableBonusSpdTimer -= delta;
+            if (this._consumableBonusSpdTimer <= 0) {
+                this._consumableBonusSpd = 0;
+                this.floatingText(this.player.x, this.player.y - 30, 'SPD boost expired', '#95a5a6');
+            }
+        }
+        if (this._consumableBonusDefTimer > 0) {
+            this._consumableBonusDefTimer -= delta;
+            if (this._consumableBonusDefTimer <= 0) {
+                this._consumableBonusDef = 0;
+                this.floatingText(this.player.x, this.player.y - 30, 'DEF boost expired', '#95a5a6');
+            }
+        }
+    }
 
     _destroyOrphanedCaveStairs() {
         if (this.caveStairs) { this.caveStairs.destroy(); this.caveStairs = null; }
@@ -645,6 +695,8 @@ export default class GameScene extends Phaser.Scene {
     _activateCampfire() { if (this.zones.village) this.zones.village._activateCampfire(); }
     _talkToChild() { if (this.zones.village) this.zones.village._talkToChild(); }
     _enterCemetery() { if (this.zones.village) this.zones.village._enterCemetery(); }
+    _openShop() { if (this.zones.village) this.zones.village._openShop(); }
+    _useInn() { if (this.zones.village) this.zones.village._useInn(); }
     _enterHell() { if (this.zones.hell) this.zones.hell.enterHell(); }
     _exitHell() { if (this.zones.hell) this.zones.hell.exitHell(); }
     _villageBossMeteor(boss) { if (this.zones.village) this.zones.village._villageBossMeteor(boss); }
@@ -706,6 +758,7 @@ export default class GameScene extends Phaser.Scene {
         this.bKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B);
         this.nKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.N);
         this.cKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
+        this.fKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
     }
 
     _handleInput() {
@@ -748,6 +801,10 @@ export default class GameScene extends Phaser.Scene {
             if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
                 if (this.nearbyNpc) {
                     this._interactWithNpc();
+                } else if (this.nearbyShop) {
+                    this.zones.village._openShop();
+                } else if (this.nearbyInn) {
+                    this.zones.village._useInn();
                 } else if (this.zone === 'forest') {
                     if (this.player.y < 100) {
                         this._enterPortal();
@@ -832,7 +889,7 @@ export default class GameScene extends Phaser.Scene {
                     } else {
                         this.attack();
                     }
-                } else if (this.zone === 'castle') {
+                } else         if (this.zone === 'castle') {
                     this.zones.castle.handleSpace();
                 }
             }
@@ -840,6 +897,9 @@ export default class GameScene extends Phaser.Scene {
             if (Phaser.Input.Keyboard.JustDown(this.pKey)) this.togglePause();
             if (Phaser.Input.Keyboard.JustDown(this.tKey)) this._openTalentTree();
             if (Phaser.Input.Keyboard.JustDown(this.mKey)) this._toggleMute();
+            if (Phaser.Input.Keyboard.JustDown(this.fKey)) {
+                if (this.playerSys) this.playerSys.useConsumable();
+            }
             const spells = this._getClassSpells();
             if (Phaser.Input.Keyboard.JustDown(this.qKey)) this._castSpell(spells.q);
             if (Phaser.Input.Keyboard.JustDown(this.wKey)) this._castSpell(spells.w);
@@ -861,6 +921,7 @@ export default class GameScene extends Phaser.Scene {
         this._updateBoss();
         this._updateCorruption();
         this._updateSpells(delta);
+        this._updateConsumableBonuses(delta);
 
         if (this.currentZone) {
             this.currentZone.update(time, delta);
@@ -901,6 +962,29 @@ export default class GameScene extends Phaser.Scene {
                 if (this.hellReturnPortalHint) this.hellReturnPortalHint.setText('SPACE = return to Village');
             } else if (this.hellReturnPortalHint) {
                 this.hellReturnPortalHint.setText('');
+            }
+        }
+
+        if (this.zone === 'village' && !this.villageFrozen && this.villageRestored) {
+            this.nearbyShop = null;
+            this.nearbyInn = null;
+            if (this.villageMerchantNPC && this.villageMerchantHint) {
+                const md = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.villageMerchantNPC.x, this.villageMerchantNPC.y);
+                if (md < 50) {
+                    this.nearbyShop = this.villageMerchantNPC;
+                    this.villageMerchantHint.setText('SPACE = shop');
+                } else {
+                    this.villageMerchantHint.setText('');
+                }
+            }
+            if (this.villageInn && this.villageInnHint) {
+                const id = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.villageInn.x, this.villageInn.y);
+                if (id < 40) {
+                    this.nearbyInn = this.villageInn;
+                    this.villageInnHint.setText(this.innUsed ? 'Already rested' : 'SPACE = rest');
+                } else {
+                    this.villageInnHint.setText('');
+                }
             }
         }
 

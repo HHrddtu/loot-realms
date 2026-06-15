@@ -238,4 +238,65 @@ export function drawNpcTextures(mk) {
         c.fillStyle = '#95a5a6';
         c.fillRect(45, -2, 6, 4);
     });
+
+    mk('villager_merchant', 28, 36, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#f5cba7';
+        c.fillRect(9, 0, 10, 8);
+        c.fillStyle = '#5d4037';
+        c.fillRect(8, 0, 12, 3);
+        c.fillRect(8, 1, 2, 4);
+        c.fillRect(18, 1, 2, 3);
+        c.fillStyle = '#2c3e50';
+        c.fillRect(11, 3, 2, 2);
+        c.fillRect(15, 3, 2, 2);
+        c.fillStyle = '#c0392b';
+        c.fillRect(12, 6, 4, 1);
+        c.fillStyle = '#d4ac0d';
+        c.fillRect(6, 8, 16, 12);
+        c.fillStyle = '#b7950b';
+        c.fillRect(8, 8, 12, 12);
+        c.fillStyle = '#8b4513';
+        c.fillRect(6, 14, 16, 2);
+        c.fillStyle = '#f5cba7';
+        c.fillRect(2, 10, 4, 8);
+        c.fillRect(22, 10, 4, 8);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(2, 16, 4, 3);
+        c.fillRect(22, 16, 4, 3);
+        c.fillStyle = '#5d4037';
+        c.fillRect(7, 20, 4, 8);
+        c.fillRect(17, 20, 4, 8);
+        c.fillStyle = '#3e2723';
+        c.fillRect(6, 26, 6, 4);
+        c.fillRect(16, 26, 6, 4);
+    });
+
+    mk('village_bed', 32, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#5a3d1a';
+        c.fillRect(0, 0, 32, 4);
+        c.fillRect(0, 16, 32, 4);
+        c.fillRect(0, 0, 4, 20);
+        c.fillStyle = '#ecf0f1';
+        c.fillRect(4, 4, 10, 12);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(4, 4, 10, 2);
+        c.fillStyle = '#2980b9';
+        c.fillRect(14, 4, 18, 12);
+        c.fillStyle = '#2471a3';
+        c.fillRect(16, 6, 14, 8);
+    });
+
+    mk('village_anvil', 24, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(4, 14, 16, 6);
+        c.fillStyle = '#566573';
+        c.fillRect(8, 6, 8, 10);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(6, 4, 12, 4);
+        c.fillStyle = '#bdc3c7';
+        c.fillRect(7, 5, 4, 2);
+    });
 }

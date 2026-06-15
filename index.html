@@ -20,7 +20,35 @@
             overflow: hidden;
         }
         #game-container {
+            position: relative;
             border: 2px solid #333;
+        }
+        #game-container input,
+        #game-container input[type="text"],
+        #game-container input[type="password"],
+        #game-container input[type="email"] {
+            background: transparent !important;
+            color: #d0d0d0 !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            -webkit-box-shadow: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            appearance: none !important;
+            border-radius: 0 !important;
+            caret-color: #f1c40f !important;
+        }
+        #game-container input::placeholder {
+            color: #555 !important;
+            opacity: 1 !important;
+        }
+        #game-container input:-webkit-autofill,
+        #game-container input:-webkit-autofill:hover,
+        #game-container input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px #12121f inset !important;
+            -webkit-text-fill-color: #d0d0d0 !important;
+            transition: background-color 5000s ease-in-out 0s;
         }
     </style>
 </head>

@@ -1,4 +1,4 @@
-import { RARITY_COLORS } from '../config/index.js';
+import { RARITY_COLORS, SHOP_EQUIP_PRICES, SELL_PRICE_RATIO } from '../config/index.js';
 import { lighten } from '../utils.js';
 import { toggleMute } from '../sound.js';
 import { getAccountLevelUpReq } from '../save.js';
@@ -80,6 +80,11 @@ export class UISystem {
 
         this.scene.diffText = sx(this.scene.add.text(185, 4, '', {
             fontSize: '9px', fill: '#f39c12', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 1
+        }).setOrigin(1, 0));
+
+        this.scene.goldText = sx(this.scene.add.text(185, 86, '', {
+            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 1
         }).setOrigin(1, 0));
 
@@ -239,6 +244,7 @@ export class UISystem {
 
         if (this.scene.diffText) this.scene.diffText.setText(this.scene.difficulty);
         this.scene.talentText.setText(this.scene.talentPoints > 0 ? 'TALENTS: ' + this.scene.talentPoints + ' [T]' : '');
+        if (this.scene.goldText) this.scene.goldText.setText('Gold: ' + (this.scene.gold || 0));
 
         if (this.scene.spellSlots) {
             ['fireball', 'shield', 'heal'].forEach(key => {
@@ -427,6 +433,42 @@ export class UISystem {
                 }).setOrigin(0.5)));
             }
         });
+
+        const consY = 340;
+        this.scene.invGroup.push(mkInv(this.scene.add.text(equipX - 55, consY - 8, 'Potion:', {
+            fontSize: '11px', fill: '#2ecc71', fontFamily: 'Arial', fontStyle: 'bold'
+        })));
+        const consBg = mkInv(this.scene.add.rectangle(equipX + 20, consY + 10, 44, 44, 0x1a1a2e)
+            .setStrokeStyle(1, 0x2ecc71));
+        this.scene.invGroup.push(consBg);
+        if (this.scene.consumable) {
+            const item = this.scene.consumable;
+            this.scene.invGroup.push(mkInv(this.scene.add.sprite(equipX + 20, consY + 10, item.texKey)));
+            const rc = '#' + (RARITY_COLORS[item.rarity] || 0xaaaaaa).toString(16).padStart(6, '0');
+            this.scene.invGroup.push(mkInv(this.scene.add.text(equipX - 55, consY + 18, item.name, {
+                fontSize: '10px', fill: rc, fontFamily: 'Arial'
+            })));
+            consBg.setStrokeStyle(2, RARITY_COLORS[item.rarity] || 0xaaaaaa);
+            consBg.setInteractive({ useHandCursor: true });
+            consBg.on('pointerover', () => this._showItemTooltip(equipX + 50, consY, item));
+            consBg.on('pointerout', () => this._hideItemTooltip());
+            consBg.on('pointerdown', () => {
+                this._hideItemTooltip();
+                if (this.scene.playerSys) this.scene.playerSys.useConsumable();
+                this.closeInventory();
+            });
+            this.scene.invGroup.push(mkInv(this.scene.add.text(equipX + 44, consY + 10, '[F]', {
+                fontSize: '9px', fill: '#2ecc71', fontFamily: 'Arial'
+            })));
+        } else {
+            this.scene.invGroup.push(mkInv(this.scene.add.text(equipX + 20, consY + 10, 'Empty', {
+                fontSize: '9px', fill: '#555', fontFamily: 'Arial'
+            }).setOrigin(0.5)));
+        }
+
+        this.scene.invGroup.push(mkInv(this.scene.add.text(350, consY - 8, 'Gold: ' + (this.scene.gold || 0), {
+            fontSize: '13px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5)));
     }
 
     _drawMaterialsPanel() {
@@ -501,7 +543,7 @@ export class UISystem {
             fontSize: '12px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5)));
         this.scene.invGroup.push(mkInv(this.scene.add.text(eqX, eqY + 16,
-            this.scene.equipBag.length + '/' + this.scene.maxEquipBag + '  (click to equip)', {
+            this.scene.equipBag.length + '/' + this.scene.maxEquipBag + '  (click=equip, shift+click=sell)', {
             fontSize: '10px', fill: '#555', fontFamily: 'Arial'
         }).setOrigin(0.5)));
 
@@ -524,10 +566,11 @@ export class UISystem {
                 const idx = i;
                 bg.on('pointerdown', () => {
                     if (this.scene.input.keyboard.checkDown(this.scene.input.keyboard.addKey('SHIFT'))) {
-                        const expGain = this.scene.deleteItem('equip', idx);
-                        if (expGain > 0) {
-                            this.floatingText(sx, sy - 20, '+' + expGain + ' EXP', '#2ecc71');
-                        }
+                        const sellPrice = Math.floor((SHOP_EQUIP_PRICES[item.rarity] || SHOP_EQUIP_PRICES.uncommon) * SELL_PRICE_RATIO);
+                        this.scene.equipBag.splice(idx, 1);
+                        this.scene.gold = (this.scene.gold || 0) + sellPrice;
+                        this.scene.floatingText(sx, sy - 20, '+' + sellPrice + ' gold', '#f1c40f');
+                        if (this.scene.goldText) this.scene.goldText.setText('Gold: ' + this.scene.gold);
                         this.closeInventory();
                         this.openInventory();
                     } else {

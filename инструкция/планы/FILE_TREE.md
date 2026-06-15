@@ -1,6 +1,6 @@
 # FILE TREE
 
-## Текущая структура (v0.13.0)
+## Текущая структура (v0.14.0)
 
 ```
 WebGame/
@@ -50,7 +50,8 @@ WebGame/
     │   ├── crafting.js       (CRAFT_RECIPES, MATERIAL_ITEMS)
     │   ├── quests.js         (QUESTS — 6 квестов с наградами)
     │   ├── difficulty.js     (DIFFICULTY_KEYS, DIFFICULTY_UNLOCK_MAP)
-    │   └── rarity.js         (RARITY_COLORS, RARITY_MULT, RARITY_STARS)
+    │   ├── rarity.js         (RARITY_COLORS, RARITY_MULT, RARITY_STARS)
+    │   └── gold.js           (НОВОЕ v0.14.0 — GOLD_DROPS, CONSUMABLES, SHOP_*, SELL_PRICE_RATIO)
     ├── textures/             (НОВОЕ v0.12.0)
     │   ├── index.js          (generateAllTextures — вызывает все генераторы)
     │   ├── zones.js          (meadow, forest, mine, cave, hell, village, snowy, cemetery, castle_ground, castle_door, castle_bars, castle_stairs)
@@ -92,11 +93,11 @@ WebGame/
 
 ---
 
-## Архитектура v0.13.0
+## Архитектура v0.14.0
 
 ### Делегирование в GameScene.js
 
-GameScene (~1102 строки) — thin delegation skeleton:
+GameScene (~1106 строк) — thin delegation skeleton:
 
 1. **Systems** (constructor):
    - `this.combat = new CombatSystem(this)` —攻击, урон, killEnemy
@@ -139,7 +140,7 @@ GameScene (~1102 строки) — thin delegation skeleton:
 | Файл | Зависит от | Ответственность |
 |------|-----------|-----------------|
 | `main.js` | config, textures, i18n, scenes | Точка входа, 9 сцен, loadLang() |
-| `config/*.js` | — | Данные: difficulties, enemies, bosses, zones, items, spells, crafting, quests, rarity |
+| `config/*.js` | — | Данные: difficulties, enemies, bosses, zones, items, spells, crafting, quests, rarity, gold |
 | `textures/*.js` | utils | Процедурные текстуры: все спрайты |
 | `i18n.js` | — | Локализация EN/RU/DE |
 | `classes.js` | — | CLASS_DB: Sage/Alchemist/Angel |
@@ -151,16 +152,16 @@ GameScene (~1102 строки) — thin delegation skeleton:
 | `quests.js` | config | Квесты: initQuests, acceptQuest, onKill, onCollect |
 | `crafting.js` | config, materialBook | Крафт: canCraft(), craft() |
 | `save.js` | — | LocalStorage: game + account + миграция |
-| `systems/CombatSystem.js` | — | Атака, урон, убийство, checkLevelUp |
-| `systems/PlayerSystem.js` | — | Игрок: recalcStats, inventory, levelup |
+| `systems/CombatSystem.js` | — | Атака, урон, убийство, checkLevelUp, gold drops |
+| `systems/PlayerSystem.js` | — | Игрок: recalcStats, inventory, levelup, consumable |
 | `systems/SpellSystem.js` | — | Заклинания, снаряды, щит, исцеление |
-| `systems/UISystem.js` | — | HUD, инвентарь, тултипы, пауза, оверлеи |
+| `systems/UISystem.js` | — | HUD, инвентарь, тултипы, пауза, оверлеи, consumable slot, equipment selling |
 | `systems/NpcSystem.js` | — | NPC, квесты, cart ride, campfire |
 | `zones/ForestZone.js` | — | Лес: мобы, пеньки, портал |
 | `zones/ArenaZone.js` | — | Арена: Skeleton Lord boss |
 | `zones/MineZone.js` | — | Шахта: мобы, сундуки, Skeleton Lord boss |
 | `zones/CaveZone.js` | — | Пещера: Giant Bat boss, ступени |
-| `zones/VillageZone.js` | — | Деревня: лагери, decor, cemetery, Hell boss, snowy village, castle child NPC, castle skip |
+| `zones/VillageZone.js` | — | Деревня: лагери, decor, cemetery, Hell boss, snowy village, castle child NPC, castle skip, shop, inn |
 | `zones/HellZone.js` | — | Ад: лава, лагери, Red Demon, imps |
 | `zones/CastleZone.js` | — | Замок: 7 комнат + чердак, бандиты, Bandit Leader boss, спасение пленников, time skip |
 | `scenes/GameScene.js` | systems, zones | Delegation skeleton + ввод + save/load + meadow + castle |

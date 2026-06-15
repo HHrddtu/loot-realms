@@ -8,6 +8,7 @@ import {
     CAVE_CHEST_OPEN_KEY, CAVE_WIDTH, CAVE_HEIGHT
 } from '../config/index.js';
 import { rollEquip, rollMaterial, rollAccountEquip, rollCaveRelic } from '../utils.js';
+import { rollGold, rollBossGold, rollChestGold } from '../config/gold.js';
 import { playBossDeath, playEnemyDeath, playLoot, playBreak } from '../sound.js';
 import { recordKill } from '../bestiary.js';
 import { recordSoulCollect } from '../soulBook.js';
@@ -370,6 +371,12 @@ export class CombatSystem {
         onCollect('mine_chest');
         this.scene._updateQuestIcons();
 
+        const chestGold = rollChestGold(this.scene.zone || 'mine');
+        const chestGoldBonus = 1 + ((this.scene.accountEffects ? this.scene.accountEffects.goldPercent || 0 : 0)) / 100;
+        const finalChestGold = Math.floor(chestGold * chestGoldBonus);
+        this.scene.gold = (this.scene.gold || 0) + finalChestGold;
+        this.scene.floatingText(ch.x, ch.y - 35, '+' + finalChestGold + ' gold', '#f1c40f');
+
         const hasLoot = ch.loot.length > 0;
         if (hasLoot) {
             ch.loot.forEach((item, i) => {
@@ -483,7 +490,12 @@ export class CombatSystem {
             });
         }
 
+        const goldAmount = rollGold(this.scene.zone || 'forest');
+        const goldBonus = 1 + ((this.scene.accountEffects ? this.scene.accountEffects.goldPercent || 0 : 0)) / 100;
+        const finalGold = Math.floor(goldAmount * goldBonus);
+        this.scene.gold = (this.scene.gold || 0) + finalGold;
         this.scene.floatingText(enemy.x, enemy.y - 30, '+' + exp + ' EXP', '#f1c40f');
+        this.scene.floatingText(enemy.x, enemy.y - 45, '+' + finalGold + ' gold', '#f1c40f');
 
         if (Math.random() < EQUIP_DROP_CHANCE) {
             const item = rollEquip();
@@ -614,7 +626,12 @@ export class CombatSystem {
         if (b.aoeRing2) { b.aoeRing2.destroy(); b.aoeRing2 = null; }
         if (this.scene[cfg.nameTextKey]) this.scene[cfg.nameTextKey].destroy();
 
+        const bossGold = rollBossGold(this.scene.zone || 'forest');
+        const bossGoldBonus = 1 + ((this.scene.accountEffects ? this.scene.accountEffects.goldPercent || 0 : 0)) / 100;
+        const finalBossGold = Math.floor(bossGold * bossGoldBonus);
+        this.scene.gold = (this.scene.gold || 0) + finalBossGold;
         this.scene.floatingText(cfg.textX, cfg.textY, '+' + exp + ' EXP', '#f1c40f');
+        this.scene.floatingText(cfg.textX, cfg.textY + 20, '+' + finalBossGold + ' gold', '#f1c40f');
 
         this.scene.defeatedText = this.scene.add.text(cfg.textX, cfg.textY + 50, cfg.defeatedText, {
             fontSize: '28px', fill: cfg.defeatedColor, fontFamily: 'Arial', fontStyle: 'bold',
@@ -693,6 +710,12 @@ export class CombatSystem {
         ch.hpBg.destroy();
         ch.hpFill.destroy();
         playBreak();
+
+        const vGold = rollChestGold(this.scene.zone || 'village');
+        const vGoldBonus = 1 + ((this.scene.accountEffects ? this.scene.accountEffects.goldPercent || 0 : 0)) / 100;
+        const finalVGold = Math.floor(vGold * vGoldBonus);
+        this.scene.gold = (this.scene.gold || 0) + finalVGold;
+        this.scene.floatingText(ch.x, ch.y - 20, '+' + finalVGold + ' gold', '#f1c40f');
 
         ch.loot.forEach((item, i) => {
             const rc = '#' + RARITY_COLORS[item.rarity].toString(16).padStart(6, '0');

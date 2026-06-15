@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from './config/index.js';
 import BootScene from './scenes/BootScene.js';
+import LoginScene from './scenes/LoginScene.js';
 import MenuScene from './scenes/MenuScene.js';
 import ClassSelectScene from './scenes/ClassSelectScene.js';
 import GameScene from './scenes/GameScene.js';
@@ -19,9 +20,10 @@ new Phaser.Game({
     height: GAME_HEIGHT,
     parent: 'game-container',
     pixelArt: true,
+    dom: { createContainer: true },
     physics: {
         default: 'arcade',
         arcade: { gravity: { y: 0 }, debug: false }
     },
-    scene: [BootScene, MenuScene, ClassSelectScene, GameScene, TalentScene, BestiaryScene, MaterialBookScene, SoulBookScene, CraftScene]
+    scene: [BootScene, LoginScene, MenuScene, ClassSelectScene, GameScene, TalentScene, BestiaryScene, MaterialBookScene, SoulBookScene, CraftScene]
 });
