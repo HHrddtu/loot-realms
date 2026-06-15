@@ -1,9 +1,9 @@
 import Phaser from 'phaser';
 import { lighten } from '../utils.js';
-import { getDisplayName, isAnonymous } from '../auth.js';
+import { getDisplayName } from '../auth.js';
 import {
-    createRoom, joinRoom, disconnect, getRoomCode, isHost, getMyId,
-    getPlayers, getPlayerNames, onPlayerJoin, onPlayerLeave, onDisconnect
+    createRoom, joinRoom, disconnect, isHost, getMyId,
+    getPlayerNames, onPlayerJoin, onPlayerLeave
 } from '../network.js';
 import { t } from '../i18n.js';
 
@@ -14,38 +14,40 @@ export default class LobbyScene extends Phaser.Scene {
 
     create() {
         this.cameras.main.setBackgroundColor('#0a0a1a');
-        this.elements = [];
+        this._group = this.add.group();
         this._domInputs = [];
-        this._players = {};
-        this._status = 'menu';
         this._roomCode = '';
-        this._errorText = null;
         this._playersList = null;
-        this._codeDisplay = null;
 
         this._showMenu();
     }
 
+    _add(obj) {
+        this._group.add(obj);
+        return obj;
+    }
+
     _showMenu() {
         this._cleanup();
+        this._status = 'menu';
 
-        this.add.text(400, 50, t('mp.title'), {
+        this._add(this.add.text(400, 60, t('mp.title'), {
             fontSize: '32px', fill: '#f1c40f', fontFamily: 'Georgia', fontStyle: 'bold'
-        }).setOrigin(0.5);
+        }).setOrigin(0.5));
 
-        this.add.text(400, 90, t('mp.subtitle'), {
+        this._add(this.add.text(400, 100, t('mp.subtitle'), {
             fontSize: '14px', fill: '#7f8c8d', fontFamily: 'Arial'
-        }).setOrigin(0.5);
+        }).setOrigin(0.5));
 
-        this._createField('name', 400, 155, getDisplayName() !== 'Guest' ? getDisplayName() : 'Your Name');
+        this._createField('name', 400, 170, getDisplayName() !== 'Guest' ? getDisplayName() : 'Your Name');
 
-        this.errorText = this.add.text(400, 205, '', {
+        this._errorText = this._add(this.add.text(400, 215, '', {
             fontSize: '13px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold'
-        }).setOrigin(0.5);
+        }).setOrigin(0.5));
 
-        this._createBtn(400, 250, t('mp.create'), 0x27ae60, () => this._doCreate());
-        this._createBtn(400, 300, t('mp.join'), 0x2980b9, () => this._showJoinUI());
-        this._createBtn(400, 360, t('mp.back'), 0x555577, () => {
+        this._createBtn(400, 260, t('mp.create'), 0x27ae60, () => this._doCreate());
+        this._createBtn(400, 310, t('mp.join'), 0x2980b9, () => this._showJoinUI());
+        this._createBtn(400, 380, t('mp.back'), 0x555577, () => {
             this._cleanup();
             this.scene.start('Menu');
         });
@@ -55,64 +57,65 @@ export default class LobbyScene extends Phaser.Scene {
         this._cleanup();
         this._status = 'joinUI';
 
-        this.add.text(400, 80, t('mp.joinRoom'), {
+        this._add(this.add.text(400, 60, t('mp.joinRoom'), {
             fontSize: '28px', fill: '#2980b9', fontFamily: 'Georgia', fontStyle: 'bold'
-        }).setOrigin(0.5);
+        }).setOrigin(0.5));
 
-        this._createField('code', 400, 160, 'CODE');
+        this._createField('name', 400, 130, getDisplayName() !== 'Guest' ? getDisplayName() : 'Your Name');
+        this._createField('code', 400, 200, 'CODE');
 
-        this.errorText = this.add.text(400, 210, '', {
+        this._errorText = this._add(this.add.text(400, 250, '', {
             fontSize: '13px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold'
-        }).setOrigin(0.5);
+        }).setOrigin(0.5));
 
-        this._createBtn(400, 260, t('mp.connect'), 0x27ae60, () => this._doJoin());
-        this._createBtn(400, 310, t('mp.back'), 0x555577, () => this._showMenu());
+        this._createBtn(400, 295, t('mp.connect'), 0x27ae60, () => this._doJoin());
+        this._createBtn(400, 355, t('mp.back'), 0x555577, () => this._showMenu());
     }
 
     _showWaitingRoom() {
         this._cleanup();
         this._status = 'waiting';
 
-        const isHostMode = isHost();
+        const hostMode = isHost();
 
-        this.add.text(400, 40, isHostMode ? t('mp.youAreHost') : t('mp.connected'), {
-            fontSize: '28px', fill: isHostMode ? '#f1c40f' : '#27ae60', fontFamily: 'Georgia', fontStyle: 'bold'
-        }).setOrigin(0.5);
+        this._add(this.add.text(400, 50, hostMode ? t('mp.youAreHost') : t('mp.connected'), {
+            fontSize: '28px', fill: hostMode ? '#f1c40f' : '#27ae60', fontFamily: 'Georgia', fontStyle: 'bold'
+        }).setOrigin(0.5));
 
-        this._codeDisplay = this.add.text(400, 85, t('mp.roomCode') + ': ' + this._roomCode, {
-            fontSize: '20px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+        this._add(this.add.text(400, 95, t('mp.roomCode') + ': ' + this._roomCode, {
+            fontSize: '22px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 3
-        }).setOrigin(0.5);
+        }).setOrigin(0.5));
 
-        if (isHostMode) {
-            this.add.text(400, 115, t('mp.shareCode'), {
+        if (hostMode) {
+            this._add(this.add.text(400, 125, t('mp.shareCode'), {
                 fontSize: '12px', fill: '#888', fontFamily: 'Arial'
-            }).setOrigin(0.5);
+            }).setOrigin(0.5));
         }
 
-        this.add.text(400, 155, t('mp.players') + ':', {
+        this._add(this.add.text(400, 165, t('mp.players') + ':', {
             fontSize: '16px', fill: '#ecf0f1', fontFamily: 'Arial', fontStyle: 'bold'
-        }).setOrigin(0.5);
+        }).setOrigin(0.5));
 
-        this._playersList = this.add.text(400, 185, '', {
+        this._playersList = this._add(this.add.text(400, 195, t('mp.waiting'), {
             fontSize: '14px', fill: '#bdc3c7', fontFamily: 'Arial',
             wordWrap: { width: 350 }, align: 'center', lineSpacing: 6
-        }).setOrigin(0.5, 0);
+        }).setOrigin(0.5, 0));
 
-        this._updatePlayersList();
-
-        this._createBtn(400, 420, t('mp.startGame'), 0x27ae60, () => this._startGame());
-        this._createBtn(400, 470, t('mp.leave'), 0xc0392b, () => {
+        this._createBtn(400, 400, t('mp.startGame'), 0x27ae60, () => this._startGame());
+        this._createBtn(400, 450, t('mp.leave'), 0xc0392b, () => {
             disconnect();
             this._showMenu();
         });
 
         onPlayerJoin(() => this._updatePlayersList());
         onPlayerLeave(() => this._updatePlayersList());
+
+        this._updatePlayersList();
     }
 
     _updatePlayersList() {
-        if (!this._playersList) return;
+        if (!this._playersList || !this._playersList.active) return;
         const names = getPlayerNames();
         const ids = Object.keys(names);
         if (ids.length === 0) {
@@ -130,9 +133,7 @@ export default class LobbyScene extends Phaser.Scene {
     _createField(key, x, y, placeholder) {
         const W = 300, H = 34;
 
-        const bg = this.add.rectangle(x, y, W, H, 0x12121f)
-            .setStrokeStyle(1, 0x3a3a5c);
-        this.elements.push(bg);
+        const bg = this._add(this.add.rectangle(x, y, W, H, 0x12121f).setStrokeStyle(1, 0x3a3a5c));
 
         const container = document.createElement('div');
         container.style.cssText = `
@@ -167,28 +168,23 @@ export default class LobbyScene extends Phaser.Scene {
     }
 
     _getCanvasOffsetX() {
-        const canvas = this.game.canvas;
-        const parent = canvas.parentNode;
-        return canvas.getBoundingClientRect().left - parent.getBoundingClientRect().left;
+        return this.game.canvas.getBoundingClientRect().left - this.game.canvas.parentNode.getBoundingClientRect().left;
     }
 
     _getCanvasOffsetY() {
-        const canvas = this.game.canvas;
-        const parent = canvas.parentNode;
-        return canvas.getBoundingClientRect().top - parent.getBoundingClientRect().top;
+        return this.game.canvas.getBoundingClientRect().top - this.game.canvas.parentNode.getBoundingClientRect().top;
     }
 
     _createBtn(x, y, label, color, cb) {
-        const bg = this.add.rectangle(x, y, 280, 36, color)
+        const bg = this._add(this.add.rectangle(x, y, 280, 40, color)
             .setStrokeStyle(2, lighten(color, 0.3))
-            .setInteractive({ useHandCursor: true });
-        const txt = this.add.text(x, y, label, {
+            .setInteractive({ useHandCursor: true }));
+        const txt = this._add(this.add.text(x, y, label, {
             fontSize: '16px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
-        }).setOrigin(0.5);
+        }).setOrigin(0.5));
         bg.on('pointerover', () => { bg.setFillStyle(lighten(color, 0.2)); bg.setScale(1.03); txt.setScale(1.03); });
         bg.on('pointerout', () => { bg.setFillStyle(color); bg.setScale(1); txt.setScale(1); });
         bg.on('pointerdown', cb);
-        this.elements.push(bg, txt);
     }
 
     async _doCreate() {
@@ -226,12 +222,20 @@ export default class LobbyScene extends Phaser.Scene {
     }
 
     _showError(msg) {
-        if (this.errorText) this.errorText.setText(msg);
+        if (this._errorText && this._errorText.active) this._errorText.setText(msg);
     }
 
     _cleanup() {
         this._domInputs.forEach(el => { if (el.parentNode) el.parentNode.removeChild(el); });
         this._domInputs = [];
+        if (this._group) {
+            this._group.getChildren().forEach(obj => {
+                if (obj && obj.destroy) obj.destroy();
+            });
+            this._group.clear();
+        }
+        this._errorText = null;
+        this._playersList = null;
     }
 
     shutdown() {
