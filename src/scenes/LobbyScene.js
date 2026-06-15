@@ -134,8 +134,16 @@ export default class LobbyScene extends Phaser.Scene {
             this._playersList.setText(t('mp.waiting'));
             return;
         }
-        const lines = ids.map((id, i) => {
-            const me = id === getMyId();
+        const myId = getMyId();
+        const sortedIds = ids.sort((a, b) => {
+            if (isHost()) {
+                if (a === myId) return -1;
+                if (b === myId) return 1;
+            }
+            return 0;
+        });
+        const lines = sortedIds.map((id, i) => {
+            const me = id === myId;
             const name = names[id] || '???';
             return (i + 1) + '. ' + name + (me ? ' (you)' : '') + (isHost() && i === 0 ? ' ★' : '');
         });

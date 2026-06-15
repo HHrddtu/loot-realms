@@ -60,7 +60,7 @@ export function onDisconnect(cb) { _onDisconnect = cb; }
 
 export function createRoom(playerName) {
     return new Promise((resolve, reject) => {
-        let resolved = false;
+        let settled = false;
         _roomCode = _genCode();
         _isHost = true;
         _hostName = playerName || 'Host';
@@ -69,8 +69,8 @@ export function createRoom(playerName) {
         _peer = new Peer(_myId);
 
         const timer = setTimeout(() => {
-            if (!resolved) {
-                resolved = true;
+            if (!settled) {
+                settled = true;
                 _peer.destroy();
                 _peer = null;
                 reject(new Error('PeerJS connection timeout'));
@@ -78,11 +78,11 @@ export function createRoom(playerName) {
         }, 10000);
 
         _peer.on('open', (id) => {
-            if (resolved) return;
-            resolved = true;
+            if (settled) return;
+            settled = true;
             clearTimeout(timer);
             _myId = id;
-            _players[id] = { x: 0, y: 0, facing: 'down', hp: 100, maxHp: 100, classKey: 'sage', attacking: false };
+            _players[id] = { x: 400, y: 300, facing: 'down', hp: 100, maxHp: 100, classKey: 'sage', attacking: false };
             _playerNames[id] = _hostName;
             resolve(_roomCode);
         });
@@ -93,8 +93,8 @@ export function createRoom(playerName) {
 
         _peer.on('error', (err) => {
             console.warn('PeerJS host error:', err);
-            if (!resolved) {
-                resolved = true;
+            if (!settled) {
+                settled = true;
                 clearTimeout(timer);
                 if (err.type === 'unavailable-id') {
                     _roomCode = _genCode();
@@ -115,11 +115,15 @@ function _handleGuestConnection(conn) {
     _guestConns[peerId] = conn;
 
     conn.on('open', () => {
-        conn.send({ type: 'welcome', roomCode: _roomCode, hostName: _hostName });
-
         conn.on('data', (data) => {
             _handleGuestData(peerId, data);
         });
+
+        const existingNames = {};
+        Object.keys(_playerNames).forEach(id => {
+            existingNames[id] = _playerNames[id];
+        });
+        conn.send({ type: 'welcome', roomCode: _roomCode, hostName: _hostName, players: existingNames });
     });
 
     conn.on('close', () => {
@@ -135,7 +139,14 @@ function _handleGuestData(peerId, data) {
     switch (data.type) {
         case 'join':
             _playerNames[peerId] = data.name || 'Guest';
-            _players[peerId] = { x: data.x || 0, y: data.y || 0, facing: 'down', hp: data.hp || 100, maxHp: data.maxHp || 100, classKey: data.classKey || 'sage', attacking: false };
+            _players[peerId] = { x: data.x || 400, y: data.y || 300, facing: 'down', hp: data.hp || 100, maxHp: data.maxHp || 100, classKey: data.classKey || 'sage', attacking: false };
+
+            const existingNames = {};
+            Object.keys(_playerNames).forEach(id => {
+                existingNames[id] = _playerNames[id];
+            });
+            _sendToGuest(peerId, { type: 'playerList', players: existingNames });
+
             _broadcastToGuests({ type: 'playerJoin', peerId, name: data.name, classKey: data.classKey });
             if (_onPlayerJoin) _onPlayerJoin(peerId, data.name);
             break;
@@ -166,11 +177,11 @@ export function joinRoom(code, playerName) {
 
         _peer = new Peer();
 
-        let resolved = false;
+        let settled = false;
 
         const timer = setTimeout(() => {
-            if (!resolved) {
-                resolved = true;
+            if (!settled) {
+                settled = true;
                 _peer.destroy();
                 _peer = null;
                 reject(new Error('Connection timeout'));
@@ -184,14 +195,14 @@ export function joinRoom(code, playerName) {
             _hostConn = conn;
 
             conn.on('open', () => {
-                conn.send({ type: 'join', name: playerName || 'Guest', classKey: 'sage', x: 400, y: 300, hp: 100, maxHp: 100 });
-
                 conn.on('data', (data) => {
                     _handleHostData(data);
                 });
 
-                if (!resolved) {
-                    resolved = true;
+                conn.send({ type: 'join', name: playerName || 'Guest', classKey: 'sage', x: 400, y: 300, hp: 100, maxHp: 100 });
+
+                if (!settled) {
+                    settled = true;
                     clearTimeout(timer);
                     resolve();
                 }
@@ -204,8 +215,8 @@ export function joinRoom(code, playerName) {
 
             conn.on('error', (err) => {
                 console.warn('PeerJS guest conn error:', err);
-                if (!resolved) {
-                    resolved = true;
+                if (!settled) {
+                    settled = true;
                     clearTimeout(timer);
                     reject(err);
                 }
@@ -214,8 +225,8 @@ export function joinRoom(code, playerName) {
 
         _peer.on('error', (err) => {
             console.warn('PeerJS guest error:', err);
-            if (!resolved) {
-                resolved = true;
+            if (!settled) {
+                settled = true;
                 clearTimeout(timer);
                 reject(err);
             }
@@ -227,6 +238,20 @@ function _handleHostData(data) {
     switch (data.type) {
         case 'welcome':
             _roomCode = data.roomCode;
+            _playerNames[_myId] = _hostName;
+            if (data.players) {
+                Object.keys(data.players).forEach(id => {
+                    _playerNames[id] = data.players[id];
+                });
+            }
+            break;
+
+        case 'playerList':
+            if (data.players) {
+                Object.keys(data.players).forEach(id => {
+                    _playerNames[id] = data.players[id];
+                });
+            }
             break;
 
         case 'state':
