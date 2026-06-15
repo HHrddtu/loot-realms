@@ -14,16 +14,17 @@ export default class LobbyScene extends Phaser.Scene {
 
     create() {
         this.cameras.main.setBackgroundColor('#0a0a1a');
-        this._group = this.add.group();
+        this._objs = [];
         this._domInputs = [];
         this._roomCode = '';
         this._playersList = null;
+        this._errorText = null;
 
         this._showMenu();
     }
 
     _add(obj) {
-        this._group.add(obj);
+        this._objs.push(obj);
         return obj;
     }
 
@@ -226,14 +227,15 @@ export default class LobbyScene extends Phaser.Scene {
     }
 
     _cleanup() {
+        for (let i = this._objs.length - 1; i >= 0; i--) {
+            const obj = this._objs[i];
+            if (obj && obj.active) {
+                obj.destroy();
+            }
+        }
+        this._objs = [];
         this._domInputs.forEach(el => { if (el.parentNode) el.parentNode.removeChild(el); });
         this._domInputs = [];
-        if (this._group) {
-            this._group.getChildren().forEach(obj => {
-                if (obj && obj.destroy) obj.destroy();
-            });
-            this._group.clear();
-        }
         this._errorText = null;
         this._playersList = null;
     }
