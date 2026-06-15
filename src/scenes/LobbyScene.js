@@ -3,7 +3,7 @@ import { lighten } from '../utils.js';
 import { getDisplayName } from '../auth.js';
 import {
     createRoom, joinRoom, disconnect, isHost, getMyId, getRoomCode,
-    getPlayerNames, onPlayerJoin, onPlayerLeave
+    getPlayerNames, onPlayerJoin, onPlayerLeave, broadcastStartGame, onStartGame
 } from '../network.js';
 import { t } from '../i18n.js';
 
@@ -122,6 +122,7 @@ export default class LobbyScene extends Phaser.Scene {
 
         onPlayerJoin(() => this._updatePlayersList());
         onPlayerLeave(() => this._updatePlayersList());
+        onStartGame(() => this._startGame());
 
         this._updatePlayersList();
     }
@@ -247,6 +248,7 @@ export default class LobbyScene extends Phaser.Scene {
 
     _startGame() {
         this._cleanup();
+        if (isHost()) broadcastStartGame();
         this.scene.start('Game', {
             difficulty: 'Normal',
             classKey: 'sage',

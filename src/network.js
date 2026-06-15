@@ -14,6 +14,7 @@ let _onLoot = null;
 let _onKey = null;
 let _onChat = null;
 let _onDisconnect = null;
+let _onStartGame = null;
 let _hostName = '';
 let _playerNames = {};
 
@@ -58,6 +59,7 @@ export function onLoot(cb) { _onLoot = cb; }
 export function onKey(cb) { _onKey = cb; }
 export function onChat(cb) { _onChat = cb; }
 export function onDisconnect(cb) { _onDisconnect = cb; }
+export function onStartGame(cb) { _onStartGame = cb; }
 
 function _getHostPlayerNames() {
     const out = {};
@@ -296,6 +298,10 @@ function _handleHostData(data) {
         case 'disconnect':
             if (_onDisconnect) _onDisconnect('kicked');
             break;
+
+        case 'startGame':
+            if (_onStartGame) _onStartGame();
+            break;
     }
 }
 
@@ -349,6 +355,11 @@ export function kickPlayer(peerId) {
     }
 }
 
+export function broadcastStartGame() {
+    if (!_isHost) return;
+    _broadcastToGuests({ type: 'startGame' });
+}
+
 export function disconnect() {
     if (_hostConn) { _hostConn.close(); _hostConn = null; }
     Object.values(_guestConns).forEach(c => c.close());
@@ -367,4 +378,5 @@ export function disconnect() {
     _onKey = null;
     _onChat = null;
     _onDisconnect = null;
+    _onStartGame = null;
 }
