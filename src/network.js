@@ -60,6 +60,7 @@ export function onDisconnect(cb) { _onDisconnect = cb; }
 
 export function createRoom(playerName) {
     return new Promise((resolve, reject) => {
+        let resolved = false;
         _roomCode = _genCode();
         _isHost = true;
         _hostName = playerName || 'Host';
@@ -67,7 +68,19 @@ export function createRoom(playerName) {
 
         _peer = new Peer(_myId);
 
+        const timer = setTimeout(() => {
+            if (!resolved) {
+                resolved = true;
+                _peer.destroy();
+                _peer = null;
+                reject(new Error('PeerJS connection timeout'));
+            }
+        }, 10000);
+
         _peer.on('open', (id) => {
+            if (resolved) return;
+            resolved = true;
+            clearTimeout(timer);
             _myId = id;
             _players[id] = { x: 0, y: 0, facing: 'down', hp: 100, maxHp: 100, classKey: 'sage', attacking: false };
             _playerNames[id] = _hostName;
@@ -80,12 +93,19 @@ export function createRoom(playerName) {
 
         _peer.on('error', (err) => {
             console.warn('PeerJS host error:', err);
-            if (err.type === 'unavailable-id') {
-                _roomCode = _genCode();
-                _myId = ROOM_PREFIX + _roomCode;
-                _peer.reconnect();
+            if (!resolved) {
+                resolved = true;
+                clearTimeout(timer);
+                if (err.type === 'unavailable-id') {
+                    _roomCode = _genCode();
+                    _myId = ROOM_PREFIX + _roomCode;
+                    _peer.destroy();
+                    _peer = null;
+                    createRoom(playerName).then(resolve).catch(reject);
+                } else {
+                    reject(err);
+                }
             }
-            reject(err);
         });
     });
 }
@@ -146,6 +166,17 @@ export function joinRoom(code, playerName) {
 
         _peer = new Peer();
 
+        let resolved = false;
+
+        const timer = setTimeout(() => {
+            if (!resolved) {
+                resolved = true;
+                _peer.destroy();
+                _peer = null;
+                reject(new Error('Connection timeout'));
+            }
+        }, 10000);
+
         _peer.on('open', (id) => {
             _myId = id;
             const hostId = ROOM_PREFIX + _roomCode;
@@ -158,6 +189,12 @@ export function joinRoom(code, playerName) {
                 conn.on('data', (data) => {
                     _handleHostData(data);
                 });
+
+                if (!resolved) {
+                    resolved = true;
+                    clearTimeout(timer);
+                    resolve();
+                }
             });
 
             conn.on('close', () => {
@@ -165,24 +202,23 @@ export function joinRoom(code, playerName) {
                 if (_onDisconnect) _onDisconnect('host');
             });
 
-            let welcomeTimeout = setTimeout(() => {
-                reject(new Error('Connection timeout'));
-                disconnect();
-            }, 5000);
-
-            const origHandler = _onStateUpdate;
-            _onStateUpdate = (state) => {
-                clearTimeout(welcomeTimeout);
-                _onStateUpdate = origHandler;
-                if (origHandler) origHandler(state);
-            };
-
-            resolve();
+            conn.on('error', (err) => {
+                console.warn('PeerJS guest conn error:', err);
+                if (!resolved) {
+                    resolved = true;
+                    clearTimeout(timer);
+                    reject(err);
+                }
+            });
         });
 
         _peer.on('error', (err) => {
             console.warn('PeerJS guest error:', err);
-            reject(err);
+            if (!resolved) {
+                resolved = true;
+                clearTimeout(timer);
+                reject(err);
+            }
         });
     });
 }

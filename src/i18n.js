@@ -56,6 +56,7 @@ const LOCALES = {
         'mp.invalidCode': 'Enter 4-digit code',
         'mp.createError': 'Failed to create room',
         'mp.joinError': 'Could not connect. Check code.',
+        'mp.connecting': 'Connecting...',
 
         // === LOGIN ===
         'login.title': 'LOGIN',
@@ -326,6 +327,7 @@ const LOCALES = {
         'mp.invalidCode': 'Введите 4-значный код',
         'mp.createError': 'Не удалось создать комнату',
         'mp.joinError': 'Не удалось подключиться. Проверьте код.',
+        'mp.connecting': 'Подключение...',
 
         // === LOGIN ===
         'login.title': 'ВХОД',
@@ -595,6 +597,7 @@ const LOCALES = {
         'mp.invalidCode': 'Gib einen 4-stelligen Code ein',
         'mp.createError': 'Raum konnte nicht erstellt werden',
         'mp.joinError': 'Verbindung fehlgeschlagen. Code prüfen.',
+        'mp.connecting': 'Verbindung wird hergestellt...',
 
         // === LOGIN ===
         'login.title': 'ANMELDUNG',

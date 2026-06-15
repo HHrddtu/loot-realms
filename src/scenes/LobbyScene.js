@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { lighten } from '../utils.js';
 import { getDisplayName } from '../auth.js';
 import {
-    createRoom, joinRoom, disconnect, isHost, getMyId,
+    createRoom, joinRoom, disconnect, isHost, getMyId, getRoomCode,
     getPlayerNames, onPlayerJoin, onPlayerLeave
 } from '../network.js';
 import { t } from '../i18n.js';
@@ -28,27 +28,34 @@ export default class LobbyScene extends Phaser.Scene {
         return obj;
     }
 
+    _getMyName() {
+        const name = getDisplayName();
+        return (name && name !== 'Guest') ? name : 'Player';
+    }
+
     _showMenu() {
         this._cleanup();
         this._status = 'menu';
 
-        this._add(this.add.text(400, 60, t('mp.title'), {
+        this._add(this.add.text(400, 100, t('mp.title'), {
             fontSize: '32px', fill: '#f1c40f', fontFamily: 'Georgia', fontStyle: 'bold'
         }).setOrigin(0.5));
 
-        this._add(this.add.text(400, 100, t('mp.subtitle'), {
+        this._add(this.add.text(400, 140, t('mp.subtitle'), {
             fontSize: '14px', fill: '#7f8c8d', fontFamily: 'Arial'
         }).setOrigin(0.5));
 
-        this._createField('name', 400, 170, getDisplayName() !== 'Guest' ? getDisplayName() : 'Your Name');
+        this._add(this.add.text(400, 185, this._getMyName(), {
+            fontSize: '18px', fill: '#bdc3c7', fontFamily: 'Arial'
+        }).setOrigin(0.5));
 
-        this._errorText = this._add(this.add.text(400, 215, '', {
+        this._errorText = this._add(this.add.text(400, 220, '', {
             fontSize: '13px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5));
 
-        this._createBtn(400, 260, t('mp.create'), 0x27ae60, () => this._doCreate());
-        this._createBtn(400, 310, t('mp.join'), 0x2980b9, () => this._showJoinUI());
-        this._createBtn(400, 380, t('mp.back'), 0x555577, () => {
+        this._createBtn(400, 270, t('mp.create'), 0x27ae60, () => this._doCreate());
+        this._createBtn(400, 320, t('mp.join'), 0x2980b9, () => this._showJoinUI());
+        this._createBtn(400, 400, t('mp.back'), 0x555577, () => {
             this._cleanup();
             this.scene.start('Menu');
         });
@@ -58,19 +65,22 @@ export default class LobbyScene extends Phaser.Scene {
         this._cleanup();
         this._status = 'joinUI';
 
-        this._add(this.add.text(400, 60, t('mp.joinRoom'), {
+        this._add(this.add.text(400, 100, t('mp.joinRoom'), {
             fontSize: '28px', fill: '#2980b9', fontFamily: 'Georgia', fontStyle: 'bold'
         }).setOrigin(0.5));
 
-        this._createField('name', 400, 130, getDisplayName() !== 'Guest' ? getDisplayName() : 'Your Name');
-        this._createField('code', 400, 200, 'CODE');
+        this._add(this.add.text(400, 150, this._getMyName(), {
+            fontSize: '18px', fill: '#bdc3c7', fontFamily: 'Arial'
+        }).setOrigin(0.5));
 
-        this._errorText = this._add(this.add.text(400, 250, '', {
+        this._createField('code', 400, 210, 'CODE');
+
+        this._errorText = this._add(this.add.text(400, 260, '', {
             fontSize: '13px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5));
 
-        this._createBtn(400, 295, t('mp.connect'), 0x27ae60, () => this._doJoin());
-        this._createBtn(400, 355, t('mp.back'), 0x555577, () => this._showMenu());
+        this._createBtn(400, 310, t('mp.connect'), 0x27ae60, () => this._doJoin());
+        this._createBtn(400, 370, t('mp.back'), 0x555577, () => this._showMenu());
     }
 
     _showWaitingRoom() {
@@ -78,12 +88,13 @@ export default class LobbyScene extends Phaser.Scene {
         this._status = 'waiting';
 
         const hostMode = isHost();
+        const code = getRoomCode() || this._roomCode;
 
         this._add(this.add.text(400, 50, hostMode ? t('mp.youAreHost') : t('mp.connected'), {
             fontSize: '28px', fill: hostMode ? '#f1c40f' : '#27ae60', fontFamily: 'Georgia', fontStyle: 'bold'
         }).setOrigin(0.5));
 
-        this._add(this.add.text(400, 95, t('mp.roomCode') + ': ' + this._roomCode, {
+        this._add(this.add.text(400, 95, t('mp.roomCode') + ': ' + code, {
             fontSize: '22px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 3
         }).setOrigin(0.5));
@@ -149,14 +160,14 @@ export default class LobbyScene extends Phaser.Scene {
         const input = document.createElement('input');
         input.type = 'text';
         input.placeholder = placeholder;
-        input.maxLength = key === 'code' ? 4 : 20;
+        input.maxLength = 4;
         input.style.cssText = `
             flex: 1; height: 100%;
             background: transparent !important; border: none !important; outline: none !important;
             color: #d0d0d0; font-family: Arial; font-size: 14px;
             caret-color: #f1c40f; padding: 0; margin: 0;
-            text-transform: ${key === 'code' ? 'uppercase' : 'none'};
-            letter-spacing: ${key === 'code' ? '8px' : 'normal'};
+            text-transform: uppercase;
+            letter-spacing: 8px;
             text-align: center;
         `;
         container.appendChild(input);
@@ -188,27 +199,40 @@ export default class LobbyScene extends Phaser.Scene {
         bg.on('pointerdown', cb);
     }
 
+    _showLoading() {
+        this._cleanup();
+        this._status = 'loading';
+        this._add(this.add.text(400, 200, t('mp.connecting') || 'Connecting...', {
+            fontSize: '22px', fill: '#f1c40f', fontFamily: 'Arial'
+        }).setOrigin(0.5));
+        this._errorText = this._add(this.add.text(400, 250, '', {
+            fontSize: '13px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5));
+    }
+
     async _doCreate() {
-        const name = this._nameInput ? this._nameInput.value.trim() : '';
-        if (!name) { this._showError(t('mp.enterName')); return; }
+        this._showLoading();
         try {
-            this._roomCode = await createRoom(name);
+            this._roomCode = await createRoom(this._getMyName());
             this._showWaitingRoom();
         } catch (e) {
+            console.warn('Create room failed:', e);
+            this._showMenu();
             this._showError(t('mp.createError'));
         }
     }
 
     async _doJoin() {
-        const name = this._nameInput ? this._nameInput.value.trim() : '';
         const code = this._codeInput ? this._codeInput.value.trim().toUpperCase() : '';
-        if (!name) { this._showError(t('mp.enterName')); return; }
         if (code.length !== 4) { this._showError(t('mp.invalidCode')); return; }
+        this._showLoading();
         try {
             this._roomCode = code;
-            await joinRoom(code, name);
+            await joinRoom(code, this._getMyName());
             this._showWaitingRoom();
         } catch (e) {
+            console.warn('Join room failed:', e);
+            this._showMenu();
             this._showError(t('mp.joinError'));
         }
     }
