@@ -18,6 +18,7 @@ let _hostName = '';
 let _playerNames = {};
 
 const ROOM_PREFIX = 'lr-';
+const MAX_PLAYERS = 4;
 
 function _genCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -58,6 +59,16 @@ export function onKey(cb) { _onKey = cb; }
 export function onChat(cb) { _onChat = cb; }
 export function onDisconnect(cb) { _onDisconnect = cb; }
 
+function _getHostPlayerNames() {
+    const out = {};
+    Object.keys(_playerNames).forEach(id => {
+        if (_guestConns[id] || id === _myId) {
+            out[id] = _playerNames[id];
+        }
+    });
+    return out;
+}
+
 export function createRoom(playerName) {
     return new Promise((resolve, reject) => {
         let settled = false;
@@ -65,6 +76,8 @@ export function createRoom(playerName) {
         _isHost = true;
         _hostName = playerName || 'Host';
         _myId = ROOM_PREFIX + _roomCode;
+        _playerNames = {};
+        _players = {};
 
         _peer = new Peer(_myId);
 
@@ -112,18 +125,21 @@ export function createRoom(playerName) {
 
 function _handleGuestConnection(conn) {
     const peerId = conn.peer;
+
+    if (Object.keys(_guestConns).length >= MAX_PLAYERS) {
+        conn.on('open', () => {
+            conn.send({ type: 'disconnect' });
+            conn.close();
+        });
+        return;
+    }
+
     _guestConns[peerId] = conn;
 
     conn.on('open', () => {
         conn.on('data', (data) => {
             _handleGuestData(peerId, data);
         });
-
-        const existingNames = {};
-        Object.keys(_playerNames).forEach(id => {
-            existingNames[id] = _playerNames[id];
-        });
-        conn.send({ type: 'welcome', roomCode: _roomCode, hostName: _hostName, players: existingNames });
     });
 
     conn.on('close', () => {
@@ -143,9 +159,11 @@ function _handleGuestData(peerId, data) {
 
             const existingNames = {};
             Object.keys(_playerNames).forEach(id => {
-                existingNames[id] = _playerNames[id];
+                if (_guestConns[id] || id === _myId) {
+                    existingNames[id] = _playerNames[id];
+                }
             });
-            _sendToGuest(peerId, { type: 'playerList', players: existingNames });
+            _sendToGuest(peerId, { type: 'welcome', roomCode: _roomCode, hostName: _hostName, players: existingNames });
 
             _broadcastToGuests({ type: 'playerJoin', peerId, name: data.name, classKey: data.classKey });
             if (_onPlayerJoin) _onPlayerJoin(peerId, data.name);
@@ -174,6 +192,8 @@ export function joinRoom(code, playerName) {
         _isHost = false;
         _roomCode = code.toUpperCase();
         _myId = null;
+        _playerNames = {};
+        _players = {};
 
         _peer = new Peer();
 
@@ -238,18 +258,11 @@ function _handleHostData(data) {
     switch (data.type) {
         case 'welcome':
             _roomCode = data.roomCode;
-            _playerNames[_myId] = _hostName;
             if (data.players) {
                 Object.keys(data.players).forEach(id => {
-                    _playerNames[id] = data.players[id];
-                });
-            }
-            break;
-
-        case 'playerList':
-            if (data.players) {
-                Object.keys(data.players).forEach(id => {
-                    _playerNames[id] = data.players[id];
+                    if (id && id !== _myId) {
+                        _playerNames[id] = data.players[id];
+                    }
                 });
             }
             break;
@@ -346,6 +359,7 @@ export function disconnect() {
     _myId = null;
     _players = {};
     _playerNames = {};
+    _hostName = '';
     _onStateUpdate = null;
     _onPlayerJoin = null;
     _onPlayerLeave = null;

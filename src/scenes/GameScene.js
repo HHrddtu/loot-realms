@@ -429,6 +429,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     _spawnRemotePlayer(id, name) {
+        if (id === getMyId()) return;
         if (this._remotePlayers[id]) return;
         const cls = getClassData(this.classKey);
         const walkKey = cls.walkTexKey || 'player_sage_walk';
