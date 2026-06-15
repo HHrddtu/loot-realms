@@ -1132,6 +1132,18 @@ export default class GameScene extends Phaser.Scene {
                     this._sendInputToHost();
                 }
             }
+            if (isHost()) {
+                const netPlayers = getPlayers();
+                Object.keys(this._remotePlayers).forEach(id => {
+                    if (netPlayers[id] && this._remotePlayers[id]) {
+                        this._remotePlayers[id].sprite.x = netPlayers[id].x;
+                        this._remotePlayers[id].sprite.y = netPlayers[id].y;
+                        if (netPlayers[id].facing) {
+                            this._remotePlayers[id].sprite.setFlipX(netPlayers[id].facing === 'left');
+                        }
+                    }
+                });
+            }
             Object.values(this._remotePlayers).forEach(rp => {
                 if (rp.nameText) {
                     rp.nameText.x = rp.sprite.x;
