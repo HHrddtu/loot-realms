@@ -15,6 +15,8 @@ let _onKey = null;
 let _onChat = null;
 let _onDisconnect = null;
 let _onStartGame = null;
+let _onWelcome = null;
+let _onDifficulty = null;
 let _hostName = '';
 let _playerNames = {};
 
@@ -60,6 +62,8 @@ export function onKey(cb) { _onKey = cb; }
 export function onChat(cb) { _onChat = cb; }
 export function onDisconnect(cb) { _onDisconnect = cb; }
 export function onStartGame(cb) { _onStartGame = cb; }
+export function onWelcome(cb) { _onWelcome = cb; }
+export function onDifficulty(cb) { _onDifficulty = cb; }
 
 function _getHostPlayerNames() {
     const out = {};
@@ -267,6 +271,7 @@ function _handleHostData(data) {
                     }
                 });
             }
+            if (_onWelcome) _onWelcome();
             break;
 
         case 'state':
@@ -301,6 +306,10 @@ function _handleHostData(data) {
 
         case 'startGame':
             if (_onStartGame) _onStartGame();
+            break;
+
+        case 'difficulty':
+            if (_onDifficulty) _onDifficulty(data.difficulty);
             break;
     }
 }
@@ -360,6 +369,11 @@ export function broadcastStartGame() {
     _broadcastToGuests({ type: 'startGame' });
 }
 
+export function sendDifficulty(difficulty) {
+    if (!_isHost) return;
+    _broadcastToGuests({ type: 'difficulty', difficulty });
+}
+
 export function disconnect() {
     if (_hostConn) { _hostConn.close(); _hostConn = null; }
     Object.values(_guestConns).forEach(c => c.close());
@@ -379,4 +393,6 @@ export function disconnect() {
     _onChat = null;
     _onDisconnect = null;
     _onStartGame = null;
+    _onWelcome = null;
+    _onDifficulty = null;
 }

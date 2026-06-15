@@ -3,8 +3,10 @@ import { lighten } from '../utils.js';
 import { getDisplayName } from '../auth.js';
 import {
     createRoom, joinRoom, disconnect, isHost, getMyId, getRoomCode,
-    getPlayerNames, onPlayerJoin, onPlayerLeave, broadcastStartGame, onStartGame
+    getPlayerNames, onPlayerJoin, onPlayerLeave, broadcastStartGame, onStartGame,
+    onWelcome, onDifficulty, sendDifficulty
 } from '../network.js';
+import { DIFFICULTIES } from '../config/index.js';
 import { t } from '../i18n.js';
 
 export default class LobbyScene extends Phaser.Scene {
@@ -19,6 +21,8 @@ export default class LobbyScene extends Phaser.Scene {
         this._roomCode = '';
         this._playersList = null;
         this._errorText = null;
+        this._difficulty = 'Normal';
+        this._diffLabel = null;
 
         this._showMenu();
     }
@@ -53,9 +57,39 @@ export default class LobbyScene extends Phaser.Scene {
             fontSize: '13px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5));
 
-        this._createBtn(400, 270, t('mp.create'), 0x27ae60, () => this._doCreate());
-        this._createBtn(400, 320, t('mp.join'), 0x2980b9, () => this._showJoinUI());
-        this._createBtn(400, 400, t('mp.back'), 0x555577, () => {
+        this._add(this.add.text(400, 260, t('adv.difficulty'), {
+            fontSize: '14px', fill: '#ecf0f1', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5));
+
+        this._diffLabel = this._add(this.add.text(400, 285, this._difficulty, {
+            fontSize: '18px', fill: '#f1c40f', fontFamily: 'Arial'
+        }).setOrigin(0.5));
+
+        const leftArrow = this._add(this.add.rectangle(330, 285, 28, 24, 0x34495e)
+            .setStrokeStyle(1, 0x556677).setInteractive({ useHandCursor: true }));
+        const leftLbl = this._add(this.add.text(330, 285, '<', {
+            fontSize: '14px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5));
+        const rightArrow = this._add(this.add.rectangle(470, 285, 28, 24, 0x34495e)
+            .setStrokeStyle(1, 0x556677).setInteractive({ useHandCursor: true }));
+        const rightLbl = this._add(this.add.text(470, 285, '>', {
+            fontSize: '14px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5));
+
+        leftArrow.on('pointerdown', () => {
+            const cur = DIFFICULTIES.indexOf(this._difficulty);
+            this._difficulty = DIFFICULTIES[(cur + DIFFICULTIES.length - 1) % DIFFICULTIES.length];
+            this._diffLabel.setText(this._difficulty);
+        });
+        rightArrow.on('pointerdown', () => {
+            const cur = DIFFICULTIES.indexOf(this._difficulty);
+            this._difficulty = DIFFICULTIES[(cur + 1) % DIFFICULTIES.length];
+            this._diffLabel.setText(this._difficulty);
+        });
+
+        this._createBtn(400, 330, t('mp.create'), 0x27ae60, () => this._doCreate());
+        this._createBtn(400, 380, t('mp.join'), 0x2980b9, () => this._showJoinUI());
+        this._createBtn(400, 440, t('mp.back'), 0x555577, () => {
             this._cleanup();
             this.scene.start('Menu');
         });
@@ -105,16 +139,22 @@ export default class LobbyScene extends Phaser.Scene {
             }).setOrigin(0.5));
         }
 
-        this._add(this.add.text(400, 165, t('mp.players') + ':', {
+        this._add(this.add.text(400, 150, t('adv.difficulty') + ': ' + this._difficulty, {
+            fontSize: '14px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5));
+
+        this._add(this.add.text(400, 185, t('mp.players') + ':', {
             fontSize: '16px', fill: '#ecf0f1', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5));
 
-        this._playersList = this._add(this.add.text(400, 195, t('mp.waiting'), {
+        this._playersList = this._add(this.add.text(400, 215, t('mp.waiting'), {
             fontSize: '14px', fill: '#bdc3c7', fontFamily: 'Arial',
             wordWrap: { width: 350 }, align: 'center', lineSpacing: 6
         }).setOrigin(0.5, 0));
 
-        this._createBtn(400, 400, t('mp.startGame'), 0x27ae60, () => this._startGame());
+        if (hostMode) {
+            this._createBtn(400, 400, t('mp.startGame'), 0x27ae60, () => this._startGame());
+        }
         this._createBtn(400, 450, t('mp.leave'), 0xc0392b, () => {
             disconnect();
             this._showMenu();
@@ -123,6 +163,10 @@ export default class LobbyScene extends Phaser.Scene {
         onPlayerJoin(() => this._updatePlayersList());
         onPlayerLeave(() => this._updatePlayersList());
         onStartGame(() => this._startGame());
+        onWelcome(() => this._updatePlayersList());
+        onDifficulty((diff) => {
+            this._difficulty = diff || 'Normal';
+        });
 
         this._updatePlayersList();
     }
@@ -248,9 +292,12 @@ export default class LobbyScene extends Phaser.Scene {
 
     _startGame() {
         this._cleanup();
-        if (isHost()) broadcastStartGame();
+        if (isHost()) {
+            sendDifficulty(this._difficulty);
+            broadcastStartGame();
+        }
         this.scene.start('Game', {
-            difficulty: 'Normal',
+            difficulty: this._difficulty,
             classKey: 'sage',
             multiplayer: true
         });
@@ -272,6 +319,7 @@ export default class LobbyScene extends Phaser.Scene {
         this._domInputs = [];
         this._errorText = null;
         this._playersList = null;
+        this._diffLabel = null;
     }
 
     shutdown() {
