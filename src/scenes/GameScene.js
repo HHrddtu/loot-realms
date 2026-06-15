@@ -27,7 +27,7 @@ import { VillageZone } from '../zones/VillageZone.js';
 import { HellZone } from '../zones/HellZone.js';
 import { SnowyZone } from '../zones/SnowyZone.js';
 import { CastleZone } from '../zones/CastleZone.js';
-import { isHost, getMyId, getPlayerNames, onStateUpdate, onLoot, onKey, sendInput, sendGameState, sendLootPickup, sendKeyPickup } from '../network.js';
+import { isHost, getMyId, getPlayers, getPlayerNames, onStateUpdate, onLoot, onKey, sendInput, sendGameState, sendLootPickup, sendKeyPickup } from '../network.js';
 
 
 export default class GameScene extends Phaser.Scene {
@@ -461,18 +461,29 @@ export default class GameScene extends Phaser.Scene {
             y: this.player.y,
             flipX: this.player.flipX
         };
+        const netPlayers = getPlayers();
+        Object.keys(netPlayers).forEach(id => {
+            if (id !== getMyId()) {
+                players[id] = {
+                    x: netPlayers[id].x,
+                    y: netPlayers[id].y,
+                    flipX: netPlayers[id].facing === 'left'
+                };
+            }
+        });
         sendGameState({ players, names: getPlayerNames() });
     }
 
     _sendInputToHost() {
         if (isHost()) return;
-        const keys = {};
-        if (this.cursors.left.isDown) keys.left = true;
-        if (this.cursors.right.isDown) keys.right = true;
-        if (this.cursors.up.isDown) keys.up = true;
-        if (this.cursors.down.isDown) keys.down = true;
-        if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) keys.space = true;
-        sendInput(keys);
+        sendInput({
+            x: this.player.x,
+            y: this.player.y,
+            facing: this.facing,
+            attacking: this.playerAttacking,
+            hp: this.playerHP,
+            maxHp: this.playerMaxHP
+        });
     }
 
     _cleanupMultiplayer() {
