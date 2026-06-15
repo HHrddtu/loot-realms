@@ -51,6 +51,7 @@
 | **94-108** | **Рефакторинг v0.12.0** — см. ниже | v0.12.0 |
 | **109-115** | **Castle Questline v0.13.0** — см. ниже | v0.13.0 |
 | **116-126** | **Shop & Inn v0.14.0** — см. ниже | v0.14.0 |
+| **127-133** | **PeerJS Multiplayer v0.15.0** — P2P Host/Guest, 4 игрока, room code | v0.15.0 |
 
 ---
 
@@ -139,6 +140,20 @@
 | 132 | save.js Firestore sync | `src/save.js` | ✅ |
 | 133 | i18n login.* ключи | `src/i18n.js` | ✅ |
 | 134 | main.js LoginScene + dom | `src/main.js` | ✅ |
+
+---
+
+## PeerJS Multiplayer v0.15.0
+
+| # | Задача | Файл | Статус |
+|---|--------|------|--------|
+| 127 | PeerJS установка | `package.json` | ✅ |
+| 128 | network.js — PeerJS wrapper | `src/network.js` | ✅ |
+| 129 | LobbyScene — UI лобби (Create/Join) | `src/scenes/LobbyScene.js` | ✅ |
+| 130 | MenuScene — кнопка Multiplayer | `src/scenes/MenuScene.js` | ✅ |
+| 131 | main.js — добавить LobbyScene | `src/main.js` | ✅ |
+| 132 | GameScene — multiplayer sync | `src/scenes/GameScene.js` | ✅ |
+| 133 | i18n — mp.* ключи EN/RU/DE | `src/i18n.js` | ✅ |
 | 135 | index.html CSS override | `index.html` | ✅ |
 
 ### Известные баги (требуют доработки)

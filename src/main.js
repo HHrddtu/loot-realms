@@ -3,6 +3,7 @@ import { GAME_WIDTH, GAME_HEIGHT } from './config/index.js';
 import BootScene from './scenes/BootScene.js';
 import LoginScene from './scenes/LoginScene.js';
 import MenuScene from './scenes/MenuScene.js';
+import LobbyScene from './scenes/LobbyScene.js';
 import ClassSelectScene from './scenes/ClassSelectScene.js';
 import GameScene from './scenes/GameScene.js';
 import TalentScene from './scenes/TalentScene.js';
@@ -25,5 +26,5 @@ new Phaser.Game({
         default: 'arcade',
         arcade: { gravity: { y: 0 }, debug: false }
     },
-    scene: [BootScene, LoginScene, MenuScene, ClassSelectScene, GameScene, TalentScene, BestiaryScene, MaterialBookScene, SoulBookScene, CraftScene]
+    scene: [BootScene, LoginScene, MenuScene, LobbyScene, ClassSelectScene, GameScene, TalentScene, BestiaryScene, MaterialBookScene, SoulBookScene, CraftScene]
 });

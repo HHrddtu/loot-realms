@@ -47,11 +47,15 @@ export default class MenuScene extends Phaser.Scene {
             }
         });
 
-        this.accountBtn = this.menuBtn(400, 310, t('menu.account'), 0x2980b9, () => this.showAccount());
+        this.mpBtn = this.menuBtn(400, 310, t('menu.multiplayer'), 0x8e44ad, () => {
+            this.scene.start('Lobby');
+        });
 
-        this.advBtn = this.menuBtn(400, 370, t('menu.advanced'), 0x555577, () => this.showAdvanced());
+        this.accountBtn = this.menuBtn(400, 370, t('menu.account'), 0x2980b9, () => this.showAccount());
 
-        this.logoutBtn = this.menuBtn(400, 430, t('menu.logout'), 0xc0392b, async () => {
+        this.advBtn = this.menuBtn(400, 430, t('menu.advanced'), 0x555577, () => this.showAdvanced());
+
+        this.logoutBtn = this.menuBtn(400, 490, t('menu.logout'), 0xc0392b, async () => {
             await logout();
             this.scene.start('Login');
         });

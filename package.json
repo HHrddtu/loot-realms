@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "firebase": "^12.14.0",
+    "peerjs": "^1.5.5",
     "phaser": "^3.80.0"
   },
   "devDependencies": {

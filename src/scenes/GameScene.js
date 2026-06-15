@@ -27,6 +27,7 @@ import { VillageZone } from '../zones/VillageZone.js';
 import { HellZone } from '../zones/HellZone.js';
 import { SnowyZone } from '../zones/SnowyZone.js';
 import { CastleZone } from '../zones/CastleZone.js';
+import { isHost, getMyId, getPlayerNames, onStateUpdate, onLoot, onKey, sendInput, sendLootPickup, sendKeyPickup } from '../network.js';
 
 
 export default class GameScene extends Phaser.Scene {
@@ -38,6 +39,7 @@ export default class GameScene extends Phaser.Scene {
         this.difficulty = data.difficulty || 'Normal';
         this.loadOnStart = data.load || false;
         this.classKey = data.classKey || 'sage';
+        this.multiplayer = data.multiplayer || false;
     }
 
     create() {
@@ -155,6 +157,12 @@ export default class GameScene extends Phaser.Scene {
         this.nearbyShop = null;
         this.nearbyInn = null;
 
+        this._remotePlayers = {};
+        this._mpSendTimer = 0;
+        this._mpStateHandler = null;
+        this._mpLootHandler = null;
+        this._mpKeyHandler = null;
+
         const acc = loadAccount() || {};
         this.accountLevel = acc.accountLevel || 1;
         this.accountExp = acc.accountExp || 0;
@@ -196,6 +204,10 @@ export default class GameScene extends Phaser.Scene {
             this._setupZone('forest');
         }
 
+        if (this.multiplayer) {
+            this._setupMultiplayer();
+        }
+
         this.events.on('shutdown', () => {
             if (this._onBeforeUnload) {
                 window.removeEventListener('beforeunload', this._onBeforeUnload);
@@ -204,6 +216,9 @@ export default class GameScene extends Phaser.Scene {
             if (this.particles) this.particles.destroy();
             this.doSave();
             stopMusic();
+            if (this.multiplayer) {
+                this._cleanupMultiplayer();
+            }
         });
 
         this._onBeforeUnload = () => this.doSave();
@@ -358,6 +373,110 @@ export default class GameScene extends Phaser.Scene {
         this.player.body.setOffset(7, 8);
         this.player.body.setCollideWorldBounds(true);
         this.player.play(animKey);
+    }
+
+    /* ===== MULTIPLAYER ===== */
+
+    _setupMultiplayer() {
+        const names = getPlayerNames();
+        const ids = Object.keys(names);
+        ids.forEach(id => {
+            if (id === getMyId()) return;
+            this._spawnRemotePlayer(id, names[id]);
+        });
+
+        this._mpStateHandler = (data) => {
+            if (!data || !data.players) return;
+            const seen = {};
+            Object.keys(data.players).forEach(id => {
+                if (id === getMyId()) return;
+                seen[id] = true;
+                const p = data.players[id];
+                if (this._remotePlayers[id]) {
+                    this._remotePlayers[id].sprite.x = p.x;
+                    this._remotePlayers[id].sprite.y = p.y;
+                    if (p.flipX !== undefined) this._remotePlayers[id].sprite.setFlipX(p.flipX);
+                } else {
+                    this._spawnRemotePlayer(id, data.names?.[id] || '???');
+                    if (this._remotePlayers[id]) {
+                        this._remotePlayers[id].sprite.x = p.x;
+                        this._remotePlayers[id].sprite.y = p.y;
+                    }
+                }
+            });
+            Object.keys(this._remotePlayers).forEach(id => {
+                if (!seen[id]) this._despawnRemotePlayer(id);
+            });
+        };
+
+        this._mpLootHandler = (data) => {
+            if (!data) return;
+            if (data.type === 'heal') {
+                this.playerHP = Math.min(this.playerMaxHP, this.playerHP + data.amount);
+            }
+        };
+
+        this._mpKeyHandler = (data) => {
+            if (!data) return;
+            if (data.key === 'secret') this.hasSecretKey = true;
+            if (data.key === 'mine') this.mineUnlocked = true;
+            if (data.key === 'cave') this.caveBossDefeated = true;
+        };
+
+        onStateUpdate(this._mpStateHandler);
+        onLoot(this._mpLootHandler);
+        onKey(this._mpKeyHandler);
+    }
+
+    _spawnRemotePlayer(id, name) {
+        if (this._remotePlayers[id]) return;
+        const cls = getClassData(this.classKey);
+        const walkKey = cls.walkTexKey || 'player_sage_walk';
+        const sprite = this.add.sprite(400, 400, walkKey).setDepth(9);
+        this.physics.add.existing(sprite, false);
+        sprite.body.setSize(18, 38);
+        sprite.body.setOffset(7, 8);
+        sprite.body.setCollideWorldBounds(true);
+        sprite.setAlpha(0.7);
+        const nameText = this.add.text(0, 0, name || '...', {
+            fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
+        }).setOrigin(0.5).setDepth(11);
+        this._remotePlayers[id] = { sprite, nameText };
+    }
+
+    _despawnRemotePlayer(id) {
+        if (!this._remotePlayers[id]) return;
+        this._remotePlayers[id].sprite.destroy();
+        this._remotePlayers[id].nameText.destroy();
+        delete this._remotePlayers[id];
+    }
+
+    _broadcastState() {
+        if (!isHost()) return;
+        const players = {};
+        players[getMyId()] = {
+            x: this.player.x,
+            y: this.player.y,
+            flipX: this.player.flipX
+        };
+        sendGameState({ players, names: getPlayerNames() });
+    }
+
+    _sendInputToHost() {
+        if (isHost()) return;
+        const keys = {};
+        if (this.cursors.left.isDown) keys.left = true;
+        if (this.cursors.right.isDown) keys.right = true;
+        if (this.cursors.up.isDown) keys.up = true;
+        if (this.cursors.down.isDown) keys.down = true;
+        if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) keys.space = true;
+        sendInput(keys);
+    }
+
+    _cleanupMultiplayer() {
+        Object.keys(this._remotePlayers).forEach(id => this._despawnRemotePlayer(id));
+        this._remotePlayers = {};
     }
 
     /* ===== STATS ===== */
@@ -990,6 +1109,24 @@ export default class GameScene extends Phaser.Scene {
 
         this.updateUI();
         this._checkNpcProximity();
+
+        if (this.multiplayer) {
+            this._mpSendTimer += delta;
+            if (this._mpSendTimer >= 50) {
+                this._mpSendTimer = 0;
+                if (isHost()) {
+                    this._broadcastState();
+                } else {
+                    this._sendInputToHost();
+                }
+            }
+            Object.values(this._remotePlayers).forEach(rp => {
+                if (rp.nameText) {
+                    rp.nameText.x = rp.sprite.x;
+                    rp.nameText.y = rp.sprite.y - 28;
+                }
+            });
+        }
     }
 
     _updateEnemies() {
