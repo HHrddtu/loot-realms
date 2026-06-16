@@ -1,5 +1,6 @@
 import {
-    DIFF_MULT, MATERIAL_SLOTS, EQUIP_BAG_SLOTS, ACCOUNT_EQUIP_BAG_SLOTS, EMPTY_ACCOUNT_EQUIPMENT
+    DIFF_MULT, MATERIAL_SLOTS, EQUIP_BAG_SLOTS, ACCOUNT_EQUIP_BAG_SLOTS, EMPTY_ACCOUNT_EQUIPMENT,
+    SHOP_EQUIP_PRICES, SELL_PRICE_RATIO
 } from '../config/index.js';
 import { getClassData, getClassStats } from '../classes.js';
 import { getTalentEffects } from '../talents.js';
@@ -178,16 +179,22 @@ export class PlayerSystem {
 
     addMaterial(item) {
         if (this.scene.materials.length >= this.scene.maxMaterials) return false;
-        this.scene.materials.push(item);
-        if (item.id) recordMaterialCollect(item.id);
-        if (item.id) onCollect(item.id);
+        const copy = { ...item };
+        if (copy.locked === undefined) copy.locked = false;
+        this.scene.materials.push(copy);
+        if (copy.id) recordMaterialCollect(copy.id);
+        if (copy.id) onCollect(copy.id);
         this.recalcStats();
         return true;
     }
 
     addEquip(item) {
         if (this.scene.equipBag.length >= this.scene.maxEquipBag) return false;
-        this.scene.equipBag.push(item);
+        const copy = { ...item };
+        if (copy.locked === undefined) {
+            copy.locked = (copy.rarity === 'legendary' || copy.rarity === 'epic' || copy.locked);
+        }
+        this.scene.equipBag.push(copy);
         return true;
     }
 
@@ -293,19 +300,23 @@ export class PlayerSystem {
         if (type === 'material') {
             item = this.scene.materials[idx];
             if (!item) return 0;
+            if (item.locked) return -1;
             this.scene.materials.splice(idx, 1);
         } else if (type === 'equip') {
             item = this.scene.equipBag[idx];
             if (!item) return 0;
+            if (item.locked) return -1;
             this.scene.equipBag.splice(idx, 1);
         } else if (type === 'accountEquip') {
             const slot = idx;
             item = this.scene.accountEquipment[slot];
             if (!item) return 0;
+            if (item.locked) return -1;
             this.scene.accountEquipment[slot] = null;
         } else if (type === 'accountEquipBag') {
             item = this.scene.accountEquipBag[idx];
             if (!item) return 0;
+            if (item.locked) return -1;
             this.scene.accountEquipBag.splice(idx, 1);
         } else {
             return 0;
@@ -322,6 +333,44 @@ export class PlayerSystem {
         }
         this.recalcStats();
         return expGain;
+    }
+
+    sellItem(type, idx) {
+        let item = null;
+        if (type === 'equip') {
+            item = this.scene.equipBag[idx];
+            if (!item) return 0;
+            if (item.locked) return -1;
+            const sellPrice = Math.floor((SHOP_EQUIP_PRICES[item.rarity] || SHOP_EQUIP_PRICES.uncommon) * SELL_PRICE_RATIO);
+            this.scene.equipBag.splice(idx, 1);
+            this.scene.gold = (this.scene.gold || 0) + sellPrice;
+            return sellPrice;
+        } else if (type === 'accountEquipBag') {
+            item = this.scene.accountEquipBag[idx];
+            if (!item) return 0;
+            if (item.locked) return -1;
+            const sellPrice = Math.floor((SHOP_EQUIP_PRICES[item.rarity] || SHOP_EQUIP_PRICES.uncommon) * SELL_PRICE_RATIO);
+            this.scene.accountEquipBag.splice(idx, 1);
+            this.scene.gold = (this.scene.gold || 0) + sellPrice;
+            return sellPrice;
+        }
+        return 0;
+    }
+
+    toggleLock(type, idx) {
+        let item = null;
+        if (type === 'material') {
+            item = this.scene.materials[idx];
+        } else if (type === 'equip') {
+            item = this.scene.equipBag[idx];
+        } else if (type === 'accountEquipBag') {
+            item = this.scene.accountEquipBag[idx];
+        } else if (type === 'accountEquip') {
+            item = this.scene.accountEquipment[idx];
+        }
+        if (!item) return false;
+        item.locked = !item.locked;
+        return item.locked;
     }
 
     getAccountEquipStatsText() {

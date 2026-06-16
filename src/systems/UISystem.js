@@ -303,6 +303,16 @@ export class UISystem {
         lines.push({ text: item.name || 'Unknown', color: hex, size: '13px', bold: true });
         lines.push({ text: rarityName, color: '#888', size: '10px', bold: false });
 
+        if (item.locked) {
+            lines.push({ text: '\u{1F512} Locked', color: '#e74c3c', size: '10px', bold: true });
+        }
+        if (item.questItem) {
+            lines.push({ text: '\u2605 Quest Item', color: '#f39c12', size: '10px', bold: true });
+        }
+        if (item.relic) {
+            lines.push({ text: '\u2605 Relic', color: '#9b59b6', size: '10px', bold: true });
+        }
+
         if (item.slot) {
             const slotName = item.slot.charAt(0).toUpperCase() + item.slot.slice(1);
             lines.push({ text: 'Slot: ' + slotName, color: '#95a5a6', size: '10px', bold: false });
@@ -332,6 +342,8 @@ export class UISystem {
         if (item.effect) {
             lines.push({ text: 'Effect: ' + item.effect, color: '#f39c12', size: '10px', bold: false });
         }
+
+        lines.push({ text: 'RMB=lock/unlock', color: '#555', size: '9px', bold: false });
 
         const maxW = 180;
         const lineH = 16;
@@ -421,11 +433,15 @@ export class UISystem {
                 bg.setInteractive({ useHandCursor: true });
                 bg.on('pointerover', () => this._showItemTooltip(equipX + 50, sl.y, item));
                 bg.on('pointerout', () => this._hideItemTooltip());
-                bg.on('pointerdown', () => {
-                    this._hideItemTooltip();
-                    this.scene.unequipItem(sl.key);
-                    this.closeInventory();
-                    this.openInventory();
+                bg.on('pointerdown', (pointer) => {
+                    if (pointer.rightButtonDown()) {
+                        this.scene.playerSys.toggleLock('equip', this.scene.equipBag.indexOf(item));
+                    } else {
+                        this._hideItemTooltip();
+                        this.scene.unequipItem(sl.key);
+                        this.closeInventory();
+                        this.openInventory();
+                    }
                 });
             } else {
                 this.scene.invGroup.push(mkInv(this.scene.add.text(equipX + 20, sl.y + 10, 'Empty', {
@@ -486,8 +502,8 @@ export class UISystem {
             fontSize: '10px', fill: '#27ae60', fontFamily: 'Arial'
         }).setOrigin(0.5)));
 
-        const cols = 3, slotSize = 40, gap = 4;
-        for (let i = 0; i < 6; i++) {
+        const cols = 5, slotSize = 36, gap = 4;
+        for (let i = 0; i < this.scene.maxMaterials; i++) {
             const col = i % cols;
             const row = Math.floor(i / cols);
             const sx = matX - (cols * (slotSize + gap)) / 2 + col * (slotSize + gap) + slotSize / 2;
@@ -498,13 +514,28 @@ export class UISystem {
 
             if (i < this.scene.materials.length) {
                 const item = this.scene.materials[i];
-                this.scene.invGroup.push(mkInv(this.scene.add.sprite(sx, sy, item.texKey).setScale(1.3)));
+                this.scene.invGroup.push(mkInv(this.scene.add.sprite(sx, sy, item.texKey).setScale(1.2)));
                 bg.setStrokeStyle(2, RARITY_COLORS[item.rarity]);
                 bg.setInteractive({ useHandCursor: true });
 
+                if (item.locked) {
+                    const lockIcon = mkInv(this.scene.add.text(sx - slotSize / 2 + 3, sy - slotSize / 2 + 2, '\u{1F512}', {
+                        fontSize: '8px', fill: '#e74c3c', fontFamily: 'Arial'
+                    }));
+                    this.scene.invGroup.push(lockIcon);
+                }
+
                 const idx = i;
-                bg.on('pointerdown', () => {
-                    if (this.scene.input.keyboard.checkDown(this.scene.input.keyboard.addKey('SHIFT'))) {
+                bg.on('pointerdown', (pointer) => {
+                    if (pointer.rightButtonDown()) {
+                        this.scene.playerSys.toggleLock('material', idx);
+                        this.closeInventory();
+                        this.openInventory();
+                    } else if (this.scene.input.keyboard.checkDown(this.scene.input.keyboard.addKey('SHIFT'))) {
+                        if (item.locked) {
+                            this.floatingText(sx, sy - 20, 'Item is locked!', '#e74c3c');
+                            return;
+                        }
                         const expGain = this.scene.deleteItem('material', idx);
                         if (expGain > 0) {
                             this.floatingText(sx, sy - 20, '+' + expGain + ' EXP', '#2ecc71');
@@ -523,14 +554,16 @@ export class UISystem {
                     if (item.stats.speed) statParts.push('+' + item.stats.speed + 'SPD');
                 }
                 if (statParts.length > 0) {
-                    this.scene.invGroup.push(mkInv(this.scene.add.text(sx, sy + slotSize / 2 + 8, statParts.join(' '), {
-                        fontSize: '8px', fill: '#27ae60', fontFamily: 'Arial'
+                    this.scene.invGroup.push(mkInv(this.scene.add.text(sx, sy + slotSize / 2 + 6, statParts.join(' '), {
+                        fontSize: '7px', fill: '#27ae60', fontFamily: 'Arial'
                     }).setOrigin(0.5)));
                 }
 
-                this.scene.invGroup.push(mkInv(this.scene.add.text(sx + slotSize / 2 - 2, sy - slotSize / 2 + 2, 'x', {
-                    fontSize: '8px', fill: '#c0392b', fontFamily: 'Arial', fontStyle: 'bold'
-                }).setOrigin(1, 0)));
+                if (!item.locked) {
+                    this.scene.invGroup.push(mkInv(this.scene.add.text(sx + slotSize / 2 - 2, sy - slotSize / 2 + 2, 'x', {
+                        fontSize: '8px', fill: '#c0392b', fontFamily: 'Arial', fontStyle: 'bold'
+                    }).setOrigin(1, 0)));
+                }
             }
         }
     }
@@ -543,8 +576,8 @@ export class UISystem {
             fontSize: '12px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5)));
         this.scene.invGroup.push(mkInv(this.scene.add.text(eqX, eqY + 16,
-            this.scene.equipBag.length + '/' + this.scene.maxEquipBag + '  (click=equip, shift+click=sell)', {
-            fontSize: '10px', fill: '#555', fontFamily: 'Arial'
+            this.scene.equipBag.length + '/' + this.scene.maxEquipBag + '  click=equip  shift+click=sell  RMB=lock', {
+            fontSize: '9px', fill: '#555', fontFamily: 'Arial'
         }).setOrigin(0.5)));
 
         const cols = 4, slotSize = 40, gap = 4;
@@ -563,14 +596,29 @@ export class UISystem {
                 bg.setStrokeStyle(2, RARITY_COLORS[item.rarity]);
                 bg.setInteractive({ useHandCursor: true });
 
+                if (item.locked) {
+                    const lockIcon = mkInv(this.scene.add.text(sx - slotSize / 2 + 3, sy - slotSize / 2 + 2, '\u{1F512}', {
+                        fontSize: '8px', fill: '#e74c3c', fontFamily: 'Arial'
+                    }));
+                    this.scene.invGroup.push(lockIcon);
+                }
+
                 const idx = i;
-                bg.on('pointerdown', () => {
-                    if (this.scene.input.keyboard.checkDown(this.scene.input.keyboard.addKey('SHIFT'))) {
-                        const sellPrice = Math.floor((SHOP_EQUIP_PRICES[item.rarity] || SHOP_EQUIP_PRICES.uncommon) * SELL_PRICE_RATIO);
-                        this.scene.equipBag.splice(idx, 1);
-                        this.scene.gold = (this.scene.gold || 0) + sellPrice;
-                        this.scene.floatingText(sx, sy - 20, '+' + sellPrice + ' gold', '#f1c40f');
-                        if (this.scene.goldText) this.scene.goldText.setText('Gold: ' + this.scene.gold);
+                bg.on('pointerdown', (pointer) => {
+                    if (pointer.rightButtonDown()) {
+                        this.scene.playerSys.toggleLock('equip', idx);
+                        this.closeInventory();
+                        this.openInventory();
+                    } else if (this.scene.input.keyboard.checkDown(this.scene.input.keyboard.addKey('SHIFT'))) {
+                        if (item.locked) {
+                            this.scene.floatingText(sx, sy - 20, 'Item is locked!', '#e74c3c');
+                            return;
+                        }
+                        const sellResult = this.scene.playerSys.sellItem('equip', idx);
+                        if (sellResult > 0) {
+                            this.scene.floatingText(sx, sy - 20, '+' + sellResult + ' gold', '#f1c40f');
+                            if (this.scene.goldText) this.scene.goldText.setText('Gold: ' + this.scene.gold);
+                        }
                         this.closeInventory();
                         this.openInventory();
                     } else {
@@ -582,9 +630,11 @@ export class UISystem {
                 bg.on('pointerover', () => { bg.setScale(1.1); this._showItemTooltip(sx + 30, sy, item); });
                 bg.on('pointerout', () => { bg.setScale(1); this._hideItemTooltip(); });
 
-                this.scene.invGroup.push(mkInv(this.scene.add.text(sx + slotSize / 2 - 2, sy - slotSize / 2 + 2, 'x', {
-                    fontSize: '8px', fill: '#c0392b', fontFamily: 'Arial', fontStyle: 'bold'
-                }).setOrigin(1, 0)));
+                if (!item.locked) {
+                    this.scene.invGroup.push(mkInv(this.scene.add.text(sx + slotSize / 2 - 2, sy - slotSize / 2 + 2, 'x', {
+                        fontSize: '8px', fill: '#c0392b', fontFamily: 'Arial', fontStyle: 'bold'
+                    }).setOrigin(1, 0)));
+                }
             }
         }
     }
@@ -803,7 +853,7 @@ export class UISystem {
             fontSize: '13px', fill: '#f39c12', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5)));
 
-        this.scene.accountEquipGroup.push(mk(this.scene.add.text(400, 278, this.scene.accountEquipBag.length + '/' + this.scene.maxAccountEquipBag + '  LMB=equip  RMB=unequip  SHIFT+click=sell', {
+        this.scene.accountEquipGroup.push(mk(this.scene.add.text(400, 278, this.scene.accountEquipBag.length + '/' + this.scene.maxAccountEquipBag + '  LMB=equip  RMB=lock  SHIFT+click=sell', {
             fontSize: '9px', fill: '#666', fontFamily: 'Arial'
         }).setOrigin(0.5)));
 
@@ -830,6 +880,13 @@ export class UISystem {
                 const rc = RARITY_COLORS[item.rarity] || 0xaaaaaa;
                 bg.setStrokeStyle(2, rc);
 
+                if (item.locked) {
+                    const lockIcon = mk(this.scene.add.text(sx - bagSlotSize / 2 + 2, sy - bagSlotSize / 2 + 1, '\u{1F512}', {
+                        fontSize: '7px', fill: '#e74c3c', fontFamily: 'Arial'
+                    }));
+                    this.scene.accountEquipGroup.push(lockIcon);
+                }
+
                 bg.setInteractive({ useHandCursor: true });
                 bg.on('pointerover', () => {
                     bg.setScale(1.15);
@@ -840,10 +897,18 @@ export class UISystem {
                     this._hideItemTooltip();
                 });
                 bg.on('pointerdown', (pointer) => {
-                    if (pointer.rightButtonDown() || this.scene.input.keyboard.checkDown(this.scene.input.keyboard.addKey('SHIFT'))) {
-                        const expGain = this.scene.deleteItem('accountEquipBag', i);
-                        if (expGain > 0) {
-                            this.floatingText(sx, sy - 20, '+' + expGain + ' Account EXP', '#f39c12');
+                    if (pointer.rightButtonDown()) {
+                        this.scene.playerSys.toggleLock('accountEquipBag', i);
+                        this._closeAccountEquipOverlay();
+                        this._openAccountEquipOverlay();
+                    } else if (this.scene.input.keyboard.checkDown(this.scene.input.keyboard.addKey('SHIFT'))) {
+                        if (item.locked) {
+                            this.floatingText(sx, sy - 20, 'Item is locked!', '#e74c3c');
+                            return;
+                        }
+                        const sellResult = this.scene.playerSys.sellItem('accountEquipBag', i);
+                        if (sellResult > 0) {
+                            this.floatingText(sx, sy - 20, '+' + sellResult + ' gold', '#f1c40f');
                         }
                         this._closeAccountEquipOverlay();
                         this._openAccountEquipOverlay();

@@ -89,9 +89,9 @@ export const ACCOUNT_EQUIP_DB = [
 ];
 
 export const ACCOUNT_EQUIP_DB_CAVE = [
-    { id: 'relic_cave_sage',     name: 'Relic of Depths',       nameRu: 'Реликвия Глубин',      nameDe: 'Reliktiefe',          rarity: 'legendary', slot: 'relic', texKey: 'sage_book',   chance: 0.33, stats: {}, effect: 'fireball_chain', classes: ['sage'] },
-    { id: 'relic_cave_alchemist', name: 'Relic of Fermentation', nameRu: 'Реликвия Брожения',   nameDe: 'Reliktgärung',        rarity: 'legendary', slot: 'relic', texKey: 'alch_wand',   chance: 0.33, stats: {}, effect: 'craft_bonus',   classes: ['alchemist'] },
-    { id: 'relic_cave_angel',    name: 'Relic of Grace',        nameRu: 'Реликвия Благодати',   nameDe: 'Reliktder Gnade',     rarity: 'legendary', slot: 'relic', texKey: 'angel_staff', chance: 0.34, stats: {}, effect: 'purify_heal',  classes: ['angel'] }
+    { id: 'relic_cave_sage',     name: 'Relic of Depths',       nameRu: 'Реликвия Глубин',      nameDe: 'Reliktiefe',          rarity: 'legendary', slot: 'relic', texKey: 'sage_book',   chance: 0.33, stats: {}, effect: 'fireball_chain', classes: ['sage'], locked: true, relic: true },
+    { id: 'relic_cave_alchemist', name: 'Relic of Fermentation', nameRu: 'Реликвия Брожения',   nameDe: 'Reliktgärung',        rarity: 'legendary', slot: 'relic', texKey: 'alch_wand',   chance: 0.33, stats: {}, effect: 'craft_bonus',   classes: ['alchemist'], locked: true, relic: true },
+    { id: 'relic_cave_angel',    name: 'Relic of Grace',        nameRu: 'Реликвия Благодати',   nameDe: 'Reliktder Gnade',     rarity: 'legendary', slot: 'relic', texKey: 'angel_staff', chance: 0.34, stats: {}, effect: 'purify_heal',  classes: ['angel'], locked: true, relic: true }
 ];
 export const CAVE_RELIC_CLASSES = ['sage', 'alchemist', 'angel'];
 
@@ -115,6 +115,8 @@ export const SECRET_KEY_ITEM = {
     texKey: 'item_key',
     rarity: 'legendary',
     type: 'material',
+    locked: true,
+    questItem: true,
     description: 'A mysterious key that hums with dark energy. The old cart driver might know what it opens.',
     descriptionRu: 'Загадочный ключ, гудящий тёмной энергией. Старый извозчик знает, что он открывает.',
     descriptionDe: 'Ein geheimnisvoller Schlüssel, der von dunkler Energie summt. Der alte Kutscher weiß vielleicht, was er öffnet.',
@@ -125,6 +127,7 @@ export const MAGMA_ARMOR = {
     id: 'magma_armor', name: 'Magma Armor', nameRu: 'Магма Броня', nameDe: 'Magma-Rüstung',
     rarity: 'legendary', slot: 'armor', texKey: 'acc_book',
     stats: { hp: 80, dmg: 25, speed: 15 },
+    locked: true,
     description: 'Legendary armor forged in hellfire'
 };
 
@@ -132,6 +135,7 @@ export const HEAT_CRYSTAL = {
     id: 'heat_crystal', name: 'Heat Crystal', nameRu: 'Жила Тепла', nameDe: 'Wärmekristall',
     rarity: 'legendary', slot: 'accessory', texKey: 'item_ruby',
     stats: { hp: 50, dmg: 20, speed: 10 },
+    locked: true,
     description: 'A crystal forged in the heart of hell. Radiates intense heat.'
 };
 
@@ -139,6 +143,7 @@ export const WARMTH_CORE = {
     id: 'warmth_core', name: 'Warmth Core', nameRu: 'Жизнь Тепла', nameDe: 'Kern der Wärme',
     rarity: 'legendary', slot: 'accessory', texKey: 'warmth_core',
     stats: { hp: 60, dmg: 25, speed: 12, regenPercent: 3 },
+    locked: true, questItem: true,
     description: 'A warm soul extracted from the Ice Spirit. Place it in the campfire to restore the village.'
 };
 
@@ -146,6 +151,7 @@ export const CASTLE_KEY = {
     id: 'castle_key', name: 'Castle Key', nameRu: 'Ключ от Замка', nameDe: 'Schlossschlüssel',
     rarity: 'legendary', slot: 'accessory', texKey: 'item_key',
     stats: { hp: 40, dmg: 20, speed: 8 },
+    locked: true, questItem: true,
     description: 'A heavy iron key taken from the Bandit Leader. It unlocks the attic where the villagers are held.',
     descriptionRu: 'Тяжёлый железный ключ, отнятый у Лидера Бандитов. Открывает чердак, где заключены жители.',
     descriptionDe: 'Ein schwerer eiserner Schlüssel, dem Banditenanführer abgenommen. Er öffnet den Dachboden, auf dem die Dorfbewohner gefangen sind.'

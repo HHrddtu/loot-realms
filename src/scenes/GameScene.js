@@ -771,6 +771,8 @@ export default class GameScene extends Phaser.Scene {
     unequipItem(slot) { if (this.playerSys) this.playerSys.unequipItem(slot); }
     unequipAccountItem(slot) { if (this.playerSys) this.playerSys.unequipAccountItem(slot); }
     deleteItem(type, idx) { return this.playerSys ? this.playerSys.deleteItem(type, idx) : 0; }
+    sellItem(type, idx) { return this.playerSys ? this.playerSys.sellItem(type, idx) : 0; }
+    toggleLock(type, idx) { return this.playerSys ? this.playerSys.toggleLock(type, idx) : false; }
     recalcStats() { if (this.playerSys) this.playerSys.recalcStats(); }
     checkLevelUp() { if (this.playerSys) this.playerSys.checkLevelUp(); }
     _checkAccountLevelUp() { if (this.playerSys) this.playerSys._checkAccountLevelUp(); }

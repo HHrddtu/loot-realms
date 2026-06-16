@@ -36,7 +36,7 @@ export default class BootScene extends Phaser.Scene {
             }
         });
 
-        this.time.delayedCall(5000, () => {
+        this.time.delayedCall(8000, () => {
             if (!getCurrentUser()) {
                 unsub();
                 this.scene.start('Login');
