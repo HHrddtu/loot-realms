@@ -12,6 +12,7 @@ import { recordMaterialCollect } from '../materialBook.js';
 import { onCollect } from '../quests.js';
 import { playLevelUp } from '../sound.js';
 import { getAccountLevelUpReq, loadAccount } from '../save.js';
+import { getPetStats } from '../config/pets.js';
 
 export class PlayerSystem {
     constructor(scene) {
@@ -55,6 +56,9 @@ export class PlayerSystem {
         this.scene.accountTalentPoints = acc.accountTalentPoints || 0;
         this.scene.unlockedAccountTalents = acc.unlockedAccountTalents || [];
         this.scene.accountEffects = getAccountTalentEffects(this.scene.unlockedAccountTalents);
+
+        this.scene.equippedPet = acc.equippedPet || null;
+        this.scene.petLevels = acc.petLevels || {};
 
         this.recalcStats();
     }
@@ -109,6 +113,13 @@ export class PlayerSystem {
             }
         });
 
+        const petStats = getPetStats(this.scene.equippedPet, (this.scene.petLevels || {})[this.scene.equippedPet] || 1);
+        if (petStats.hpPercent) accHpPercent += petStats.hpPercent;
+        if (petStats.damagePercent) accDmgPercent += petStats.damagePercent;
+        if (petStats.speedPercent) accSpdPercent += petStats.speedPercent;
+        if (petStats.spellPercent) accSpellPercent += petStats.spellPercent;
+        if (petStats.critPercent) accCritPercent += petStats.critPercent;
+
         const hpMult = 1 + (te.hpPercent || 0) / 100 + accHpPercent / 100;
         const dmgMult = 1 + (te.damagePercent || 0) / 100 + accDmgPercent / 100;
         const moveSpeedBonus = (ae.moveSpeedPercent || 0) + (te.moveSpeedPercent || 0);
@@ -133,7 +144,7 @@ export class PlayerSystem {
         this.scene.computedCritDamage = 1.5 + (te.critDamagePercent || 0) / 100;
         this.scene.computedDodgePercent = (te.dodgePercent || 0) + accDodgePercent;
         this.scene.computedLifeSteal = (te.lifeSteal || 0) + (ae.lifeSteal || 0);
-        this.scene.computedDamageReduction = (te.damageReduction || 0) + (ae.damageReduction || 0);
+        this.scene.computedDamageReduction = (te.damageReduction || 0) + (ae.damageReduction || 0) + (petStats.damageReduction || 0);
         this.scene.computedDamageReflection = (te.damageReflection || 0) + (ae.damageReflection || 0);
         this.scene.computedCooldownReduction = (te.cooldownReduction || 0) + (ae.cooldownReduction || 0);
         this.scene.computedAreaDamage = (te.areaDamage || 0) + (ae.areaDamage || 0);
@@ -147,7 +158,7 @@ export class PlayerSystem {
             }
         });
         this.scene.computedHealPower = (te.healPower || 0) + (ae.healPower || 0);
-        this.scene.computedRegenPercent = (te.regenPercent || 0) + (ae.regenPercent || 0);
+        this.scene.computedRegenPercent = (te.regenPercent || 0) + (ae.regenPercent || 0) + (petStats.regenPercent || 0);
         this.scene.computedDotPower = te.dotPower || 0;
         this.scene.computedDotDuration = te.dotDuration || 0;
         this.scene.computedShieldPercent = te.shieldPercent || 0;

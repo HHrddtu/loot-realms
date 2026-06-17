@@ -9,6 +9,7 @@ import { drawBossTextures } from '../textures/bosses.js';
 import { drawMineTextures } from '../textures/mine.js';
 import { drawSnowyTextures } from '../textures/snowy.js';
 import { drawExpansionTextures } from '../textures/expansion.js';
+import { drawPetTextures } from '../textures/pets.js';
 import { generateAnimations } from '../textures/animations.js';
 import { onAuthChange, getCurrentUser } from '../auth.js';
 
@@ -62,6 +63,7 @@ export default class BootScene extends Phaser.Scene {
         drawMineTextures(mk);
         drawSnowyTextures(mk, this.textures);
         drawExpansionTextures(mk, this.textures);
+        drawPetTextures(mk);
         generateAnimations(this.textures);
     }
 }

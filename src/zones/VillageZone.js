@@ -11,6 +11,7 @@ import {
     BOSS_DROP_CHANCE, GAME_WIDTH, GAME_HEIGHT, RARITY_COLORS
 } from '../config/index.js';
 import { CONSUMABLES } from '../config/gold.js';
+import { rollBossCrystals } from '../config/pets.js';
 import { rollVillageEquip, rollEquip, rollVillageAccountEquip, rollAccountEquip } from '../utils.js';
 import {
     playLoot, playBossAoE, playBossDeath, playPortal, playBreak, startMusic
@@ -1247,6 +1248,12 @@ export class VillageZone {
         this.scene.checkLevelUp();
         this.scene._checkAccountLevelUp();
         this.scene.updateUI();
+
+        const vc = rollBossCrystals('village');
+        if (vc > 0) {
+            this.scene.crystals = (this.scene.crystals || 0) + vc;
+            this.scene.floatingText(this.scene.villageOffsetX + VILLAGE_WIDTH / 2, 310, '+' + vc + ' \u{1F48E}', '#3498db');
+        }
     }
 
     _spawnSnowyVillageCamps() {
@@ -1536,6 +1543,12 @@ export class VillageZone {
         this.scene.time.delayedCall(2000, () => {
             this.scene.floatingText(ox + VILLAGE_WIDTH / 2, 260, 'Use Warmth Core at the campfire!', '#f1c40f');
         });
+
+        const sc = rollBossCrystals('snowy');
+        if (sc > 0) {
+            this.scene.crystals = (this.scene.crystals || 0) + sc;
+            this.scene.floatingText(ox + VILLAGE_WIDTH / 2, 290, '+' + sc + ' \u{1F48E}', '#3498db');
+        }
     }
 
     _updateSnowyVillageMobs() {

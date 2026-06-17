@@ -8,6 +8,7 @@ import {
     BOSS_DROP_CHANCE, RARITY_COLORS, VILLAGE_WIDTH, CEMETERY_HEIGHT
 } from '../config/index.js';
 import { rollEquip, rollAccountEquip } from '../utils.js';
+import { rollBossCrystals } from '../config/pets.js';
 import { playBossDeath, playLoot, playPortal } from '../sound.js';
 
 export class HellZone {
@@ -609,6 +610,12 @@ export class HellZone {
         s.checkLevelUp();
         s._checkAccountLevelUp();
         s.ui.updateUI();
+
+        const hc = rollBossCrystals('hell');
+        if (hc > 0) {
+            s.crystals = (s.crystals || 0) + hc;
+            s.floatingText(ox + HELL_WIDTH / 2, 310, '+' + hc + ' \u{1F48E}', '#3498db');
+        }
     }
 
     enterHell() {

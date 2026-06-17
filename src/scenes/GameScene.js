@@ -28,6 +28,7 @@ import { HellZone } from '../zones/HellZone.js';
 import { SnowyZone } from '../zones/SnowyZone.js';
 import { CastleZone } from '../zones/CastleZone.js';
 import { isHost, getMyId, getPlayers, getPlayerNames, onStateUpdate, onLoot, onKey, sendInput, sendGameState, sendLootPickup, sendKeyPickup } from '../network.js';
+import { PET_DB, PET_TYPES } from '../config/pets.js';
 
 
 export default class GameScene extends Phaser.Scene {
@@ -86,6 +87,7 @@ export default class GameScene extends Phaser.Scene {
 
         this._createAnimations();
         this._createPlayer();
+        this._createPet();
         this._initInventory();
         this._initStats();
         this._createUI();
@@ -153,6 +155,7 @@ export default class GameScene extends Phaser.Scene {
         this._consumableBonusDef = 0;
         this._consumableBonusDefTimer = 0;
         this.gold = 0;
+        this.crystals = 0;
         this.innUsed = false;
         this.nearbyShop = null;
         this.nearbyInn = null;
@@ -174,6 +177,7 @@ export default class GameScene extends Phaser.Scene {
         this.accountEquipBag = accBagPerClass[this.classKey] || [];
         this.accountEffects = getAccountTalentEffects(this.unlockedAccountTalents);
         this.gold = acc.gold || 0;
+        this.crystals = acc.crystals || 0;
         this.recalcStats();
 
         if (this.loadOnStart) this.doLoad();
@@ -214,6 +218,7 @@ export default class GameScene extends Phaser.Scene {
                 this._onBeforeUnload = null;
             }
             if (this.particles) this.particles.destroy();
+            this._destroyPet();
             this.doSave();
             stopMusic();
             if (this.multiplayer) {
@@ -236,6 +241,10 @@ export default class GameScene extends Phaser.Scene {
                 this.receiveTalentData(td);
                 this.registry.remove('talentData');
             }
+            this._createPet();
+            const acc = loadAccount() || {};
+            this.crystals = acc.crystals || 0;
+            this._savedZone = null;
         });
     }
 
@@ -373,6 +382,115 @@ export default class GameScene extends Phaser.Scene {
         this.player.body.setOffset(7, 8);
         this.player.body.setCollideWorldBounds(true);
         this.player.play(animKey);
+    }
+
+    _destroyPet() {
+        if (this.petSprite) {
+            this.petSprite.destroy();
+            this.petSprite = null;
+        }
+        this.petData = null;
+        this.petTarget = null;
+    }
+
+    _createPet() {
+        this._destroyPet();
+        this.petAttackTimer = 0;
+        this.petAttackCooldown = 2000;
+        const acc = loadAccount() || {};
+        const equippedPet = acc.equippedPet;
+        if (!equippedPet) return;
+        const petData = PET_DB.find(p => p.id === equippedPet);
+        if (!petData) return;
+        this.petData = petData;
+        this.petLevel = (acc.petLevels || {})[equippedPet] || 1;
+        this.petSprite = this.add.sprite(this.player.x + 20, this.player.y + 10, petData.texKey)
+            .setDepth(9).setScale(1.5);
+        this.tweens.add({
+            targets: this.petSprite,
+            scaleY: 1.6,
+            duration: 1200,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+    }
+
+    _updatePetFollow() {
+        if (!this.petSprite || !this.player) return;
+        if (this.petTarget && this.petTarget.active && this.petTarget.stats && this.petTarget.stats.hp > 0) {
+            const dx = this.petTarget.x - this.petSprite.x;
+            const dy = this.petTarget.y - this.petSprite.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 20) {
+                const speed = 2.5;
+                this.petSprite.x += (dx / dist) * speed;
+                this.petSprite.y += (dy / dist) * speed;
+            }
+            this.petSprite.setFlipX(dx < 0);
+        } else {
+            this.petTarget = null;
+            const offsetX = this.facing === 'left' ? -20 : 20;
+            const targetX = this.player.x + offsetX;
+            const targetY = this.player.y + 10;
+            const dx = targetX - this.petSprite.x;
+            const dy = targetY - this.petSprite.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 100) {
+                this.petSprite.x = targetX;
+                this.petSprite.y = targetY;
+            } else {
+                this.petSprite.x += dx * 0.12;
+                this.petSprite.y += dy * 0.12;
+            }
+            this.petSprite.setFlipX(this.facing === 'left');
+        }
+    }
+
+    _updatePetCombat(delta) {
+        if (!this.petSprite || !this.petData) return;
+        const type = this.petData.type;
+        const cooldowns = { attacker: 1500, companion: 2200, tank: 2500, collector: 2000 };
+            this.petAttackCooldown = cooldowns[type] || 2000;
+            this.petAttackTimer -= delta;
+            if (this.petTarget && (!this.petTarget.active || !this.petTarget.stats || this.petTarget.stats.hp <= 0)) {
+                this.petTarget = null;
+            }
+            if (!this.petTarget) {
+                let closest = null;
+                let closestDist = 200;
+                const groups = [this.enemies, this.villageZombies, this.hellImps, this.caveSmallBats];
+                groups.forEach(grp => {
+                    if (!grp) return;
+                    grp.getChildren().forEach(e => {
+                        if (!e.active || !e.stats || e.stats.hp <= 0) return;
+                        const d = Phaser.Math.Distance.Between(this.petSprite.x, this.petSprite.y, e.x, e.y);
+                        if (d < closestDist) { closest = e; closestDist = d; }
+                    });
+                });
+                const bossList = [this.boss, this.mineBoss, this.caveBoss, this.villageBoss, this.hellBoss, this.snowyIceSpirit, this.castleBoss];
+                bossList.forEach(b => {
+                    if (b && b.active && b.stats && b.stats.hp > 0) {
+                        const d = Phaser.Math.Distance.Between(this.petSprite.x, this.petSprite.y, b.x, b.y);
+                        if (d < closestDist) { closest = b; closestDist = d; }
+                    }
+                });
+                this.petTarget = closest;
+            }
+            if (this.petTarget && this.petAttackTimer <= 0) {
+                this.petAttackTimer = this.petAttackCooldown;
+                const baseDmg = Math.floor(this.playerDamage * 0.3 * (1 + (this.petLevel - 1) * 0.3));
+            const dmg = Math.max(1, baseDmg);
+            this.tweens.add({
+                targets: this.petSprite,
+                scaleX: 2.0,
+                scaleY: 1.0,
+                duration: 80,
+                yoyo: true,
+                ease: 'Quad.easeOut'
+            });
+            this.combat.hitEnemy(this.petTarget, dmg);
+        }
     }
 
     /* ===== MULTIPLAYER ===== */
@@ -553,6 +671,7 @@ export default class GameScene extends Phaser.Scene {
             consumable: this.consumable || null,
             equipBag: this.equipBag,
             gold: this.gold || 0,
+            crystals: this.crystals || 0,
             kills: this.kills,
             stumpsBroken: this.stumpsBroken,
             corruption: this.corruption,
@@ -591,6 +710,7 @@ export default class GameScene extends Phaser.Scene {
             accountTalentPoints: this.accountTalentPoints,
             unlockedAccountTalents: this.unlockedAccountTalents,
             gold: this.gold || 0,
+            crystals: this.crystals || 0,
             accountEquipment: eqPerClass,
             accountEquipBag: bagPerClass
         };
@@ -630,6 +750,7 @@ export default class GameScene extends Phaser.Scene {
         this.consumable = data.consumable || null;
         this.equipBag = data.equipBag || [];
         this.gold = data.gold || 0;
+        this.crystals = data.crystals || 0;
         this.innUsed = data.innUsed || false;
         this.kills = data.kills || 0;
         this.stumpsBroken = data.stumpsBroken || 0;
@@ -663,10 +784,15 @@ export default class GameScene extends Phaser.Scene {
         this.accountEquipBag = accBagPerClass2[this.classKey] || [];
         this.accountEffects = getAccountTalentEffects(this.unlockedAccountTalents);
         this.gold = acc.gold || 0;
+        this.crystals = acc.crystals || 0;
         this.classStats = getClassStats(this.classKey, this.playerLevel);
         this.talentEffects = getTalentEffects(this.unlockedTalents);
         this.corruptionMax = this.classStats.corruptionMax + (this.talentEffects.corruptionMax || 0);
         this.recalcStats();
+        if (this.petSprite) {
+            this.petSprite.x = this.player.x + 20;
+            this.petSprite.y = this.player.y + 10;
+        }
         return true;
     }
 
@@ -722,6 +848,7 @@ export default class GameScene extends Phaser.Scene {
 
     _setupZone(zoneName, ...args) {
         if (this.particles) this.particles.stopEnvironment();
+        this.petTarget = null;
         if (this.currentZone) {
             this.currentZone.clear();
         }
@@ -1055,6 +1182,8 @@ export default class GameScene extends Phaser.Scene {
         this._updateCorruption();
         this._updateSpells(delta);
         this._updateConsumableBonuses(delta);
+        this._updatePetFollow();
+        this._updatePetCombat(delta);
 
         if (this.currentZone) {
             this.currentZone.update(time, delta);

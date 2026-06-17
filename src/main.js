@@ -11,6 +11,7 @@ import BestiaryScene from './scenes/BestiaryScene.js';
 import MaterialBookScene from './scenes/MaterialBookScene.js';
 import SoulBookScene from './scenes/SoulBookScene.js';
 import CraftScene from './scenes/CraftScene.js';
+import PetScene from './scenes/PetScene.js';
 import { loadLang } from './i18n.js';
 
 loadLang();
@@ -26,5 +27,5 @@ new Phaser.Game({
         default: 'arcade',
         arcade: { gravity: { y: 0 }, debug: false }
     },
-    scene: [BootScene, LoginScene, MenuScene, LobbyScene, ClassSelectScene, GameScene, TalentScene, BestiaryScene, MaterialBookScene, SoulBookScene, CraftScene]
+    scene: [BootScene, LoginScene, MenuScene, LobbyScene, ClassSelectScene, GameScene, TalentScene, BestiaryScene, MaterialBookScene, SoulBookScene, CraftScene, PetScene]
 });

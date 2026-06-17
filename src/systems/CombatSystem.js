@@ -9,6 +9,7 @@ import {
 } from '../config/index.js';
 import { rollEquip, rollMaterial, rollAccountEquip, rollCaveRelic } from '../utils.js';
 import { rollGold, rollBossGold, rollChestGold } from '../config/gold.js';
+import { rollBossCrystals } from '../config/pets.js';
 import { playBossDeath, playEnemyDeath, playLoot, playBreak } from '../sound.js';
 import { recordKill } from '../bestiary.js';
 import { recordSoulCollect } from '../soulBook.js';
@@ -632,6 +633,12 @@ export class CombatSystem {
         this.scene.gold = (this.scene.gold || 0) + finalBossGold;
         this.scene.floatingText(cfg.textX, cfg.textY, '+' + exp + ' EXP', '#f1c40f');
         this.scene.floatingText(cfg.textX, cfg.textY + 20, '+' + finalBossGold + ' gold', '#f1c40f');
+
+        const bossCrystals = rollBossCrystals(this.scene.zone || 'forest');
+        if (bossCrystals > 0) {
+            this.scene.crystals = (this.scene.crystals || 0) + bossCrystals;
+            this.scene.floatingText(cfg.textX, cfg.textY + 40, '+' + bossCrystals + ' \u{1F48E}', '#3498db');
+        }
 
         this.scene.defeatedText = this.scene.add.text(cfg.textX, cfg.textY + 50, cfg.defeatedText, {
             fontSize: '28px', fill: cfg.defeatedColor, fontFamily: 'Arial', fontStyle: 'bold',

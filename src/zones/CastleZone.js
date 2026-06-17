@@ -7,6 +7,7 @@ import {
     VILLAGE_WIDTH, VILLAGE_HEIGHT
 } from '../config/index.js';
 import { rollEquip } from '../utils.js';
+import { rollBossCrystals } from '../config/pets.js';
 import { playLoot, playBossAoE, playBossDeath, playPortal, startMusic } from '../sound.js';
 import { recordKill } from '../bestiary.js';
 import { recordSoulCollect } from '../soulBook.js';
@@ -670,6 +671,12 @@ export class CastleZone {
         this.scene.checkLevelUp();
         this.scene._checkAccountLevelUp();
         this.scene.updateUI();
+
+        const cc = rollBossCrystals('castle');
+        if (cc > 0) {
+            this.scene.crystals = (this.scene.crystals || 0) + cc;
+            this.scene.floatingText(GAME_WIDTH / 2, 200, '+' + cc + ' \u{1F48E}', '#3498db');
+        }
     }
 
     /* ===== ATTIC ===== */

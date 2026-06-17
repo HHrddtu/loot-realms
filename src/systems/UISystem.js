@@ -1,10 +1,11 @@
 import { RARITY_COLORS, SHOP_EQUIP_PRICES, SELL_PRICE_RATIO } from '../config/index.js';
 import { lighten } from '../utils.js';
 import { toggleMute } from '../sound.js';
-import { getAccountLevelUpReq } from '../save.js';
+import { getAccountLevelUpReq, loadAccount } from '../save.js';
 import { getTalentEffects } from '../talents.js';
 import { getAccountTalentEffects } from '../accountTalents.js';
 import { initMaterialBook, getMaterialBookData } from '../materialBook.js';
+import { PET_DB } from '../config/pets.js';
 import { t } from '../i18n.js';
 
 export class UISystem {
@@ -87,6 +88,21 @@ export class UISystem {
             fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 1
         }).setOrigin(1, 0));
+
+        this.scene.crystalText = sx(this.scene.add.text(185, 98, '', {
+            fontSize: '11px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 1
+        }).setOrigin(1, 0));
+
+        this.scene.petBtnText = sx(this.scene.add.text(185, 114, '', {
+            fontSize: '11px', fill: '#e67e22', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 1
+        }).setOrigin(1, 0).setInteractive({ useHandCursor: true }));
+        this.scene.petBtnText.on('pointerdown', () => {
+            this.scene.scene.start('Pet', { returnScene: 'Game' });
+        });
+        this.scene.petBtnText.on('pointerover', () => this.scene.petBtnText.setStyle({ fill: '#f39c12' }));
+        this.scene.petBtnText.on('pointerout', () => this.scene.petBtnText.setStyle({ fill: '#e67e22' }));
 
         this.scene.hintText = this.scene.add.text(400, 588, '', {
             fontSize: '10px', fill: '#555', fontFamily: 'Arial'
@@ -245,6 +261,12 @@ export class UISystem {
         if (this.scene.diffText) this.scene.diffText.setText(this.scene.difficulty);
         this.scene.talentText.setText(this.scene.talentPoints > 0 ? 'TALENTS: ' + this.scene.talentPoints + ' [T]' : '');
         if (this.scene.goldText) this.scene.goldText.setText('Gold: ' + (this.scene.gold || 0));
+        if (this.scene.crystalText) this.scene.crystalText.setText('\u{1F48E} ' + (this.scene.crystals || 0));
+
+        if (this.scene.petBtnText) {
+            const eqPet = this.scene.equippedPet;
+            this.scene.petBtnText.setText(eqPet ? '\u{1F43E} ' + (PET_DB.find(p => p.id === eqPet)?.name || eqPet) : '\u{1F43E} Pets');
+        }
 
         if (this.scene.spellSlots) {
             ['fireball', 'shield', 'heal'].forEach(key => {
@@ -673,35 +695,46 @@ export class UISystem {
         this.scene.pauseGroup = [];
         const mkPause = (el) => this._mkEl(el);
 
-        this.scene.pauseGroup.push(mkPause(this.scene.add.rectangle(400, 300, 400, 260, 0x000000, 0.92)
+        this.scene.pauseGroup.push(mkPause(this.scene.add.rectangle(400, 300, 420, 300, 0x000000, 0.92)
             .setStrokeStyle(2, 0xf1c40f)));
-        this.scene.pauseGroup.push(mkPause(this.scene.add.text(400, 200, t('pause.title'), {
+        this.scene.pauseGroup.push(mkPause(this.scene.add.text(400, 185, t('pause.title'), {
             fontSize: '28px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5)));
 
-        const buttons = [
-            { t: t('pause.resume'), c: 0x27ae60, cb: () => this.closePause() },
-            { t: t('pause.menu'), c: 0x2980b9, cb: () => {
-                this.scene.doSave();
-                this.closePause();
-                this.scene.scene.start('Menu');
-            }},
-            { t: t('adv.title'), c: 0x555577, cb: () => {
-                this.closePause();
-                this._openPauseAdvanced();
-            }}
-        ];
+        const resumeBg = mkPause(this.scene.add.rectangle(400, 235, 220, 38, 0x27ae60)
+            .setStrokeStyle(2, lighten(0x27ae60, 0.3))
+            .setInteractive({ useHandCursor: true }));
+        const resumeLbl = mkPause(this.scene.add.text(400, 235, t('pause.resume'), {
+            fontSize: '18px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5));
+        resumeBg.on('pointerdown', () => this.closePause());
+        resumeBg.on('pointerover', () => { resumeBg.setFillStyle(lighten(0x27ae60, 0.2)); resumeBg.setScale(1.05); resumeLbl.setScale(1.05); });
+        resumeBg.on('pointerout', () => { resumeBg.setFillStyle(0x27ae60); resumeBg.setScale(1); resumeLbl.setScale(1); });
+        this.scene.pauseGroup.push(resumeBg, resumeLbl);
 
-        buttons.forEach((b, i) => {
-            const y = 245 + i * 42;
-            const bg = mkPause(this.scene.add.rectangle(400, y, 200, 32, b.c)
-                .setStrokeStyle(1, lighten(b.c, 0.3))
+        const makeSmallBtn = (x, y, text, color, cb) => {
+            const bg = mkPause(this.scene.add.rectangle(x, y, 130, 28, color)
+                .setStrokeStyle(1, lighten(color, 0.3))
                 .setInteractive({ useHandCursor: true }));
-            const lbl = mkPause(this.scene.add.text(400, y, b.t, {
-                fontSize: '13px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+            const lbl = mkPause(this.scene.add.text(x, y, text, {
+                fontSize: '11px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
             }).setOrigin(0.5));
-            bg.on('pointerdown', b.cb);
+            bg.on('pointerdown', cb);
+            bg.on('pointerover', () => { bg.setFillStyle(lighten(color, 0.2)); });
+            bg.on('pointerout', () => { bg.setFillStyle(color); });
             this.scene.pauseGroup.push(bg, lbl);
+        };
+
+        makeSmallBtn(335, 280, t('pause.save'), 0x8e44ad, () => { this.scene.doSave(); this.closePause(); });
+        makeSmallBtn(465, 280, t('pause.menu'), 0x2980b9, () => {
+            this.scene.doSave();
+            this.closePause();
+            this.scene.scene.start('Menu');
+        });
+
+        makeSmallBtn(400, 320, t('adv.title'), 0x555577, () => {
+            this.closePause();
+            this._openPauseAdvanced();
         });
     }
 
@@ -714,48 +747,53 @@ export class UISystem {
         this.scene.pauseGroup = [];
         const mkPause = (el) => this._mkEl(el);
 
-        this.scene.pauseGroup.push(mkPause(this.scene.add.rectangle(400, 300, 400, 360, 0x000000, 0.92)
+        this.scene.pauseGroup.push(mkPause(this.scene.add.rectangle(400, 300, 420, 340, 0x000000, 0.92)
             .setStrokeStyle(2, 0x555577)));
-        this.scene.pauseGroup.push(mkPause(this.scene.add.text(400, 155, t('adv.title'), {
-            fontSize: '20px', fill: '#aaa', fontFamily: 'Arial', fontStyle: 'bold'
+        this.scene.pauseGroup.push(mkPause(this.scene.add.text(400, 165, t('adv.title'), {
+            fontSize: '22px', fill: '#aaa', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5)));
 
-        const buttons = [
-            { t: t('adv.talents'), c: 0x9b59b6, cb: () => {
-                this.closePause();
-                this._openTalentTree();
-            }},
-            { t: t('adv.accountEquip'), c: 0xf39c12, cb: () => {
-                this.closePause();
-                this._openAccountEquipOverlay();
-            }},
-            { t: t('pause.changeClass'), c: 0x1abc9c, cb: () => {
-                this.scene.doSave();
-                this.closePause();
-                this.scene.scene.start('ClassSelect');
-            }},
-            { t: t('pause.save'), c: 0x8e44ad, cb: () => { this.scene.doSave(); this.closePause(); }},
-            { t: t('pause.restart'), c: 0xe67e22, cb: () => {
-                this.scene.doSave();
-                this.closePause();
-                this.scene.scene.restart({ difficulty: this.scene.difficulty, classKey: this.scene.classKey });
-            }},
-            { t: t('pause.back'), c: 0x34495e, cb: () => {
-                this.closePause();
-                this.openPause();
-            }}
-        ];
-
-        buttons.forEach((b, i) => {
-            const y = 190 + i * 38;
-            const bg = mkPause(this.scene.add.rectangle(400, y, 200, 30, b.c)
-                .setStrokeStyle(1, lighten(b.c, 0.3))
+        const makeSmallBtn = (x, y, text, color, cb) => {
+            const bg = mkPause(this.scene.add.rectangle(x, y, 130, 28, color)
+                .setStrokeStyle(1, lighten(color, 0.3))
                 .setInteractive({ useHandCursor: true }));
-            const lbl = mkPause(this.scene.add.text(400, y, b.t, {
-                fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+            const lbl = mkPause(this.scene.add.text(x, y, text, {
+                fontSize: '11px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
             }).setOrigin(0.5));
-            bg.on('pointerdown', b.cb);
+            bg.on('pointerdown', cb);
+            bg.on('pointerover', () => { bg.setFillStyle(lighten(color, 0.2)); });
+            bg.on('pointerout', () => { bg.setFillStyle(color); });
             this.scene.pauseGroup.push(bg, lbl);
+        };
+
+        makeSmallBtn(335, 210, t('adv.talents'), 0x9b59b6, () => {
+            this.closePause();
+            this._openTalentTree();
+        });
+        makeSmallBtn(465, 210, t('adv.accountEquip'), 0xf39c12, () => {
+            this.closePause();
+            this._openAccountEquipOverlay();
+        });
+
+        makeSmallBtn(335, 255, t('pause.changeClass'), 0x1abc9c, () => {
+            this.scene.doSave();
+            this.closePause();
+            this.scene.scene.start('ClassSelect');
+        });
+        makeSmallBtn(465, 255, t('pause.save'), 0x8e44ad, () => {
+            this.scene.doSave();
+            this.closePause();
+        });
+
+        makeSmallBtn(400, 305, t('pause.restart'), 0xe67e22, () => {
+            this.scene.doSave();
+            this.closePause();
+            this.scene.scene.restart({ difficulty: this.scene.difficulty, classKey: this.scene.classKey });
+        });
+
+        makeSmallBtn(400, 345, t('pause.back'), 0x34495e, () => {
+            this.closePause();
+            this.openPause();
         });
     }
 

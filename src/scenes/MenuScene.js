@@ -35,7 +35,7 @@ export default class MenuScene extends Phaser.Scene {
             fontSize: '18px', fill: '#7f8c8d', fontFamily: 'Arial'
         }).setOrigin(0.5);
 
-        this.startBtn = this.menuBtn(400, 250, t('menu.start'), 0x27ae60, () => {
+        this.menuBtn(400, 210, t('menu.start'), 0x27ae60, () => {
             if (hasAccount()) {
                 const acc = loadAccount();
                 this.scene.start('Game', {
@@ -45,20 +45,23 @@ export default class MenuScene extends Phaser.Scene {
             } else {
                 this.scene.start('ClassSelect');
             }
-        });
+        }, 280, 46, '24px');
 
-        this.mpBtn = this.menuBtn(400, 310, t('menu.multiplayer'), 0x8e44ad, () => {
+        this.menuBtn(310, 280, t('menu.multiplayer'), 0x8e44ad, () => {
             this.scene.start('Lobby');
-        });
+        }, 150, 34, '14px');
 
-        this.accountBtn = this.menuBtn(400, 370, t('menu.account'), 0x2980b9, () => this.showAccount());
+        this.menuBtn(490, 280, '\u{1F43E} Pets', 0xe67e22, () => {
+            this.scene.start('Pet', { returnScene: 'Menu' });
+        }, 150, 34, '14px');
 
-        this.advBtn = this.menuBtn(400, 430, t('menu.advanced'), 0x555577, () => this.showAdvanced());
+        this.menuBtn(310, 330, t('menu.account'), 0x2980b9, () => this.showAccount(), 150, 30, '12px');
+        this.menuBtn(490, 330, t('menu.advanced'), 0x555577, () => this.showAdvanced(), 150, 30, '12px');
 
-        this.logoutBtn = this.menuBtn(400, 490, t('menu.logout'), 0xc0392b, async () => {
+        this.menuBtn(400, 395, t('menu.logout'), 0xc0392b, async () => {
             await logout();
             this.scene.start('Login');
-        });
+        }, 140, 28, '12px');
 
         this.versionText = this.add.text(400, 610, t('menu.version'), {
             fontSize: '12px', fill: '#444', fontFamily: 'Arial'
@@ -191,13 +194,16 @@ export default class MenuScene extends Phaser.Scene {
         this.ovlBtn(400, 480, t('adv.close'), 0x34495e, () => this.closeOverlay());
     }
 
-    menuBtn(x, y, text, color, cb) {
-        const btn = this.add.rectangle(x, y, 260, 40, color)
+    menuBtn(x, y, text, color, cb, w, h, fontSize) {
+        w = w || 260;
+        h = h || 40;
+        fontSize = fontSize || '20px';
+        const btn = this.add.rectangle(x, y, w, h, color)
             .setStrokeStyle(2, lighten(color, 0.3))
             .setInteractive({ useHandCursor: true });
 
         const lbl = this.add.text(x, y, text, {
-            fontSize: '20px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: fontSize, fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5);
 
         btn.on('pointerover', () => {

@@ -39,7 +39,7 @@ export function hasSave() {
 let _accountCache = null;
 
 const DEFAULT_ACCOUNT = {
-    version: 2,
+    version: 3,
     accountLevel: 1,
     accountExp: 0,
     accountTalentPoints: 0,
@@ -49,20 +49,30 @@ const DEFAULT_ACCOUNT = {
     highestClassLevel: {},
     playTime: 0,
     gold: 0,
+    crystals: 0,
+    ownedPets: [],
+    equippedPet: null,
+    petLevels: {},
     accountEquipment: { sage: { ...EMPTY_ACCOUNT_EQUIPMENT }, alchemist: { ...EMPTY_ACCOUNT_EQUIPMENT }, angel: { ...EMPTY_ACCOUNT_EQUIPMENT } },
     accountEquipBag: { sage: [], alchemist: [], angel: [] }
 };
 
 function migrateAccount(data) {
     if (!data) return data;
-    if (data.version >= 2) return data;
-    const flat = data.accountEquipment;
-    if (flat && !flat.sage) {
-        data.accountEquipment = { sage: { ...flat }, alchemist: { ...EMPTY_ACCOUNT_EQUIPMENT }, angel: { ...EMPTY_ACCOUNT_EQUIPMENT } };
-        const oldBag = Array.isArray(data.accountEquipBag) ? data.accountEquipBag : [];
-        data.accountEquipBag = { sage: oldBag, alchemist: [], angel: [] };
+    if (data.version >= 3) return data;
+    if (data.version < 2) {
+        const flat = data.accountEquipment;
+        if (flat && !flat.sage) {
+            data.accountEquipment = { sage: { ...flat }, alchemist: { ...EMPTY_ACCOUNT_EQUIPMENT }, angel: { ...EMPTY_ACCOUNT_EQUIPMENT } };
+            const oldBag = Array.isArray(data.accountEquipBag) ? data.accountEquipBag : [];
+            data.accountEquipBag = { sage: oldBag, alchemist: [], angel: [] };
+        }
     }
-    data.version = 2;
+    if (data.crystals === undefined) data.crystals = 0;
+    if (!data.ownedPets) data.ownedPets = [];
+    if (data.equippedPet === undefined) data.equippedPet = null;
+    if (!data.petLevels) data.petLevels = {};
+    data.version = 3;
     return data;
 }
 
