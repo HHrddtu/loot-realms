@@ -121,7 +121,38 @@ export const CRYSTAL_DROPS = {
     castle:   { bossMin: 25, bossMax: 50 }
 };
 
-export function rollBossCrystals(zone) {
+export const CRYSTAL_RUN_CAPS = {
+    Normal: 200,
+    Hard: 50,
+    Expert: 75,
+    Nightmare: 100,
+    Hell: 150,
+    Abyss: 200
+};
+
+export const CRYSTAL_DIFF_MULT = {
+    Normal: 1.0,
+    Hard: 0.8,
+    Expert: 0.7,
+    Nightmare: 0.6,
+    Hell: 0.5,
+    Abyss: 0.4
+};
+
+export function rollBossCrystals(zone, difficulty) {
     const d = CRYSTAL_DROPS[zone] || CRYSTAL_DROPS.forest;
-    return Math.floor(Math.random() * (d.bossMax - d.bossMin + 1)) + d.bossMin;
+    let amount = Math.floor(Math.random() * (d.bossMax - d.bossMin + 1)) + d.bossMin;
+    const mult = CRYSTAL_DIFF_MULT[difficulty] || 1.0;
+    amount = Math.floor(amount * mult);
+    return Math.max(1, amount);
+}
+
+export function canGetCrystals(crystalsThisRun, difficulty) {
+    const cap = CRYSTAL_RUN_CAPS[difficulty] || 200;
+    return crystalsThisRun < cap;
+}
+
+export function getCrystalsRemaining(crystalsThisRun, difficulty) {
+    const cap = CRYSTAL_RUN_CAPS[difficulty] || 200;
+    return Math.max(0, cap - crystalsThisRun);
 }

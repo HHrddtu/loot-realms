@@ -6,7 +6,7 @@ import {
     CAVE_CHEST_CLOSED_KEY, CAVE_CHEST_W, CAVE_CHEST_H,
     CAVE_SMALL_BAT, DIFF_MULT
 } from '../config/index.js';
-import { rollEquip } from '../utils.js';
+import { rollZoneEquip } from '../utils.js';
 import { startMusic, playPortal, playBossAoE } from '../sound.js';
 
 export class CaveZone {
@@ -235,7 +235,7 @@ export class CaveZone {
         const count = 1 + Math.floor(Math.random() * 2);
         for (let i = 0; i < count; i++) {
             if (Math.random() < CAVE_CHEST_DROP_CHANCE) {
-                ch.loot.push(rollEquip());
+                ch.loot.push(rollZoneEquip('cave'));
             }
         }
         ch.hintText = s.add.text(x, y - 18, '', {

@@ -7,7 +7,7 @@ import {
     MINE_CHEST_COUNT, MINE_CHEST_DROP_CHANCE,
     ARENA_EXIT_POS, DIFF_MULT
 } from '../config/index.js';
-import { rollEquip } from '../utils.js';
+import { rollZoneEquip, rollZoneMaterial } from '../utils.js';
 import { startMusic, playPortal, playBossAoE } from '../sound.js';
 
 export class MineZone {
@@ -247,7 +247,7 @@ export class MineZone {
         const count = 1 + Math.floor(Math.random() * 2);
         for (let i = 0; i < count; i++) {
             if (Math.random() < MINE_CHEST_DROP_CHANCE) {
-                ch.loot.push(rollEquip());
+                ch.loot.push(rollZoneEquip('mine'));
             }
         }
         ch.hintText = s.add.text(x, y - 22, '', {

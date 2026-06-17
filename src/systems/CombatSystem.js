@@ -7,7 +7,7 @@ import {
     VILLAGE_BOSS_TYPE, VILLAGE_CHEST_OPEN_KEY,
     CAVE_CHEST_OPEN_KEY, CAVE_WIDTH, CAVE_HEIGHT
 } from '../config/index.js';
-import { rollEquip, rollMaterial, rollAccountEquip, rollCaveRelic } from '../utils.js';
+import { rollZoneEquip, rollZoneMaterial, rollEquip, rollMaterial, rollAccountEquip, rollCaveRelic } from '../utils.js';
 import { rollGold, rollBossGold, rollChestGold } from '../config/gold.js';
 import { rollBossCrystals, getPetStats } from '../config/pets.js';
 import { playBossDeath, playEnemyDeath, playLoot, playBreak } from '../sound.js';
@@ -238,6 +238,9 @@ export class CombatSystem {
 
     hitEnemy(enemy, damage) {
         let finalDamage = damage;
+        if (this.scene._consumableBonusDmg > 0) {
+            finalDamage = Math.floor(finalDamage * (1 + this.scene._consumableBonusDmg));
+        }
         const te = this.scene.talentEffects || {};
         const ae = this.scene.accountEffects || {};
         if (te.damagePercentVs && enemy.stats && enemy.stats.key) {
@@ -261,7 +264,7 @@ export class CombatSystem {
         if (this.scene.playerHP === this.scene.playerMaxHP && (te.damagePercentFullHp || ae.damagePercentFullHp)) {
             finalDamage = Math.floor(finalDamage * (1 + ((te.damagePercentFullHp || 0) + (ae.damagePercentFullHp || 0)) / 100));
         }
-        if (this.scene.computedCritChance && Math.random() * 100 < this.scene.computedCritChance) {
+        if (this.scene.computedCritChance && Math.random() * 100 < this.scene.computedCritChance + (this.scene._consumableBonusCrit || 0)) {
             finalDamage = Math.floor(finalDamage * this.scene.computedCritDamage);
             this.scene.floatingText(enemy.x, enemy.y - 30, 'CRIT!', '#f1c40f');
         }
@@ -280,8 +283,9 @@ export class CombatSystem {
         });
         this.scene.floatingText(enemy.x, enemy.y - 20, '-' + finalDamage, '#e74c3c');
 
-        if (this.scene.computedLifeSteal > 0) {
-            const healAmount = Math.floor(finalDamage * this.scene.computedLifeSteal / 100);
+        const totalLifeSteal = this.scene.computedLifeSteal + ((this.scene._consumableBonusLifesteal || 0) * 100);
+        if (totalLifeSteal > 0) {
+            const healAmount = Math.floor(finalDamage * totalLifeSteal / 100);
             if (healAmount > 0) {
                 this.scene.playerHP = Math.min(this.scene.playerMaxHP, this.scene.playerHP + healAmount);
                 this.scene.floatingText(this.scene.player.x, this.scene.player.y - 40, '+' + healAmount, '#2ecc71');
@@ -391,8 +395,7 @@ export class CombatSystem {
         } else {
             const matCount = 1 + Math.floor(Math.random() * 2);
             for (let i = 0; i < matCount; i++) {
-                const item = rollMaterial(this.scene.zone);
-                if (this.scene.addMaterial(item)) {
+                const item = rollZoneMaterial(this.scene.zone);                if (this.scene.addMaterial(item)) {
                     const rc = '#' + RARITY_COLORS[item.rarity].toString(16).padStart(6, '0');
                     this.scene.floatingText(ch.x + (i * 18 - 9), ch.y - 35, '+' + item.name, rc);
                 }
@@ -411,7 +414,7 @@ export class CombatSystem {
                 const cnt = 1 + Math.floor(Math.random() * 2);
                 for (let i = 0; i < cnt; i++) {
                     if (Math.random() < MINE_CHEST_DROP_CHANCE) {
-                        ch.loot.push(rollEquip());
+                        ch.loot.push(rollZoneEquip('mine'));
                     }
                 }
             }
@@ -524,8 +527,8 @@ export class CombatSystem {
         this.scene._checkAccountLevelUp();
         this.scene.updateUI();
 
-        enemy.hpBg.destroy();
-        enemy.hpFill.destroy();
+        if (enemy.hpBg) enemy.hpBg.destroy();
+        if (enemy.hpFill) enemy.hpFill.destroy();
         enemy.destroy();
 
         this.scene.time.delayedCall(3000, () => {
@@ -636,10 +639,12 @@ export class CombatSystem {
         this.scene.floatingText(cfg.textX, cfg.textY, '+' + exp + ' EXP', '#f1c40f');
         this.scene.floatingText(cfg.textX, cfg.textY + 20, '+' + finalBossGold + ' gold', '#f1c40f');
 
-        const bossCrystals = rollBossCrystals(this.scene.zone || 'forest');
+        const bossCrystals = rollBossCrystals(this.scene.zone || 'forest', this.scene.difficulty);
         if (bossCrystals > 0) {
-            this.scene.crystals = (this.scene.crystals || 0) + bossCrystals;
-            this.scene.floatingText(cfg.textX, cfg.textY + 40, '+' + bossCrystals + ' \u{1F48E}', '#3498db');
+            const granted = this.scene.awardCrystals(bossCrystals, cfg.textX, cfg.textY + 40);
+            if (granted > 0) {
+                this.scene.floatingText(cfg.textX, cfg.textY + 40, '+' + granted + ' \u{1F48E}', '#3498db');
+            }
         }
 
         this.scene.defeatedText = this.scene.add.text(cfg.textX, cfg.textY + 50, cfg.defeatedText, {

@@ -1,4 +1,5 @@
 import { MATERIAL_DB, EQUIP_DB, ACCOUNT_EQUIP_DB, CAVE_MATERIALS, ACCOUNT_EQUIP_DB_CAVE, VILLAGE_MATERIALS, ACCOUNT_EQUIP_DB_VILLAGE, VILLAGE_CHEST_DROP_ITEMS } from './config/index.js';
+import { ZONE_LOOT_TABLES } from './config/gold.js';
 
 export function lighten(color, amt) {
     let r = (color >> 16) & 0xff;
@@ -49,4 +50,31 @@ export function rollVillageEquip() {
 export function rollVillageAccountEquip() {
     const idx = Math.floor(Math.random() * ACCOUNT_EQUIP_DB_VILLAGE.length);
     return { ...ACCOUNT_EQUIP_DB_VILLAGE[idx], type: 'accountEquip' };
+}
+
+export function rollZoneEquip(zone) {
+    const table = ZONE_LOOT_TABLES[zone];
+    if (!table) return rollEquip();
+
+    const roll = Math.random();
+    let cum = 0;
+    let targetRarity = 'common';
+    const rarities = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
+    for (const r of rarities) {
+        cum += (table[r] || 0);
+        if (roll < cum) { targetRarity = r; break; }
+    }
+
+    const pool = EQUIP_DB.filter(e => e.rarity === targetRarity);
+    if (pool.length === 0) return rollEquip();
+
+    const item = pool[Math.floor(Math.random() * pool.length)];
+    return { ...item, type: 'equip' };
+}
+
+export function rollZoneMaterial(zone) {
+    if (zone === 'mine') return { ...weightedRoll(MATERIAL_DB), type: 'material' };
+    if (zone === 'cave') return { ...weightedRoll(CAVE_MATERIALS), type: 'material' };
+    if (zone === 'village' || zone === 'snowy') return { ...weightedRoll(VILLAGE_MATERIALS), type: 'material' };
+    return { ...weightedRoll(MATERIAL_DB), type: 'material' };
 }

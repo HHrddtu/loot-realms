@@ -140,6 +140,37 @@ function drawItemShape(c, shape, color) {
             c.fillStyle = lighten(parseInt(color.slice(1), 16), 0.3);
             c.fillRect(5, 8, 3, 3);
             break;
+        case 'potion_flask':
+            c.fillStyle = '#8b4513';
+            c.fillRect(6, 1, 4, 2);
+            c.fillRect(5, 3, 6, 2);
+            c.fillStyle = color;
+            c.fillRect(3, 5, 10, 9);
+            c.fillStyle = lighten(parseInt(color.slice(1), 16), 0.35);
+            c.fillRect(5, 6, 3, 4);
+            c.fillStyle = 'rgba(255,255,255,0.3)';
+            c.fillRect(4, 5, 2, 3);
+            break;
+        case 'scroll':
+            c.fillStyle = '#f5deb3';
+            c.fillRect(3, 2, 10, 12);
+            c.fillStyle = '#d4a574';
+            c.fillRect(3, 2, 2, 12);
+            c.fillRect(11, 2, 2, 12);
+            c.fillStyle = color;
+            c.fillRect(5, 5, 6, 2);
+            c.fillRect(5, 8, 6, 2);
+            c.fillRect(5, 11, 4, 1);
+            break;
+        case 'upgrade':
+            c.fillStyle = '#2c3e50';
+            c.fillRect(2, 4, 12, 8);
+            c.fillStyle = color;
+            c.fillRect(6, 2, 4, 4);
+            c.fillRect(4, 6, 8, 4);
+            c.fillStyle = lighten(parseInt(color.slice(1), 16), 0.3);
+            c.fillRect(6, 6, 4, 2);
+            break;
     }
 }
 
@@ -188,7 +219,30 @@ export function drawItemTextures(mk) {
         { key: 'angel_amulet', color: '#f39c12', shape: 'amulet' },
         { key: 'angel_ring',   color: '#f1c40f', shape: 'ring' },
         { key: 'angel_charm',  color: '#d4ac0d', shape: 'charm' },
-        { key: 'consumable_potion', color: '#e74c3c', shape: 'potion' }
+        { key: 'consumable_potion', color: '#e74c3c', shape: 'potion' },
+        // Potions (unique per type)
+        { key: 'potion_heal_small',  color: '#27ae60', shape: 'potion_flask' },
+        { key: 'potion_heal_medium', color: '#2980b9', shape: 'potion_flask' },
+        { key: 'potion_heal_large',  color: '#8e44ad', shape: 'potion_flask' },
+        { key: 'potion_berserker',   color: '#e74c3c', shape: 'potion_flask' },
+        { key: 'potion_swift',       color: '#1abc9c', shape: 'potion_flask' },
+        { key: 'potion_iron',        color: '#7f8c8d', shape: 'potion_flask' },
+        { key: 'potion_heal_mega',   color: '#f1c40f', shape: 'potion_flask' },
+        { key: 'potion_precision',   color: '#e67e22', shape: 'potion_flask' },
+        { key: 'potion_vampiric',    color: '#c0392b', shape: 'potion_flask' },
+        // Boost scrolls
+        { key: 'item_scroll_xp',    color: '#3498db', shape: 'scroll' },
+        { key: 'item_scroll_gold',  color: '#f1c40f', shape: 'scroll' },
+        { key: 'item_scroll_loot',  color: '#2ecc71', shape: 'scroll' },
+        { key: 'item_scroll_dmg',   color: '#e74c3c', shape: 'scroll' },
+        { key: 'item_scroll_def',   color: '#95a5a6', shape: 'scroll' },
+        { key: 'item_scroll_regen', color: '#27ae60', shape: 'scroll' },
+        // Permanent upgrades
+        { key: 'item_upgrade_hp',   color: '#e74c3c', shape: 'upgrade' },
+        { key: 'item_upgrade_dmg',  color: '#f39c12', shape: 'upgrade' },
+        { key: 'item_upgrade_spd',  color: '#1abc9c', shape: 'upgrade' },
+        { key: 'item_upgrade_crit', color: '#9b59b6', shape: 'upgrade' },
+        { key: 'item_upgrade_regen',color: '#27ae60', shape: 'upgrade' }
     ];
 
     defs.forEach(({ key, color, shape }) => {

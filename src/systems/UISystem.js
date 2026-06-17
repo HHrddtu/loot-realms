@@ -124,18 +124,38 @@ export class UISystem {
         const spellLabels = ['Q', 'W', 'E'];
         const spellColors = [0xe74c3c, 0x3498db, 0x2ecc71];
         spellKeys.forEach((key, i) => {
-            const sx2 = 690 + i * 36;
+            const sx2 = 640 + i * 32;
             const sy = 565;
-            const bg = this.scene.add.rectangle(sx2, sy, 30, 30, 0x1a1a2e)
+            const bg = this.scene.add.rectangle(sx2, sy, 28, 28, 0x1a1a2e)
                 .setStrokeStyle(2, spellColors[i])
                 .setScrollFactor(0).setDepth(24);
             const lbl = this.scene.add.text(sx2, sy - 2, spellLabels[i], {
                 fontSize: '10px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
             }).setOrigin(0.5).setScrollFactor(0).setDepth(25);
-            const cd = this.scene.add.text(sx2, sy + 10, '', {
+            const cd = this.scene.add.text(sx2, sy + 9, '', {
                 fontSize: '8px', fill: '#f39c12', fontFamily: 'Arial'
             }).setOrigin(0.5).setScrollFactor(0).setDepth(25);
             this.scene.spellSlots[key] = { bg, lbl, cd };
+        });
+
+        const fx = 640 + 3 * 32;
+        const fy = 565;
+        const consBg = this.scene.add.rectangle(fx, fy, 28, 28, 0x1a1a2e)
+            .setStrokeStyle(2, 0xf39c12)
+            .setScrollFactor(0).setDepth(24);
+        const consLbl = this.scene.add.text(fx, fy - 2, 'F', {
+            fontSize: '10px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(25);
+        const consIcon = this.scene.add.sprite(fx, fy - 1, 'potion_heal_small').setScale(1.4)
+            .setScrollFactor(0).setDepth(25).setVisible(false);
+        const consName = this.scene.add.text(fx, fy + 11, '', {
+            fontSize: '5px', fill: '#f39c12', fontFamily: 'Arial'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(25);
+        this.scene.consumableSlot = { bg: consBg, lbl: consLbl, icon: consIcon, name: consName };
+
+        consBg.setInteractive({ useHandCursor: true });
+        consBg.on('pointerdown', () => {
+            if (this.scene.playerSys) this.scene.playerSys.useConsumable();
         });
     }
 
@@ -282,6 +302,23 @@ export class UISystem {
                     s.bg.setAlpha(1);
                 }
             });
+        }
+
+        if (this.scene.consumableSlot) {
+            const cs = this.scene.consumableSlot;
+            const cons = this.scene.consumable;
+            if (cons) {
+                cs.icon.setTexture(cons.texKey || 'potion_heal_small').setVisible(true);
+                cs.lbl.setVisible(false);
+                const shortName = (cons.name || '').split(' ').slice(0, 2).join(' ');
+                cs.name.setText(shortName);
+                cs.bg.setStrokeStyle(2, 0x2ecc71);
+            } else {
+                cs.icon.setVisible(false);
+                cs.lbl.setVisible(true);
+                cs.name.setText('');
+                cs.bg.setStrokeStyle(2, 0x555555);
+            }
         }
     }
 

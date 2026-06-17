@@ -28,7 +28,7 @@ import { HellZone } from '../zones/HellZone.js';
 import { SnowyZone } from '../zones/SnowyZone.js';
 import { CastleZone } from '../zones/CastleZone.js';
 import { isHost, getMyId, getPlayers, getPlayerNames, onStateUpdate, onLoot, onKey, sendInput, sendGameState, sendLootPickup, sendKeyPickup } from '../network.js';
-import { PET_DB, PET_TYPES } from '../config/pets.js';
+import { PET_DB, PET_TYPES, CRYSTAL_RUN_CAPS, canGetCrystals } from '../config/pets.js';
 
 
 export default class GameScene extends Phaser.Scene {
@@ -154,8 +154,13 @@ export default class GameScene extends Phaser.Scene {
         this._consumableBonusSpdTimer = 0;
         this._consumableBonusDef = 0;
         this._consumableBonusDefTimer = 0;
+        this._consumableBonusCrit = 0;
+        this._consumableBonusCritTimer = 0;
+        this._consumableBonusLifesteal = 0;
+        this._consumableBonusLifestealTimer = 0;
         this.gold = 0;
         this.crystals = 0;
+        this.crystalsThisRun = 0;
         this.innUsed = false;
         this.nearbyShop = null;
         this.nearbyInn = null;
@@ -422,10 +427,27 @@ export default class GameScene extends Phaser.Scene {
             const dx = this.petTarget.x - this.petSprite.x;
             const dy = this.petTarget.y - this.petSprite.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist > 20) {
-                const speed = 2.5;
-                this.petSprite.x += (dx / dist) * speed;
-                this.petSprite.y += (dy / dist) * speed;
+            if (this.petData.type === 'tank') {
+                const toEnemyX = this.petTarget.x - this.player.x;
+                const toEnemyY = this.petTarget.y - this.player.y;
+                const enemyDist = Math.sqrt(toEnemyX * toEnemyX + toEnemyY * toEnemyY);
+                const idealDist = Math.min(50, enemyDist * 0.4);
+                const tx = this.player.x + (toEnemyX / (enemyDist || 1)) * idealDist;
+                const ty = this.player.y + (toEnemyY / (enemyDist || 1)) * idealDist;
+                const tdx = tx - this.petSprite.x;
+                const tdy = ty - this.petSprite.y;
+                const tdist = Math.sqrt(tdx * tdx + tdy * tdy);
+                if (tdist > 8) {
+                    this.petSprite.x += (tdx / tdist) * 2.5;
+                    this.petSprite.y += (tdy / tdist) * 2.5;
+                }
+            } else {
+                const stopDist = 48;
+                if (dist > stopDist) {
+                    const speed = 2.8;
+                    this.petSprite.x += (dx / dist) * speed;
+                    this.petSprite.y += (dy / dist) * speed;
+                }
             }
             this.petSprite.setFlipX(dx < 0);
         } else {
@@ -451,37 +473,38 @@ export default class GameScene extends Phaser.Scene {
         if (!this.petSprite || !this.petData) return;
         const type = this.petData.type;
         const cooldowns = { attacker: 1500, companion: 2200, tank: 2500, collector: 2000 };
-            this.petAttackCooldown = cooldowns[type] || 2000;
-            this.petAttackTimer -= delta;
-            if (this.petTarget && (!this.petTarget.active || !this.petTarget.stats || this.petTarget.stats.hp <= 0)) {
-                this.petTarget = null;
-            }
-            if (!this.petTarget) {
-                let closest = null;
-                let closestDist = 200;
-                const groups = [this.enemies, this.villageZombies, this.hellImps, this.caveSmallBats];
-                groups.forEach(grp => {
-                    if (!grp) return;
-                    grp.getChildren().forEach(e => {
-                        if (!e.active || !e.stats || e.stats.hp <= 0) return;
-                        const d = Phaser.Math.Distance.Between(this.petSprite.x, this.petSprite.y, e.x, e.y);
-                        if (d < closestDist) { closest = e; closestDist = d; }
-                    });
+        this.petAttackCooldown = cooldowns[type] || 2000;
+        this.petAttackTimer -= delta;
+        if (this.petTarget && (!this.petTarget.active || !this.petTarget.stats || this.petTarget.stats.hp <= 0)) {
+            this.petTarget = null;
+        }
+        if (!this.petTarget) {
+            const searchRanges = { attacker: 130, companion: 110, tank: 150, collector: 100 };
+            let closestDist = searchRanges[type] || 120;
+            let closest = null;
+            const groups = [this.enemies, this.villageZombies, this.hellImps, this.caveSmallBats];
+            groups.forEach(grp => {
+                if (!grp) return;
+                grp.getChildren().forEach(e => {
+                    if (!e.active || !e.stats || e.stats.hp <= 0) return;
+                    const d = Phaser.Math.Distance.Between(this.petSprite.x, this.petSprite.y, e.x, e.y);
+                    if (d < closestDist) { closest = e; closestDist = d; }
                 });
-                const bossList = [this.boss, this.mineBoss, this.caveBoss, this.villageBoss, this.hellBoss, this.snowyIceSpirit, this.castleBoss];
-                bossList.forEach(b => {
-                    if (b && b.active && b.stats && b.stats.hp > 0) {
-                        const d = Phaser.Math.Distance.Between(this.petSprite.x, this.petSprite.y, b.x, b.y);
-                        if (d < closestDist) { closest = b; closestDist = d; }
-                    }
-                });
-                this.petTarget = closest;
-            }
-            if (this.petTarget && this.petAttackTimer <= 0) {
-                this.petAttackTimer = this.petAttackCooldown;
-                const baseDmg = Math.floor(this.playerDamage * 0.3 * (1 + (this.petLevel - 1) * 0.3));
+            });
+            const bossList = [this.boss, this.mineBoss, this.caveBoss, this.villageBoss, this.hellBoss, this.snowyIceSpirit, this.castleBoss];
+            bossList.forEach(b => {
+                if (b && b.active && b.stats && b.stats.hp > 0) {
+                    const d = Phaser.Math.Distance.Between(this.petSprite.x, this.petSprite.y, b.x, b.y);
+                    if (d < closestDist) { closest = b; closestDist = d; }
+                }
+            });
+            this.petTarget = closest;
+        }
+        if (this.petTarget && this.petAttackTimer <= 0) {
+            this.petAttackTimer = this.petAttackCooldown;
+            const baseDmg = Math.floor(this.playerDamage * 0.3 * (1 + (this.petLevel - 1) * 0.3));
             const dmg = Math.max(1, baseDmg);
-            playPetAttack();
+            playPetAttack(type);
             this.tweens.add({
                 targets: this.petSprite,
                 scaleX: 2.0,
@@ -644,8 +667,26 @@ export default class GameScene extends Phaser.Scene {
         this.accountTalentPoints = acc.accountTalentPoints || 0;
         this.unlockedAccountTalents = acc.unlockedAccountTalents || [];
         this.accountEffects = getAccountTalentEffects(this.unlockedAccountTalents);
+        this.upgradeLevels = acc.upgradeLevels || {};
+        this.activeBoosts = acc.activeBoosts || {};
 
         this.recalcStats();
+    }
+
+    awardCrystals(amount, x, y) {
+        if (amount <= 0) return;
+        const cap = CRYSTAL_RUN_CAPS[this.difficulty] || 200;
+        const remaining = cap - (this.crystalsThisRun || 0);
+        if (remaining <= 0) {
+            if (x !== undefined && y !== undefined) {
+                this.floatingText(x, y, 'Crystal cap reached!', '#888');
+            }
+            return 0;
+        }
+        const granted = Math.min(amount, remaining);
+        this.crystals += granted;
+        this.crystalsThisRun = (this.crystalsThisRun || 0) + granted;
+        return granted;
     }
 
     /* ===== INVENTORY DATA ===== */
@@ -719,6 +760,7 @@ export default class GameScene extends Phaser.Scene {
             unlockedAccountTalents: this.unlockedAccountTalents,
             gold: this.gold || 0,
             crystals: this.crystals || 0,
+            upgradeLevels: this.upgradeLevels || {},
             accountEquipment: eqPerClass,
             accountEquipBag: bagPerClass
         };
@@ -838,6 +880,20 @@ export default class GameScene extends Phaser.Scene {
             if (this._consumableBonusDefTimer <= 0) {
                 this._consumableBonusDef = 0;
                 this.floatingText(this.player.x, this.player.y - 30, 'DEF boost expired', '#95a5a6');
+            }
+        }
+        if (this._consumableBonusCritTimer > 0) {
+            this._consumableBonusCritTimer -= delta;
+            if (this._consumableBonusCritTimer <= 0) {
+                this._consumableBonusCrit = 0;
+                this.floatingText(this.player.x, this.player.y - 30, 'Crit boost expired', '#95a5a6');
+            }
+        }
+        if (this._consumableBonusLifestealTimer > 0) {
+            this._consumableBonusLifestealTimer -= delta;
+            if (this._consumableBonusLifestealTimer <= 0) {
+                this._consumableBonusLifesteal = 0;
+                this.floatingText(this.player.x, this.player.y - 30, 'Lifesteal expired', '#95a5a6');
             }
         }
     }

@@ -6,7 +6,7 @@ import {
     CASTLE_KEY, GAME_WIDTH, GAME_HEIGHT, RARITY_COLORS,
     VILLAGE_WIDTH, VILLAGE_HEIGHT
 } from '../config/index.js';
-import { rollEquip } from '../utils.js';
+import { rollZoneEquip, rollEquip } from '../utils.js';
 import { rollBossCrystals } from '../config/pets.js';
 import { playLoot, playBossAoE, playBossDeath, playPortal, startMusic } from '../sound.js';
 import { recordKill } from '../bestiary.js';
@@ -373,7 +373,7 @@ export class CastleZone {
         ch.hpFill = this.scene.add.rectangle(x, y - 16, 22, 3, 0xf39c12).setOrigin(0.5).setDepth(11);
         ch.loot = [];
         if (Math.random() < CASTLE_CHEST_DROP_CHANCE) {
-            ch.loot.push(rollEquip());
+            ch.loot.push(rollZoneEquip('castle'));
         }
         ch.hintText = this.scene.add.text(x, y - 20, '', {
             fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
@@ -673,10 +673,12 @@ export class CastleZone {
         this.scene._checkAccountLevelUp();
         this.scene.updateUI();
 
-        const cc = rollBossCrystals('castle');
+        const cc = rollBossCrystals('castle', this.scene.difficulty);
         if (cc > 0) {
-            this.scene.crystals = (this.scene.crystals || 0) + cc;
-            this.scene.floatingText(GAME_WIDTH / 2, 200, '+' + cc + ' \u{1F48E}', '#3498db');
+            const granted = this.scene.awardCrystals(cc, GAME_WIDTH / 2, 200);
+            if (granted > 0) {
+                this.scene.floatingText(GAME_WIDTH / 2, 200, '+' + granted + ' \u{1F48E}', '#3498db');
+            }
         }
     }
 
@@ -915,7 +917,7 @@ export class CastleZone {
     _updateStairsUpHint() {
         if (this.scene.castleRoom >= CASTLE_ROOMS - 1) return;
 
-        const alive = this.scene.enemies ? this.scene.enemies.getChildren().filter(e => e.active && e.stats && !e.stats.isBoss).length : 0;
+        const alive = this.scene.enemies ? this.scene.enemies.getChildren().filter(e => e.active && e.stats && e.stats.hp > 0 && !e.stats.isBoss).length : 0;
         const wasCleared = this.scene.castleFloorCleared;
         this.scene.castleFloorCleared = alive === 0;
 
@@ -977,6 +979,7 @@ export class CastleZone {
         this.scene.cameras.main.fadeOut(400, 0, 0, 0);
         this.scene.time.delayedCall(400, () => {
             this.scene.castleRoom++;
+            this.scene.castleFloorCleared = false;
             this.scene.physics.world.colliders.destroy();
             if (this.scene.enemies) {
                 this.scene.enemies.getChildren().forEach(e => {

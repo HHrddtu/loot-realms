@@ -612,10 +612,12 @@ export class HellZone {
         s._checkAccountLevelUp();
         s.ui.updateUI();
 
-        const hc = rollBossCrystals('hell');
+        const hc = rollBossCrystals('hell', s.difficulty);
         if (hc > 0) {
-            s.crystals = (s.crystals || 0) + hc;
-            s.floatingText(ox + HELL_WIDTH / 2, 310, '+' + hc + ' \u{1F48E}', '#3498db');
+            const granted = s.awardCrystals(hc, ox + HELL_WIDTH / 2, 310);
+            if (granted > 0) {
+                s.floatingText(ox + HELL_WIDTH / 2, 310, '+' + granted + ' \u{1F48E}', '#3498db');
+            }
         }
     }
 

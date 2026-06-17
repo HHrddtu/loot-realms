@@ -59,6 +59,8 @@ export class PlayerSystem {
 
         this.scene.equippedPet = acc.equippedPet || null;
         this.scene.petLevels = acc.petLevels || {};
+        this.scene.upgradeLevels = acc.upgradeLevels || {};
+        this.scene.activeBoosts = acc.activeBoosts || {};
 
         this.recalcStats();
     }
@@ -120,9 +122,25 @@ export class PlayerSystem {
         if (petStats.spellPercent) accSpellPercent += petStats.spellPercent;
         if (petStats.critPercent) accCritPercent += petStats.critPercent;
 
+        const upgradeLevels = this.scene.upgradeLevels || {};
+        const upgHp = (upgradeLevels.upg_hp || 0) * 5;
+        const upgDmg = (upgradeLevels.upg_dmg || 0) * 5;
+        const upgSpd = (upgradeLevels.upg_spd || 0) * 5;
+        const upgCrit = (upgradeLevels.upg_crit || 0) * 3;
+        const upgRegen = (upgradeLevels.upg_regen || 0) * 2;
+        accHpPercent += upgHp;
+        accDmgPercent += upgDmg;
+        accSpdPercent += upgSpd;
+        accCritPercent += upgCrit;
+
+        const activeBoosts = this.scene.activeBoosts || {};
+        const boostDmgPct = activeBoosts.damage_percent || 0;
+        const boostDefPct = activeBoosts.defense_percent || 0;
+        const boostRegenFlat = activeBoosts.regen_flat || 0;
+
         const hpMult = 1 + (te.hpPercent || 0) / 100 + accHpPercent / 100;
-        const dmgMult = 1 + (te.damagePercent || 0) / 100 + accDmgPercent / 100;
-        const moveSpeedBonus = (ae.moveSpeedPercent || 0) + (te.moveSpeedPercent || 0);
+        const dmgMult = 1 + (te.damagePercent || 0) / 100 + accDmgPercent / 100 + boostDmgPct / 100;
+        const moveSpeedBonus = (ae.moveSpeedPercent || 0) + (te.moveSpeedPercent || 0) + ((this.scene._consumableBonusSpd || 0) * 100);
         const spdMult = 1 + accSpdPercent / 100 + moveSpeedBonus / 100;
 
         this.scene.playerMaxHP = Math.floor((cls.stats.hp + (lvl - 1) * growth.hpPerLevel + bonusHP) * hpMult);
@@ -144,12 +162,13 @@ export class PlayerSystem {
         this.scene.computedCritDamage = 1.5 + (te.critDamagePercent || 0) / 100;
         this.scene.computedDodgePercent = (te.dodgePercent || 0) + accDodgePercent;
         this.scene.computedLifeSteal = (te.lifeSteal || 0) + (ae.lifeSteal || 0);
-        this.scene.computedDamageReduction = (te.damageReduction || 0) + (ae.damageReduction || 0) + (petStats.damageReduction || 0);
+        this.scene.computedDamageReduction = (te.damageReduction || 0) + (ae.damageReduction || 0) + (petStats.damageReduction || 0) + boostDefPct + ((this.scene._consumableBonusDef || 0) * 100);
         this.scene.computedDamageReflection = (te.damageReflection || 0) + (ae.damageReflection || 0);
         this.scene.computedCooldownReduction = (te.cooldownReduction || 0) + (ae.cooldownReduction || 0);
         this.scene.computedAreaDamage = (te.areaDamage || 0) + (ae.areaDamage || 0);
         this.scene.computedBossDamage = (te.bossDamagePercent || 0) + (ae.bossDamagePercent || 0);
         this.scene.computedSpellDamage = (te.spellDamage || 0) + accSpellPercent;
+        this.scene.computedRegenFlat = (te.regenFlat || 0) + boostRegenFlat + upgRegen;
 
         this.scene.relicEffects = {};
         Object.values(this.scene.accountEquipment).forEach(item => {
@@ -233,6 +252,14 @@ export class PlayerSystem {
             this.scene._consumableBonusDef = c.value;
             this.scene._consumableBonusDefTimer = c.duration || 60000;
             this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, '+' + Math.floor(c.value * 100) + '% DEF', '#f39c12');
+        } else if (c.effect === 'crit_boost') {
+            this.scene._consumableBonusCrit = c.value;
+            this.scene._consumableBonusCritTimer = c.duration || 60000;
+            this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, '+' + c.value + '% Crit', '#9b59b6');
+        } else if (c.effect === 'lifesteal') {
+            this.scene._consumableBonusLifesteal = c.value;
+            this.scene._consumableBonusLifestealTimer = c.duration || 45000;
+            this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, Math.floor(c.value * 100) + '% Lifesteal', '#c0392b');
         }
         this.scene.consumable = null;
         this.scene.updateUI();

@@ -104,14 +104,111 @@ export function playBreak() {
     osc(250, 0.08, 'sine', 0.04);
 }
 
-export function playPetAttack() {
-    osc(600, 0.05, 'square', 0.04);
-    osc(450, 0.07, 'sine', 0.03);
+export function playPetAttack(type) {
+    if (muted) return;
+    const c = getCtx();
+    if (type === 'attacker') {
+        const o1 = c.createOscillator();
+        const g1 = c.createGain();
+        o1.type = 'sawtooth';
+        o1.frequency.setValueAtTime(800, c.currentTime);
+        o1.frequency.exponentialRampToValueAtTime(200, c.currentTime + 0.08);
+        g1.gain.setValueAtTime(0.06, c.currentTime);
+        g1.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.1);
+        o1.connect(g1); g1.connect(c.destination);
+        o1.start(c.currentTime); o1.stop(c.currentTime + 0.1);
+        const o2 = c.createOscillator();
+        const g2 = c.createGain();
+        o2.type = 'square';
+        o2.frequency.setValueAtTime(300, c.currentTime);
+        o2.frequency.exponentialRampToValueAtTime(100, c.currentTime + 0.06);
+        g2.gain.setValueAtTime(0.04, c.currentTime);
+        g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.07);
+        o2.connect(g2); g2.connect(c.destination);
+        o2.start(c.currentTime); o2.stop(c.currentTime + 0.07);
+        noise(0.05, 0.03);
+    } else if (type === 'tank') {
+        const o1 = c.createOscillator();
+        const g1 = c.createGain();
+        o1.type = 'sine';
+        o1.frequency.setValueAtTime(120, c.currentTime);
+        o1.frequency.exponentialRampToValueAtTime(60, c.currentTime + 0.15);
+        g1.gain.setValueAtTime(0.1, c.currentTime);
+        g1.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.18);
+        o1.connect(g1); g1.connect(c.destination);
+        o1.start(c.currentTime); o1.stop(c.currentTime + 0.18);
+        noise(0.1, 0.06);
+        const o2 = c.createOscillator();
+        const g2 = c.createGain();
+        o2.type = 'triangle';
+        o2.frequency.setValueAtTime(200, c.currentTime);
+        o2.frequency.exponentialRampToValueAtTime(80, c.currentTime + 0.12);
+        g2.gain.setValueAtTime(0.05, c.currentTime);
+        g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.14);
+        o2.connect(g2); g2.connect(c.destination);
+        o2.start(c.currentTime); o2.stop(c.currentTime + 0.14);
+    } else if (type === 'collector') {
+        const o1 = c.createOscillator();
+        const g1 = c.createGain();
+        o1.type = 'sine';
+        o1.frequency.setValueAtTime(1200, c.currentTime);
+        o1.frequency.exponentialRampToValueAtTime(800, c.currentTime + 0.08);
+        g1.gain.setValueAtTime(0.03, c.currentTime);
+        g1.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.12);
+        o1.connect(g1); g1.connect(c.destination);
+        o1.start(c.currentTime); o1.stop(c.currentTime + 0.12);
+        const o2 = c.createOscillator();
+        const g2 = c.createGain();
+        o2.type = 'sine';
+        o2.frequency.setValueAtTime(1600, c.currentTime + 0.04);
+        o2.frequency.exponentialRampToValueAtTime(1100, c.currentTime + 0.12);
+        g2.gain.setValueAtTime(0.025, c.currentTime + 0.04);
+        g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.15);
+        o2.connect(g2); g2.connect(c.destination);
+        o2.start(c.currentTime + 0.04); o2.stop(c.currentTime + 0.15);
+    } else {
+        const o1 = c.createOscillator();
+        const g1 = c.createGain();
+        o1.type = 'sine';
+        o1.frequency.setValueAtTime(600, c.currentTime);
+        o1.frequency.exponentialRampToValueAtTime(400, c.currentTime + 0.1);
+        g1.gain.setValueAtTime(0.04, c.currentTime);
+        g1.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.12);
+        o1.connect(g1); g1.connect(c.destination);
+        o1.start(c.currentTime); o1.stop(c.currentTime + 0.12);
+        const o2 = c.createOscillator();
+        const g2 = c.createGain();
+        o2.type = 'triangle';
+        o2.frequency.setValueAtTime(500, c.currentTime);
+        o2.frequency.exponentialRampToValueAtTime(350, c.currentTime + 0.08);
+        g2.gain.setValueAtTime(0.03, c.currentTime);
+        g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.1);
+        o2.connect(g2); g2.connect(c.destination);
+        o2.start(c.currentTime); o2.stop(c.currentTime + 0.1);
+    }
 }
 
 export function playPetPickup() {
-    osc(700, 0.08, 'sine', 0.04);
-    setTimeout(() => osc(900, 0.1, 'sine', 0.03), 60);
+    if (muted) return;
+    const c = getCtx();
+    const o1 = c.createOscillator();
+    const g1 = c.createGain();
+    o1.type = 'sine';
+    o1.frequency.setValueAtTime(800, c.currentTime);
+    o1.frequency.exponentialRampToValueAtTime(1200, c.currentTime + 0.06);
+    g1.gain.setValueAtTime(0.04, c.currentTime);
+    g1.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.1);
+    o1.connect(g1); g1.connect(c.destination);
+    o1.start(c.currentTime); o1.stop(c.currentTime + 0.1);
+    const o2 = c.createOscillator();
+    const g2 = c.createGain();
+    o2.type = 'sine';
+    o2.frequency.setValueAtTime(1100, c.currentTime + 0.05);
+    o2.frequency.exponentialRampToValueAtTime(1500, c.currentTime + 0.12);
+    g2.gain.setValueAtTime(0.03, c.currentTime + 0.05);
+    g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.15);
+    o2.connect(g2); g2.connect(c.destination);
+    o2.start(c.currentTime + 0.05); o2.stop(c.currentTime + 0.15);
 }
 
 /* === MEDIEVAL FLUTE MUSIC === */

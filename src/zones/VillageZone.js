@@ -10,9 +10,10 @@ import {
     SNOWY_BOSS_MINION, WARMTH_CORE, SNOWY_VILLAGE_CHEST_COUNT, SNOWY_VILLAGE_CHEST_DROP_CHANCE,
     BOSS_DROP_CHANCE, GAME_WIDTH, GAME_HEIGHT, RARITY_COLORS
 } from '../config/index.js';
-import { CONSUMABLES } from '../config/gold.js';
-import { rollBossCrystals } from '../config/pets.js';
-import { rollVillageEquip, rollEquip, rollVillageAccountEquip, rollAccountEquip } from '../utils.js';
+import { CONSUMABLES, SHOP_BOOSTS, SHOP_UPGRADES, SHOP_GOLD_CASES } from '../config/gold.js';
+import { rollBossCrystals, rollCaseDrop, CASE_DB } from '../config/pets.js';
+import { loadAccount, saveAccount } from '../save.js';
+import { rollZoneEquip, rollEquip, rollVillageAccountEquip, rollAccountEquip } from '../utils.js';
 import {
     playLoot, playBossAoE, playBossDeath, playPortal, playBreak, startMusic
 } from '../sound.js';
@@ -281,63 +282,457 @@ export class VillageZone {
         this.scene.shopGroup = [];
         const mk = (el) => { el.setScrollFactor(0).setDepth(200); return el; };
 
-        const W = 400, H = 380;
+        const W = 520, H = 500;
         this.scene.shopGroup.push(mk(this.scene.add.rectangle(400, 300, W, H, 0x0a0a1a, 0.95).setStrokeStyle(2, 0xf1c40f)));
-        this.scene.shopGroup.push(mk(this.scene.add.text(400, 130, 'VILLAGE MERCHANT', {
-            fontSize: '18px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+
+        this.scene.shopGroup.push(mk(this.scene.add.text(400, 65, 'VILLAGE MERCHANT', {
+            fontSize: '18px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5)));
-        this.scene.shopGroup.push(mk(this.scene.add.text(400, 150, 'Gold: ' + (this.scene.gold || 0), {
+
+        const goldText = mk(this.scene.add.text(260, 87, '\u{1F4B0} ' + (this.scene.gold || 0), {
             fontSize: '12px', fill: '#f1c40f', fontFamily: 'Arial'
+        }).setOrigin(0.5));
+        this.scene.shopGroup.push(goldText);
+
+        const crystalText = mk(this.scene.add.text(400, 87, '\u{1F48E} ' + (this.scene.crystals || 0), {
+            fontSize: '12px', fill: '#3498db', fontFamily: 'Arial'
+        }).setOrigin(0.5));
+        this.scene.shopGroup.push(crystalText);
+
+        const cap = { Normal: 200, Hard: 50, Expert: 75, Nightmare: 100, Hell: 150, Abyss: 200 }[this.scene.difficulty] || 200;
+        const capText = mk(this.scene.add.text(540, 87, 'Cap: ' + (this.scene.crystalsThisRun || 0) + '/' + cap, {
+            fontSize: '9px', fill: '#888', fontFamily: 'Arial'
+        }).setOrigin(0.5));
+        this.scene.shopGroup.push(capText);
+
+        const tabs = ['Potions', 'Boosts', 'Upgrades', 'Cases'];
+        const tabColors = ['#27ae60', '#3498db', '#e74c3c', '#f1c40f'];
+        let currentTab = 0;
+
+        const tabBtns = [];
+        tabs.forEach((tab, i) => {
+            const tx = 175 + i * 95;
+            const tbg = mk(this.scene.add.rectangle(tx, 108, 85, 20, i === 0 ? 0x2c3e50 : 0x1a1a2e)
+                .setStrokeStyle(1, i === 0 ? parseInt(tabColors[i].slice(1), 16) : 0x555));
+            const ttl = mk(this.scene.add.text(tx, 108, tab, {
+                fontSize: '10px', fill: i === 0 ? tabColors[i] : '#888', fontFamily: 'Arial', fontStyle: 'bold'
+            }).setOrigin(0.5));
+            tbg.setInteractive({ useHandCursor: true });
+            tbg.on('pointerdown', () => {
+                currentTab = i;
+                this._closeShop();
+                this.scene.menuOpen = false;
+                this.scene.physics.resume();
+                this._openShopTab(i);
+            });
+            tabBtns.push(tbg, ttl);
+        });
+        this.scene.shopGroup.push(...tabBtns);
+
+        this._renderShopTab(0, mk, goldText, crystalText, capText);
+
+        const closeBg = mk(this.scene.add.rectangle(400, 535, 100, 24, 0x34495e)
+            .setStrokeStyle(1, 0x5a6c7d).setInteractive({ useHandCursor: true }));
+        const closeTxt = mk(this.scene.add.text(400, 535, 'CLOSE', {
+            fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5));
+        closeBg.on('pointerdown', () => this._closeShop());
+        this.scene.shopGroup.push(closeBg, closeTxt);
+    }
+
+    _openShopTab(tabIndex) {
+        if (this.scene.menuOpen) return;
+        this.scene.menuOpen = true;
+        this.scene.physics.pause();
+        if (this.scene.enemies) this.scene.enemies.getChildren().forEach(e => { if (e.body) e.body.setVelocity(0); });
+        this.scene.shopGroup = [];
+        const mk = (el) => { el.setScrollFactor(0).setDepth(200); return el; };
+
+        const W = 520, H = 500;
+        this.scene.shopGroup.push(mk(this.scene.add.rectangle(400, 300, W, H, 0x0a0a1a, 0.95).setStrokeStyle(2, 0xf1c40f)));
+
+        this.scene.shopGroup.push(mk(this.scene.add.text(400, 65, 'VILLAGE MERCHANT', {
+            fontSize: '18px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5)));
 
+        const goldText = mk(this.scene.add.text(260, 87, '\u{1F4B0} ' + (this.scene.gold || 0), {
+            fontSize: '12px', fill: '#f1c40f', fontFamily: 'Arial'
+        }).setOrigin(0.5));
+        this.scene.shopGroup.push(goldText);
+
+        const crystalText = mk(this.scene.add.text(400, 87, '\u{1F48E} ' + (this.scene.crystals || 0), {
+            fontSize: '12px', fill: '#3498db', fontFamily: 'Arial'
+        }).setOrigin(0.5));
+        this.scene.shopGroup.push(crystalText);
+
+        const cap = { Normal: 200, Hard: 50, Expert: 75, Nightmare: 100, Hell: 150, Abyss: 200 }[this.scene.difficulty] || 200;
+        const capText = mk(this.scene.add.text(540, 87, 'Cap: ' + (this.scene.crystalsThisRun || 0) + '/' + cap, {
+            fontSize: '9px', fill: '#888', fontFamily: 'Arial'
+        }).setOrigin(0.5));
+        this.scene.shopGroup.push(capText);
+
+        const tabs = ['Potions', 'Boosts', 'Upgrades', 'Cases'];
+        const tabColors = ['#27ae60', '#3498db', '#e74c3c', '#f1c40f'];
+        tabs.forEach((tab, i) => {
+            const tx = 175 + i * 95;
+            const tbg = mk(this.scene.add.rectangle(tx, 108, 85, 20, i === tabIndex ? 0x2c3e50 : 0x1a1a2e)
+                .setStrokeStyle(1, i === tabIndex ? parseInt(tabColors[i].slice(1), 16) : 0x555));
+            const ttl = mk(this.scene.add.text(tx, 108, tab, {
+                fontSize: '10px', fill: i === tabIndex ? tabColors[i] : '#888', fontFamily: 'Arial', fontStyle: 'bold'
+            }).setOrigin(0.5));
+            tbg.setInteractive({ useHandCursor: true });
+            tbg.on('pointerdown', () => {
+                this._closeShop();
+                this.scene.menuOpen = false;
+                this.scene.physics.resume();
+                this._openShopTab(i);
+            });
+            this.scene.shopGroup.push(tbg, ttl);
+        });
+
+        this._renderShopTab(tabIndex, mk, goldText, crystalText, capText);
+
+        const closeBg = mk(this.scene.add.rectangle(400, 535, 100, 24, 0x34495e)
+            .setStrokeStyle(1, 0x5a6c7d).setInteractive({ useHandCursor: true }));
+        const closeTxt = mk(this.scene.add.text(400, 535, 'CLOSE', {
+            fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5));
+        closeBg.on('pointerdown', () => this._closeShop());
+        this.scene.shopGroup.push(closeBg, closeTxt);
+    }
+
+    _renderShopTab(tabIndex, mk, goldText, crystalText, capText) {
+        const updateCurrency = () => {
+            if (goldText) goldText.setText('\u{1F4B0} ' + (this.scene.gold || 0));
+            if (crystalText) crystalText.setText('\u{1F48E} ' + (this.scene.crystals || 0));
+            const cap = { Normal: 200, Hard: 50, Expert: 75, Nightmare: 100, Hell: 150, Abyss: 200 }[this.scene.difficulty] || 200;
+            if (capText) capText.setText('Cap: ' + (this.scene.crystalsThisRun || 0) + '/' + cap);
+        };
+
+        if (tabIndex === 0) this._renderPotionsTab(mk, updateCurrency);
+        else if (tabIndex === 1) this._renderBoostsTab(mk, updateCurrency);
+        else if (tabIndex === 2) this._renderUpgradesTab(mk, updateCurrency);
+        else if (tabIndex === 3) this._renderCasesTab(mk, updateCurrency);
+    }
+
+    _renderPotionsTab(mk, updateCurrency) {
+        const equippedId = this.scene.consumable ? this.scene.consumable.id : null;
         const items = CONSUMABLES.slice();
-        const cols = 3, slotSize = 50, gap = 10;
-        const startX = 400 - (cols * (slotSize + gap)) / 2 + slotSize / 2;
-        const startY = 190;
+        const cols = 3, slotW = 140, slotH = 60, gapX = 12, gapY = 6;
+        const totalW = cols * slotW + (cols - 1) * gapX;
+        const startX = 400 - totalW / 2 + slotW / 2;
+        const startY = 160;
 
-        items.forEach((item, i) => {
-            const col = i % cols;
-            const row = Math.floor(i / cols);
-            const sx = startX + col * (slotSize + gap);
-            const sy = startY + row * (slotSize + gap + 16);
+        const healing = items.filter(i => i.category === 'healing');
+        const combat = items.filter(i => i.category === 'combat');
 
-            const bg = mk(this.scene.add.rectangle(sx, sy, slotSize, slotSize, 0x1a1a2e).setStrokeStyle(1, 0x444));
+        this.scene.shopGroup.push(mk(this.scene.add.text(400, startY - 8, '\u2764 Healing', {
+            fontSize: '10px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5)));
+
+        let allItems = [];
+        healing.forEach((item, i) => { allItems.push({ item, row: Math.floor(i / cols), col: i % cols }); });
+        let combatStart = Math.ceil(healing.length / cols);
+        this.scene.shopGroup.push(mk(this.scene.add.text(400, startY + combatStart * (slotH + gapY) + 16, '\u2694 Combat', {
+            fontSize: '10px', fill: '#e67e22', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5)));
+        combat.forEach((item, i) => { allItems.push({ item, row: combatStart + Math.floor(i / cols), col: i % cols }); });
+
+        allItems.forEach(({ item, row, col }) => {
+            const sx = startX + col * (slotW + gapX);
+            const sy = startY + row * (slotH + gapY) + (row > 0 ? 16 : 0);
+
+            const rc = RARITY_COLORS[item.rarity] || 0xaaaaaa;
+            const rcHex = '#' + rc.toString(16).padStart(6, '0');
+            const isEquipped = equippedId === item.id;
+
+            const bgColor = isEquipped ? 0x1a3a1a : 0x1a1a2e;
+            const borderColor = isEquipped ? 0x2ecc71 : rc;
+            const bg = mk(this.scene.add.rectangle(sx, sy, slotW, slotH, bgColor).setStrokeStyle(isEquipped ? 2 : 1, borderColor));
             this.scene.shopGroup.push(bg);
-            this.scene.shopGroup.push(mk(this.scene.add.sprite(sx, sy - 4, item.texKey).setScale(1.5)));
 
-            const rc = '#' + (RARITY_COLORS[item.rarity] || 0xaaaaaa).toString(16).padStart(6, '0');
-            this.scene.shopGroup.push(mk(this.scene.add.text(sx, sy + slotSize / 2 - 4, item.name.split(' ').slice(0, 2).join(' '), {
-                fontSize: '7px', fill: rc, fontFamily: 'Arial'
+            this.scene.shopGroup.push(mk(this.scene.add.sprite(sx - 40, sy, item.texKey).setScale(2.0)));
+
+            this.scene.shopGroup.push(mk(this.scene.add.text(sx + 5, sy - 18, item.name.split(' ').slice(0, 2).join(' '), {
+                fontSize: '8px', fill: rcHex, fontFamily: 'Arial', fontStyle: 'bold'
+            }).setOrigin(0, 0.5)));
+
+            this.scene.shopGroup.push(mk(this.scene.add.text(sx + 5, sy - 4, item.description, {
+                fontSize: '7px', fill: '#aaa', fontFamily: 'Arial'
+            }).setOrigin(0, 0.5)));
+
+            this.scene.shopGroup.push(mk(this.scene.add.text(sx + 5, sy + 10, item.effectDesc || '', {
+                fontSize: '6px', fill: '#888', fontFamily: 'Arial', wordWrap: { width: slotW - 55 }
+            }).setOrigin(0, 0.5)));
+
+            this.scene.shopGroup.push(mk(this.scene.add.text(sx, sy + slotH / 2 - 8, item.price + 'g', {
+                fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
             }).setOrigin(0.5)));
 
-            this.scene.shopGroup.push(mk(this.scene.add.text(sx, sy + slotSize / 2 + 8, item.price + 'g', {
-                fontSize: '9px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
-            }).setOrigin(0.5)));
+            if (isEquipped) {
+                this.scene.shopGroup.push(mk(this.scene.add.text(sx, sy - slotH / 2 + 8, 'EQUIPPED', {
+                    fontSize: '7px', fill: '#2ecc71', fontFamily: 'Arial', fontStyle: 'bold',
+                    stroke: '#000', strokeThickness: 1
+                }).setOrigin(0.5)));
+            }
 
             bg.setInteractive({ useHandCursor: true });
-            bg.on('pointerover', () => { bg.setScale(1.1); this.scene._showItemTooltip(sx + 35, sy, item); });
-            bg.on('pointerout', () => { bg.setScale(1); this.scene._hideItemTooltip(); });
+            bg.on('pointerover', () => bg.setScale(1.03));
+            bg.on('pointerout', () => bg.setScale(1));
             bg.on('pointerdown', () => {
                 if ((this.scene.gold || 0) >= item.price) {
                     this.scene.gold -= item.price;
-                    const consumableItem = { ...item, type: 'consumable' };
-                    this.scene.consumable = consumableItem;
+                    this.scene.consumable = { ...item, type: 'consumable' };
                     this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, '+' + item.name, '#2ecc71');
                     this._closeShop();
-                    this._openShop();
+                    this.scene.menuOpen = false;
+                    this.scene.physics.resume();
+                    this._openShopTab(0);
+                } else {
+                    this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, 'Not enough gold!', '#e74c3c');
+                }
+            });
+        });
+    }
+
+    _renderBoostsTab(mk, updateCurrency) {
+        const cols = 2, slotW = 220, slotH = 60, gapX = 14, gapY = 8;
+        const totalW = cols * slotW + (cols - 1) * gapX;
+        const startX = 400 - totalW / 2 + slotW / 2;
+        const startY = 160;
+
+        this.scene.shopGroup.push(mk(this.scene.add.text(400, startY - 8, 'Run Boosts (active until run ends)', {
+            fontSize: '10px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5)));
+
+        const activeBoosts = this.scene.activeBoosts || {};
+
+        SHOP_BOOSTS.forEach((item, i) => {
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            const sx = startX + col * (slotW + gapX);
+            const sy = startY + 14 + row * (slotH + gapY);
+
+            const rc = RARITY_COLORS[item.rarity] || 0xaaaaaa;
+            const rcHex = '#' + rc.toString(16).padStart(6, '0');
+            const isActive = activeBoosts[item.boostType] > 0;
+
+            const bgColor = isActive ? 0x1a3a2a : 0x1a1a2e;
+            const borderColor = isActive ? 0x2ecc71 : rc;
+            const bg = mk(this.scene.add.rectangle(sx, sy, slotW, slotH, bgColor).setStrokeStyle(isActive ? 2 : 1, borderColor));
+            this.scene.shopGroup.push(bg);
+
+            this.scene.shopGroup.push(mk(this.scene.add.sprite(sx - 85, sy, item.texKey).setScale(1.8)));
+
+            this.scene.shopGroup.push(mk(this.scene.add.text(sx - 55, sy - 16, item.name, {
+                fontSize: '10px', fill: rcHex, fontFamily: 'Arial', fontStyle: 'bold'
+            }).setOrigin(0, 0.5)));
+
+            this.scene.shopGroup.push(mk(this.scene.add.text(sx - 55, sy - 3, item.effectDesc || item.description, {
+                fontSize: '7px', fill: '#aaa', fontFamily: 'Arial', wordWrap: { width: slotW - 50 }
+            }).setOrigin(0, 0.5)));
+
+            this.scene.shopGroup.push(mk(this.scene.add.text(sx, sy + slotH / 2 - 8, item.price + 'g', {
+                fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+            }).setOrigin(0.5)));
+
+            if (isActive) {
+                this.scene.shopGroup.push(mk(this.scene.add.text(sx, sy - slotH / 2 + 8, 'ACTIVE', {
+                    fontSize: '7px', fill: '#2ecc71', fontFamily: 'Arial', fontStyle: 'bold',
+                    stroke: '#000', strokeThickness: 1
+                }).setOrigin(0.5)));
+            }
+
+            bg.setInteractive({ useHandCursor: true });
+            bg.on('pointerover', () => bg.setScale(1.03));
+            bg.on('pointerout', () => bg.setScale(1));
+            bg.on('pointerdown', () => {
+                if ((this.scene.gold || 0) >= item.price) {
+                    this.scene.gold -= item.price;
+                    if (!this.scene.activeBoosts) this.scene.activeBoosts = {};
+                    this.scene.activeBoosts[item.boostType] = (this.scene.activeBoosts[item.boostType] || 0) + item.value;
+                    this.scene.recalcStats();
+                    this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, '+' + item.name + ' activated!', '#2ecc71');
+                    this._closeShop();
+                    this.scene.menuOpen = false;
+                    this.scene.physics.resume();
+                    this._openShopTab(1);
+                } else {
+                    this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, 'Not enough gold!', '#e74c3c');
+                }
+            });
+        });
+    }
+
+    _renderUpgradesTab(mk, updateCurrency) {
+        const cols = 1, slotW = 440, slotH = 55, gapX = 0, gapY = 7;
+        const startX = 400;
+        const startY = 160;
+
+        this.scene.shopGroup.push(mk(this.scene.add.text(400, startY - 8, 'Permanent Upgrades (survive death)', {
+            fontSize: '10px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5)));
+
+        const upgradeLevels = this.scene.upgradeLevels || {};
+
+        SHOP_UPGRADES.forEach((item, i) => {
+            const sy = startY + 14 + i * (slotH + gapY);
+            const level = upgradeLevels[item.id] || 0;
+            const maxed = level >= item.maxLevel;
+            const price = maxed ? 0 : Math.floor(item.basePrice * Math.pow(item.priceScale, level));
+
+            const rc = maxed ? 0x2ecc71 : 0xaaaaaa;
+            const rcHex = '#' + rc.toString(16).padStart(6, '0');
+
+            const bg = mk(this.scene.add.rectangle(startX, sy, slotW, slotH, 0x1a1a2e)
+                .setStrokeStyle(1, maxed ? 0x2ecc71 : 0x555));
+            this.scene.shopGroup.push(bg);
+
+            this.scene.shopGroup.push(mk(this.scene.add.sprite(startX - 190, sy, item.texKey).setScale(1.8)));
+
+            this.scene.shopGroup.push(mk(this.scene.add.text(startX - 165, sy - 14, item.name, {
+                fontSize: '11px', fill: rcHex, fontFamily: 'Arial', fontStyle: 'bold'
+            }).setOrigin(0, 0.5)));
+
+            this.scene.shopGroup.push(mk(this.scene.add.text(startX - 165, sy + 2, item.effectDesc || item.description, {
+                fontSize: '8px', fill: '#aaa', fontFamily: 'Arial'
+            }).setOrigin(0, 0.5)));
+
+            const lvlText = maxed ? 'MAX' : 'Lv ' + level + '/' + item.maxLevel;
+            this.scene.shopGroup.push(mk(this.scene.add.text(startX + 120, sy - 5, lvlText, {
+                fontSize: '10px', fill: maxed ? '#2ecc71' : '#888', fontFamily: 'Arial', fontStyle: 'bold'
+            }).setOrigin(0.5)));
+
+            if (!maxed) {
+                const buyBg = mk(this.scene.add.rectangle(startX + 180, sy, 80, 22, 0x2c3e50)
+                    .setStrokeStyle(1, 0xf1c40f).setInteractive({ useHandCursor: true }));
+                const buyTxt = mk(this.scene.add.text(startX + 180, sy, price + 'g', {
+                    fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+                }).setOrigin(0.5));
+                this.scene.shopGroup.push(buyBg, buyTxt);
+
+                buyBg.on('pointerdown', () => {
+                    if ((this.scene.gold || 0) >= price) {
+                        this.scene.gold -= price;
+                        if (!this.scene.upgradeLevels) this.scene.upgradeLevels = {};
+                        this.scene.upgradeLevels[item.id] = level + 1;
+                        this.scene.recalcStats();
+                        this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, item.name + ' upgraded!', '#2ecc71');
+                        this._closeShop();
+                        this.scene.menuOpen = false;
+                        this.scene.physics.resume();
+                        this._openShopTab(2);
+                    } else {
+                        this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, 'Not enough gold!', '#e74c3c');
+                    }
+                });
+            } else {
+                this.scene.shopGroup.push(mk(this.scene.add.text(startX + 180, sy, 'DONE', {
+                    fontSize: '10px', fill: '#2ecc71', fontFamily: 'Arial', fontStyle: 'bold'
+                }).setOrigin(0.5)));
+            }
+        });
+    }
+
+    _renderCasesTab(mk, updateCurrency) {
+        const startY = 160;
+
+        this.scene.shopGroup.push(mk(this.scene.add.text(400, startY - 8, 'Pet Cases (Gold)', {
+            fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5)));
+
+        SHOP_GOLD_CASES.forEach((item, i) => {
+            const sx = 200 + i * 170;
+            const sy = startY + 70;
+
+            const caseInfo = CASE_DB.find(c => c.id === item.caseId);
+            const rc = RARITY_COLORS[caseInfo ? caseInfo.rarity : 'common'] || 0xaaaaaa;
+            const rcHex = '#' + rc.toString(16).padStart(6, '0');
+
+            const bg = mk(this.scene.add.rectangle(sx, sy, 150, 140, 0x1a1a2e)
+                .setStrokeStyle(1, rc));
+            this.scene.shopGroup.push(bg);
+
+            this.scene.shopGroup.push(mk(this.scene.add.sprite(sx, sy - 30, item.texKey).setScale(2.5)));
+
+            this.scene.shopGroup.push(mk(this.scene.add.text(sx, sy + 25, item.name, {
+                fontSize: '10px', fill: rcHex, fontFamily: 'Arial', fontStyle: 'bold'
+            }).setOrigin(0.5)));
+
+            this.scene.shopGroup.push(mk(this.scene.add.text(sx, sy + 40, item.description, {
+                fontSize: '8px', fill: '#aaa', fontFamily: 'Arial'
+            }).setOrigin(0.5)));
+
+            this.scene.shopGroup.push(mk(this.scene.add.text(sx, sy + 55, item.goldPrice + 'g', {
+                fontSize: '12px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+            }).setOrigin(0.5)));
+
+            bg.setInteractive({ useHandCursor: true });
+            bg.on('pointerover', () => bg.setScale(1.05));
+            bg.on('pointerout', () => bg.setScale(1));
+            bg.on('pointerdown', () => {
+                if ((this.scene.gold || 0) >= item.goldPrice) {
+                    this.scene.gold -= item.goldPrice;
+                    this._openCase(item.caseId);
                 } else {
                     this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, 'Not enough gold!', '#e74c3c');
                 }
             });
         });
 
-        const closeBg = mk(this.scene.add.rectangle(400, 480, 100, 24, 0x34495e)
-            .setStrokeStyle(1, 0x5a6c7d).setInteractive({ useHandCursor: true }));
-        const closeTxt = mk(this.scene.add.text(400, 480, 'CLOSE', {
-            fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
-        }).setOrigin(0.5));
-        closeBg.on('pointerdown', () => this._closeShop());
-        this.scene.shopGroup.push(closeBg, closeTxt);
+        this.scene.shopGroup.push(mk(this.scene.add.text(400, startY + 170, 'Crystal Cases (Pet Scene)', {
+            fontSize: '10px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5)));
+
+        CASE_DB.forEach((c, i) => {
+            const sx = 200 + i * 170;
+            const sy = startY + 240;
+
+            const rc = RARITY_COLORS[c.rarity] || 0xaaaaaa;
+            const rcHex = '#' + rc.toString(16).padStart(6, '0');
+
+            const bg = mk(this.scene.add.rectangle(sx, sy, 150, 120, 0x1a1a2e)
+                .setStrokeStyle(1, rc));
+            this.scene.shopGroup.push(bg);
+
+            this.scene.shopGroup.push(mk(this.scene.add.sprite(sx, sy - 20, c.texKey).setScale(2.5)));
+
+            this.scene.shopGroup.push(mk(this.scene.add.text(sx, sy + 25, c.name, {
+                fontSize: '10px', fill: rcHex, fontFamily: 'Arial', fontStyle: 'bold'
+            }).setOrigin(0.5)));
+
+            this.scene.shopGroup.push(mk(this.scene.add.text(sx, sy + 42, '\u{1F48E} ' + c.price, {
+                fontSize: '12px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold'
+            }).setOrigin(0.5)));
+
+            this.scene.shopGroup.push(mk(this.scene.add.text(sx, sy + 55, 'Pet Scene only', {
+                fontSize: '7px', fill: '#666', fontFamily: 'Arial'
+            }).setOrigin(0.5)));
+        });
+    }
+
+    _openCase(caseId) {
+        const pet = rollCaseDrop(caseId);
+        if (!pet) return;
+
+        const acc = loadAccount() || {};
+        if (!acc.ownedPets) acc.ownedPets = [];
+        const alreadyOwned = acc.ownedPets.includes(pet.id);
+        acc.ownedPets.push(pet.id);
+        if (!acc.petLevels) acc.petLevels = {};
+        saveAccount(acc);
+
+        this.scene._closeShop();
+        this.scene.menuOpen = false;
+        this.scene.physics.resume();
+
+        this.scene.floatingText(this.scene.player.x, this.scene.player.y - 40,
+            (alreadyOwned ? '(owned) ' : '') + pet.name + ' (' + pet.rarity + ')',
+            pet.rarity === 'legendary' ? '#f39c12' : pet.rarity === 'rare' ? '#3498db' : '#fff'
+        );
+        playLoot();
     }
 
     _closeShop() {
@@ -345,6 +740,11 @@ export class VillageZone {
         if (this.scene.shopGroup) {
             this.scene.shopGroup.forEach(e => e.destroy());
             this.scene.shopGroup = [];
+        }
+        if (this.scene.upgradeLevels) {
+            const acc = loadAccount() || {};
+            acc.upgradeLevels = this.scene.upgradeLevels;
+            saveAccount(acc);
         }
         this.scene.menuOpen = false;
         this.scene.physics.resume();
@@ -473,11 +873,11 @@ export class VillageZone {
         const count = 1 + Math.floor(Math.random() * 2);
         for (let i = 0; i < count; i++) {
             if (Math.random() < VILLAGE_CHEST_DROP_CHANCE) {
-                ch.loot.push(rollVillageEquip());
+                ch.loot.push(rollZoneEquip('village'));
             }
         }
         if (Math.random() < VILLAGE_CHEST_EQUIP_DROP_CHANCE) {
-            ch.loot.push(rollEquip());
+            ch.loot.push(rollZoneEquip('village'));
         }
         ch.hintText = this.scene.add.text(x, y - 20, '', {
             fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
@@ -1250,10 +1650,12 @@ export class VillageZone {
         this.scene._checkAccountLevelUp();
         this.scene.updateUI();
 
-        const vc = rollBossCrystals('village');
+        const vc = rollBossCrystals('village', this.scene.difficulty);
         if (vc > 0) {
-            this.scene.crystals = (this.scene.crystals || 0) + vc;
-            this.scene.floatingText(this.scene.villageOffsetX + VILLAGE_WIDTH / 2, 310, '+' + vc + ' \u{1F48E}', '#3498db');
+            const granted = this.scene.awardCrystals(vc, this.scene.villageOffsetX + VILLAGE_WIDTH / 2, 310);
+            if (granted > 0) {
+                this.scene.floatingText(this.scene.villageOffsetX + VILLAGE_WIDTH / 2, 310, '+' + granted + ' \u{1F48E}', '#3498db');
+            }
         }
     }
 
@@ -1321,11 +1723,11 @@ export class VillageZone {
         const count = 1 + Math.floor(Math.random() * 2);
         for (let i = 0; i < count; i++) {
             if (Math.random() < SNOWY_VILLAGE_CHEST_DROP_CHANCE) {
-                ch.loot.push(rollVillageEquip());
+                ch.loot.push(rollZoneEquip('snowy'));
             }
         }
         if (Math.random() < VILLAGE_CHEST_EQUIP_DROP_CHANCE) {
-            ch.loot.push(rollEquip());
+            ch.loot.push(rollZoneEquip('snowy'));
         }
         ch.hintText = this.scene.add.text(x, y - 20, '', {
             fontSize: '10px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold',
@@ -1545,10 +1947,12 @@ export class VillageZone {
             this.scene.floatingText(ox + VILLAGE_WIDTH / 2, 260, 'Use Warmth Core at the campfire!', '#f1c40f');
         });
 
-        const sc = rollBossCrystals('snowy');
+        const sc = rollBossCrystals('snowy', this.scene.difficulty);
         if (sc > 0) {
-            this.scene.crystals = (this.scene.crystals || 0) + sc;
-            this.scene.floatingText(ox + VILLAGE_WIDTH / 2, 290, '+' + sc + ' \u{1F48E}', '#3498db');
+            const granted = this.scene.awardCrystals(sc, ox + VILLAGE_WIDTH / 2, 290);
+            if (granted > 0) {
+                this.scene.floatingText(ox + VILLAGE_WIDTH / 2, 290, '+' + granted + ' \u{1F48E}', '#3498db');
+            }
         }
     }
 
