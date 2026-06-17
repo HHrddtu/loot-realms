@@ -333,8 +333,9 @@ export class CaveZone {
             if (!e.active || !e.stats) return;
             if (e === s.caveBoss) return;
 
-            const dx = s.player.x - e.x;
-            const dy = s.player.y - e.y;
+            const aggroBat = s.getAggroTarget();
+            const dx = aggroBat.x - e.x;
+            const dy = aggroBat.y - e.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist < 200) {
@@ -358,8 +359,9 @@ export class CaveZone {
         if (s.caveSmallBats) {
             s.caveSmallBats.getChildren().forEach(e => {
                 if (!e.active || !e.stats) return;
-                const dx = s.player.x - e.x;
-                const dy = s.player.y - e.y;
+                const aggroSmall = s.getAggroTarget();
+                const dx = aggroSmall.x - e.x;
+                const dy = aggroSmall.y - e.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < 250) {
                     const speed = 70;

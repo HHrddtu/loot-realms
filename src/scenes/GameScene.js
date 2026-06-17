@@ -4,7 +4,7 @@ import {
     CORRUPTION, MINE_BOSS_PORTAL_POS,
     MEADOW_GATE_POS, MEADOW_WIDTH, MEADOW_HEIGHT
 } from '../config/index.js';
-import { playBossAoE, playPortal, stopMusic } from '../sound.js';
+import { playBossAoE, playPortal, stopMusic, playPetAttack, playPetPickup } from '../sound.js';
 import { saveGame, loadGame, saveAccount, loadAccount } from '../save.js';
 import { getClassData, getClassStats } from '../classes.js';
 import { getTalentEffects } from '../talents.js';
@@ -481,6 +481,7 @@ export default class GameScene extends Phaser.Scene {
                 this.petAttackTimer = this.petAttackCooldown;
                 const baseDmg = Math.floor(this.playerDamage * 0.3 * (1 + (this.petLevel - 1) * 0.3));
             const dmg = Math.max(1, baseDmg);
+            playPetAttack();
             this.tweens.add({
                 targets: this.petSprite,
                 scaleX: 2.0,
@@ -491,6 +492,13 @@ export default class GameScene extends Phaser.Scene {
             });
             this.combat.hitEnemy(this.petTarget, dmg);
         }
+    }
+
+    getAggroTarget() {
+        if (!this.petSprite || !this.petData || this.petData.type !== 'tank') return this.player;
+        const petDist = Phaser.Math.Distance.Between(this.petSprite.x, this.petSprite.y, this.player.x, this.player.y);
+        if (petDist > 150) return this.player;
+        return this.petSprite;
     }
 
     /* ===== MULTIPLAYER ===== */

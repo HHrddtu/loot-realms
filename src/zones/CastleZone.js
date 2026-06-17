@@ -394,8 +394,9 @@ export class CastleZone {
             if (!e.active || !e.stats) return;
             if (e.stats.isBoss) return;
 
-            const dx = this.scene.player.x - e.x;
-            const dy = this.scene.player.y - e.y;
+            const aggro = this.scene.getAggroTarget();
+            const dx = aggro.x - e.x;
+            const dy = aggro.y - e.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (e.stats.role === 'ranger') {

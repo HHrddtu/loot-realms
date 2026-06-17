@@ -635,8 +635,9 @@ export class VillageZone {
         this.scene.enemies.getChildren().forEach(e => {
             if (!e.active || !e.stats) return;
 
-            const dx = this.scene.player.x - e.x;
-            const dy = this.scene.player.y - e.y;
+            const aggro = this.scene.getAggroTarget();
+            const dx = aggro.x - e.x;
+            const dy = aggro.y - e.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist < 220) {
@@ -693,8 +694,8 @@ export class VillageZone {
         if (this.scene.villageZombies && this.scene.villageZombies.getLength() > 0) {
             this.scene.villageZombies.getChildren().forEach(e => {
                 if (!e.active || !e.stats) return;
-                const dx = this.scene.player.x - e.x;
-                const dy = this.scene.player.y - e.y;
+                const dx = aggro.x - e.x;
+                const dy = aggro.y - e.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < 200) {
                     if (dist > 20) {
@@ -1559,8 +1560,9 @@ export class VillageZone {
 
         this.scene.enemies.getChildren().forEach(e => {
             if (!e.active || !e.stats) return;
-            const dx = this.scene.player.x - e.x;
-            const dy = this.scene.player.y - e.y;
+            const aggro = this.scene.getAggroTarget();
+            const dx = aggro.x - e.x;
+            const dy = aggro.y - e.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
             if (dist < 220) {
                 let speed = 55;

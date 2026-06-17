@@ -235,8 +235,9 @@ export class HellZone {
         s.enemies.getChildren().forEach(e => {
             if (!e.active || !e.stats) return;
 
-            const dx = s.player.x - e.x;
-            const dy = s.player.y - e.y;
+            const aggro = s.getAggroTarget();
+            const dx = aggro.x - e.x;
+            const dy = aggro.y - e.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist < 250) {
@@ -667,8 +668,9 @@ export class HellZone {
         if (!s.hellImps) return;
         s.hellImps.getChildren().forEach(e => {
             if (!e.active || !e.stats) return;
-            const dx = s.player.x - e.x;
-            const dy = s.player.y - e.y;
+            const aggroImp = s.getAggroTarget();
+            const dx = aggroImp.x - e.x;
+            const dy = aggroImp.y - e.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
             if (dist < 250) {
                 const spd = e.stats.speed || 80;

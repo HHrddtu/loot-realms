@@ -9,7 +9,7 @@ import {
 } from '../config/index.js';
 import { rollEquip, rollMaterial, rollAccountEquip, rollCaveRelic } from '../utils.js';
 import { rollGold, rollBossGold, rollChestGold } from '../config/gold.js';
-import { rollBossCrystals } from '../config/pets.js';
+import { rollBossCrystals, getPetStats } from '../config/pets.js';
 import { playBossDeath, playEnemyDeath, playLoot, playBreak } from '../sound.js';
 import { recordKill } from '../bestiary.js';
 import { recordSoulCollect } from '../soulBook.js';
@@ -492,13 +492,15 @@ export class CombatSystem {
         }
 
         const goldAmount = rollGold(this.scene.zone || 'forest');
-        const goldBonus = 1 + ((this.scene.accountEffects ? this.scene.accountEffects.goldPercent || 0 : 0)) / 100;
+        const petStats = getPetStats(this.scene.equippedPet, (this.scene.petLevels || {})[this.scene.equippedPet] || 1);
+        const lootBonus = (petStats.lootPercent || 0) / 100;
+        const goldBonus = 1 + ((this.scene.accountEffects ? this.scene.accountEffects.goldPercent || 0 : 0)) / 100 + lootBonus;
         const finalGold = Math.floor(goldAmount * goldBonus);
         this.scene.gold = (this.scene.gold || 0) + finalGold;
         this.scene.floatingText(enemy.x, enemy.y - 30, '+' + exp + ' EXP', '#f1c40f');
         this.scene.floatingText(enemy.x, enemy.y - 45, '+' + finalGold + ' gold', '#f1c40f');
 
-        if (Math.random() < EQUIP_DROP_CHANCE) {
+        if (Math.random() < EQUIP_DROP_CHANCE + lootBonus * 0.5) {
             const item = rollEquip();
             if (this.scene.addEquip(item)) {
                 const rc = '#' + RARITY_COLORS[item.rarity].toString(16).padStart(6, '0');

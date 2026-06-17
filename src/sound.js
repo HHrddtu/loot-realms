@@ -104,6 +104,16 @@ export function playBreak() {
     osc(250, 0.08, 'sine', 0.04);
 }
 
+export function playPetAttack() {
+    osc(600, 0.05, 'square', 0.04);
+    osc(450, 0.07, 'sine', 0.03);
+}
+
+export function playPetPickup() {
+    osc(700, 0.08, 'sine', 0.04);
+    setTimeout(() => osc(900, 0.1, 'sine', 0.03), 60);
+}
+
 /* === MEDIEVAL FLUTE MUSIC === */
 
 const MELODY = [

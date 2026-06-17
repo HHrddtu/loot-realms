@@ -111,10 +111,10 @@ export function rollCaseDrop(caseId) {
 // ===== CRYSTAL DROPS (bosses only) =====
 
 export const CRYSTAL_DROPS = {
-    forest:   { bossMin: 5,  bossMax: 10 },
-    mine:     { bossMin: 8,  bossMax: 15 },
-    cave:     { bossMin: 12, bossMax: 22 },
-    village:  { bossMin: 12, bossMax: 20 },
+    forest:   { bossMin: 4,  bossMax: 8 },
+    mine:     { bossMin: 6,  bossMax: 12 },
+    cave:     { bossMin: 10, bossMax: 18 },
+    village:  { bossMin: 10, bossMax: 16 },
     cemetery: { bossMin: 15, bossMax: 25 },
     hell:     { bossMin: 20, bossMax: 35 },
     snowy:    { bossMin: 20, bossMax: 35 },
