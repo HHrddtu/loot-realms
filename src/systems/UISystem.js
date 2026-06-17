@@ -1,4 +1,4 @@
-import { RARITY_COLORS, SHOP_EQUIP_PRICES, SELL_PRICE_RATIO } from '../config/index.js';
+import { RARITY_COLORS, SHOP_EQUIP_PRICES, SELL_PRICE_RATIO, SPELLS } from '../config/index.js';
 import { lighten } from '../utils.js';
 import { toggleMute } from '../sound.js';
 import { getAccountLevelUpReq, loadAccount } from '../save.js';
@@ -120,25 +120,75 @@ export class UISystem {
         }).setScrollFactor(0).setDepth(23);
 
         this.scene.spellSlots = {};
-        const spellKeys = ['fireball', 'shield', 'heal'];
-        const spellLabels = ['Q', 'W', 'E'];
-        const spellColors = [0xe74c3c, 0x3498db, 0x2ecc71];
+        const classKey = this.scene.classKey;
+        const slotConfig = {
+            sage: { q: 'fireball', w: 'shield', e: 'heal', r: 'meteor' },
+            alchemist: { q: 'acid_flask', w: 'toxic_puddle', e: 'burrow', r: 'chemical_cloud' },
+            angel: { q: 'soul_strike', w: 'holy_shield', e: 'holy_nova', r: 'divine_blessing' }
+        };
+        const sc = slotConfig[classKey] || slotConfig.sage;
+        const spellKeys = [sc.q, sc.w, sc.e, sc.r];
+        const slotLabels = ['Q', 'W', 'E', 'R'];
+        const slotColors = [0x555555, 0x555555, 0x555555, 0x555555];
+
+        const iconMap = {
+            fireball: 'icon_fireball', shield: 'icon_shield', heal: 'icon_heal',
+            acid_flask: 'icon_acid_flask', toxic_puddle: 'icon_toxic_puddle', burrow: 'icon_burrow',
+            soul_strike: 'icon_soul_strike', holy_shield: 'icon_holy_shield', holy_nova: 'icon_holy_nova',
+            meteor: 'icon_meteor', chemical_cloud: 'icon_chemical_cloud', divine_blessing: 'icon_divine_blessing'
+        };
+
         spellKeys.forEach((key, i) => {
             const sx2 = 640 + i * 32;
             const sy = 565;
             const bg = this.scene.add.rectangle(sx2, sy, 28, 28, 0x1a1a2e)
-                .setStrokeStyle(2, spellColors[i])
+                .setStrokeStyle(2, slotColors[i])
                 .setScrollFactor(0).setDepth(24);
-            const lbl = this.scene.add.text(sx2, sy - 2, spellLabels[i], {
-                fontSize: '10px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
-            }).setOrigin(0.5).setScrollFactor(0).setDepth(25);
+            const icon = this.scene.add.sprite(sx2, sy, iconMap[key] || 'icon_fireball').setScale(1.2)
+                .setScrollFactor(0).setDepth(25);
+            const keyLbl = this.scene.add.text(sx2, sy - 16, slotLabels[i], {
+                fontSize: '8px', fill: '#aaa', fontFamily: 'Arial', fontStyle: 'bold'
+            }).setOrigin(0.5).setScrollFactor(0).setDepth(26);
             const cd = this.scene.add.text(sx2, sy + 9, '', {
                 fontSize: '8px', fill: '#f39c12', fontFamily: 'Arial'
             }).setOrigin(0.5).setScrollFactor(0).setDepth(25);
-            this.scene.spellSlots[key] = { bg, lbl, cd };
+            this.scene.spellSlots[key] = { bg, icon, keyLbl, cd };
+
+            bg.setInteractive({ useHandCursor: true });
+            bg.on('pointerover', () => {
+                if (!this.scene.tooltipText) {
+                    this.scene.tooltipText = this.scene.add.text(0, 0, '', {
+                        fontSize: '9px', fill: '#fff', fontFamily: 'Arial',
+                        backgroundColor: '#1a1a2e', padding: { x: 6, y: 4 },
+                        stroke: '#000', strokeThickness: 1, wordWrap: { width: 180 }
+                    }).setScrollFactor(0).setDepth(100).setAlpha(0.95);
+                }
+                const spellDef = SPELLS[key];
+                if (spellDef) {
+                    const name = spellDef.nameRu || spellDef.name;
+                    const desc = spellDef.description || '';
+                    const cdStr = spellDef.cooldown ? spellDef.cooldown + 's CD' : '';
+                    const dmg = spellDef.damage ? spellDef.damage + ' DMG' : '';
+                    const heal = spellDef.healPercent ? 'Heal ' + Math.floor(spellDef.healPercent * 100) + '%' : '';
+                    const lines = [name];
+                    if (cdStr) lines.push(cdStr);
+                    if (dmg) lines.push(dmg);
+                    if (heal) lines.push(heal);
+                    if (desc) lines.push(desc);
+                    this.scene.tooltipText.setText(lines.join('\n'));
+                } else {
+                    this.scene.tooltipText.setText(key);
+                }
+                const tx = Math.min(sx2 - 90, 600);
+                const ty = sy - 60;
+                this.scene.tooltipText.setPosition(tx, ty).setVisible(true);
+            });
+            bg.on('pointerout', () => {
+                if (this.scene.tooltipText) this.scene.tooltipText.setVisible(false);
+            });
         });
 
-        const fx = 640 + 3 * 32;
+        const fx = 640 + 4 * 32;
         const fy = 565;
         const consBg = this.scene.add.rectangle(fx, fy, 28, 28, 0x1a1a2e)
             .setStrokeStyle(2, 0xf39c12)
@@ -200,6 +250,139 @@ export class UISystem {
             returnScene: 'Game'
         });
         this.scene.scene.pause();
+    }
+
+    _openSpellAssign() {
+        if (this.scene.menuOpen || this.scene.transitioning) return;
+        this.scene.menuOpen = true;
+
+        const cls = this.scene.classKey;
+        const allSpells = {
+            sage: ['fireball', 'shield', 'heal', 'meteor'],
+            alchemist: ['acid_flask', 'toxic_puddle', 'burrow', 'chemical_cloud'],
+            angel: ['soul_strike', 'holy_shield', 'holy_nova', 'divine_blessing']
+        };
+        const available = allSpells[cls] || allSpells.sage;
+        const assignments = { ...(this.scene.spellAssignments || {}) };
+        const defaults = {
+            sage: { q: 'fireball', w: 'shield', e: 'heal', r: 'meteor' },
+            alchemist: { q: 'acid_flask', w: 'toxic_puddle', e: 'burrow', r: 'chemical_cloud' },
+            angel: { q: 'soul_strike', w: 'holy_shield', e: 'holy_nova', r: 'divine_blessing' }
+        };
+        const d = defaults[cls] || defaults.sage;
+        if (!assignments.q) assignments.q = d.q;
+        if (!assignments.w) assignments.w = d.w;
+        if (!assignments.e) assignments.e = d.e;
+        if (!assignments.r) assignments.r = d.r;
+
+        const iconMap = {
+            fireball: 'icon_fireball', shield: 'icon_shield', heal: 'icon_heal',
+            acid_flask: 'icon_acid_flask', toxic_puddle: 'icon_toxic_puddle', burrow: 'icon_burrow',
+            soul_strike: 'icon_soul_strike', holy_shield: 'icon_holy_shield', holy_nova: 'icon_holy_nova',
+            meteor: 'icon_meteor', chemical_cloud: 'icon_chemical_cloud', divine_blessing: 'icon_divine_blessing'
+        };
+
+        const container = this.scene.add.container(0, 0).setScrollFactor(0).setDepth(90);
+        const overlay = this.scene.add.rectangle(400, 300, 800, 600, 0x000000, 0.7).setScrollFactor(0).setDepth(90);
+        overlay.setInteractive();
+        container.add(overlay);
+
+        const title = this.scene.add.text(400, 80, 'SPELL ASSIGNMENT', {
+            fontSize: '14px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(91);
+        container.add(title);
+
+        const slotKeys = ['q', 'w', 'e', 'r'];
+        const slotLabels = ['Q', 'W', 'E', 'R'];
+        const slotX = [300, 360, 420, 480];
+        const slotY = 140;
+        let selectedSlot = null;
+        const slotElements = [];
+
+        slotKeys.forEach((sk, i) => {
+            const bg = this.scene.add.rectangle(slotX[i], slotY, 40, 40, 0x1a1a2e)
+                .setStrokeStyle(2, 0xf1c40f).setScrollFactor(0).setDepth(91);
+            const icon = this.scene.add.sprite(slotX[i], slotY, iconMap[assignments[sk]] || 'icon_fireball')
+                .setScale(1.5).setScrollFactor(0).setDepth(92);
+            const lbl = this.scene.add.text(slotX[i], slotY - 28, slotLabels[i], {
+                fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+            }).setOrigin(0.5).setScrollFactor(0).setDepth(92);
+            container.add([bg, icon, lbl]);
+            slotElements.push({ bg, icon, lbl, key: sk });
+
+            bg.setInteractive({ useHandCursor: true });
+            bg.on('pointerdown', () => {
+                if (selectedSlot) {
+                    slotElements.forEach(s => s.bg.setStrokeStyle(2, 0xf1c40f));
+                    selectedSlot.bg.setStrokeStyle(2, 0xf1c40f);
+                }
+                selectedSlot = slotElements[i];
+                selectedSlot.bg.setStrokeStyle(2, 0xff0000);
+            });
+        });
+
+        const spellElements = [];
+        const spellY = 240;
+        available.forEach((sp, i) => {
+            const sx = 300 + (i % 4) * 60;
+            const sy = spellY + Math.floor(i / 4) * 70;
+            const bg = this.scene.add.rectangle(sx, sy, 44, 44, 0x1a1a2e)
+                .setStrokeStyle(2, 0x555555).setScrollFactor(0).setDepth(91);
+            const icon = this.scene.add.sprite(sx, sy, iconMap[sp] || 'icon_fireball')
+                .setScale(1.6).setScrollFactor(0).setDepth(92);
+            const name = SPELLS[sp] ? (SPELLS[sp].nameRu || SPELLS[sp].name) : sp;
+            const nm = this.scene.add.text(sx, sy + 30, name, {
+                fontSize: '7px', fill: '#aaa', fontFamily: 'Arial'
+            }).setOrigin(0.5).setScrollFactor(0).setDepth(92);
+            container.add([bg, icon, nm]);
+            spellElements.push({ bg, icon, nm, key: sp });
+
+            bg.setInteractive({ useHandCursor: true });
+            bg.on('pointerdown', () => {
+                if (selectedSlot) {
+                    assignments[selectedSlot.key] = sp;
+                    selectedSlot.icon.setTexture(iconMap[sp] || 'icon_fireball');
+                    slotElements.forEach(s => s.bg.setStrokeStyle(2, 0xf1c40f));
+                    selectedSlot = null;
+                }
+            });
+        });
+
+        const saveBtn = this.scene.add.rectangle(400, 420, 100, 30, 0x27ae60)
+            .setStrokeStyle(2, 0x2ecc71).setScrollFactor(0).setDepth(91);
+        const saveTxt = this.scene.add.text(400, 420, 'SAVE', {
+            fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(92);
+        container.add([saveBtn, saveTxt]);
+
+        const closeBtn = this.scene.add.rectangle(400, 460, 100, 30, 0x555555)
+            .setStrokeStyle(2, 0x888888).setScrollFactor(0).setDepth(91);
+        const closeTxt = this.scene.add.text(400, 460, 'CLOSE', {
+            fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(92);
+        container.add([closeBtn, closeTxt]);
+
+        const cleanup = () => {
+            container.destroy();
+            this.scene.menuOpen = false;
+            this.scene.physics.resume();
+        };
+
+        saveBtn.setInteractive({ useHandCursor: true });
+        saveBtn.on('pointerdown', () => {
+            this.scene.spellAssignments = { ...assignments };
+            const acc = loadAccount() || {};
+            acc.spellAssignments = { ...(acc.spellAssignments || {}), [this.scene.classKey]: { ...assignments } };
+            saveAccount(acc);
+            cleanup();
+        });
+
+        closeBtn.setInteractive({ useHandCursor: true });
+        closeBtn.on('pointerdown', () => {
+            cleanup();
+        });
+
+        overlay.on('pointerdown', () => {});
     }
 
     _openCrafting() {
@@ -289,8 +472,9 @@ export class UISystem {
         }
 
         if (this.scene.spellSlots) {
-            ['fireball', 'shield', 'heal'].forEach(key => {
+            ['fireball', 'shield', 'heal', 'purify', 'meteor', 'chemical_cloud', 'divine_blessing', 'acid_flask', 'iron_skin', 'healing_potion', 'life_link', 'soul_strike', 'toxic_puddle', 'burrow', 'holy_shield', 'holy_nova'].forEach(key => {
                 const s = this.scene.spellSlots[key];
+                if (!s) return;
                 const cd = this.scene.spellCooldowns[key];
                 if (cd > 0) {
                     s.cd.setText(cd.toFixed(1));

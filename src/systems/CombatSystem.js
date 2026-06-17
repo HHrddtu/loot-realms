@@ -120,39 +120,81 @@ export class CombatSystem {
             this.scene.playerAttacking = false;
         });
 
-        const range = 55;
-        let ax = this.scene.player.x, ay = this.scene.player.y;
-        if (this.scene.facing === 'right') ax += range;
-        else if (this.scene.facing === 'left') ax -= range;
-        else if (this.scene.facing === 'up') ay -= range;
-        else if (this.scene.facing === 'down') ay += range;
+        const range = cls.meleeRange || 55;
+        const cooldown = cls.meleeCooldown || 280;
+        const dmgMult = cls.meleeDmgMult || 1.0;
+        const attackDamage = Math.floor(this.scene.playerDamage * dmgMult);
 
-        this._showSlash(ax, ay);
-        this._dealAttackDamage(ax, ay);
+        if (cls.meleeRanged) {
+            this._rangedAttack(cls, attackDamage);
+        } else {
+            let ax = this.scene.player.x, ay = this.scene.player.y;
+            if (this.scene.facing === 'right') ax += range;
+            else if (this.scene.facing === 'left') ax -= range;
+            else if (this.scene.facing === 'up') ay -= range;
+            else if (this.scene.facing === 'down') ay += range;
 
-        this.scene.time.delayedCall(280, () => {
+            this._showSlash(ax, ay, cls.meleeColor || 0xaaddff);
+            this._dealAttackDamage(ax, ay, attackDamage, cls);
+        }
+
+        this.scene.time.delayedCall(cooldown, () => {
             this.scene.attackCooldown = false;
         });
     }
 
-    _showSlash(ax, ay) {
+    _rangedAttack(cls, attackDamage) {
+        let vx = 0, vy = 0;
+        let ox = 0, oy = 0;
+        const speed = 350;
+        if (this.scene.facing === 'left') { vx = -speed; ox = -20; }
+        else if (this.scene.facing === 'right') { vx = speed; ox = 20; }
+        else if (this.scene.facing === 'up') { vy = -speed; oy = -20; }
+        else if (this.scene.facing === 'down') { vy = speed; oy = 20; }
+        else { vx = speed; ox = 20; }
+
+        const px = this.scene.player.x + ox;
+        const py = this.scene.player.y + oy;
+        const fb = this.scene.add.sprite(px, py, 'soul_strike').setDepth(15).setTint(cls.meleeColor || 0xf1c40f);
+        this.scene.physics.add.existing(fb);
+        fb.body.setVelocity(vx, vy);
+        fb.damage = attackDamage;
+        fb.lifespan = (cls.meleeRange || 120) / speed;
+        fb.isMeleeProjectile = true;
+        fb.healPercent = cls.meleeHealPercent || 0;
+        this.scene.fireballs.push(fb);
+
+        const glow = this.scene.add.circle(px, py, 10, cls.meleeColor || 0xf1c40f, 0.4).setDepth(14);
+        fb.glow = glow;
+
+        this.scene.tweens.add({
+            targets: fb, scaleX: 1.2, scaleY: 1.2, duration: 80,
+            yoyo: true, repeat: -1
+        });
+    }
+
+    _showSlash(ax, ay, color) {
         const s = this.scene.add.sprite(ax, ay, 'slash').setAlpha(0.9);
+        if (color && color !== 0xaaddff) s.setTint(color);
         this.scene.tweens.add({
             targets: s, alpha: 0, scaleX: 1.4, scaleY: 1.4, angle: 90,
             duration: 180, onComplete: () => s.destroy()
         });
-        this.scene.player.setTint(0xaaddff);
+        this.scene.player.setTint(color || 0xaaddff);
         this.scene.time.delayedCall(100, () => {
             if (this.scene.player.active) this.scene.player.clearTint();
         });
     }
 
-    _dealAttackDamage(ax, ay) {
+    _dealAttackDamage(ax, ay, attackDamage, cls) {
+        const dmg = attackDamage || this.scene.playerDamage;
+        const isAlchemist = cls && cls.key === 'alchemist';
         if (this.scene.enemies && this.scene.enemies.getLength) {
             this.scene.enemies.getChildren().forEach(e => {
                 if (!e.active || !e.stats) return;
                 if (Phaser.Math.Distance.Between(ax, ay, e.x, e.y) < 35) {
-                    this.hitEnemy(e, this.scene.playerDamage);
+                    this.hitEnemy(e, dmg);
+                    if (isAlchemist) this._applyArmorShred(e);
                 }
             });
         }
@@ -160,7 +202,7 @@ export class CombatSystem {
             this.scene.stumps.getChildren().forEach(st => {
                 if (!st.active || !st.stats) return;
                 if (Phaser.Math.Distance.Between(ax, ay, st.x, st.y) < 35) {
-                    this.hitStump(st, this.scene.playerDamage);
+                    this.hitStump(st, dmg);
                 }
             });
         }
@@ -168,7 +210,7 @@ export class CombatSystem {
             this.scene.mineChests.getChildren().forEach(ch => {
                 if (!ch.active || !ch.stats || ch.broken) return;
                 if (Phaser.Math.Distance.Between(ax, ay, ch.x, ch.y) < 35) {
-                    this.hitChest(ch, this.scene.playerDamage);
+                    this.hitChest(ch, dmg);
                 }
             });
         }
@@ -176,7 +218,7 @@ export class CombatSystem {
             this.scene.caveChests.getChildren().forEach(ch => {
                 if (!ch.active || !ch.stats || ch.broken) return;
                 if (Phaser.Math.Distance.Between(ax, ay, ch.x, ch.y) < 35) {
-                    this.hitChest(ch, this.scene.playerDamage);
+                    this.hitChest(ch, dmg);
                 }
             });
         }
@@ -184,7 +226,7 @@ export class CombatSystem {
             this.scene.villageChests.getChildren().forEach(ch => {
                 if (!ch.active || !ch.stats || ch.broken) return;
                 if (Phaser.Math.Distance.Between(ax, ay, ch.x, ch.y) < 35) {
-                    ch.stats.hp -= this.scene.playerDamage;
+                    ch.stats.hp -= dmg;
                     if (ch.hpFill) ch.hpFill.width = ch.hpBg.width * (ch.stats.hp / ch.stats.maxHp);
                     if (ch.stats.hp <= 0) this.breakVillageChest(ch);
                 }
@@ -194,7 +236,8 @@ export class CombatSystem {
             this.scene.villageZombies.getChildren().forEach(e => {
                 if (!e.active || !e.stats) return;
                 if (Phaser.Math.Distance.Between(ax, ay, e.x, e.y) < 35) {
-                    this.hitEnemy(e, this.scene.playerDamage);
+                    this.hitEnemy(e, dmg);
+                    if (isAlchemist) this._applyArmorShred(e);
                 }
             });
         }
@@ -202,7 +245,8 @@ export class CombatSystem {
             this.scene.hellImps.getChildren().forEach(e => {
                 if (!e.active || !e.stats) return;
                 if (Phaser.Math.Distance.Between(ax, ay, e.x, e.y) < 35) {
-                    this.hitEnemy(e, this.scene.playerDamage);
+                    this.hitEnemy(e, dmg);
+                    if (isAlchemist) this._applyArmorShred(e);
                 }
             });
         }
@@ -210,21 +254,23 @@ export class CombatSystem {
             this.scene.caveSmallBats.getChildren().forEach(e => {
                 if (!e.active || !e.stats) return;
                 if (Phaser.Math.Distance.Between(ax, ay, e.x, e.y) < 35) {
-                    this.hitEnemy(e, this.scene.playerDamage);
+                    this.hitEnemy(e, dmg);
+                    if (isAlchemist) this._applyArmorShred(e);
                 }
             });
         }
         if (this.scene.snowyIceSpirit && this.scene.snowyIceSpirit.active && this.scene.snowyIceSpirit.stats) {
             if (Phaser.Math.Distance.Between(ax, ay, this.scene.snowyIceSpirit.x, this.scene.snowyIceSpirit.y) < 45) {
-                this.hitEnemy(this.scene.snowyIceSpirit, this.scene.playerDamage);
+                this.hitEnemy(this.scene.snowyIceSpirit, dmg);
+                if (isAlchemist) this._applyArmorShred(this.scene.snowyIceSpirit);
             }
         }
         if (this.scene.snowyIceShards) {
             this.scene.snowyIceShards.getChildren().forEach(s => {
                 if (!s.active || !s.stats) return;
                 if (Phaser.Math.Distance.Between(ax, ay, s.x, s.y) < 35) {
-                    s.stats.hp -= this.scene.playerDamage;
-                    this.scene.floatingText(s.x, s.y - 15, '-' + this.scene.playerDamage, '#3498db');
+                    s.stats.hp -= dmg;
+                    this.scene.floatingText(s.x, s.y - 15, '-' + dmg, '#3498db');
                     if (s.stats.hp <= 0) {
                         recordKill('ice_shard');
                         if (s.hpBg) s.hpBg.destroy();
@@ -233,6 +279,20 @@ export class CombatSystem {
                     }
                 }
             });
+        }
+    }
+
+    _applyArmorShred(enemy) {
+        if (!enemy || !enemy.stats) return;
+        if (!enemy.armorShredStacks) enemy.armorShredStacks = 0;
+        if (!enemy.armorShredTimer) enemy.armorShredTimer = 0;
+        if (enemy.armorShredStacks < 3) {
+            enemy.armorShredStacks = Math.min(3, enemy.armorShredStacks + 1);
+            enemy.armorShredTimer = 3;
+            const shred = enemy.armorShredStacks * 5;
+            this.scene.floatingText(enemy.x, enemy.y - 30, '-' + shred + '% ARMOR', '#27ae60');
+        } else {
+            enemy.armorShredTimer = 3;
         }
     }
 
@@ -267,6 +327,10 @@ export class CombatSystem {
         if (this.scene.computedCritChance && Math.random() * 100 < this.scene.computedCritChance + (this.scene._consumableBonusCrit || 0)) {
             finalDamage = Math.floor(finalDamage * this.scene.computedCritDamage);
             this.scene.floatingText(enemy.x, enemy.y - 30, 'CRIT!', '#f1c40f');
+        }
+        if (enemy.armorShredStacks && enemy.armorShredStacks > 0) {
+            const shredBonus = 1 + (enemy.armorShredStacks * 0.05);
+            finalDamage = Math.floor(finalDamage * shredBonus);
         }
 
         enemy.stats.hp -= finalDamage;

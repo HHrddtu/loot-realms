@@ -695,4 +695,207 @@ export function drawMineTextures(mk) {
         c.fillStyle = '#3498db';
         c.fillRect(4, 8, 6, 4);
     });
+
+    mk('icon_fireball', 20, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        const grd = c.createRadialGradient(10, 10, 0, 10, 10, 9);
+        grd.addColorStop(0, '#fff8e1');
+        grd.addColorStop(0.3, '#ff9800');
+        grd.addColorStop(0.6, '#f44336');
+        grd.addColorStop(1, 'rgba(180,20,20,0)');
+        c.fillStyle = grd;
+        c.fillRect(0, 0, 20, 20);
+    });
+
+    mk('icon_shield', 20, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#2980b9';
+        c.beginPath();
+        c.moveTo(10, 2);
+        c.lineTo(17, 6);
+        c.lineTo(17, 12);
+        c.lineTo(10, 18);
+        c.lineTo(3, 12);
+        c.lineTo(3, 6);
+        c.closePath();
+        c.fill();
+        c.fillStyle = '#5dade2';
+        c.beginPath();
+        c.moveTo(10, 4);
+        c.lineTo(15, 7);
+        c.lineTo(15, 11);
+        c.lineTo(10, 16);
+        c.lineTo(5, 11);
+        c.lineTo(5, 7);
+        c.closePath();
+        c.fill();
+    });
+
+    mk('icon_heal', 20, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#2ecc71';
+        c.fillRect(7, 3, 6, 14);
+        c.fillRect(3, 7, 14, 6);
+        c.fillStyle = '#27ae60';
+        c.fillRect(8, 4, 4, 12);
+        c.fillRect(4, 8, 12, 4);
+    });
+
+    mk('icon_acid_flask', 20, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#666';
+        c.fillRect(8, 1, 4, 4);
+        c.fillStyle = '#555';
+        c.fillRect(7, 5, 6, 2);
+        c.fillStyle = '#2ecc71';
+        c.fillRect(5, 7, 10, 11);
+        c.fillStyle = '#1abc9c';
+        c.fillRect(7, 9, 6, 6);
+    });
+
+    mk('icon_toxic_puddle', 20, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#1a5e1a';
+        c.beginPath();
+        c.ellipse(10, 12, 8, 5, 0, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = '#3ddc3d';
+        c.beginPath();
+        c.arc(7, 10, 2, 0, Math.PI * 2);
+        c.fill();
+        c.beginPath();
+        c.arc(13, 11, 1.5, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = '#0d3d0d';
+        c.beginPath();
+        c.arc(10, 13, 1, 0, Math.PI * 2);
+        c.fill();
+    });
+
+    mk('icon_burrow', 20, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#8B4513';
+        c.fillRect(2, 10, 16, 8);
+        c.fillStyle = '#654321';
+        c.fillRect(4, 12, 12, 4);
+        c.fillStyle = '#A0522D';
+        c.fillRect(8, 6, 4, 6);
+        c.fillStyle = '#D2691E';
+        c.fillRect(9, 7, 2, 4);
+        c.fillStyle = '#555';
+        c.fillRect(6, 8, 2, 3);
+        c.fillRect(12, 7, 2, 3);
+    });
+
+    mk('icon_soul_strike', 20, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        const grd = c.createRadialGradient(10, 10, 0, 10, 10, 9);
+        grd.addColorStop(0, '#fff');
+        grd.addColorStop(0.3, '#f1c40f');
+        grd.addColorStop(0.6, '#f39c12');
+        grd.addColorStop(1, 'rgba(243,156,18,0)');
+        c.fillStyle = grd;
+        c.fillRect(0, 0, 20, 20);
+        c.fillStyle = '#fff';
+        c.fillRect(9, 3, 2, 14);
+        c.fillRect(6, 7, 8, 2);
+    });
+
+    mk('icon_holy_shield', 20, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#f1c40f';
+        c.beginPath();
+        c.moveTo(10, 2);
+        c.lineTo(17, 6);
+        c.lineTo(17, 12);
+        c.lineTo(10, 18);
+        c.lineTo(3, 12);
+        c.lineTo(3, 6);
+        c.closePath();
+        c.fill();
+        c.fillStyle = '#f9e547';
+        c.beginPath();
+        c.moveTo(10, 4);
+        c.lineTo(15, 7);
+        c.lineTo(15, 11);
+        c.lineTo(10, 16);
+        c.lineTo(5, 11);
+        c.lineTo(5, 7);
+        c.closePath();
+        c.fill();
+    });
+
+    mk('icon_holy_nova', 20, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        const grd = c.createRadialGradient(10, 10, 0, 10, 10, 9);
+        grd.addColorStop(0, '#fff');
+        grd.addColorStop(0.2, '#f1c40f');
+        grd.addColorStop(0.5, '#f39c12');
+        grd.addColorStop(0.8, 'rgba(241,196,15,0.3)');
+        grd.addColorStop(1, 'rgba(241,196,15,0)');
+        c.fillStyle = grd;
+        c.fillRect(0, 0, 20, 20);
+        c.fillStyle = '#fff';
+        for (let a = 0; a < 8; a++) {
+            const angle = (Math.PI * 2 / 8) * a;
+            c.fillRect(10 + Math.cos(angle) * 4 - 1, 10 + Math.sin(angle) * 4 - 1, 2, 2);
+        }
+    });
+
+    mk('icon_meteor', 20, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#e74c3c';
+        c.beginPath();
+        c.moveTo(10, 2);
+        c.lineTo(14, 8);
+        c.lineTo(12, 7);
+        c.lineTo(16, 14);
+        c.lineTo(14, 13);
+        c.lineTo(18, 18);
+        c.lineTo(8, 16);
+        c.lineTo(10, 14);
+        c.lineTo(4, 18);
+        c.lineTo(6, 12);
+        c.lineTo(3, 13);
+        c.lineTo(7, 6);
+        c.lineTo(5, 7);
+        c.closePath();
+        c.fill();
+        c.fillStyle = '#ff6b3d';
+        c.beginPath();
+        c.arc(10, 11, 4, 0, Math.PI * 2);
+        c.fill();
+    });
+
+    mk('icon_chemical_cloud', 20, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#27ae60';
+        c.beginPath();
+        c.arc(7, 10, 5, 0, Math.PI * 2);
+        c.fill();
+        c.beginPath();
+        c.arc(13, 9, 6, 0, Math.PI * 2);
+        c.fill();
+        c.beginPath();
+        c.arc(10, 13, 4, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = '#1abc9c';
+        c.beginPath();
+        c.arc(10, 10, 3, 0, Math.PI * 2);
+        c.fill();
+    });
+
+    mk('icon_divine_blessing', 20, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        const grd = c.createRadialGradient(10, 10, 0, 10, 10, 9);
+        grd.addColorStop(0, '#fff');
+        grd.addColorStop(0.3, '#f1c40f');
+        grd.addColorStop(0.7, 'rgba(241,196,15,0.4)');
+        grd.addColorStop(1, 'rgba(241,196,15,0)');
+        c.fillStyle = grd;
+        c.fillRect(0, 0, 20, 20);
+        c.fillStyle = '#fff';
+        c.fillRect(9, 4, 2, 12);
+        c.fillRect(4, 9, 12, 2);
+    });
 }

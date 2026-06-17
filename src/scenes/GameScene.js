@@ -181,6 +181,7 @@ export default class GameScene extends Phaser.Scene {
         this.accountEquipment = accEquipPerClass[this.classKey] || { ...EMPTY_ACCOUNT_EQUIPMENT };
         this.accountEquipBag = accBagPerClass[this.classKey] || [];
         this.accountEffects = getAccountTalentEffects(this.unlockedAccountTalents);
+        this.spellAssignments = acc.spellAssignments || {};
         this.gold = acc.gold || 0;
         this.crystals = acc.crystals || 0;
         this.recalcStats();
@@ -985,6 +986,7 @@ export default class GameScene extends Phaser.Scene {
     _openTalentTree() { if (this.ui) this.ui._openTalentTree(); }
     _openBestiary() { if (this.ui) this.ui._openBestiary(); }
     _openCrafting() { if (this.ui) this.ui._openCrafting(); }
+    _openSpellAssign() { if (this.ui) this.ui._openSpellAssign(); }
     updateUI() { if (this.ui) this.ui.updateUI(); }
     toggleInventory() { if (this.ui) this.ui.toggleInventory(); }
     openInventory() { if (this.ui) this.ui.openInventory(); }
@@ -1083,6 +1085,8 @@ export default class GameScene extends Phaser.Scene {
         this.nKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.N);
         this.cKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
         this.fKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
+        this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+        this.xKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
     }
 
     _handleInput() {
@@ -1228,9 +1232,11 @@ export default class GameScene extends Phaser.Scene {
             if (Phaser.Input.Keyboard.JustDown(this.qKey)) this._castSpell(spells.q);
             if (Phaser.Input.Keyboard.JustDown(this.wKey)) this._castSpell(spells.w);
             if (Phaser.Input.Keyboard.JustDown(this.eKey)) this._castSpell(spells.e);
+            if (Phaser.Input.Keyboard.JustDown(this.rKey)) this._castSpell(spells.r);
             if (Phaser.Input.Keyboard.JustDown(this.bKey)) this._openBestiary();
             if (Phaser.Input.Keyboard.JustDown(this.nKey)) this._openQuestLog();
             if (Phaser.Input.Keyboard.JustDown(this.cKey)) this._openCrafting();
+            if (Phaser.Input.Keyboard.JustDown(this.xKey)) this._openSpellAssign();
         } else if (this.invOpen) {
             if (Phaser.Input.Keyboard.JustDown(this.iKey)) this.closeInventory();
             if (Phaser.Input.Keyboard.JustDown(this.pKey)) this.closeInventory();

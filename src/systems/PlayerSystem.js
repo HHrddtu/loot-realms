@@ -138,8 +138,11 @@ export class PlayerSystem {
         const boostDefPct = activeBoosts.defense_percent || 0;
         const boostRegenFlat = activeBoosts.regen_flat || 0;
 
+        const divineDmgBuff = (this.scene._divineBlessingDmgBuff || 0) / 100;
+        const divineDefBuff = (this.scene._divineBlessingDefBuff || 0) / 100;
+
         const hpMult = 1 + (te.hpPercent || 0) / 100 + accHpPercent / 100;
-        const dmgMult = 1 + (te.damagePercent || 0) / 100 + accDmgPercent / 100 + boostDmgPct / 100;
+        const dmgMult = 1 + (te.damagePercent || 0) / 100 + accDmgPercent / 100 + boostDmgPct / 100 + divineDmgBuff;
         const moveSpeedBonus = (ae.moveSpeedPercent || 0) + (te.moveSpeedPercent || 0) + ((this.scene._consumableBonusSpd || 0) * 100);
         const spdMult = 1 + accSpdPercent / 100 + moveSpeedBonus / 100;
 
@@ -162,7 +165,7 @@ export class PlayerSystem {
         this.scene.computedCritDamage = 1.5 + (te.critDamagePercent || 0) / 100;
         this.scene.computedDodgePercent = (te.dodgePercent || 0) + accDodgePercent;
         this.scene.computedLifeSteal = (te.lifeSteal || 0) + (ae.lifeSteal || 0);
-        this.scene.computedDamageReduction = (te.damageReduction || 0) + (ae.damageReduction || 0) + (petStats.damageReduction || 0) + boostDefPct + ((this.scene._consumableBonusDef || 0) * 100);
+        this.scene.computedDamageReduction = (te.damageReduction || 0) + (ae.damageReduction || 0) + (petStats.damageReduction || 0) + boostDefPct + divineDefBuff * 100 + ((this.scene._consumableBonusDef || 0) * 100);
         this.scene.computedDamageReflection = (te.damageReflection || 0) + (ae.damageReflection || 0);
         this.scene.computedCooldownReduction = (te.cooldownReduction || 0) + (ae.cooldownReduction || 0);
         this.scene.computedAreaDamage = (te.areaDamage || 0) + (ae.areaDamage || 0);

@@ -55,6 +55,7 @@ const DEFAULT_ACCOUNT = {
     petLevels: {},
     upgradeLevels: {},
     activeBoosts: {},
+    spellAssignments: {},
     accountEquipment: { sage: { ...EMPTY_ACCOUNT_EQUIPMENT }, alchemist: { ...EMPTY_ACCOUNT_EQUIPMENT }, angel: { ...EMPTY_ACCOUNT_EQUIPMENT } },
     accountEquipBag: { sage: [], alchemist: [], angel: [] }
 };
@@ -76,6 +77,7 @@ function migrateAccount(data) {
     if (!data.petLevels) data.petLevels = {};
     if (!data.upgradeLevels) data.upgradeLevels = {};
     if (!data.activeBoosts) data.activeBoosts = {};
+    if (!data.spellAssignments) data.spellAssignments = {};
     data.version = 3;
     return data;
 }
