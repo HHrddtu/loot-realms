@@ -25,7 +25,7 @@ export const MINE_CHEST_COUNT = 4;
 export const MINE_CHEST_DROP_CHANCE = 0.35;
 
 // Cave
-export const CAVE_WIDTH = 500;
+export const CAVE_WIDTH = 800;
 export const CAVE_HEIGHT = 1200;
 export const CAVE_CHEST_COUNT = 10;
 export const CAVE_CHEST_DROP_CHANCE = 0.40;
@@ -41,7 +41,7 @@ export const MEADOW_WIDTH = 800;
 export const MEADOW_HEIGHT = 600;
 
 // Village
-export const VILLAGE_WIDTH = 700;
+export const VILLAGE_WIDTH = 800;
 export const VILLAGE_HEIGHT = 2000;
 export const CEMETERY_HEIGHT = 500;
 export const VILLAGE_TOTAL_HEIGHT = VILLAGE_HEIGHT + CEMETERY_HEIGHT;
