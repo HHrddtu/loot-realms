@@ -134,7 +134,8 @@ export class NpcSystem {
             if (completable.length > 0) {
                 const q = completable[0];
                 const rewards = completeQuest(q.key);
-                if (rewards) {
+                const rewardText = this._formatRewards(rewards);
+                this._showDialog(npc, q.name + ' Complete!', rewardText, '#2ecc71', () => {
                     if (rewards.exp) {
                         s.playerExp += rewards.exp;
                         s.floatingText(s.player.x, s.player.y - 40, '+' + rewards.exp + ' EXP', '#f1c40f');
@@ -153,9 +154,9 @@ export class NpcSystem {
                             s.floatingText(s.player.x + 30, s.player.y - 40, '+' + item.name, '#3498db');
                         }
                     }
-                }
-                this.updateQuestIcons();
-                saveQuests();
+                    this.updateQuestIcons();
+                    saveQuests();
+                });
             }
             return;
         }
@@ -163,17 +164,120 @@ export class NpcSystem {
         const available = getAvailableQuests(npcKey);
         if (available.length > 0) {
             const qKey = available[0];
-            acceptQuest(qKey);
             const quest = QUEST_DB[qKey];
-            s.floatingText(s.player.x, s.player.y - 40, 'New Quest: ' + quest.name, '#f1c40f');
-            this.updateQuestIcons();
-            saveQuests();
+            this._showDialog(npc, quest.name, quest.description, '#f1c40f', () => {
+                acceptQuest(qKey);
+                s.floatingText(s.player.x, s.player.y - 40, 'New Quest: ' + quest.name, '#f1c40f');
+                this.updateQuestIcons();
+                saveQuests();
+            }, t('quest.npc.talk'));
         } else {
             const greeting = getLang() === 'ru' && npc.greetingRu ? npc.greetingRu
                 : getLang() === 'de' && npc.greetingDe ? npc.greetingDe
                 : npc.greeting;
-            s.floatingText(s.player.x, s.player.y - 40, greeting, '#aaa');
+            this._showDialog(npc, npc.name, greeting, '#aaa', null);
         }
+    }
+
+    _formatRewards(rewards) {
+        if (!rewards) return '';
+        const parts = [];
+        if (rewards.exp) parts.push('+' + rewards.exp + ' EXP');
+        if (rewards.accountExp) parts.push('+' + rewards.accountExp + ' Account EXP');
+        if (rewards.talentPoints) parts.push('+' + rewards.talentPoints + ' Talent Point');
+        if (rewards.gold) parts.push('+' + rewards.gold + ' Gold');
+        return parts.length > 0 ? parts.join('\n') : 'No rewards';
+    }
+
+    _showDialog(npc, title, text, titleColor, onConfirm, confirmLabel) {
+        const s = this.scene;
+        if (s.menuOpen) return;
+        s.menuOpen = true;
+        s.physics.pause();
+        if (s.enemies) s.enemies.getChildren().forEach(e => { if (e.body) e.body.setVelocity(0); });
+
+        const dw = 600;
+        const dh = 200;
+        const dx = GAME_WIDTH / 2;
+        const dy = GAME_HEIGHT - dh / 2 - 15;
+        const depth = 120;
+
+        s.dialogGroup = [];
+        const mk = (el) => { el.setDepth(depth); s.dialogGroup.push(el); return el; };
+
+        mk(s.add.rectangle(dx, dy, dw, dh, 0x0a0a18, 0.96).setStrokeStyle(2, Phaser.Display.Color.HexStringToColor(titleColor).color));
+
+        const lang = getLang();
+        const displayName = lang === 'ru' ? (npc.nameRu || npc.name) : lang === 'de' ? (npc.nameDe || npc.name) : npc.name;
+
+        try {
+            const portrait = mk(s.add.sprite(dx - dw / 2 + 50, dy - 10, npc.texKey).setDisplaySize(56, 56));
+            try {
+                const walkKey = npc.texKey + '_walk';
+                if (s.anims.exists(walkKey)) portrait.play(walkKey);
+            } catch (e) {}
+        } catch (e) {
+            mk(s.add.rectangle(dx - dw / 2 + 50, dy - 10, 48, 48, 0x334466));
+        }
+
+        mk(s.add.text(dx - dw / 2 + 85, dy - dh / 2 + 15, displayName, {
+            fontSize: '16px', fill: '#f1c40f', fontFamily: 'Georgia', fontStyle: 'bold'
+        }));
+
+        mk(s.add.text(dx - dw / 2 + 85, dy - dh / 2 + 38, title, {
+            fontSize: '13px', fill: titleColor, fontFamily: 'Arial', fontStyle: 'bold'
+        }));
+
+        mk(s.add.text(dx - dw / 2 + 85, dy - 10, text, {
+            fontSize: '12px', fill: '#ccc', fontFamily: 'Arial',
+            wordWrap: { width: dw - 110 }, lineSpacing: 3
+        }).setOrigin(0, 0.5));
+
+        if (onConfirm && confirmLabel) {
+            const btnW = 140;
+            const btnX = dx + dw / 2 - btnW / 2 - 15;
+            const btnY = dy + dh / 2 - 22;
+            const btn = mk(s.add.rectangle(btnX, btnY, btnW, 28, 0x27ae60)
+                .setStrokeStyle(1, 0x2ecc71).setInteractive({ useHandCursor: true }));
+            mk(s.add.text(btnX, btnY, confirmLabel, {
+                fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+            }).setOrigin(0.5));
+            btn.on('pointerover', () => btn.setFillStyle(0x2ecc71));
+            btn.on('pointerout', () => btn.setFillStyle(0x27ae60));
+            btn.on('pointerdown', () => {
+                this._closeDialog();
+                onConfirm();
+            });
+        }
+
+        const closeBtnX = confirmLabel ? dx + dw / 2 - 15 : dx;
+        const closeBtnY = dy + dh / 2 - 22;
+        const closeBtn = mk(s.add.rectangle(closeBtnX - (confirmLabel ? 155 : 0), closeBtnY, 100, 28, 0x34495e)
+            .setStrokeStyle(1, 0x556677).setInteractive({ useHandCursor: true }));
+        mk(s.add.text(closeBtnX - (confirmLabel ? 155 : 0), closeBtnY, t('quest.close'), {
+            fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5));
+        closeBtn.on('pointerdown', () => this._closeDialog());
+        closeBtn.on('pointerover', () => closeBtn.setFillStyle(0x445566));
+        closeBtn.on('pointerout', () => closeBtn.setFillStyle(0x34495e));
+
+        const onKey = (e) => {
+            if (e.code === 'Space' || e.code === 'Escape' || e.code === 'Enter') {
+                this._closeDialog();
+                s.input.keyboard.off('keydown', onKey);
+            }
+        };
+        s.input.keyboard.on('keydown', onKey);
+    }
+
+    _closeDialog() {
+        const s = this.scene;
+        if (s.dialogGroup) {
+            s.dialogGroup.forEach(e => e.destroy());
+            s.dialogGroup = [];
+        }
+        s.menuOpen = false;
+        s.physics.resume();
     }
 
     startCartRide() {
