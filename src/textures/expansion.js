@@ -95,6 +95,29 @@ export function drawExpansionTextures(mk, textures) {
         }
     });
 
+    // ===== MINE CART =====
+    mk('mine_cart', 36, 28, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#8b6914';
+        c.fillRect(4, 8, 28, 12);
+        c.fillStyle = '#a07818';
+        c.fillRect(6, 6, 24, 2);
+        c.fillRect(2, 10, 32, 8);
+        c.fillStyle = '#6b4f12';
+        c.fillRect(4, 18, 28, 4);
+        c.fillStyle = '#555';
+        c.fillRect(8, 22, 6, 4);
+        c.fillRect(22, 22, 6, 4);
+        c.fillStyle = '#888';
+        c.fillRect(9, 23, 4, 2);
+        c.fillRect(23, 23, 4, 2);
+        c.fillStyle = '#7a5c10';
+        c.fillRect(10, 10, 16, 6);
+        c.fillStyle = '#c0a030';
+        c.fillRect(12, 11, 4, 4);
+        c.fillRect(20, 11, 4, 4);
+    });
+
     // ===== CAVE GROUND =====
     mk('cave_ground', 500, 1200, (c) => {
         c.fillStyle = '#1a1a1a';

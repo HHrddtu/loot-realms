@@ -57,6 +57,7 @@ export class MineZone {
         this.spawnMineChests();
         this.spawnMineTorches();
         this.spawnMineDecor();
+        this.spawnMineCart();
 
         s.mineDarkness = s.add.image(400, 300, 'mine_darkness').setDepth(13).setAlpha(0.9).setScrollFactor(0);
 
@@ -131,6 +132,11 @@ export class MineZone {
             s.mineChests.clear(true, true);
         }
         if (s.mineChests) { s.mineChests.destroy(); s.mineChests = null; }
+        if (s.mineCart) {
+            if (s.mineCart.cartTriggerZone) { s.mineCart.cartTriggerZone.destroy(); s.mineCart.cartTriggerZone = null; }
+            s.mineCart.destroy();
+            s.mineCart = null;
+        }
         if (s.mineBg) { s.mineBg.destroy(); s.mineBg = null; }
         if (s.mineRails) { s.mineRails.destroy(); s.mineRails = null; }
         if (s.exitLadder) { s.exitLadder.destroy(); s.exitLadder = null; }
@@ -165,6 +171,7 @@ export class MineZone {
         const s = this.scene;
         if (s.zone === 'mine') {
             this.checkMineExitProximity();
+            this.updateMineCart();
         } else if (s.zone === 'mine_boss') {
             this.checkMineBossArenaExitProximity();
             this.updateMineBoss();
@@ -329,6 +336,91 @@ export class MineZone {
                 s.mineDecor.push(d);
             }
         });
+    }
+
+    spawnMineCart() {
+        const s = this.scene;
+        if (s.mineCart) { s.mineCart.destroy(); s.mineCart = null; }
+
+        const path = [
+            { x: 100, y: 100 },
+            { x: 700, y: 100 },
+            { x: 700, y: 500 },
+            { x: 100, y: 500 },
+            { x: 100, y: 100 }
+        ];
+
+        const cart = s.add.sprite(path[0].x, path[0].y, 'mine_cart').setDepth(7);
+        s.physics.add.existing(cart, false);
+        cart.body.setSize(30, 20);
+        cart.body.setCollideWorldBounds(true);
+        cart.cartPath = path;
+        cart.cartIdx = 0;
+        cart.cartSpeed = 120;
+        cart.cartActive = false;
+        cart.cartCooldown = 0;
+        cart.cartTriggerZone = s.add.zone(100, 100, 60, 60);
+        s.physics.add.existing(cart.cartTriggerZone, true);
+
+        s.physics.add.overlap(s.player, cart.cartTriggerZone, () => {
+            if (!cart.cartActive && cart.cartCooldown <= 0) {
+                cart.cartActive = true;
+                cart.cartIdx = 0;
+            }
+        }, null, s);
+
+        s.mineCart = cart;
+    }
+
+    updateMineCart() {
+        const s = this.scene;
+        const cart = s.mineCart;
+        if (!cart || !cart.cartActive) {
+            if (cart && cart.cartCooldown > 0) cart.cartCooldown -= s.game.loop.delta;
+            return;
+        }
+
+        const target = cart.cartPath[cart.cartIdx];
+        if (!target) { cart.cartActive = false; return; }
+
+        const dx = target.x - cart.x;
+        const dy = target.y - cart.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < 10) {
+            cart.cartIdx++;
+            if (cart.cartIdx >= cart.cartPath.length) {
+                cart.cartActive = false;
+                cart.cartCooldown = 5000;
+                cart.body.setVelocity(0, 0);
+                return;
+            }
+        } else {
+            const speed = cart.cartSpeed;
+            cart.body.setVelocity((dx / dist) * speed, (dy / dist) * speed);
+        }
+
+        if (s.enemies) {
+            s.enemies.getChildren().forEach(e => {
+                if (e.active && e.stats) {
+                    const d = Phaser.Math.Distance.Between(cart.x, cart.y, e.x, e.y);
+                    if (d < 30) {
+                        const knockX = (e.x - cart.x) / d * 200;
+                        const knockY = (e.y - cart.y) / d * 200;
+                        e.body.setVelocity(knockX, knockY);
+                        s.time.delayedCall(200, () => { if (e.body) e.body.setVelocity(0, 0); });
+                        s.combat.hitEnemy(e, 25);
+                    }
+                }
+            });
+        }
+
+        const pd = Phaser.Math.Distance.Between(cart.x, cart.y, s.player.x, s.player.y);
+        if (pd < 25 && !s.menuOpen && !s.transitioning) {
+            s.combat.takeDamage(15);
+            const knockDir = s.player.x < cart.x ? -1 : 1;
+            s.player.body.setVelocity(knockDir * 200, -150);
+        }
     }
 
     checkMineExitProximity() {
