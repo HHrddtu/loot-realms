@@ -98,6 +98,20 @@ export default class GameScene extends Phaser.Scene {
             this._bindKeys();
         });
 
+        this.input.on('pointerdown', (pointer) => {
+            if (this.menuOpen || this.transitioning || this.invOpen) return;
+            if (pointer.button !== 0) return;
+            const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+            const dx = worldPoint.x - this.player.x;
+            const dy = worldPoint.y - this.player.y;
+            if (Math.abs(dx) > Math.abs(dy)) {
+                this.facing = dx > 0 ? 'right' : 'left';
+            } else {
+                this.facing = dy > 0 ? 'down' : 'up';
+            }
+            this.attack();
+        });
+
         this.invOpen = false;
         this.invGroup = [];
         this._tooltipGroup = [];

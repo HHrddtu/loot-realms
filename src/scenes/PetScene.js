@@ -418,7 +418,14 @@ export default class PetScene extends Phaser.Scene {
         const backTxt = this._add(this.add.text(100, 570, '\u2190 BACK', {
             fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5));
-        backBtn.on('pointerdown', () => this.scene.start(this.returnScene));
+        backBtn.on('pointerdown', () => {
+            this.scene.stop();
+            if (this.scene.isActive(this.returnScene) || this.scene.isPaused(this.returnScene)) {
+                this.scene.resume(this.returnScene);
+            } else {
+                this.scene.start(this.returnScene);
+            }
+        });
         backBtn.on('pointerover', () => backBtn.setFillStyle(0x4a6a8e));
         backBtn.on('pointerout', () => backBtn.setFillStyle(0x34495e));
     }

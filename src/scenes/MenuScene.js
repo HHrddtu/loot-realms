@@ -52,7 +52,8 @@ export default class MenuScene extends Phaser.Scene {
         }, 150, 34, '14px');
 
         this.menuBtn(490, 280, '\u{1F43E} Pets', 0xe67e22, () => {
-            this.scene.start('Pet', { returnScene: 'Menu' });
+            this.scene.launch('Pet', { returnScene: 'Menu' });
+            this.scene.pause();
         }, 150, 34, '14px');
 
         this.menuBtn(310, 330, t('menu.account'), 0x2980b9, () => this.showAccount(), 150, 30, '12px');

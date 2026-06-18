@@ -101,7 +101,8 @@ export class UISystem {
             stroke: '#000', strokeThickness: 1
         }).setOrigin(1, 0).setInteractive({ useHandCursor: true }));
         this.scene.petBtnText.on('pointerdown', () => {
-            this.scene.scene.start('Pet', { returnScene: 'Game' });
+            this.scene.scene.launch('Pet', { returnScene: 'Game' });
+            this.scene.scene.pause();
         });
         this.scene.petBtnText.on('pointerover', () => this.scene.petBtnText.setStyle({ fill: '#f39c12' }));
         this.scene.petBtnText.on('pointerout', () => this.scene.petBtnText.setStyle({ fill: '#e67e22' }));
@@ -259,7 +260,7 @@ export class UISystem {
             { icon: 'nav_book', label: 'B', cb: () => this.scene._openBestiary(), key: 'bKey' },
             { icon: 'nav_hammer', label: 'C', cb: () => this.scene._openCrafting(), key: 'cKey' },
             { icon: 'nav_star', label: 'T', cb: () => this.scene._openTalentTree(), key: 'tKey' },
-            { icon: 'nav_paw', label: 'P', cb: () => this.scene.scene.start('Pet', { returnScene: 'Game' }) },
+            { icon: 'nav_paw', label: 'P', cb: () => { this.scene.scene.launch('Pet', { returnScene: 'Game' }); this.scene.scene.pause(); } },
             { icon: 'nav_sound', label: 'M', cb: () => this._toggleMute() },
         ];
 
