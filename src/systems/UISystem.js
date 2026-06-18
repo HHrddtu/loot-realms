@@ -1,12 +1,14 @@
 import { RARITY_COLORS, SHOP_EQUIP_PRICES, SELL_PRICE_RATIO, SPELLS } from '../config/index.js';
 import { lighten } from '../utils.js';
 import { toggleMute } from '../sound.js';
-import { getAccountLevelUpReq, loadAccount } from '../save.js';
+import { getAccountLevelUpReq, loadAccount, saveAccount } from '../save.js';
 import { getTalentEffects } from '../talents.js';
 import { getAccountTalentEffects } from '../accountTalents.js';
 import { initMaterialBook, getMaterialBookData } from '../materialBook.js';
 import { PET_DB } from '../config/pets.js';
 import { t } from '../i18n.js';
+
+const SPELL_SLOT_STORAGE_KEY = 'loot_realms_spell_slot_pos';
 
 export class UISystem {
     constructor(scene) {
@@ -104,6 +106,8 @@ export class UISystem {
         this.scene.petBtnText.on('pointerover', () => this.scene.petBtnText.setStyle({ fill: '#f39c12' }));
         this.scene.petBtnText.on('pointerout', () => this.scene.petBtnText.setStyle({ fill: '#e67e22' }));
 
+        this._createNavPanel();
+
         this.scene.hintText = this.scene.add.text(400, 588, '', {
             fontSize: '10px', fill: '#555', fontFamily: 'Arial'
         }).setOrigin(0.5).setScrollFactor(0).setDepth(20);
@@ -138,9 +142,13 @@ export class UISystem {
             meteor: 'icon_meteor', chemical_cloud: 'icon_chemical_cloud', divine_blessing: 'icon_divine_blessing'
         };
 
+        const savedPos = this._loadSpellSlotPositions();
+        const defaultSlotY = 565;
+
         spellKeys.forEach((key, i) => {
-            const sx2 = 640 + i * 32;
-            const sy = 565;
+            const saved = savedPos && savedPos[i];
+            const sx2 = saved ? saved.x : 640 + i * 32;
+            const sy = saved ? saved.y : defaultSlotY;
             const bg = this.scene.add.rectangle(sx2, sy, 28, 28, 0x1a1a2e)
                 .setStrokeStyle(2, slotColors[i])
                 .setScrollFactor(0).setDepth(24);
@@ -152,9 +160,33 @@ export class UISystem {
             const cd = this.scene.add.text(sx2, sy + 9, '', {
                 fontSize: '8px', fill: '#f39c12', fontFamily: 'Arial'
             }).setOrigin(0.5).setScrollFactor(0).setDepth(25);
-            this.scene.spellSlots[key] = { bg, icon, keyLbl, cd };
+            this.scene.spellSlots[key] = { bg, icon, keyLbl, cd, index: i };
 
-            bg.setInteractive({ useHandCursor: true });
+            bg.setInteractive({ useHandCursor: true, draggable: true });
+            this.scene.input.setDraggable(bg);
+
+            bg.on('dragstart', () => {
+                bg.setStrokeStyle(2, 0xf1c40f);
+                bg.setFillStyle(0x2a2a4e);
+            });
+
+            bg.on('drag', (pointer, dragX, dragY) => {
+                bg.x = dragX;
+                bg.y = dragY;
+                icon.x = dragX;
+                icon.y = dragY;
+                keyLbl.x = dragX;
+                keyLbl.y = dragY - 16;
+                cd.x = dragX;
+                cd.y = dragY + 9;
+            });
+
+            bg.on('dragend', () => {
+                bg.setStrokeStyle(2, slotColors[i]);
+                bg.setFillStyle(0x1a1a2e);
+                this._saveSpellSlotPositions();
+            });
+
             bg.on('pointerover', () => {
                 if (!this.scene.tooltipText) {
                     this.scene.tooltipText = this.scene.add.text(0, 0, '', {
@@ -213,6 +245,80 @@ export class UISystem {
         const m = toggleMute();
         this.scene.muteText.setText(m ? 'MUTE' : 'SOUND');
         this.scene.muteText.setColor(m ? '#e74c3c' : '#27ae60');
+    }
+
+    _createNavPanel() {
+        const s = (el) => { el.setScrollFactor(0).setDepth(21); return el; };
+        const navBtns = [];
+        const startX = 14;
+        const startY = 100;
+        const gap = 22;
+
+        const navItems = [
+            { icon: 'nav_quest', label: 'Q', cb: () => this.scene._openQuestLog(), key: 'nKey' },
+            { icon: 'nav_book', label: 'B', cb: () => this.scene._openBestiary(), key: 'bKey' },
+            { icon: 'nav_hammer', label: 'C', cb: () => this.scene._openCrafting(), key: 'cKey' },
+            { icon: 'nav_star', label: 'T', cb: () => this.scene._openTalentTree(), key: 'tKey' },
+            { icon: 'nav_paw', label: 'P', cb: () => this.scene.scene.start('Pet', { returnScene: 'Game' }) },
+            { icon: 'nav_sound', label: 'M', cb: () => this._toggleMute() },
+        ];
+
+        const bg = s(this.scene.add.rectangle(startX + 10, startY + (navItems.length * gap) / 2 - gap / 2 + 4, 24, navItems.length * gap + 4, 0x0a0a1a, 0.75)
+            .setStrokeStyle(1, 0x333333));
+        navBtns.push(bg);
+
+        navItems.forEach((item, i) => {
+            const y = startY + i * gap;
+            const btnBg = s(this.scene.add.rectangle(startX + 10, y, 20, 20, 0x1a1a2e)
+                .setStrokeStyle(1, 0x444444));
+            const icon = s(this.scene.add.sprite(startX + 10, y, item.icon).setScale(1));
+            navBtns.push(btnBg, icon);
+
+            btnBg.setInteractive({ useHandCursor: true });
+            btnBg.on('pointerover', () => {
+                btnBg.setStrokeStyle(2, 0xf1c40f);
+                btnBg.setFillStyle(0x2a2a4e);
+            });
+            btnBg.on('pointerout', () => {
+                btnBg.setStrokeStyle(1, 0x444444);
+                btnBg.setFillStyle(0x1a1a2e);
+            });
+            btnBg.on('pointerdown', () => {
+                if (!this.scene.menuOpen && !this.scene.transitioning) {
+                    item.cb();
+                }
+            });
+        });
+
+        this.scene.navBtns = navBtns;
+    }
+
+    _loadSpellSlotPositions() {
+        try {
+            const json = localStorage.getItem(SPELL_SLOT_STORAGE_KEY);
+            if (json) return JSON.parse(json);
+        } catch (e) {}
+        return null;
+    }
+
+    _saveSpellSlotPositions() {
+        try {
+            const positions = [];
+            const slotConfig = {
+                sage: { q: 'fireball', w: 'shield', e: 'heal', r: 'meteor' },
+                alchemist: { q: 'acid_flask', w: 'toxic_puddle', e: 'burrow', r: 'chemical_cloud' },
+                angel: { q: 'soul_strike', w: 'holy_shield', e: 'holy_nova', r: 'divine_blessing' }
+            };
+            const sc = slotConfig[this.scene.classKey] || slotConfig.sage;
+            const keys = [sc.q, sc.w, sc.e, sc.r];
+            keys.forEach((key, i) => {
+                const slot = this.scene.spellSlots[key];
+                if (slot) {
+                    positions[i] = { x: Math.round(slot.bg.x), y: Math.round(slot.bg.y) };
+                }
+            });
+            localStorage.setItem(SPELL_SLOT_STORAGE_KEY, JSON.stringify(positions));
+        } catch (e) {}
     }
 
     _openTalentTree() {

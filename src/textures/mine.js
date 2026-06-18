@@ -898,4 +898,110 @@ export function drawMineTextures(mk) {
         c.fillRect(9, 4, 2, 12);
         c.fillRect(4, 9, 12, 2);
     });
+
+    mk('nav_book', 16, 16, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#8B4513';
+        c.fillRect(2, 1, 12, 14);
+        c.fillStyle = '#D2691E';
+        c.fillRect(3, 2, 10, 12);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(5, 4, 6, 1);
+        c.fillRect(5, 6, 6, 1);
+        c.fillRect(5, 8, 4, 1);
+    });
+
+    mk('nav_scroll', 16, 16, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#f5deb3';
+        c.fillRect(3, 2, 10, 12);
+        c.fillStyle = '#deb887';
+        c.fillRect(3, 2, 10, 2);
+        c.fillRect(3, 12, 10, 2);
+        c.fillStyle = '#8B4513';
+        c.fillRect(5, 5, 6, 1);
+        c.fillRect(5, 7, 6, 1);
+        c.fillRect(5, 9, 4, 1);
+    });
+
+    mk('nav_hammer', 16, 16, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#8B4513';
+        c.fillRect(7, 6, 2, 8);
+        c.fillStyle = '#888';
+        c.fillRect(4, 2, 8, 5);
+        c.fillStyle = '#aaa';
+        c.fillRect(5, 3, 6, 3);
+    });
+
+    mk('nav_star', 16, 16, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#f1c40f';
+        c.beginPath();
+        c.moveTo(8, 1);
+        c.lineTo(9.5, 5.5);
+        c.lineTo(14, 6);
+        c.lineTo(10.5, 9);
+        c.lineTo(12, 14);
+        c.lineTo(8, 11);
+        c.lineTo(4, 14);
+        c.lineTo(5.5, 9);
+        c.lineTo(2, 6);
+        c.lineTo(6.5, 5.5);
+        c.closePath();
+        c.fill();
+    });
+
+    mk('nav_paw', 16, 16, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#d4a574';
+        c.beginPath();
+        c.arc(8, 10, 4, 0, Math.PI * 2);
+        c.fill();
+        c.beginPath();
+        c.arc(4, 5, 2, 0, Math.PI * 2);
+        c.fill();
+        c.beginPath();
+        c.arc(8, 3, 2, 0, Math.PI * 2);
+        c.fill();
+        c.beginPath();
+        c.arc(12, 5, 2, 0, Math.PI * 2);
+        c.fill();
+    });
+
+    mk('nav_sound', 16, 16, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#2ecc71';
+        c.fillRect(2, 5, 3, 6);
+        c.beginPath();
+        c.moveTo(5, 5);
+        c.lineTo(9, 2);
+        c.lineTo(9, 14);
+        c.lineTo(5, 11);
+        c.closePath();
+        c.fill();
+        c.strokeStyle = '#2ecc71';
+        c.lineWidth = 1.5;
+        c.beginPath();
+        c.arc(11, 8, 2, -Math.PI * 0.4, Math.PI * 0.4);
+        c.stroke();
+        c.beginPath();
+        c.arc(11, 8, 4, -Math.PI * 0.3, Math.PI * 0.3);
+        c.stroke();
+    });
+
+    mk('nav_quest', 16, 16, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#f5deb3';
+        c.fillRect(2, 1, 12, 14);
+        c.fillStyle = '#deb887';
+        c.fillRect(2, 1, 12, 2);
+        c.fillStyle = '#2ecc71';
+        c.fillRect(4, 5, 2, 2);
+        c.fillRect(8, 5, 2, 2);
+        c.fillStyle = '#8B4513';
+        c.fillRect(4, 8, 8, 1);
+        c.fillRect(4, 10, 6, 1);
+        c.fillRect(4, 12, 7, 1);
+    });
 }
