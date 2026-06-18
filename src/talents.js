@@ -286,6 +286,14 @@ export function canUnlock(talentId, unlockedIds) {
     return talent.requires.every(req => unlockedIds.includes(req));
 }
 
+export function getTalentCost(row) {
+    if (row <= 2) return 1;
+    if (row <= 5) return 2;
+    if (row <= 8) return 3;
+    if (row <= 11) return 5;
+    return 8;
+}
+
 export function getTalentEffects(unlockedIds) {
     const effects = {
         damagePercent: 0,

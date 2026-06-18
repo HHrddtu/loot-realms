@@ -162,6 +162,8 @@ export default class MenuScene extends Phaser.Scene {
                     unlockedAccountTalents: a ? a.unlockedAccountTalents || [] : [],
                     accountTalentPoints: a ? a.accountTalentPoints || 0 : 0,
                     accountLevel: a ? a.accountLevel || 1 : 1,
+                    lockedBranches: a ? a.lockedBranches || [] : [],
+                    playerGold: 0,
                     returnScene: 'Menu'
                 });
                 this.scene.pause();

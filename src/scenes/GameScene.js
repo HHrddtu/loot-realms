@@ -772,6 +772,8 @@ export default class GameScene extends Phaser.Scene {
         eqPerClass[this.classKey] = this.accountEquipment;
         const bagPerClass = acc.accountEquipBag || {};
         bagPerClass[this.classKey] = this.accountEquipBag;
+        const lockedPerClass = acc.lockedBranchesPerClass || {};
+        lockedPerClass[this.classKey] = this.lockedBranches || [];
         return {
             ...acc,
             accountLevel: this.accountLevel,
@@ -782,7 +784,8 @@ export default class GameScene extends Phaser.Scene {
             crystals: this.crystals || 0,
             upgradeLevels: this.upgradeLevels || {},
             accountEquipment: eqPerClass,
-            accountEquipBag: bagPerClass
+            accountEquipBag: bagPerClass,
+            lockedBranchesPerClass: lockedPerClass
         };
     }
 
@@ -852,6 +855,7 @@ export default class GameScene extends Phaser.Scene {
         const accBagPerClass2 = acc.accountEquipBag || {};
         this.accountEquipment = accEquipPerClass2[this.classKey] || { ...EMPTY_ACCOUNT_EQUIPMENT };
         this.accountEquipBag = accBagPerClass2[this.classKey] || [];
+        this.lockedBranches = (acc.lockedBranchesPerClass || {})[this.classKey] || [];
         this.accountEffects = getAccountTalentEffects(this.unlockedAccountTalents);
         this.gold = acc.gold || 0;
         this.crystals = acc.crystals || 0;
@@ -1083,6 +1087,7 @@ export default class GameScene extends Phaser.Scene {
         this.unlockedAccountTalents = data.unlockedAccountTalents || [];
         this.accountTalentPoints = data.accountTalentPoints || 0;
         this.accountEffects = getAccountTalentEffects(this.unlockedAccountTalents);
+        this.lockedBranches = data.lockedBranches || [];
         this.recalcStats();
         this.menuOpen = false;
         this.physics.resume();

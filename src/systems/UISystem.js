@@ -336,6 +336,8 @@ export class UISystem {
             unlockedAccountTalents: this.scene.unlockedAccountTalents,
             accountTalentPoints: this.scene.accountTalentPoints,
             accountLevel: this.scene.accountLevel,
+            lockedBranches: this.scene.lockedBranches || [],
+            playerGold: this.scene.player ? this.scene.player.gold : 0,
             returnScene: 'Game'
         });
         this.scene.scene.pause();
