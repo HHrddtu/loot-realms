@@ -4,7 +4,7 @@ import {
     PORTAL_POS, PORTAL_ENTER_DIST, FOREST_RETURN_POS,
     ENEMY_TYPES
 } from '../config/index.js';
-import { startMusic, playPortal } from '../sound.js';
+import { playPortal, startZoneMusic } from '../sound.js';
 import { recordEncounter } from '../bestiary.js';
 
 export class ForestZone {
@@ -93,7 +93,7 @@ export class ForestZone {
         s.zone = 'forest';
         s.npc.spawnNPCs();
         s.hintText.setText('Arrows=move | SPACE=attack/NPC | I=inventory | TAB=stats | T=talents | C=craft | Q=quests | P=pause | M=sound');
-        startMusic();
+        startZoneMusic('forest');
         if (s.particles) {
             s.particles.startForestLeaves(800, FOREST_HEIGHT);
             s.particles.startFirefly(800, FOREST_HEIGHT);

@@ -3,12 +3,12 @@ import {
     CASTLE_WIDTH, CASTLE_ROOM_HEIGHT, CASTLE_TOTAL_HEIGHT, CASTLE_ROOMS, CASTLE_ATTIC_INDEX,
     CASTLE_CHEST_POSITIONS, CASTLE_VILLAGER_POSITIONS, CASTLE_SPAWN_POS,
     BANDIT_TYPES, BANDIT_LEADER_BOSS, CASTLE_CHEST_COUNT, CASTLE_CHEST_DROP_CHANCE,
-    CASTLE_KEY, GAME_WIDTH, GAME_HEIGHT, RARITY_COLORS,
+    CASTLE_KEY, GAME_WIDTH, GAME_HEIGHT, RARITY_COLORS, DIFF_COLORS,
     VILLAGE_WIDTH, VILLAGE_HEIGHT
 } from '../config/index.js';
 import { rollZoneEquip, rollEquip } from '../utils.js';
 import { rollBossCrystals } from '../config/pets.js';
-import { playLoot, playBossAoE, playBossDeath, playPortal, startMusic } from '../sound.js';
+import { playLoot, playBossAoE, playBossDeath, playPortal, startZoneMusic } from '../sound.js';
 import { recordKill } from '../bestiary.js';
 import { recordSoulCollect } from '../soulBook.js';
 
@@ -58,7 +58,7 @@ export class CastleZone {
 
         this.scene.zone = 'castle';
         this.scene.hintText.setText('SPACE=attack | I=inventory | TAB=stats | T=talents | Q/W/E=spells');
-        startMusic();
+        startZoneMusic('castle');
     }
 
     clear() {
@@ -489,7 +489,7 @@ export class CastleZone {
             this.scene.castleBoss.hpBg = this.scene.add.rectangle(barX, 50, hw, 5, 0x333333).setOrigin(0.5).setDepth(15).setScrollFactor(0);
             this.scene.castleBoss.hpFill = this.scene.add.rectangle(barX, 50, hw, 5, 0xc0392b).setOrigin(0.5).setDepth(15).setScrollFactor(0);
             this.scene.castleBossNameText = this.scene.add.text(barX, 35, bt.name, {
-                fontSize: '12px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold',
+                fontSize: '12px', fill: DIFF_COLORS[this.scene.difficulty] || '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold',
                 stroke: '#000', strokeThickness: 2
             }).setOrigin(0.5).setDepth(15).setScrollFactor(0);
 

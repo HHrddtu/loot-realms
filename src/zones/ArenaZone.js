@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, ARENA_EXIT_POS, BOSS_TYPE, RARITY_COLORS } from '../config/index.js';
-import { startMusic, playPortal, playBossDeath } from '../sound.js';
+import { GAME_WIDTH, GAME_HEIGHT, ARENA_EXIT_POS, BOSS_TYPE, RARITY_COLORS, DIFF_COLORS } from '../config/index.js';
+import { playPortal, playBossDeath, startZoneMusic } from '../sound.js';
 import { rollEquip, rollAccountEquip } from '../utils.js';
 import { recordKill } from '../bestiary.js';
 import { recordSoulCollect } from '../soulBook.js';
@@ -48,7 +48,7 @@ export class ArenaZone {
 
         s.zone = 'arena';
         s.hintText.setText(s.mineUnlocked ? 'Enter the Mine! | I=inventory | TAB=stats | P=pause' : 'Defeat the Ancient Treant! | I=inventory | TAB=stats | P=pause');
-        startMusic();
+        startZoneMusic('arena');
     }
 
     clear() {
@@ -151,7 +151,7 @@ export class ArenaZone {
         s.boss.hpFill = s.add.rectangle(400, 130, hw, 5, 0xe74c3c).setOrigin(0.5).setDepth(15);
 
         s.bossNameText = s.add.text(400, 118, bt.name, {
-            fontSize: '12px', fill: '#ff4444', fontFamily: 'Arial', fontStyle: 'bold',
+            fontSize: '12px', fill: DIFF_COLORS[s.scene.difficulty] || '#ff4444', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5).setDepth(15);
 

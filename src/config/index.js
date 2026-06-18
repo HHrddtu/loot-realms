@@ -1,5 +1,5 @@
 // Difficulty
-export { DIFFICULTIES, DIFF_NAMES, DIFF_MULT } from './difficulty.js';
+export { DIFFICULTIES, DIFF_NAMES, DIFF_MULT, DIFF_COLORS, DIFF_TEXT_COLORS } from './difficulty.js';
 
 // Rarity
 export { RARITY_COLORS, RARITY_NAMES } from './rarity.js';

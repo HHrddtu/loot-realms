@@ -4,10 +4,10 @@ import {
     CAVE_ENEMY_TYPES, CAVE_BOSS_TYPE,
     CAVE_CHEST_COUNT, CAVE_CHEST_DROP_CHANCE,
     CAVE_CHEST_CLOSED_KEY, CAVE_CHEST_W, CAVE_CHEST_H,
-    CAVE_SMALL_BAT, DIFF_MULT
+    CAVE_SMALL_BAT, DIFF_MULT, DIFF_COLORS
 } from '../config/index.js';
 import { rollZoneEquip } from '../utils.js';
-import { startMusic, playPortal, playBossAoE } from '../sound.js';
+import { playPortal, playBossAoE, startZoneMusic } from '../sound.js';
 
 export class CaveZone {
     constructor(scene) {
@@ -111,7 +111,7 @@ export class CaveZone {
         s.zone = 'cave';
         s.npc.spawnNPCs();
         s.hintText.setText('Q=quests | I=inventory | TAB=stats | T=talents | P=pause');
-        startMusic();
+        startZoneMusic('cave');
         if (s.particles) {
             s.particles.startCaveDrip(500, 1200);
         }
@@ -581,7 +581,7 @@ export class CaveZone {
         s.caveBoss.hpBg = s.add.rectangle(s.caveOffsetX + CAVE_WIDTH / 2, 100, hw, 5, 0x222222).setOrigin(0.5).setDepth(15).setScrollFactor(0);
         s.caveBoss.hpFill = s.add.rectangle(s.caveOffsetX + CAVE_WIDTH / 2, 100, hw, 5, 0x8e44ad).setOrigin(0.5).setDepth(15).setScrollFactor(0);
         s.caveBossNameText = s.add.text(s.caveOffsetX + CAVE_WIDTH / 2, 85, bt.name, {
-            fontSize: '12px', fill: '#bf77f6', fontFamily: 'Arial', fontStyle: 'bold',
+            fontSize: '12px', fill: DIFF_COLORS[s.difficulty] || '#bf77f6', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5).setDepth(15).setScrollFactor(0);
 

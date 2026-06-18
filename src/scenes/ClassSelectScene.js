@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { CLASS_DB } from '../classes.js';
 import { lighten } from '../utils.js';
-import { DIFFICULTIES } from '../config/index.js';
+import { DIFFICULTIES, DIFF_COLORS } from '../config/index.js';
 import { initAccount } from '../save.js';
 import { t, getLang } from '../i18n.js';
 
@@ -41,17 +41,19 @@ export default class ClassSelectScene extends Phaser.Scene {
         });
 
         this.diffLabel = this.add.text(400, 490, t('class.difficulty') + ': ' + DIFFICULTIES[this.diffIdx], {
-            fontSize: '20px', fill: '#ecf0f1', fontFamily: 'Arial'
+            fontSize: '20px', fill: DIFF_COLORS[DIFFICULTIES[this.diffIdx]] || '#ecf0f1', fontFamily: 'Arial'
         }).setOrigin(0.5);
 
         this.menuBtn(320, 520, '<', 0x34495e, () => {
             this.diffIdx = (this.diffIdx + DIFFICULTIES.length - 1) % DIFFICULTIES.length;
             this.diffLabel.setText(t('class.difficulty') + ': ' + DIFFICULTIES[this.diffIdx]);
+            this.diffLabel.setColor(DIFF_COLORS[DIFFICULTIES[this.diffIdx]] || '#ecf0f1');
         });
 
         this.menuBtn(480, 520, '>', 0x34495e, () => {
             this.diffIdx = (this.diffIdx + 1) % DIFFICULTIES.length;
             this.diffLabel.setText(t('class.difficulty') + ': ' + DIFFICULTIES[this.diffIdx]);
+            this.diffLabel.setColor(DIFF_COLORS[DIFFICULTIES[this.diffIdx]] || '#ecf0f1');
         });
 
         this.menuBtn(400, 570, t('class.begin'), 0x27ae60, () => {

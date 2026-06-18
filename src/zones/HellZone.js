@@ -5,7 +5,7 @@ import {
     HELL_LAVA_DAMAGE, HELL_LAVA_INTERVAL, HELL_HEAT_DAMAGE,
     HELL_ENEMY_TYPES, HELL_CAMP_POSITIONS, HELL_LAVA_POSITIONS,
     HELL_BOSS_TYPE, HELL_BOSS_MINION, HEAT_CRYSTAL,
-    BOSS_DROP_CHANCE, RARITY_COLORS, VILLAGE_WIDTH, CEMETERY_HEIGHT
+    BOSS_DROP_CHANCE, RARITY_COLORS, VILLAGE_WIDTH, CEMETERY_HEIGHT, DIFF_COLORS
 } from '../config/index.js';
 import { rollEquip, rollAccountEquip } from '../utils.js';
 import { rollBossCrystals } from '../config/pets.js';
@@ -374,7 +374,7 @@ export class HellZone {
         b.hpBg.setVisible(false);
         b.hpFill.setVisible(false);
         s.hellBossNameText = s.add.text(400, 95, bt.name, {
-            fontSize: '14px', fill: '#ff4400', fontFamily: 'Arial', fontStyle: 'bold',
+            fontSize: '14px', fill: DIFF_COLORS[s.difficulty] || '#ff4400', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 3
         }).setOrigin(0.5).setDepth(12).setScrollFactor(0).setVisible(false);
 

@@ -1,4 +1,4 @@
-import { RARITY_COLORS, SHOP_EQUIP_PRICES, SELL_PRICE_RATIO, SPELLS } from '../config/index.js';
+import { RARITY_COLORS, SHOP_EQUIP_PRICES, SELL_PRICE_RATIO, SPELLS, DIFF_COLORS } from '../config/index.js';
 import { lighten } from '../utils.js';
 import { toggleMute } from '../sound.js';
 import { getAccountLevelUpReq, loadAccount, saveAccount } from '../save.js';
@@ -571,6 +571,7 @@ export class UISystem {
         if (this.scene.heroHint) this.scene.heroHint.setText(this.scene.talentPoints > 0 ? 'Talents: ' + this.scene.talentPoints + ' [T]' : '');
 
         if (this.scene.diffText) this.scene.diffText.setText(this.scene.difficulty);
+        if (this.scene.diffText) this.scene.diffText.setColor(DIFF_COLORS[this.scene.difficulty] || '#f39c12');
         this.scene.talentText.setText(this.scene.talentPoints > 0 ? 'TALENTS: ' + this.scene.talentPoints + ' [T]' : '');
         if (this.scene.goldText) this.scene.goldText.setText('Gold: ' + (this.scene.gold || 0));
         if (this.scene.crystalText) this.scene.crystalText.setText('\u{1F48E} ' + (this.scene.crystals || 0));
@@ -1029,6 +1030,10 @@ export class UISystem {
             .setStrokeStyle(2, 0xf1c40f)));
         this.scene.pauseGroup.push(mkPause(this.scene.add.text(400, 185, t('pause.title'), {
             fontSize: '28px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5)));
+
+        this.scene.pauseGroup.push(mkPause(this.scene.add.text(400, 215, this.scene.difficulty, {
+            fontSize: '14px', fill: DIFF_COLORS[this.scene.difficulty] || '#f39c12', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5)));
 
         const resumeBg = mkPause(this.scene.add.rectangle(400, 235, 220, 38, 0x27ae60)

@@ -5,10 +5,10 @@ import {
     MINE_ROCK_COUNT, MINE_CRYSTAL_COUNT,
     MINE_EXIT_POS, MINE_RETURN_POS, MINE_BOSS_PORTAL_POS,
     MINE_CHEST_COUNT, MINE_CHEST_DROP_CHANCE,
-    ARENA_EXIT_POS, DIFF_MULT
+    ARENA_EXIT_POS, DIFF_MULT, DIFF_COLORS
 } from '../config/index.js';
 import { rollZoneEquip, rollZoneMaterial } from '../utils.js';
-import { startMusic, playPortal, playBossAoE } from '../sound.js';
+import { playPortal, playBossAoE, startZoneMusic } from '../sound.js';
 
 export class MineZone {
     constructor(scene) {
@@ -73,7 +73,7 @@ export class MineZone {
         s.zone = 'mine';
         s.npc.spawnNPCs();
         s.hintText.setText('Q=quests | I=inventory | TAB=stats | T=talents | P=pause');
-        startMusic();
+        startZoneMusic('mine');
         if (s.particles) {
             s.particles.startMineDust(GAME_WIDTH, FOREST_HEIGHT);
             s.particles.startCandleGlow(200, 300);
@@ -538,7 +538,7 @@ export class MineZone {
 
         s.zone = 'mine_boss';
         s.hintText.setText('Defeat the Skeleton Lord! | I=inventory | TAB=stats | P=pause');
-        startMusic();
+        startZoneMusic('mine_boss');
     }
 
     clearBossArena() {
@@ -656,7 +656,7 @@ export class MineZone {
         s.mineBoss.hpFill = s.add.rectangle(400, 130, hw, 5, 0x9b59b6).setOrigin(0.5).setDepth(15);
 
         s.mineBossNameText = s.add.text(400, 118, bt.name, {
-            fontSize: '12px', fill: '#bf77f6', fontFamily: 'Arial', fontStyle: 'bold',
+            fontSize: '12px', fill: DIFF_COLORS[s.difficulty] || '#bf77f6', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5).setDepth(15);
 

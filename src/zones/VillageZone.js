@@ -8,14 +8,14 @@ import {
     VILLAGE_BOSS_TYPE, VILLAGE_CORPSE_MINION, MAGMA_ARMOR,
     SNOWY_VILLAGE_ENEMY_TYPES, SNOWY_VILLAGE_CAMP_POSITIONS, SNOWY_VILLAGE_BOSS_TYPE,
     SNOWY_BOSS_MINION, WARMTH_CORE, SNOWY_VILLAGE_CHEST_COUNT, SNOWY_VILLAGE_CHEST_DROP_CHANCE,
-    BOSS_DROP_CHANCE, GAME_WIDTH, GAME_HEIGHT, RARITY_COLORS
+    BOSS_DROP_CHANCE, GAME_WIDTH, GAME_HEIGHT, RARITY_COLORS, DIFF_COLORS
 } from '../config/index.js';
 import { CONSUMABLES, SHOP_BOOSTS, SHOP_UPGRADES, SHOP_GOLD_CASES } from '../config/gold.js';
 import { rollBossCrystals, rollCaseDrop, CASE_DB } from '../config/pets.js';
 import { loadAccount, saveAccount } from '../save.js';
 import { rollZoneEquip, rollEquip, rollVillageAccountEquip, rollAccountEquip } from '../utils.js';
 import {
-    playLoot, playBossAoE, playBossDeath, playPortal, playBreak, startMusic
+    playLoot, playBossAoE, playBossDeath, playPortal, playBreak, startZoneMusic
 } from '../sound.js';
 import { recordKill } from '../bestiary.js';
 import { onKill } from '../quests.js';
@@ -103,7 +103,11 @@ export class VillageZone {
         this.scene.zone = 'village';
         if (!frozen) this.scene._spawnNPCs();
         this.scene.hintText.setText('SPACE=interact/attack | I=inventory | T=talents | C=craft | Q=quests | F=potion | P=pause');
-        startMusic();
+        if (frozen) {
+            startZoneMusic('snowy');
+        } else {
+            startZoneMusic('village');
+        }
         if (frozen && this.scene.particles) {
             this.scene.particles.startSnowfall(VILLAGE_WIDTH, VILLAGE_TOTAL_HEIGHT);
         }
@@ -1284,6 +1288,7 @@ export class VillageZone {
         }, null, this.scene);
 
         this.scene.zone = 'cemetery';
+        startZoneMusic('cemetery');
         this.scene.hintText.setText('SPACE=attack | I=inventory | TAB=stats | T=talents | C=craft | Q=quests | P=pause');
 
         if (this.scene.particles) {
@@ -1332,7 +1337,7 @@ export class VillageZone {
             this.scene.villageBoss.hpBg = this.scene.add.rectangle(ox + VILLAGE_WIDTH / 2, 100, hw, 5, 0x333333).setOrigin(0.5).setDepth(15).setScrollFactor(0);
             this.scene.villageBoss.hpFill = this.scene.add.rectangle(ox + VILLAGE_WIDTH / 2, 100, hw, 5, 0x8a30a0).setOrigin(0.5).setDepth(15).setScrollFactor(0);
             this.scene.villageBossNameText = this.scene.add.text(ox + VILLAGE_WIDTH / 2, 85, bt.name, {
-                fontSize: '12px', fill: '#bf77f6', fontFamily: 'Arial', fontStyle: 'bold',
+                fontSize: '12px', fill: DIFF_COLORS[this.scene.difficulty] || '#bf77f6', fontFamily: 'Arial', fontStyle: 'bold',
                 stroke: '#000', strokeThickness: 2
             }).setOrigin(0.5).setDepth(15).setScrollFactor(0);
 
@@ -1780,7 +1785,7 @@ export class VillageZone {
         e.hpBg = this.scene.add.rectangle(400, 56, hpW, 6, 0x333333).setOrigin(0.5).setScrollFactor(0).setDepth(20);
         e.hpFill = this.scene.add.rectangle(400 - hpW / 2, 56, hpW, 6, 0x3498db).setOrigin(0, 0.5).setScrollFactor(0).setDepth(20);
         this.scene.snowyIceSpiritNameText = this.scene.add.text(400, 44, bt.name, {
-            fontSize: '13px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold',
+            fontSize: '13px', fill: DIFF_COLORS[this.scene.difficulty] || '#3498db', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5).setScrollFactor(0).setDepth(20);
 

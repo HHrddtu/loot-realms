@@ -4,7 +4,7 @@ import {
     SNOWY_VILLAGE_ENEMY_TYPES, SNOWY_VILLAGE_BOSS_TYPE, SNOWY_BOSS_MINION,
     WARMTH_CORE,
     SNOWY_VILLAGE_CAMP_POSITIONS, SNOWY_VILLAGE_CHEST_COUNT, SNOWY_VILLAGE_CHEST_DROP_CHANCE,
-    VILLAGE_CHEST_EQUIP_DROP_CHANCE
+    VILLAGE_CHEST_EQUIP_DROP_CHANCE, DIFF_COLORS
 } from '../config/index.js';
 import { playBossDeath, playLoot } from '../sound.js';
 import { rollVillageEquip, rollEquip } from '../utils.js';
@@ -137,7 +137,7 @@ export class SnowyZone {
         e.hpBg = this.scene.add.rectangle(400, 56, hpW, 6, 0x333333).setOrigin(0.5).setScrollFactor(0).setDepth(20);
         e.hpFill = this.scene.add.rectangle(400 - hpW / 2, 56, hpW, 6, 0x3498db).setOrigin(0, 0.5).setScrollFactor(0).setDepth(20);
         this.scene.snowyIceSpiritNameText = this.scene.add.text(400, 44, bt.name, {
-            fontSize: '13px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold',
+            fontSize: '13px', fill: DIFF_COLORS[this.scene.difficulty] || '#3498db', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5).setScrollFactor(0).setDepth(20);
 

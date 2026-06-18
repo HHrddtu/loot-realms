@@ -5,7 +5,7 @@ import {
     MEADOW_GATE_POS, MEADOW_WIDTH, MEADOW_HEIGHT,
     GAME_WIDTH, GAME_HEIGHT
 } from '../config/index.js';
-import { playBossAoE, playPortal, stopMusic, playPetAttack, playPetPickup } from '../sound.js';
+import { playBossAoE, playPortal, stopMusic, playPetAttack, playPetPickup, startZoneMusic } from '../sound.js';
 import { saveGame, loadGame, saveAccount, loadAccount } from '../save.js';
 import { getClassData, getClassStats } from '../classes.js';
 import { getTalentEffects } from '../talents.js';
@@ -220,10 +220,13 @@ export default class GameScene extends Phaser.Scene {
             } else if (this._savedZone === 'cemetery') {
                 this._setupZone('village', false);
                 this.zone = 'cemetery';
+                startZoneMusic('cemetery');
             } else if (this._savedZone === 'hell') {
                 this._setupZone('hell');
             } else if (this._savedZone === 'snowy') {
                 this._setupZone('village', true);
+                this.zone = 'snowy';
+                startZoneMusic('snowy');
             } else if (this._savedZone === 'castle') {
                 this._setupZone('castle', this.castleRoom || 0);
             } else {
@@ -945,6 +948,7 @@ export default class GameScene extends Phaser.Scene {
         if (zone) {
             this.currentZone = zone;
             this.zone = zoneName;
+            startZoneMusic(zoneName);
             if (zoneName === 'castle') {
                 const savedFlags = {
                     castleBossDefeated: this.castleBossDefeated,
@@ -1806,6 +1810,7 @@ export default class GameScene extends Phaser.Scene {
         this.cameras.main.setDeadzone(100, 80);
 
         this.zone = 'meadow';
+        startZoneMusic('meadow');
         this.doSave();
     }
 
