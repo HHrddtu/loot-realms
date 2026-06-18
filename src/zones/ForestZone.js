@@ -36,12 +36,57 @@ export class ForestZone {
 
         s.enemies = s.physics.add.group();
         s.stumps = s.physics.add.group();
+        s.traps = [];
+        s.trapGroup = s.physics.add.group();
+        s.groundLootGroup = s.physics.add.group();
+        s.forestChests = s.physics.add.group();
         this.spawnEnemies();
         this.spawnStumps();
+        this.spawnForestTraps();
+        this.spawnForestGroundLoot();
+        this.spawnForestChests();
 
         s.physics.add.overlap(s.player, s.enemies, (p, e) => {
             if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
                 s.combat.takeDamage(e.stats.damage);
+            }
+        }, null, s);
+
+        s.physics.add.overlap(s.player, s.trapGroup, (p, trap) => {
+            if (!trap.active || trap.onCooldown || s.menuOpen || s.transitioning) return;
+            trap.onCooldown = true;
+            const dmg = 10 + Math.floor(Math.random() * 11);
+            s.combat.takeDamage(dmg);
+            s.floatingText(trap.x, trap.y - 20, '-' + dmg, '#e74c3c');
+            const angle = Math.atan2(p.y - trap.y, p.x - trap.x);
+            const kb = 150;
+            p.body.setVelocity(Math.cos(angle) * kb, Math.sin(angle) * kb);
+            trap.setAlpha(0.2);
+            s.time.delayedCall(3000, () => {
+                if (trap.active) {
+                    trap.onCooldown = false;
+                    trap.setAlpha(0.7);
+                }
+            });
+        }, null, s);
+
+        s.physics.add.overlap(s.player, s.groundLootGroup, (p, loot) => {
+            if (!loot.active) return;
+            const gold = loot.goldValue || 10;
+            s.gold += gold;
+            s.floatingText(loot.x, loot.y - 20, '+' + gold + ' gold', '#f1c40f');
+            loot.destroy();
+        }, null, s);
+
+        s.physics.add.overlap(s.player, s.forestChests, (p, ch) => {
+            if (!ch.active || ch.opened) return;
+            const dist = Phaser.Math.Distance.Between(p.x, p.y, ch.x, ch.y);
+            if (dist < 45) {
+                ch.opened = true;
+                ch.setTexture('treasure_chest');
+                const gold = 15 + Math.floor(Math.random() * 26);
+                s.gold += gold;
+                s.floatingText(ch.x, ch.y - 20, '+' + gold + ' gold', '#f1c40f');
             }
         }, null, s);
 
@@ -58,6 +103,22 @@ export class ForestZone {
     clear() {
         const s = this.scene;
         s.physics.world.colliders.destroy();
+        if (s.traps) {
+            s.traps.forEach(t => {
+                if (t && t.destroy) t.destroy();
+            });
+            s.traps = null;
+        }
+        if (s.trapGroup) { s.trapGroup.clear(true, true); s.trapGroup.destroy(); s.trapGroup = null; }
+        if (s.groundLootGroup) { s.groundLootGroup.clear(true, true); s.groundLootGroup.destroy(); s.groundLootGroup = null; }
+        if (s.forestChests) {
+            s.forestChests.getChildren().forEach(ch => {
+                if (ch.hintText) ch.hintText.destroy();
+            });
+            s.forestChests.clear(true, true);
+            s.forestChests.destroy();
+            s.forestChests = null;
+        }
         if (s.enemyProjectiles) {
             s.enemyProjectiles.forEach(p => { if (p && p.destroy) p.destroy(); });
             s.enemyProjectiles = [];
@@ -89,6 +150,21 @@ export class ForestZone {
 
     update(time, delta) {
         this.checkPortalProximity();
+        this.checkChestProximity();
+    }
+
+    checkChestProximity() {
+        const s = this.scene;
+        if (s.zone !== 'forest' || s.transitioning || s.menuOpen) return;
+        if (s.forestChests) {
+            s.forestChests.getChildren().forEach(ch => {
+                if (!ch.active || ch.opened) return;
+                const cdist = Phaser.Math.Distance.Between(
+                    s.player.x, s.player.y, ch.x, ch.y
+                );
+                ch.hintText.setText(cdist < 45 ? 'Open!' : '');
+            });
+        }
     }
 
     spawnEnemies() {
@@ -115,6 +191,63 @@ export class ForestZone {
         stump.hpBg = s.add.rectangle(x, y - 18, 28, 3, 0x333333).setOrigin(0.5).setDepth(11);
         stump.hpFill = s.add.rectangle(x, y - 18, 28, 3, 0x8b6914).setOrigin(0.5).setDepth(11);
         s.stumps.add(stump);
+    }
+
+    spawnForestTraps() {
+        const s = this.scene;
+        const texKeys = ['trap_spikes', 'trap_poison'];
+        for (let i = 0; i < 4; i++) {
+            const tx = 40 + Math.random() * (GAME_WIDTH - 80);
+            const ty = 200 + Math.random() * (FOREST_HEIGHT - 400);
+            const tex = texKeys[Math.floor(Math.random() * texKeys.length)];
+            const trap = s.add.sprite(tx, ty, tex).setDepth(1).setAlpha(0.7);
+            s.physics.add.existing(trap, true);
+            trap.body.setSize(20, 20);
+            trap.onCooldown = false;
+            s.trapGroup.add(trap);
+            s.traps.push(trap);
+            s.tweens.add({
+                targets: trap, alpha: { from: 0.5, to: 0.8 },
+                duration: 1200 + Math.random() * 800, yoyo: true, repeat: -1,
+                ease: 'Sine.easeInOut', delay: Math.random() * 500
+            });
+        }
+    }
+
+    spawnForestGroundLoot() {
+        const s = this.scene;
+        for (let i = 0; i < 6; i++) {
+            const lx = 30 + Math.random() * (GAME_WIDTH - 60);
+            const ly = 150 + Math.random() * (FOREST_HEIGHT - 300);
+            const loot = s.add.sprite(lx, ly, 'gold_pile').setDepth(1).setAlpha(0.85);
+            s.physics.add.existing(loot, true);
+            loot.body.setSize(10, 8);
+            loot.goldValue = 5 + Math.floor(Math.random() * 11);
+            s.groundLootGroup.add(loot);
+            s.tweens.add({
+                targets: loot, alpha: { from: 0.6, to: 1 },
+                duration: 800 + Math.random() * 600, yoyo: true, repeat: -1,
+                ease: 'Sine.easeInOut', delay: Math.random() * 400
+            });
+        }
+    }
+
+    spawnForestChests() {
+        const s = this.scene;
+        for (let i = 0; i < 4; i++) {
+            const cx = 50 + Math.random() * (GAME_WIDTH - 100);
+            const cy = 180 + Math.random() * (FOREST_HEIGHT - 360);
+            const ch = s.add.sprite(cx, cy, 'treasure_chest').setDepth(6);
+            s.physics.add.existing(ch, false);
+            ch.body.setSize(22, 18);
+            ch.body.setCollideWorldBounds(true);
+            ch.opened = false;
+            ch.hintText = s.add.text(cx, cy - 18, '', {
+                fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5).setDepth(12);
+            s.forestChests.add(ch);
+        }
     }
 
     checkPortalProximity() {

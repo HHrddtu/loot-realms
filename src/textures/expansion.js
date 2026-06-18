@@ -1045,4 +1045,91 @@ export function drawExpansionTextures(mk, textures) {
         c.arc(12, 12, 3, 0, Math.PI * 2);
         c.fill();
     });
+
+    // ===== TRAP: SPIKES =====
+    mk('trap_spikes', 24, 24, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = 'rgba(80, 60, 50, 0.6)';
+        c.fillRect(0, 0, 24, 24);
+        c.fillStyle = '#3a2a1a';
+        c.fillRect(2, 16, 4, 8);
+        c.fillRect(8, 12, 4, 12);
+        c.fillRect(14, 10, 4, 14);
+        c.fillRect(20, 14, 4, 10);
+        c.fillStyle = '#5a4a3a';
+        c.fillRect(3, 14, 2, 2);
+        c.fillRect(9, 10, 2, 2);
+        c.fillRect(15, 8, 2, 2);
+        c.fillRect(21, 12, 2, 2);
+        c.fillStyle = '#2a1a0a';
+        c.fillRect(0, 20, 24, 4);
+        c.fillStyle = '#4a3a2a';
+        c.fillRect(4, 18, 2, 2);
+        c.fillRect(10, 16, 2, 2);
+        c.fillRect(16, 14, 2, 2);
+    });
+
+    // ===== TRAP: POISON =====
+    mk('trap_poison', 24, 24, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = 'rgba(30, 80, 30, 0.4)';
+        c.fillRect(0, 0, 24, 24);
+        c.fillStyle = 'rgba(40, 120, 40, 0.6)';
+        c.beginPath();
+        c.ellipse(12, 14, 10, 7, 0, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = 'rgba(60, 160, 60, 0.5)';
+        c.beginPath();
+        c.ellipse(10, 12, 5, 4, 0, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = 'rgba(80, 200, 80, 0.7)';
+        c.beginPath();
+        c.arc(8, 11, 2, 0, Math.PI * 2);
+        c.fill();
+        c.beginPath();
+        c.arc(14, 13, 1.5, 0, Math.PI * 2);
+        c.fill();
+        c.beginPath();
+        c.arc(11, 9, 1, 0, Math.PI * 2);
+        c.fill();
+    });
+
+    // ===== GOLD PILE =====
+    mk('gold_pile', 12, 10, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#b8860b';
+        c.fillRect(1, 4, 10, 6);
+        c.fillStyle = '#daa520';
+        c.fillRect(2, 3, 8, 5);
+        c.fillStyle = '#ffd700';
+        c.fillRect(3, 2, 6, 4);
+        c.fillRect(4, 1, 4, 3);
+        c.fillStyle = '#ffec8b';
+        c.fillRect(5, 2, 2, 2);
+        c.fillRect(3, 3, 1, 1);
+        c.fillRect(7, 3, 1, 1);
+        c.fillStyle = '#b8860b';
+        c.fillRect(2, 7, 8, 2);
+    });
+
+    // ===== TREASURE CHEST =====
+    mk('treasure_chest', 24, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#6b4226';
+        c.fillRect(2, 8, 20, 10);
+        c.fillStyle = '#8b5a2b';
+        c.fillRect(3, 9, 18, 8);
+        c.fillStyle = '#a0722a';
+        c.fillRect(2, 4, 20, 5);
+        c.fillRect(1, 3, 22, 2);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(10, 10, 4, 4);
+        c.fillStyle = '#c8a82e';
+        c.fillRect(11, 11, 2, 2);
+        c.fillStyle = '#4a2a10';
+        c.fillRect(4, 17, 4, 3);
+        c.fillRect(16, 17, 4, 3);
+        c.fillStyle = '#555';
+        c.fillRect(11, 5, 2, 4);
+    });
 }

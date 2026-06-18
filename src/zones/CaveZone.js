@@ -35,6 +35,7 @@ export class CaveZone {
         s.stumps = s.physics.add.group();
         s.caveChests = s.physics.add.group();
         s.caveTorches = [];
+        s.traps = [];
 
         this.spawnCaveEnemies();
         this.spawnCaveChests();
@@ -61,6 +62,52 @@ export class CaveZone {
             }
         }, null, s);
 
+        s.trapGroup = s.physics.add.group();
+        s.groundLootGroup = s.physics.add.group();
+        s.caveExtraChests = s.physics.add.group();
+
+        this.spawnTrapsInZone('cave');
+        this.spawnGroundLootInZone('cave');
+        this.spawnExtraChestsInZone('cave');
+
+        s.physics.add.overlap(s.player, s.trapGroup, (p, trap) => {
+            if (!trap.active || trap.onCooldown || s.menuOpen || s.transitioning) return;
+            trap.onCooldown = true;
+            const dmg = 10 + Math.floor(Math.random() * 11);
+            s.combat.takeDamage(dmg);
+            s.floatingText(trap.x, trap.y - 20, '-' + dmg, '#e74c3c');
+            const angle = Math.atan2(p.y - trap.y, p.x - trap.x);
+            const kb = 150;
+            p.body.setVelocity(Math.cos(angle) * kb, Math.sin(angle) * kb);
+            trap.setAlpha(0.2);
+            s.time.delayedCall(3000, () => {
+                if (trap.active) {
+                    trap.onCooldown = false;
+                    trap.setAlpha(0.7);
+                }
+            });
+        }, null, s);
+
+        s.physics.add.overlap(s.player, s.groundLootGroup, (p, loot) => {
+            if (!loot.active) return;
+            const gold = loot.goldValue || 10;
+            s.gold += gold;
+            s.floatingText(loot.x, loot.y - 20, '+' + gold + ' gold', '#f1c40f');
+            loot.destroy();
+        }, null, s);
+
+        s.physics.add.overlap(s.player, s.caveExtraChests, (p, ch) => {
+            if (!ch.active || ch.opened) return;
+            const dist = Phaser.Math.Distance.Between(p.x, p.y, ch.x, ch.y);
+            if (dist < 45) {
+                ch.opened = true;
+                ch.setTexture('treasure_chest');
+                const gold = 15 + Math.floor(Math.random() * 26);
+                s.gold += gold;
+                s.floatingText(ch.x, ch.y - 20, '+' + gold + ' gold', '#f1c40f');
+            }
+        }, null, s);
+
         s.zone = 'cave';
         s.npc.spawnNPCs();
         s.hintText.setText('Q=quests | I=inventory | TAB=stats | T=talents | P=pause');
@@ -73,6 +120,22 @@ export class CaveZone {
     clear() {
         const s = this.scene;
         s.physics.world.colliders.destroy();
+        if (s.traps) {
+            s.traps.forEach(t => {
+                if (t && t.destroy) t.destroy();
+            });
+            s.traps = null;
+        }
+        if (s.trapGroup) { s.trapGroup.clear(true, true); s.trapGroup.destroy(); s.trapGroup = null; }
+        if (s.groundLootGroup) { s.groundLootGroup.clear(true, true); s.groundLootGroup.destroy(); s.groundLootGroup = null; }
+        if (s.caveExtraChests) {
+            s.caveExtraChests.getChildren().forEach(ch => {
+                if (ch.hintText) ch.hintText.destroy();
+            });
+            s.caveExtraChests.clear(true, true);
+            s.caveExtraChests.destroy();
+            s.caveExtraChests = null;
+        }
         if (s.fireballs) {
             s.fireballs.forEach(fb => { if (fb.glow) fb.glow.destroy(); fb.destroy(); });
             s.fireballs = [];
@@ -278,6 +341,75 @@ export class CaveZone {
         });
     }
 
+    spawnTrapsInZone(zone) {
+        const s = this.scene;
+        const ox = zone === 'cave' ? s.caveOffsetX : 0;
+        const w = zone === 'cave' ? CAVE_WIDTH : GAME_WIDTH;
+        const h = zone === 'cave' ? CAVE_HEIGHT : FOREST_HEIGHT;
+        const count = zone === 'cave' ? 6 : 4;
+        const texKeys = ['trap_spikes', 'trap_poison'];
+        for (let i = 0; i < count; i++) {
+            const tx = ox + 40 + Math.random() * (w - 80);
+            const ty = 80 + Math.random() * (h - 160);
+            const tex = texKeys[Math.floor(Math.random() * texKeys.length)];
+            const trap = s.add.sprite(tx, ty, tex).setDepth(1).setAlpha(0.7);
+            s.physics.add.existing(trap, true);
+            trap.body.setSize(20, 20);
+            trap.onCooldown = false;
+            s.trapGroup.add(trap);
+            s.traps.push(trap);
+            s.tweens.add({
+                targets: trap, alpha: { from: 0.5, to: 0.8 },
+                duration: 1200 + Math.random() * 800, yoyo: true, repeat: -1,
+                ease: 'Sine.easeInOut', delay: Math.random() * 500
+            });
+        }
+    }
+
+    spawnGroundLootInZone(zone) {
+        const s = this.scene;
+        const ox = zone === 'cave' ? s.caveOffsetX : 0;
+        const w = zone === 'cave' ? CAVE_WIDTH : GAME_WIDTH;
+        const h = zone === 'cave' ? CAVE_HEIGHT : FOREST_HEIGHT;
+        const count = zone === 'cave' ? 8 : 6;
+        for (let i = 0; i < count; i++) {
+            const lx = ox + 30 + Math.random() * (w - 60);
+            const ly = 60 + Math.random() * (h - 120);
+            const loot = s.add.sprite(lx, ly, 'gold_pile').setDepth(1).setAlpha(0.85);
+            s.physics.add.existing(loot, true);
+            loot.body.setSize(10, 8);
+            loot.goldValue = 5 + Math.floor(Math.random() * 11);
+            s.groundLootGroup.add(loot);
+            s.tweens.add({
+                targets: loot, alpha: { from: 0.6, to: 1 },
+                duration: 800 + Math.random() * 600, yoyo: true, repeat: -1,
+                ease: 'Sine.easeInOut', delay: Math.random() * 400
+            });
+        }
+    }
+
+    spawnExtraChestsInZone(zone) {
+        const s = this.scene;
+        const ox = zone === 'cave' ? s.caveOffsetX : 0;
+        const w = zone === 'cave' ? CAVE_WIDTH : GAME_WIDTH;
+        const h = zone === 'cave' ? CAVE_HEIGHT : FOREST_HEIGHT;
+        const count = zone === 'cave' ? 3 : 4;
+        for (let i = 0; i < count; i++) {
+            const cx = ox + 50 + Math.random() * (w - 100);
+            const cy = 100 + Math.random() * (h - 200);
+            const ch = s.add.sprite(cx, cy, 'treasure_chest').setDepth(6);
+            s.physics.add.existing(ch, false);
+            ch.body.setSize(22, 18);
+            ch.body.setCollideWorldBounds(true);
+            ch.opened = false;
+            ch.hintText = s.add.text(cx, cy - 18, '', {
+                fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5).setDepth(12);
+            s.caveExtraChests.add(ch);
+        }
+    }
+
     checkCaveProximity() {
         const s = this.scene;
         if (s.zone !== 'cave' || s.transitioning || s.menuOpen) return;
@@ -289,6 +421,16 @@ export class CaveZone {
                     s.player.x, s.player.y, ch.x, ch.y
                 );
                 ch.hintText.setText(cdist < 45 ? 'Attack!' : '');
+            });
+        }
+
+        if (s.caveExtraChests) {
+            s.caveExtraChests.getChildren().forEach(ch => {
+                if (!ch.active || ch.opened) return;
+                const cdist = Phaser.Math.Distance.Between(
+                    s.player.x, s.player.y, ch.x, ch.y
+                );
+                ch.hintText.setText(cdist < 45 ? 'Open!' : '');
             });
         }
 
