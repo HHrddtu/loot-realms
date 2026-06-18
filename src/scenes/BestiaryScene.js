@@ -110,8 +110,8 @@ export default class BestiaryScene extends Phaser.Scene {
 
             const nameText = isSeen ? translateName(entry) : t('bestiary.locked');
             const nameT = this.add.text(x + itemW / 2, y + 44, nameText, {
-                fontSize: '11px', fill: isSeen ? '#ddd' : '#444', fontFamily: 'Arial',
-                wordWrap: { width: itemW - 4 }, align: 'center'
+                fontSize: '10px', fill: isSeen ? '#ddd' : '#444', fontFamily: 'Arial',
+                wordWrap: { width: itemW - 4 }, align: 'center', maxLines: 2
             }).setOrigin(0.5);
 
             const lvl = entry.level;
