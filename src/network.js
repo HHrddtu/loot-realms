@@ -17,6 +17,13 @@ let _onDisconnect = null;
 let _onStartGame = null;
 let _onWelcome = null;
 let _onDifficulty = null;
+let _onMobSync = null;
+let _onBossUpdate = null;
+let _onChestOpened = null;
+let _onLootCollected = null;
+let _onMobUpdate = null;
+let _onPlayerUpdate = null;
+let _onZoneChange = null;
 let _hostName = '';
 let _playerNames = {};
 
@@ -64,6 +71,13 @@ export function onDisconnect(cb) { _onDisconnect = cb; }
 export function onStartGame(cb) { _onStartGame = cb; }
 export function onWelcome(cb) { _onWelcome = cb; }
 export function onDifficulty(cb) { _onDifficulty = cb; }
+export function onMobSync(cb) { _onMobSync = cb; }
+export function onBossUpdate(cb) { _onBossUpdate = cb; }
+export function onChestOpened(cb) { _onChestOpened = cb; }
+export function onLootCollected(cb) { _onLootCollected = cb; }
+export function onMobUpdate(cb) { _onMobUpdate = cb; }
+export function onPlayerUpdate(cb) { _onPlayerUpdate = cb; }
+export function onZoneChange(cb) { _onZoneChange = cb; }
 
 function _getHostPlayerNames() {
     const out = {};
@@ -190,6 +204,40 @@ function _handleGuestData(peerId, data) {
             _broadcastToGuests({ type: 'chat', peerId, name: _playerNames[peerId] || '??', msg: data.msg });
             if (_onChat) _onChat(peerId, _playerNames[peerId], data.msg);
             break;
+
+        case 'mob_sync':
+            _broadcastToGuests(data);
+            if (_onMobSync) _onMobSync(data);
+            break;
+
+        case 'boss_update':
+            _broadcastToGuests(data);
+            if (_onBossUpdate) _onBossUpdate(data);
+            break;
+
+        case 'chest_opened':
+            _broadcastToGuests(data);
+            if (_onChestOpened) _onChestOpened(data);
+            break;
+
+        case 'loot_collected':
+            _broadcastToGuests(data);
+            if (_onLootCollected) _onLootCollected(data);
+            break;
+
+        case 'player_update':
+            if (_players[peerId]) {
+                _players[peerId].x = data.x;
+                _players[peerId].y = data.y;
+                _players[peerId].facing = data.direction;
+            }
+            if (_onPlayerUpdate) _onPlayerUpdate(data);
+            break;
+
+        case 'zone_change':
+            _broadcastToGuests(data);
+            if (_onZoneChange) _onZoneChange(data);
+            break;
     }
 }
 
@@ -311,6 +359,39 @@ function _handleHostData(data) {
         case 'difficulty':
             if (_onDifficulty) _onDifficulty(data.difficulty);
             break;
+
+        case 'mob_sync':
+            if (_onMobSync) _onMobSync(data);
+            break;
+
+        case 'boss_update':
+            if (_onBossUpdate) _onBossUpdate(data);
+            break;
+
+        case 'chest_opened':
+            if (_onChestOpened) _onChestOpened(data);
+            break;
+
+        case 'loot_collected':
+            if (_onLootCollected) _onLootCollected(data);
+            break;
+
+        case 'mob_update':
+            if (_onMobUpdate) _onMobUpdate(data);
+            break;
+
+        case 'player_update':
+            if (_players[data.peerId]) {
+                _players[data.peerId].x = data.x;
+                _players[data.peerId].y = data.y;
+                _players[data.peerId].facing = data.direction;
+            }
+            if (_onPlayerUpdate) _onPlayerUpdate(data);
+            break;
+
+        case 'zone_change':
+            if (_onZoneChange) _onZoneChange(data);
+            break;
     }
 }
 
@@ -349,6 +430,72 @@ export function sendChat(msg) {
         if (_onChat) _onChat(_myId, _hostName, msg);
     } else {
         _sendToHost(data);
+    }
+}
+
+export function sendMobSync(data) {
+    const msg = { type: 'mob_sync', ...data };
+    if (_isHost) {
+        _broadcastToGuests(msg);
+    } else {
+        _sendToHost(msg);
+    }
+}
+
+export function sendBossUpdate(data) {
+    const msg = { type: 'boss_update', ...data };
+    if (_isHost) {
+        _broadcastToGuests(msg);
+    } else {
+        _sendToHost(msg);
+    }
+}
+
+export function sendChestOpened(data) {
+    const msg = { type: 'chest_opened', ...data };
+    if (_isHost) {
+        _broadcastToGuests(msg);
+        if (_onChestOpened) _onChestOpened(msg);
+    } else {
+        _sendToHost(msg);
+    }
+}
+
+export function sendLootCollected(data) {
+    const msg = { type: 'loot_collected', ...data };
+    if (_isHost) {
+        _broadcastToGuests(msg);
+        if (_onLootCollected) _onLootCollected(msg);
+    } else {
+        _sendToHost(msg);
+    }
+}
+
+export function sendMobUpdate(data) {
+    const msg = { type: 'mob_update', ...data };
+    if (_isHost) {
+        _broadcastToGuests(msg);
+    } else {
+        _sendToHost(msg);
+    }
+}
+
+export function sendPlayerUpdate(data) {
+    const msg = { type: 'player_update', peerId: _myId, ...data };
+    if (_isHost) {
+        if (_onPlayerUpdate) _onPlayerUpdate(msg);
+    } else {
+        _sendToHost(msg);
+    }
+}
+
+export function sendZoneChange(data) {
+    const msg = { type: 'zone_change', peerId: _myId, ...data };
+    if (_isHost) {
+        _broadcastToGuests(msg);
+        if (_onZoneChange) _onZoneChange(msg);
+    } else {
+        _sendToHost(msg);
     }
 }
 
@@ -395,4 +542,11 @@ export function disconnect() {
     _onStartGame = null;
     _onWelcome = null;
     _onDifficulty = null;
+    _onMobSync = null;
+    _onBossUpdate = null;
+    _onChestOpened = null;
+    _onLootCollected = null;
+    _onMobUpdate = null;
+    _onPlayerUpdate = null;
+    _onZoneChange = null;
 }

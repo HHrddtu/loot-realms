@@ -809,6 +809,9 @@ export class VillageZone {
         e.hpBg = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0xe74c3c).setOrigin(0.5).setDepth(11);
         this.scene.enemies.add(e);
+        if (this.scene.multiplayer && this.scene.mpSync) {
+            this.scene.mpSync.assignMobId(e, t.key);
+        }
         return e;
     }
 
@@ -1342,6 +1345,9 @@ export class VillageZone {
             }).setOrigin(0.5).setDepth(15).setScrollFactor(0);
 
             if (this.scene.enemies) this.scene.enemies.add(this.scene.villageBoss);
+            if (this.scene.multiplayer && this.scene.mpSync) {
+                this.scene.mpSync.assignMobId(this.scene.villageBoss, 'villageBoss');
+            }
 
             try { playBossAoE(); } catch(e) {}
             this.scene.floatingText(ox + VILLAGE_WIDTH / 2, CEMETERY_HEIGHT / 2, 'PURPLE DEMON AWAKENS!', '#8a30a0');
@@ -1472,6 +1478,9 @@ export class VillageZone {
         e.hpBg = this.scene.add.rectangle(x, y - bt.bh / 2 - 6, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = this.scene.add.rectangle(x, y - bt.bh / 2 - 6, hw, 3, 0x5a6a4a).setOrigin(0.5).setDepth(11);
         this.scene.villageZombies.add(e);
+        if (this.scene.multiplayer && this.scene.mpSync) {
+            this.scene.mpSync.assignMobId(e, 'zombie');
+        }
     }
 
     _villageBossSplit(boss) {
@@ -1517,6 +1526,9 @@ export class VillageZone {
 
             this.scene.enemies.add(clone);
             this.scene.villageBossClones.push(clone);
+            if (this.scene.multiplayer && this.scene.mpSync) {
+                this.scene.mpSync.assignMobId(clone, 'boss_clone');
+            }
         }
 
         boss.body.setVelocity(0);
@@ -1704,6 +1716,9 @@ export class VillageZone {
         e.hpBg = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x3498db).setOrigin(0.5).setDepth(11);
         this.scene.enemies.add(e);
+        if (this.scene.multiplayer && this.scene.mpSync) {
+            this.scene.mpSync.assignMobId(e, t.key);
+        }
         return e;
     }
 

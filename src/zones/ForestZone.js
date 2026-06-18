@@ -72,6 +72,9 @@ export class ForestZone {
 
         s.physics.add.overlap(s.player, s.groundLootGroup, (p, loot) => {
             if (!loot.active) return;
+            if (s.multiplayer && s.mpSync && loot.mpId) {
+                s.mpSync.broadcastLootCollected(loot.mpId);
+            }
             const gold = loot.goldValue || 10;
             s.gold += gold;
             s.floatingText(loot.x, loot.y - 20, '+' + gold + ' gold', '#f1c40f');
@@ -84,6 +87,9 @@ export class ForestZone {
             if (dist < 45) {
                 ch.opened = true;
                 ch.setTexture('treasure_chest');
+                if (s.multiplayer && s.mpSync && ch.mpId) {
+                    s.mpSync.broadcastChestOpened(ch.mpId);
+                }
                 const gold = 15 + Math.floor(Math.random() * 26);
                 s.gold += gold;
                 s.floatingText(ch.x, ch.y - 20, '+' + gold + ' gold', '#f1c40f');
@@ -171,7 +177,10 @@ export class ForestZone {
         const s = this.scene;
         for (let i = 0; i < ENEMY_COUNT; i++) {
             const t = ENEMY_TYPES[i];
-            s.combat.makeEnemy(t, 100 + Math.random() * 600, 300 + Math.random() * 400);
+            const e = s.combat.makeEnemy(t, 100 + Math.random() * 600, 300 + Math.random() * 400);
+            if (s.multiplayer && s.mpSync && e) {
+                s.mpSync.assignMobId(e, t.key);
+            }
         }
     }
 
@@ -223,6 +232,7 @@ export class ForestZone {
             s.physics.add.existing(loot, true);
             loot.body.setSize(10, 8);
             loot.goldValue = 5 + Math.floor(Math.random() * 11);
+            loot.mpId = 'loot_forest_' + i;
             s.groundLootGroup.add(loot);
             s.tweens.add({
                 targets: loot, alpha: { from: 0.6, to: 1 },
@@ -242,6 +252,7 @@ export class ForestZone {
             ch.body.setSize(22, 18);
             ch.body.setCollideWorldBounds(true);
             ch.opened = false;
+            ch.mpId = 'chest_forest_' + i;
             ch.hintText = s.add.text(cx, cy - 18, '', {
                 fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
                 stroke: '#000', strokeThickness: 2

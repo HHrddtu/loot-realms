@@ -352,6 +352,9 @@ export class CastleZone {
         e.hpBg = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0xc0392b).setOrigin(0.5).setDepth(11);
         this.scene.enemies.add(e);
+        if (this.scene.multiplayer && this.scene.mpSync) {
+            this.scene.mpSync.assignMobId(e, t.key);
+        }
         return e;
     }
 
@@ -494,6 +497,9 @@ export class CastleZone {
             }).setOrigin(0.5).setDepth(15).setScrollFactor(0);
 
             if (this.scene.enemies) this.scene.enemies.add(this.scene.castleBoss);
+            if (this.scene.multiplayer && this.scene.mpSync) {
+                this.scene.mpSync.assignMobId(this.scene.castleBoss, 'castleBoss');
+            }
 
             try { playBossAoE(); } catch(e) {}
             this.scene.floatingText(x, y - 60, 'BANDIT LEADER appears!', '#c0392b');

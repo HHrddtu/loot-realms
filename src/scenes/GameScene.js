@@ -29,6 +29,7 @@ import { HellZone } from '../zones/HellZone.js';
 import { SnowyZone } from '../zones/SnowyZone.js';
 import { CastleZone } from '../zones/CastleZone.js';
 import { isHost, getMyId, getPlayers, getPlayerNames, onStateUpdate, onLoot, onKey, sendInput, sendGameState, sendLootPickup, sendKeyPickup } from '../network.js';
+import { MultiplayerSync } from '../multiplayer.js';
 import { PET_DB, PET_TYPES, CRYSTAL_RUN_CAPS, canGetCrystals } from '../config/pets.js';
 import { getKeybinds, parseKeyCode } from '../keybinds.js';
 
@@ -187,9 +188,11 @@ export default class GameScene extends Phaser.Scene {
 
         this._remotePlayers = {};
         this._mpSendTimer = 0;
+        this._mpMobTimer = 0;
         this._mpStateHandler = null;
         this._mpLootHandler = null;
         this._mpKeyHandler = null;
+        this.mpSync = null;
 
         const acc = loadAccount() || {};
         this.accountLevel = acc.accountLevel || 1;
@@ -558,6 +561,8 @@ export default class GameScene extends Phaser.Scene {
             this._spawnRemotePlayer(id, names[id]);
         });
 
+        this.mpSync = new MultiplayerSync(this);
+
         this._mpStateHandler = (data) => {
             if (!data || !data.players) return;
             const seen = {};
@@ -599,6 +604,14 @@ export default class GameScene extends Phaser.Scene {
         onStateUpdate(this._mpStateHandler);
         onLoot(this._mpLootHandler);
         onKey(this._mpKeyHandler);
+
+        if (isHost() && this.mpSync) {
+            this.mpSync.startHostSync();
+        }
+
+        if (this.mpSync) {
+            this.mpSync.broadcastZoneChange(this.zone);
+        }
     }
 
     _spawnRemotePlayer(id, name) {
@@ -659,7 +672,33 @@ export default class GameScene extends Phaser.Scene {
         });
     }
 
+    _detectMobKills() {
+        if (!this.mpSync) return;
+        if (!this._prevMobIds) this._prevMobIds = new Set();
+        const currentIds = new Set();
+        const checkGroup = (group) => {
+            if (!group || !group.getLength) return;
+            group.getChildren().forEach(e => {
+                if (e.active && e.mpId) currentIds.add(e.mpId);
+            });
+        };
+        checkGroup(this.enemies);
+        checkGroup(this.villageZombies);
+        checkGroup(this.caveSmallBats);
+        checkGroup(this.hellImps);
+        this._prevMobIds.forEach(id => {
+            if (!currentIds.has(id)) {
+                delete this.mpSync.mobSyncData[id];
+            }
+        });
+        this._prevMobIds = currentIds;
+    }
+
     _cleanupMultiplayer() {
+        if (this.mpSync) {
+            this.mpSync.cleanup();
+            this.mpSync = null;
+        }
         Object.keys(this._remotePlayers).forEach(id => this._despawnRemotePlayer(id));
         this._remotePlayers = {};
     }
@@ -961,6 +1000,9 @@ export default class GameScene extends Phaser.Scene {
                 Object.assign(this, savedFlags);
             } else {
                 zone.setup(...args);
+            }
+            if (this.multiplayer && this.mpSync) {
+                this.mpSync.broadcastZoneChange(zoneName);
             }
         }
     }
@@ -1375,6 +1417,18 @@ export default class GameScene extends Phaser.Scene {
                     this._sendInputToHost();
                 }
             }
+            this._mpMobTimer += delta;
+            if (this._mpMobTimer >= 100) {
+                this._mpMobTimer = 0;
+                if (this.mpSync) {
+                    if (!isHost()) {
+                        this.mpSync.broadcastPlayerUpdate();
+                    }
+                }
+            }
+            if (this.mpSync && isHost()) {
+                this._detectMobKills();
+            }
             if (isHost()) {
                 const netPlayers = getPlayers();
                 Object.keys(this._remotePlayers).forEach(id => {
@@ -1393,6 +1447,9 @@ export default class GameScene extends Phaser.Scene {
                     rp.nameText.y = rp.sprite.y - 28;
                 }
             });
+            if (this.mpSync) {
+                this.mpSync.update(delta);
+            }
         }
     }
 
@@ -1714,6 +1771,9 @@ export default class GameScene extends Phaser.Scene {
         e.hpBg = this.add.rectangle(x, y - 18, 22, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = this.add.rectangle(x, y - 18, 22, 3, 0x22aa44).setOrigin(0.5).setDepth(11);
         this.enemies.add(e);
+        if (this.multiplayer && this.mpSync) {
+            this.mpSync.assignMobId(e, 'root_add');
+        }
     }
 
     _treantCharge(boss) {

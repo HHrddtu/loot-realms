@@ -48,6 +48,11 @@ export class CombatSystem {
         e.hpBg = s.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = s.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0xe74c3c).setOrigin(0.5).setDepth(11);
         s.enemies.add(e);
+
+        if (s.multiplayer && s.mpSync) {
+            s.mpSync.assignMobId(e, t.key);
+        }
+
         return e;
     }
 

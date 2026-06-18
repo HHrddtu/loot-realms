@@ -56,6 +56,9 @@ export class SnowyZone {
         e.hpBg = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x3498db).setOrigin(0.5).setDepth(11);
         this.scene.enemies.add(e);
+        if (this.scene.multiplayer && this.scene.mpSync) {
+            this.scene.mpSync.assignMobId(e, t.key);
+        }
         return e;
     }
 
@@ -144,6 +147,9 @@ export class SnowyZone {
         this.scene.snowyIceSpirit = e;
         this.scene.snowyIceSpiritAbilities = { frostWaveTimer: 0, blizzardTimer: 0, summonTimer: 0 };
         this.scene.snowyIceShards = this.scene.physics.add.group();
+        if (this.scene.multiplayer && this.scene.mpSync) {
+            this.scene.mpSync.assignMobId(e, 'snowyIceSpirit');
+        }
     }
 
     _updateSnowyVillageBoss() {

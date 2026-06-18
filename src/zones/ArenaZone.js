@@ -157,6 +157,9 @@ export class ArenaZone {
 
         s.bossAlive = true;
         s.enemies.add(s.boss);
+        if (s.multiplayer && s.mpSync) {
+            s.mpSync.assignMobId(s.boss, 'boss');
+        }
     }
 
     checkExitProximity() {

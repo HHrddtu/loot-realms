@@ -183,7 +183,10 @@ export class MineZone {
     spawnMineEnemies() {
         for (let i = 0; i < MINE_ENEMY_COUNT; i++) {
             const t = MINE_ENEMY_TYPES[i % MINE_ENEMY_TYPES.length];
-            this.makeMineEnemy(t, 80 + Math.random() * 640, 200 + Math.random() * 500);
+            const e = this.makeMineEnemy(t, 80 + Math.random() * 640, 200 + Math.random() * 500);
+            if (this.scene.multiplayer && this.scene.mpSync && e) {
+                this.scene.mpSync.assignMobId(e, t.key);
+            }
         }
     }
 
@@ -264,6 +267,7 @@ export class MineZone {
             stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5).setDepth(12);
         ch.broken = false;
+        ch.mpId = 'chest_mine_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
         s.mineChests.add(ch);
         return ch;
     }
@@ -662,6 +666,9 @@ export class MineZone {
 
         s.mineBossAlive = true;
         s.enemies.add(s.mineBoss);
+        if (s.multiplayer && s.mpSync) {
+            s.mpSync.assignMobId(s.mineBoss, 'mineBoss');
+        }
     }
 
     updateMineBoss() {
@@ -990,6 +997,9 @@ export class MineZone {
         e.hpBg = s.add.rectangle(x, y - 18, 22, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = s.add.rectangle(x, y - 18, 22, 3, 0x9b59b6).setOrigin(0.5).setDepth(11);
         s.enemies.add(e);
+        if (s.multiplayer && s.mpSync) {
+            s.mpSync.assignMobId(e, 'skeleton_guard');
+        }
     }
 
     _mineBossPhaseTransition(boss) {

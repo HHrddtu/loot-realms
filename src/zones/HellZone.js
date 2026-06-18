@@ -179,6 +179,9 @@ export class HellZone {
         e.hpFill = s.add.rectangle(x, y - t.bh / 2 - 8, hpW, 4, 0xff0000).setOrigin(0.5).setDepth(6);
 
         s.enemies.add(e);
+        if (s.multiplayer && s.mpSync) {
+            s.mpSync.assignMobId(e, t.key);
+        }
         return e;
     }
 
@@ -381,6 +384,9 @@ export class HellZone {
         s.hellBoss = b;
         s.hellBossFireWaveVfx = [];
         s.enemies.add(b);
+        if (s.multiplayer && s.mpSync) {
+            s.mpSync.assignMobId(b, 'hellBoss');
+        }
 
         s.floatingText(bx, by - 60, 'RED DEMON APPEARS!', '#ff2200');
     }
@@ -528,6 +534,9 @@ export class HellZone {
             imp.hpFill = s.add.rectangle(clampedX - hpW / 2, clampedY - bt.bh / 2 - 6, hpW, 3, 0xff0000).setOrigin(0, 0.5).setDepth(6);
 
             s.hellImps.add(imp);
+            if (s.multiplayer && s.mpSync) {
+                s.mpSync.assignMobId(imp, 'hell_imp');
+            }
         }
         s.floatingText(boss.x, boss.y - 50, 'SUMMONED ' + HELL_BOSS_TYPE.summonCount + ' IMPS!', '#ff4400');
     }
