@@ -171,6 +171,10 @@ export default class MenuScene extends Phaser.Scene {
                 this.scene.pause();
             }},
             { t: t('adv.accountEquip'), c: 0xf39c12, show: acc, cb: () => this.showAccountEquip() },
+            { t: t('keybind.controls'), c: 0x2980b9, show: true, cb: () => {
+                this.scene.launch('Keybinds', { returnScene: 'Menu' });
+                this.scene.pause();
+            }},
             { t: t('adv.instructions'), c: 0x8e44ad, show: true, cb: () => this.showInstructions() },
             { t: t('adv.exit'), c: 0xc0392b, show: true, cb: () => this.showExit() }
         ];

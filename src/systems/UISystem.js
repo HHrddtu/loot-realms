@@ -1112,13 +1112,19 @@ export class UISystem {
             this.closePause();
         });
 
-        makeSmallBtn(400, 305, t('pause.restart'), 0xe67e22, () => {
+        makeSmallBtn(335, 300, t('keybind.controls'), 0x2980b9, () => {
+            this.closePause();
+            this.scene.scene.launch('Keybinds', { returnScene: 'Game' });
+            this.scene.scene.pause();
+        });
+
+        makeSmallBtn(400, 345, t('pause.restart'), 0xe67e22, () => {
             this.scene.doSave();
             this.closePause();
             this.scene.scene.restart({ difficulty: this.scene.difficulty, classKey: this.scene.classKey });
         });
 
-        makeSmallBtn(400, 345, t('pause.back'), 0x34495e, () => {
+        makeSmallBtn(400, 385, t('pause.back'), 0x34495e, () => {
             this.closePause();
             this.openPause();
         });

@@ -293,6 +293,14 @@ const LOCALES = {
         'zone.forest': 'Forest',
         'zone.mine': 'Mine',
         'zone.arena': 'Arena',
+
+        // === KEYBINDS ===
+        'keybind.title': 'CONTROLS',
+        'keybind.hint': 'Click a key to rebind. ESC to cancel.',
+        'keybind.pressKey': 'Press a key...',
+        'keybind.reset': 'RESET DEFAULT',
+        'keybind.done': 'DONE',
+        'keybind.controls': 'Controls',
     },
 
     ru: {
@@ -563,6 +571,14 @@ const LOCALES = {
         'zone.forest': 'Лес',
         'zone.mine': 'Шахта',
         'zone.arena': 'Арена',
+
+        // === KEYBINDS ===
+        'keybind.title': 'УПРАВЛЕНИЕ',
+        'keybind.hint': 'Нажмите на клавишу для переназначения. ESC для отмены.',
+        'keybind.pressKey': 'Нажмите клавишу...',
+        'keybind.reset': 'СБРОСИТЬ',
+        'keybind.done': 'ГОТОВ',
+        'keybind.controls': 'Управление',
     },
 
     de: {
@@ -833,6 +849,14 @@ const LOCALES = {
         'zone.forest': 'Wald',
         'zone.mine': 'Mine',
         'zone.arena': 'Arena',
+
+        // === KEYBINDS ===
+        'keybind.title': 'STEUERUNG',
+        'keybind.hint': 'Klick auf eine Taste zum Umbelegen. ESC zum Abbrechen.',
+        'keybind.pressKey': 'Taste drücken...',
+        'keybind.reset': 'ZURÜCKSETZEN',
+        'keybind.done': 'FERTIG',
+        'keybind.controls': 'Steuerung',
     }
 };
 

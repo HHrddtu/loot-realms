@@ -29,6 +29,7 @@ import { SnowyZone } from '../zones/SnowyZone.js';
 import { CastleZone } from '../zones/CastleZone.js';
 import { isHost, getMyId, getPlayers, getPlayerNames, onStateUpdate, onLoot, onKey, sendInput, sendGameState, sendLootPickup, sendKeyPickup } from '../network.js';
 import { PET_DB, PET_TYPES, CRYSTAL_RUN_CAPS, canGetCrystals } from '../config/pets.js';
+import { getKeybinds, parseKeyCode } from '../keybinds.js';
 
 
 export default class GameScene extends Phaser.Scene {
@@ -92,6 +93,10 @@ export default class GameScene extends Phaser.Scene {
         this._initStats();
         this._createUI();
         this._bindKeys();
+
+        this.events.on('resume', () => {
+            this._bindKeys();
+        });
 
         this.invOpen = false;
         this.invGroup = [];
@@ -1072,21 +1077,34 @@ export default class GameScene extends Phaser.Scene {
     /* ===== INPUT ===== */
 
     _bindKeys() {
-        this.cursors = this.input.keyboard.createCursorKeys();
-        this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-        this.iKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I);
-        this.pKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
-        this.mKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
-        this.tKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.T);
-        this.qKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
-        this.wKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
-        this.eKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
-        this.bKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B);
-        this.nKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.N);
-        this.cKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
-        this.fKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
-        this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-        this.xKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+        const binds = getKeybinds();
+        const kb = this.input.keyboard;
+
+        const resolveKey = (name) => {
+            const code = parseKeyCode(binds[name]);
+            return code !== null ? kb.addKey(code) : kb.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        };
+
+        this.cursors = {
+            left: resolveKey('move_left'),
+            right: resolveKey('move_right'),
+            up: resolveKey('move_up'),
+            down: resolveKey('move_down')
+        };
+        this.spaceKey = resolveKey('attack');
+        this.fKey = resolveKey('consumable');
+        this.qKey = resolveKey('spell_q');
+        this.wKey = resolveKey('spell_w');
+        this.eKey = resolveKey('spell_e');
+        this.rKey = resolveKey('spell_r');
+        this.iKey = resolveKey('inventory');
+        this.pKey = resolveKey('pause');
+        this.tKey = resolveKey('talents');
+        this.bKey = resolveKey('bestiary');
+        this.nKey = resolveKey('quests');
+        this.cKey = resolveKey('crafting');
+        this.xKey = resolveKey('spell_assign');
+        this.mKey = resolveKey('mute');
     }
 
     _handleInput() {
