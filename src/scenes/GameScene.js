@@ -2,7 +2,8 @@ import Phaser from 'phaser';
 import {
     DIFF_MULT, MATERIAL_SLOTS, EQUIP_BAG_SLOTS, ACCOUNT_EQUIP_BAG_SLOTS, EMPTY_ACCOUNT_EQUIPMENT,
     CORRUPTION, MINE_BOSS_PORTAL_POS,
-    MEADOW_GATE_POS, MEADOW_WIDTH, MEADOW_HEIGHT
+    MEADOW_GATE_POS, MEADOW_WIDTH, MEADOW_HEIGHT,
+    GAME_WIDTH, GAME_HEIGHT
 } from '../config/index.js';
 import { playBossAoE, playPortal, stopMusic, playPetAttack, playPetPickup } from '../sound.js';
 import { saveGame, loadGame, saveAccount, loadAccount } from '../save.js';
@@ -1476,26 +1477,82 @@ export default class GameScene extends Phaser.Scene {
     _updateBoss() {
         if (!this.bossAlive || !this.boss || !this.boss.active) return;
         const b = this.boss;
-        const s = b.stats;
+        const st = b.stats;
+        const delta = this.game.loop.delta;
 
-        b.hpBg.x = 400;
-        b.hpBg.y = 100;
-        b.hpFill.x = 400;
-        b.hpFill.y = 100;
+        b.hpBg.x = b.x;
+        b.hpBg.y = b.y - 50;
+        b.hpFill.x = b.x;
+        b.hpFill.y = b.y - 50;
+        b.hpFill.width = b.hpBg.width * (st.hp / st.maxHp);
+        if (this.bossNameText) {
+            this.bossNameText.x = b.x;
+            this.bossNameText.y = b.y - 60;
+        }
 
         if (this.menuOpen || this.transitioning) {
             b.body.setVelocity(0);
             return;
         }
 
+        if (st.transitioning) {
+            b.body.setVelocity(0);
+            return;
+        }
+
+        if (st.invulnerable) {
+            b.body.setVelocity(0);
+            return;
+        }
+
+        const hpPct = st.hp / st.maxHp;
+        if (hpPct <= 0.3 && st.phase !== 3) {
+            st.phase = 3;
+            this._bossPhaseTransition(b);
+            return;
+        } else if (hpPct <= 0.6 && st.phase !== 2) {
+            st.phase = 2;
+            this._bossPhaseTransition(b);
+            return;
+        }
+
+        if (st.aiState === 'telegraph') {
+            b.body.setVelocity(0);
+            st.telegraphTimer -= delta;
+            if (st.telegraphTimer <= 0) {
+                this._bossExecuteAttack(b);
+            }
+            return;
+        }
+
+        if (st.aiState === 'attacking') {
+            b.body.setVelocity(0);
+            st.attackDuration -= delta;
+            if (st.attackDuration <= 0) {
+                st.aiState = 'cooldown';
+                st.cooldownTimer = 800;
+                if (b.telegraph) { b.telegraph.destroy(); b.telegraph = null; }
+            }
+            return;
+        }
+
+        if (st.aiState === 'cooldown') {
+            b.body.setVelocity(0);
+            st.cooldownTimer -= delta;
+            if (st.cooldownTimer <= 0) {
+                st.aiState = 'chase';
+            }
+            return;
+        }
+
+        st.aiState = 'chase';
         const dx = this.player.x - b.x;
         const dy = this.player.y - b.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
+        const speed = st.phase === 3 ? st.baseSpeed * 1.2 : st.baseSpeed;
 
         if (dist > 30) {
-            const nx = dx / dist;
-            const ny = dy / dist;
-            b.body.setVelocity(nx * s.speed, ny * s.speed);
+            b.body.setVelocity((dx / dist) * speed, (dy / dist) * speed);
             if (!b.anims.isPlaying || b.anims.currentAnim.key !== 'treant_walk') {
                 b.play('treant_walk');
             }
@@ -1506,45 +1563,220 @@ export default class GameScene extends Phaser.Scene {
             b.setFrame(0);
         }
 
-        s.aoeTimer += this.game.loop.delta;
-        if (s.aoeTimer >= s.aoeInterval) {
-            s.aoeTimer = 0;
-            this._bossAoE(b);
+        st.attackTimer -= delta;
+        st.slamCooldown -= delta;
+        st.rootCooldown -= delta;
+        st.chargeCooldown -= delta;
+
+        if (st.attackTimer <= 0) {
+            const attack = this._pickTreantAttack(st);
+            if (attack) {
+                this._bossTelegraph(b, attack);
+            } else {
+                st.attackTimer = 800;
+            }
         }
     }
 
-    _bossAoE(boss) {
-        const aoeDmg = Math.floor(boss.stats.damage * boss.stats.aoeDmgMul);
-        const radius = boss.stats.aoeRadius;
+    _pickTreantAttack(st) {
+        const available = [];
+        if (st.slamCooldown <= 0) available.push('slam');
+        if (st.phase >= 2 && st.rootCooldown <= 0) available.push('roots');
+        if (st.phase >= 3 && st.chargeCooldown <= 0) available.push('charge');
+        if (available.length === 0) return null;
+        return available[Math.floor(Math.random() * available.length)];
+    }
+
+    _bossTelegraph(boss, attackType) {
+        const st = boss.stats;
+        st.aiState = 'telegraph';
+        st.currentAttack = attackType;
+        st.telegraphTimer = 500;
+        boss.body.setVelocity(0);
+
+        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
+
+        if (attackType === 'slam') {
+            const tg = this.add.sprite(boss.x, boss.y, 'boss_telegraph_circle')
+                .setAlpha(0).setDepth(10).setScale(st.aoeRadius / 64);
+            this.tweens.add({ targets: tg, alpha: 0.9, duration: 200 });
+            boss.telegraph = tg;
+            st.slamCooldown = st.phase >= 3 ? 2500 : 4000;
+        } else if (attackType === 'roots') {
+            const tg = this.add.sprite(boss.x, boss.y, 'boss_telegraph_square')
+                .setAlpha(0).setDepth(10).setScale(1.2);
+            this.tweens.add({ targets: tg, alpha: 0.9, duration: 200 });
+            boss.telegraph = tg;
+            st.rootCooldown = st.phase >= 3 ? 5000 : 8000;
+        } else if (attackType === 'charge') {
+            const dx = this.player.x - boss.x;
+            const dy = this.player.y - boss.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const nx = dx / dist;
+            const ny = dy / dist;
+            const angle = Math.atan2(ny, nx);
+            const tg = this.add.sprite(boss.x, boss.y, 'boss_telegraph_line')
+                .setAlpha(0).setDepth(10).setRotation(angle);
+            this.tweens.add({ targets: tg, alpha: 0.9, duration: 200 });
+            boss.telegraph = tg;
+            st.chargeCooldown = 5000;
+        }
+        st.attackTimer = 3000;
+    }
+
+    _bossExecuteAttack(boss) {
+        const st = boss.stats;
+        st.aiState = 'attacking';
+        st.attackDuration = 400;
+
+        if (st.currentAttack === 'slam') {
+            this._treantGroundSlam(boss);
+        } else if (st.currentAttack === 'roots') {
+            this._treantRootSummon(boss);
+        } else if (st.currentAttack === 'charge') {
+            this._treantCharge(boss);
+            st.attackDuration = 600;
+        }
+    }
+
+    _treantGroundSlam(boss) {
+        const st = boss.stats;
+        const dmgMul = st.phase === 3 ? st.aoeDmgMul * 1.5 : st.aoeDmgMul;
+        const aoeDmg = Math.floor(st.damage * dmgMul);
+        const radius = st.aoeRadius;
         playBossAoE();
 
         const ring = this.add.sprite(boss.x, boss.y, 'boss_aoe')
-            .setAlpha(0.9)
-            .setScale(0.3);
+            .setAlpha(0.9).setScale(0.3).setDepth(10);
         this.tweens.add({
             targets: ring, scaleX: 1.8, scaleY: 1.8, alpha: 0, duration: 500,
             onComplete: () => ring.destroy()
         });
 
         const ring2 = this.add.sprite(boss.x, boss.y, 'boss_aoe')
-            .setAlpha(0.5)
-            .setScale(0.1);
+            .setAlpha(0.5).setScale(0.1).setDepth(10);
         this.tweens.add({
             targets: ring2, scaleX: 1.2, scaleY: 1.2, alpha: 0, duration: 400, delay: 100,
             onComplete: () => ring2.destroy()
         });
 
         this.time.delayedCall(300, () => {
-            const dist = Phaser.Math.Distance.Between(
-                this.player.x, this.player.y, boss.x, boss.y
-            );
+            if (!boss.active) return;
+            const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, boss.x, boss.y);
             if (dist < radius) {
                 this.takeDamage(aoeDmg);
                 const pushX = this.player.x - boss.x;
                 const pushY = this.player.y - boss.y;
                 const pushDist = Math.sqrt(pushX * pushX + pushY * pushY) || 1;
-                this.player.x += (pushX / pushDist) * 40;
-                this.player.y += (pushY / pushDist) * 40;
+                this.player.x += (pushX / pushDist) * 45;
+                this.player.y += (pushY / pushDist) * 45;
+            }
+        });
+    }
+
+    _treantRootSummon(boss) {
+        const st = boss.stats;
+        playBossAoE();
+        this.floatingText(boss.x, boss.y - 40, 'ROOTS!', '#22aa44');
+
+        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
+
+        const count = st.phase >= 3 ? 3 : 2;
+        for (let i = 0; i < count; i++) {
+            const angle = (i / count) * Math.PI * 2 + Math.random() * 0.5;
+            const sx = boss.x + Math.cos(angle) * 70;
+            const sy = boss.y + Math.sin(angle) * 70;
+            this._spawnTreantRootAdd(sx, sy);
+        }
+    }
+
+    _spawnTreantRootAdd(x, y) {
+        const e = this.add.sprite(x, y, 'root_add').setDepth(5);
+        this.physics.add.existing(e, false);
+        e.body.setSize(18, 20);
+        e.body.setCollideWorldBounds(true);
+
+        const rootHp = Math.floor(60 * (this.diffMulti.hp || 1));
+        const rootDmg = Math.floor(8 * (this.diffMulti.dmg || 1));
+
+        e.stats = {
+            key: 'root_add', name: 'Treant Root',
+            hp: rootHp, maxHp: rootHp,
+            damage: rootDmg, exp: 5,
+            bw: 18, bh: 20,
+            wTimer: 0, wDir: 0
+        };
+
+        e.hpBg = this.add.rectangle(x, y - 18, 22, 3, 0x333333).setOrigin(0.5).setDepth(11);
+        e.hpFill = this.add.rectangle(x, y - 18, 22, 3, 0x22aa44).setOrigin(0.5).setDepth(11);
+        this.enemies.add(e);
+    }
+
+    _treantCharge(boss) {
+        const st = boss.stats;
+        const dx = this.player.x - boss.x;
+        const dy = this.player.y - boss.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const chargeSpeed = st.baseSpeed * 3;
+        const dmg = Math.floor(st.damage * 1.8);
+
+        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
+
+        boss.setTint(0xffaa44);
+        boss.body.setVelocity((dx / dist) * chargeSpeed, (dy / dist) * chargeSpeed);
+
+        this.time.delayedCall(400, () => {
+            if (!boss.active) return;
+            boss.body.setVelocity(0);
+            boss.clearTint();
+            const pdist = Phaser.Math.Distance.Between(this.player.x, this.player.y, boss.x, boss.y);
+            if (pdist < 60) {
+                this.takeDamage(dmg);
+                const pushX = this.player.x - boss.x;
+                const pushY = this.player.y - boss.y;
+                const pushDist = Math.sqrt(pushX * pushX + pushY * pushY) || 1;
+                this.player.x += (pushX / pushDist) * 60;
+                this.player.y += (pushY / pushDist) * 60;
+                this.floatingText(this.player.x, this.player.y - 30, 'CHARGED!', '#ff6622');
+            }
+        });
+    }
+
+    _bossPhaseTransition(boss) {
+        const st = boss.stats;
+        st.transitioning = true;
+        st.invulnerable = true;
+        boss.body.setVelocity(0);
+
+        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
+
+        this.cameras.main.shake(300, 0.01);
+        this.tweens.add({
+            targets: boss, alpha: 0.3, duration: 150, yoyo: true, repeat: 3,
+            onComplete: () => { if (boss.active) boss.setAlpha(1); }
+        });
+
+        const flash = this.add.rectangle(400, 300, GAME_WIDTH, GAME_HEIGHT, 0xffffff)
+            .setAlpha(0).setDepth(20).setScrollFactor(0);
+        this.tweens.add({
+            targets: flash, alpha: 0.4, duration: 200, yoyo: true,
+            onComplete: () => flash.destroy()
+        });
+
+        if (st.phase === 3) {
+            st.baseSpeed = Math.floor(st.baseSpeed * 1.2);
+            st.damage = Math.floor(st.damage * 1.5);
+            this.floatingText(boss.x, boss.y - 50, 'ENRAGED!', '#ff2222');
+        } else if (st.phase === 2) {
+            this.floatingText(boss.x, boss.y - 50, 'PHASE 2!', '#ffaa00');
+        }
+
+        this.time.delayedCall(1200, () => {
+            if (boss.active) {
+                st.transitioning = false;
+                st.invulnerable = false;
+                st.aiState = 'chase';
+                st.attackTimer = 1500;
             }
         });
     }

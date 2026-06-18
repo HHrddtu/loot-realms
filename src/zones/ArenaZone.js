@@ -73,6 +73,7 @@ export class ArenaZone {
             if (s.bossNameText) s.bossNameText.destroy();
             if (s.boss.aoeRing) { s.boss.aoeRing.destroy(); s.boss.aoeRing = null; }
             if (s.boss.aoeRing2) { s.boss.aoeRing2.destroy(); s.boss.aoeRing2 = null; }
+            if (s.boss.telegraph) { s.boss.telegraph.destroy(); s.boss.telegraph = null; }
             s.boss.destroy();
             s.boss = null;
         }
@@ -115,11 +116,10 @@ export class ArenaZone {
         const exp = Math.floor(bt.exp[s.difficulty] || bt.exp.Normal);
         const spd = bt.speeds[s.difficulty] || bt.speeds.Normal;
 
-        s.boss = s.add.sprite(400, 180, 'treant_walk').setDepth(5);
+        s.boss = s.add.sprite(400, 180, 'treant_boss').setDepth(5);
         s.physics.add.existing(s.boss, false);
         s.boss.body.setSize(bt.bw, bt.bh);
         s.boss.body.setCollideWorldBounds(true);
-        s.boss.play('treant_walk');
 
         s.boss.stats = {
             name: bt.name,
@@ -128,14 +128,29 @@ export class ArenaZone {
             speed: spd,
             bw: bt.bw, bh: bt.bh,
             aoeTimer: 0, aoeInterval: bt.aoeInterval,
-            aoeDmgMul: bt.aoeDmgMul, aoeRadius: bt.aoeRadius
+            aoeDmgMul: bt.aoeDmgMul, aoeRadius: bt.aoeRadius,
+            phase: 1,
+            aiState: 'chase',
+            attackTimer: 2500,
+            cooldownTimer: 0,
+            currentAttack: null,
+            invulnerable: false,
+            baseSpeed: spd,
+            baseDamage: dmg,
+            telegraphTimer: 0,
+            attackDuration: 0,
+            transitioning: false,
+            phaseTriggered: false,
+            slamCooldown: 0,
+            rootCooldown: 0,
+            chargeCooldown: 0
         };
 
         const hw = bt.bw + 20;
-        s.boss.hpBg = s.add.rectangle(400, 100, hw, 5, 0x333333).setOrigin(0.5).setDepth(15);
-        s.boss.hpFill = s.add.rectangle(400, 100, hw, 5, 0xe74c3c).setOrigin(0.5).setDepth(15);
+        s.boss.hpBg = s.add.rectangle(400, 130, hw, 5, 0x222222).setOrigin(0.5).setDepth(15);
+        s.boss.hpFill = s.add.rectangle(400, 130, hw, 5, 0xe74c3c).setOrigin(0.5).setDepth(15);
 
-        s.bossNameText = s.add.text(400, 85, bt.name, {
+        s.bossNameText = s.add.text(400, 118, bt.name, {
             fontSize: '12px', fill: '#ff4444', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5).setDepth(15);

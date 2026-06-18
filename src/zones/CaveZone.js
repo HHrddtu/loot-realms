@@ -196,6 +196,8 @@ export class CaveZone {
             if (s.caveBossNameText) s.caveBossNameText.destroy();
             if (s.caveBoss.aoeRing) { s.caveBoss.aoeRing.destroy(); }
             if (s.caveBoss.aoeRing2) { s.caveBoss.aoeRing2.destroy(); }
+            if (s.caveBoss.telegraph) { s.caveBoss.telegraph.destroy(); }
+            if (s.caveBoss.auraRing) { s.caveBoss.auraRing.destroy(); }
             s.caveBoss.destroy();
             s.caveBoss = null;
         }
@@ -557,11 +559,26 @@ export class CaveZone {
             screechRadius: bt.screechRadius, screechDmgMul: bt.screechDmgMul,
             summonHpThreshold: bt.summonHpThreshold,
             summonCount: bt.summonCount,
-            summoned: false, isDashing: false
+            summoned: false, isDashing: false,
+            phase: 1,
+            aiState: 'chase',
+            attackTimer: 3000,
+            cooldownTimer: 0,
+            currentAttack: null,
+            invulnerable: false,
+            baseSpeed: spd,
+            baseDamage: dmg,
+            telegraphTimer: 0,
+            attackDuration: 0,
+            transitioning: false,
+            phaseTriggered: false,
+            dashCooldown: 0,
+            screechCooldownTimer: 0,
+            summonCooldown: 0
         };
 
         const hw = bt.bw + 20;
-        s.caveBoss.hpBg = s.add.rectangle(s.caveOffsetX + CAVE_WIDTH / 2, 100, hw, 5, 0x333333).setOrigin(0.5).setDepth(15).setScrollFactor(0);
+        s.caveBoss.hpBg = s.add.rectangle(s.caveOffsetX + CAVE_WIDTH / 2, 100, hw, 5, 0x222222).setOrigin(0.5).setDepth(15).setScrollFactor(0);
         s.caveBoss.hpFill = s.add.rectangle(s.caveOffsetX + CAVE_WIDTH / 2, 100, hw, 5, 0x8e44ad).setOrigin(0.5).setDepth(15).setScrollFactor(0);
         s.caveBossNameText = s.add.text(s.caveOffsetX + CAVE_WIDTH / 2, 85, bt.name, {
             fontSize: '12px', fill: '#bf77f6', fontFamily: 'Arial', fontStyle: 'bold',
@@ -577,64 +594,219 @@ export class CaveZone {
         if (!s.caveBossAlive || !s.caveBoss || !s.caveBoss.active) return;
         const b = s.caveBoss;
         const st = b.stats;
+        const delta = s.game.loop.delta;
 
         b.hpBg.x = GAME_WIDTH / 2;
         b.hpBg.y = 100;
         b.hpFill.x = GAME_WIDTH / 2;
         b.hpFill.y = 100;
+        b.hpFill.width = b.hpBg.width * (st.hp / st.maxHp);
 
         if (s.menuOpen || s.transitioning) {
             b.body.setVelocity(0);
             return;
         }
+
+        if (st.transitioning || st.invulnerable) {
+            b.body.setVelocity(0);
+            return;
+        }
+
         if (st.isDashing) return;
 
+        const hpPct = st.hp / st.maxHp;
+        if (hpPct <= 0.3 && st.phase !== 3) {
+            st.phase = 3;
+            this._caveBossPhaseTransition(b);
+            return;
+        } else if (hpPct <= 0.6 && st.phase !== 2) {
+            st.phase = 2;
+            this._caveBossPhaseTransition(b);
+            return;
+        }
+
+        if (!st.summoned && st.phase >= 2) {
+            st.summoned = true;
+            this.caveBossSummon(b);
+        }
+
+        if (st.aiState === 'telegraph') {
+            b.body.setVelocity(0);
+            st.telegraphTimer -= delta;
+            if (st.telegraphTimer <= 0) {
+                this._caveBossExecuteAttack(b);
+            }
+            return;
+        }
+
+        if (st.aiState === 'attacking') {
+            b.body.setVelocity(0);
+            st.attackDuration -= delta;
+            if (st.attackDuration <= 0) {
+                st.aiState = 'cooldown';
+                st.cooldownTimer = 800;
+                if (b.telegraph) { b.telegraph.destroy(); b.telegraph = null; }
+            }
+            return;
+        }
+
+        if (st.aiState === 'cooldown') {
+            b.body.setVelocity(0);
+            st.cooldownTimer -= delta;
+            if (st.cooldownTimer <= 0) {
+                st.aiState = 'chase';
+            }
+            return;
+        }
+
+        st.aiState = 'chase';
         const dx = s.player.x - b.x;
         const dy = s.player.y - b.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
+        const speed = st.phase === 3 ? st.baseSpeed * 1.2 : st.baseSpeed;
 
         if (dist > 50) {
-            b.body.setVelocity((dx / dist) * st.speed, (dy / dist) * st.speed);
+            b.body.setVelocity((dx / dist) * speed, (dy / dist) * speed);
             b.setFlipX(dx < 0);
         } else {
             b.body.setVelocity(0);
         }
 
-        st.dashTimer += s.game.loop.delta;
-        if (st.dashTimer >= st.dashInterval) {
-            st.dashTimer = 0;
-            this.caveBossDash(b);
+        st.attackTimer -= delta;
+        st.dashCooldown -= delta;
+        st.screechCooldownTimer -= delta;
+        st.summonCooldown -= delta;
+
+        if (st.attackTimer <= 0) {
+            const attack = this._pickCaveBossAttack(st);
+            if (attack) {
+                this._caveBossTelegraph(b, attack);
+            } else {
+                st.attackTimer = 800;
+            }
+        }
+    }
+
+    _pickCaveBossAttack(st) {
+        const available = [];
+        if (st.screechCooldownTimer <= 0) available.push('screech');
+        if (st.dashCooldown <= 0) available.push('dash');
+        if (st.phase >= 3 && st.summonCooldown <= 0) available.push('summon');
+        if (available.length === 0) return null;
+        return available[Math.floor(Math.random() * available.length)];
+    }
+
+    _caveBossTelegraph(boss, attackType) {
+        const s = this.scene;
+        const st = boss.stats;
+        st.aiState = 'telegraph';
+        st.currentAttack = attackType;
+        st.telegraphTimer = 500;
+        boss.body.setVelocity(0);
+
+        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
+
+        if (attackType === 'screech') {
+            const tg = s.add.sprite(boss.x, boss.y, 'boss_telegraph_circle')
+                .setAlpha(0).setDepth(10).setScale(st.screechRadius / 64);
+            s.tweens.add({ targets: tg, alpha: 0.8, duration: 200 });
+            boss.telegraph = tg;
+            st.screechCooldownTimer = st.phase >= 3 ? 5000 : 8000;
+        } else if (attackType === 'dash') {
+            const dx = s.player.x - boss.x;
+            const dy = s.player.y - boss.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const angle = Math.atan2(dy, dx);
+            const tg = s.add.sprite(boss.x, boss.y, 'boss_telegraph_line')
+                .setAlpha(0).setDepth(10).setRotation(angle);
+            s.tweens.add({ targets: tg, alpha: 0.9, duration: 200 });
+            boss.telegraph = tg;
+            st.dashCooldown = st.phase >= 3 ? 3000 : 5000;
+        } else if (attackType === 'summon') {
+            const tg = s.add.sprite(boss.x, boss.y, 'boss_telegraph_square')
+                .setAlpha(0).setDepth(10).setScale(1.5);
+            s.tweens.add({ targets: tg, alpha: 0.9, duration: 200 });
+            boss.telegraph = tg;
+            st.summonCooldown = 12000;
+        }
+        st.attackTimer = 3000;
+    }
+
+    _caveBossExecuteAttack(boss) {
+        const st = boss.stats;
+        st.aiState = 'attacking';
+        st.attackDuration = 400;
+
+        if (st.currentAttack === 'screech') {
+            this.caveBossScreech(boss);
+        } else if (st.currentAttack === 'dash') {
+            this.caveBossDash(boss);
+            st.attackDuration = 600;
+        } else if (st.currentAttack === 'summon') {
+            this.caveBossSummon(boss);
+            st.attackDuration = 500;
+        }
+    }
+
+    _caveBossPhaseTransition(boss) {
+        const s = this.scene;
+        const st = boss.stats;
+        st.transitioning = true;
+        st.invulnerable = true;
+        boss.body.setVelocity(0);
+
+        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
+
+        s.cameras.main.shake(300, 0.01);
+        s.tweens.add({
+            targets: boss, alpha: 0.3, duration: 150, yoyo: true, repeat: 3,
+            onComplete: () => { if (boss.active) boss.setAlpha(1); }
+        });
+
+        const flash = s.add.rectangle(GAME_WIDTH / 2, 300, GAME_WIDTH, GAME_HEIGHT, 0xffffff)
+            .setAlpha(0).setDepth(20).setScrollFactor(0);
+        s.tweens.add({
+            targets: flash, alpha: 0.4, duration: 200, yoyo: true,
+            onComplete: () => flash.destroy()
+        });
+
+        if (st.phase === 3) {
+            st.baseSpeed = Math.floor(st.baseSpeed * 1.2);
+            st.damage = Math.floor(st.damage * 1.5);
+            s.floatingText(boss.x, boss.y - 50, 'ENRAGED!', '#ff2222');
+        } else if (st.phase === 2) {
+            s.floatingText(boss.x, boss.y - 50, 'PHASE 2!', '#bf77f6');
         }
 
-        st.screechTimer += s.game.loop.delta;
-        if (st.screechTimer >= st.screechCooldown) {
-            st.screechTimer = 0;
-            this.caveBossScreech(b);
-        }
-
-        if (!st.summoned && st.hp / st.maxHp <= st.summonHpThreshold) {
-            st.summoned = true;
-            this.caveBossSummon(b);
-        }
+        s.time.delayedCall(1200, () => {
+            if (boss.active) {
+                st.transitioning = false;
+                st.invulnerable = false;
+                st.aiState = 'chase';
+                st.attackTimer = 1500;
+            }
+        });
     }
 
     caveBossDash(boss) {
         const s = this.scene;
         const st = boss.stats;
         st.isDashing = true;
+
+        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
+
         const dx = s.player.x - boss.x;
         const dy = s.player.y - boss.y;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        boss.body.setVelocity((dx / dist) * st.dashSpeed, (dy / dist) * st.dashSpeed);
+        const dashSpeed = st.phase >= 3 ? st.dashSpeed * 1.3 : st.dashSpeed;
+        boss.body.setVelocity((dx / dist) * dashSpeed, (dy / dist) * dashSpeed);
         boss.setTint(0x00ffff);
         s.time.delayedCall(400, () => {
             if (boss.active) {
                 boss.body.setVelocity(0);
                 boss.clearTint();
                 st.isDashing = false;
-                const pdist = Phaser.Math.Distance.Between(
-                    s.player.x, s.player.y, boss.x, boss.y
-                );
+                const pdist = Phaser.Math.Distance.Between(s.player.x, s.player.y, boss.x, boss.y);
                 if (pdist < 60) {
                     s.combat.takeDamage(Math.floor(boss.stats.damage * st.dashDmgMul));
                 }
@@ -645,20 +817,22 @@ export class CaveZone {
     caveBossScreech(boss) {
         const s = this.scene;
         const st = boss.stats;
-        const dmg = Math.floor(boss.stats.damage * st.screechDmgMul);
+        const dmgMul = st.phase === 3 ? st.screechDmgMul * 1.5 : st.screechDmgMul;
+        const dmg = Math.floor(boss.stats.damage * dmgMul);
         playBossAoE();
 
+        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
+
         const ring = s.add.sprite(boss.x, boss.y, 'skeleton_lord_aoe')
-            .setAlpha(0.7).setScale(0.2);
+            .setAlpha(0.7).setScale(0.2).setDepth(10);
         s.tweens.add({
             targets: ring, scaleX: 2.0, scaleY: 2.0, alpha: 0, duration: 700,
             onComplete: () => ring.destroy()
         });
 
         s.time.delayedCall(350, () => {
-            const dist = Phaser.Math.Distance.Between(
-                s.player.x, s.player.y, boss.x, boss.y
-            );
+            if (!boss.active) return;
+            const dist = Phaser.Math.Distance.Between(s.player.x, s.player.y, boss.x, boss.y);
             if (dist < st.screechRadius) {
                 s.combat.takeDamage(dmg);
                 s.floatingText(s.player.x, s.player.y - 30, 'SCREECH!', '#e74c3c');
@@ -670,8 +844,12 @@ export class CaveZone {
         const s = this.scene;
         playBossAoE();
         s.floatingText(boss.x, boss.y - 40, 'SUMMONING!', '#9b59b6');
-        for (let i = 0; i < boss.stats.summonCount; i++) {
-            const angle = (i / boss.stats.summonCount) * Math.PI * 2;
+
+        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
+
+        const count = boss.stats.phase >= 3 ? boss.stats.summonCount + 1 : boss.stats.summonCount;
+        for (let i = 0; i < count; i++) {
+            const angle = (i / count) * Math.PI * 2;
             const sx = boss.x + Math.cos(angle) * 80;
             const sy = boss.y + Math.sin(angle) * 80;
             this.spawnSmallBat(sx, sy);
