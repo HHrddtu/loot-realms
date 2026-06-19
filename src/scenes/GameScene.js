@@ -175,6 +175,7 @@ export default class GameScene extends Phaser.Scene {
         this.villageInnHint = null;
         this.shopGroup = [];
         this.castleRoom = 0;
+        this.castleFloorCleared = false;
         this.castleBossDefeated = false;
         this.castleKeyObtained = false;
         this.castleRescued = false;
@@ -935,12 +936,12 @@ export default class GameScene extends Phaser.Scene {
             }
 
             if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
-                if (this.nearbyNpc) {
-                    this._interactWithNpc();
-                } else if (this.nearbyShop) {
+                if (this.nearbyShop) {
                     this.zones.village._openShop();
                 } else if (this.nearbyInn) {
                     this.zones.village._useInn();
+                } else if (this.nearbyNpc) {
+                    this._interactWithNpc();
                 } else if (this.zone === 'forest') {
                     if (this.player.y < 100) {
                         this._enterPortal();

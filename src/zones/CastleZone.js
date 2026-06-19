@@ -927,7 +927,7 @@ export class CastleZone {
         const wasCleared = this.scene.castleFloorCleared;
         this.scene.castleFloorCleared = alive === 0;
 
-        if (!wasCleared && this.scene.castleFloorCleared && !this.scene.castleStairsUp) {
+        if (this.scene.castleFloorCleared && !this.scene.castleStairsUp) {
             this._spawnStairsUp();
         }
 
