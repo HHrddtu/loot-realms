@@ -211,6 +211,22 @@ export class CombatSystem {
                 }
             });
         }
+        if (this.scene.forestChests && this.scene.forestChests.getLength) {
+            this.scene.forestChests.getChildren().forEach(ch => {
+                if (!ch.active || !ch.stats || ch.broken) return;
+                if (Phaser.Math.Distance.Between(ax, ay, ch.x, ch.y) < 35) {
+                    this.hitChest(ch, dmg);
+                }
+            });
+        }
+        if (this.scene.caveExtraChests && this.scene.caveExtraChests.getLength) {
+            this.scene.caveExtraChests.getChildren().forEach(ch => {
+                if (!ch.active || !ch.stats || ch.broken) return;
+                if (Phaser.Math.Distance.Between(ax, ay, ch.x, ch.y) < 35) {
+                    this.hitChest(ch, dmg);
+                }
+            });
+        }
         if (this.scene.mineChests && this.scene.mineChests.getLength) {
             this.scene.mineChests.getChildren().forEach(ch => {
                 if (!ch.active || !ch.stats || ch.broken) return;
@@ -438,11 +454,17 @@ export class CombatSystem {
         if (ch.broken) return;
         ch.broken = true;
         ch.body.enable = false;
-        ch.setTexture(ch.isCaveChest ? CAVE_CHEST_OPEN_KEY : 'mine_chest_broken');
+        if (ch.isForestChest) {
+            ch.setAlpha(0.4);
+            ch.setTint(0x886633);
+        } else {
+            ch.setTexture(ch.isCaveChest ? CAVE_CHEST_OPEN_KEY : 'mine_chest_broken');
+        }
         ch.hpBg.destroy();
         ch.hpFill.destroy();
+        if (ch.hintText) ch.hintText.setText('');
         playBreak();
-        onCollect('mine_chest');
+        onCollect(ch.isForestChest ? 'treasure_chest' : 'mine_chest');
         this.scene._updateQuestIcons();
 
         const chestGold = rollChestGold(this.scene.zone || 'mine');

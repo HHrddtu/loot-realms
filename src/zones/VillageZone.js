@@ -221,6 +221,8 @@ export class VillageZone {
         this._checkVillageProgress();
         this._checkSnowyVillageProgress();
         this._updateCastleChildHint();
+        this._updateCampfireHints();
+        this._updateShopInnHints();
     }
 
     _spawnVillageShop() {
@@ -2048,6 +2050,65 @@ export class VillageZone {
                 this._spawnSnowyVillageBoss();
                 this.scene.floatingText(this.scene.villageOffsetX + VILLAGE_WIDTH / 2, 200, 'ICE SPIRIT has appeared!', '#ff4444');
             });
+        }
+    }
+
+    _updateCampfireHints() {
+        const s = this.scene;
+        if (s.zone === 'village' && s.villageFrozen && s.campfire && !s.villageBossDefeated) {
+            const cd = Phaser.Math.Distance.Between(s.player.x, s.player.y, s.campfire.x, s.campfire.y);
+            if (cd < 80) {
+                if (s.campfireHint) s.campfireHint.setText('SPACE = activate');
+            } else if (s.campfireHint) {
+                s.campfireHint.setText('');
+            }
+        }
+        if (s.zone === 'village' && s.villageBossDefeated && s.campfire) {
+            const cd = Phaser.Math.Distance.Between(s.player.x, s.player.y, s.campfire.x, s.campfire.y);
+            if (cd < 80) {
+                if (s.campfireHint) s.campfireHint.setText('SPACE = restore village');
+            } else if (s.campfireHint) {
+                s.campfireHint.setText('');
+            }
+        }
+        if (s.zone === 'cemetery') {
+            if (!s.villageBossSpawned && !s.villageBossDefeated) {
+                this._spawnVillageBoss();
+            }
+            if (s.villageBossDefeated && s.hellPortal) {
+                const pd = Phaser.Math.Distance.Between(s.player.x, s.player.y, s.hellPortal.x, s.hellPortal.y);
+                if (pd < 80) {
+                    if (s.hellPortalHint) s.hellPortalHint.setText('SPACE = enter Hell');
+                } else if (s.hellPortalHint) {
+                    s.hellPortalHint.setText('');
+                }
+            }
+        }
+    }
+
+    _updateShopInnHints() {
+        const s = this.scene;
+        if (s.zone === 'village' && !s.villageFrozen && s.villageRestored) {
+            s.nearbyShop = null;
+            s.nearbyInn = null;
+            if (s.villageMerchantNPC && s.villageMerchantHint) {
+                const md = Phaser.Math.Distance.Between(s.player.x, s.player.y, s.villageMerchantNPC.x, s.villageMerchantNPC.y);
+                if (md < 50) {
+                    s.nearbyShop = s.villageMerchantNPC;
+                    s.villageMerchantHint.setText('SPACE = shop');
+                } else {
+                    s.villageMerchantHint.setText('');
+                }
+            }
+            if (s.villageInn && s.villageInnHint) {
+                const id = Phaser.Math.Distance.Between(s.player.x, s.player.y, s.villageInn.x, s.villageInn.y);
+                if (id < 40) {
+                    s.nearbyInn = s.villageInn;
+                    s.villageInnHint.setText(s.innUsed ? 'Already rested' : 'SPACE = rest');
+                } else {
+                    s.villageInnHint.setText('');
+                }
+            }
         }
     }
 }

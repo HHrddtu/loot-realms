@@ -2,24 +2,26 @@ import Phaser from 'phaser';
 import {
     DIFF_MULT, MATERIAL_SLOTS, EQUIP_BAG_SLOTS, ACCOUNT_EQUIP_BAG_SLOTS, EMPTY_ACCOUNT_EQUIPMENT,
     CORRUPTION, MINE_BOSS_PORTAL_POS,
-    MEADOW_GATE_POS, MEADOW_WIDTH, MEADOW_HEIGHT,
     GAME_WIDTH, GAME_HEIGHT
 } from '../config/index.js';
-import { playBossAoE, playPortal, stopMusic, playPetAttack, playPetPickup, startZoneMusic } from '../sound.js';
-import { saveGame, loadGame, saveAccount, loadAccount } from '../save.js';
+import { playPortal, stopMusic, playPetPickup, startZoneMusic } from '../sound.js';
+import { loadAccount } from '../save.js';
 import { getClassData, getClassStats } from '../classes.js';
 import { getTalentEffects } from '../talents.js';
 import { getAccountTalentEffects } from '../accountTalents.js';
-import { initBestiary, recordEncounter, saveBestiary } from '../bestiary.js';
-import { initMaterialBook, saveMaterialBook } from '../materialBook.js';
-import { initSoulBook, saveSoulBook } from '../soulBook.js';
-import { initQuests, saveQuests } from '../quests.js';
+import { initBestiary, recordEncounter } from '../bestiary.js';
+import { initMaterialBook } from '../materialBook.js';
+import { initSoulBook } from '../soulBook.js';
+import { initQuests } from '../quests.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { PlayerSystem } from '../systems/PlayerSystem.js';
 import { SpellSystem } from '../systems/SpellSystem.js';
 import { UISystem } from '../systems/UISystem.js';
 import { NpcSystem } from '../systems/NpcSystem.js';
 import { ParticleSystem } from '../systems/ParticleSystem.js';
+import { PetSystem } from '../systems/PetSystem.js';
+import { SaveLoadSystem } from '../systems/SaveLoadSystem.js';
+import { ForestBossAI } from '../systems/ForestBossAI.js';
 import { ForestZone } from '../zones/ForestZone.js';
 import { ArenaZone } from '../zones/ArenaZone.js';
 import { MineZone } from '../zones/MineZone.js';
@@ -28,9 +30,10 @@ import { VillageZone } from '../zones/VillageZone.js';
 import { HellZone } from '../zones/HellZone.js';
 import { SnowyZone } from '../zones/SnowyZone.js';
 import { CastleZone } from '../zones/CastleZone.js';
+import { MeadowZone } from '../zones/MeadowZone.js';
 import { isHost, getMyId, getPlayers, getPlayerNames, onStateUpdate, onLoot, onKey, sendInput, sendGameState, sendLootPickup, sendKeyPickup } from '../network.js';
 import { MultiplayerSync } from '../multiplayer.js';
-import { PET_DB, PET_TYPES, CRYSTAL_RUN_CAPS, canGetCrystals } from '../config/pets.js';
+import { CRYSTAL_RUN_CAPS, canGetCrystals } from '../config/pets.js';
 import { getKeybinds, parseKeyCode } from '../keybinds.js';
 
 
@@ -75,6 +78,9 @@ export default class GameScene extends Phaser.Scene {
         this.npc = new NpcSystem(this);
         this.particles = new ParticleSystem(this);
         this.particles.init();
+        this.petSys = new PetSystem(this);
+        this.saveLoad = new SaveLoadSystem(this);
+        this.forestBossAI = new ForestBossAI(this);
 
         this.zones = {
             forest: new ForestZone(this),
@@ -84,13 +90,14 @@ export default class GameScene extends Phaser.Scene {
             village: new VillageZone(this),
             hell: new HellZone(this),
             snowy: new SnowyZone(this),
-            castle: new CastleZone(this)
+            castle: new CastleZone(this),
+            meadow: new MeadowZone(this)
         };
         this.currentZone = null;
 
         this._createAnimations();
         this._createPlayer();
-        this._createPet();
+        this.petSys.create();
         this._initInventory();
         this._initStats();
         this._createUI();
@@ -140,6 +147,7 @@ export default class GameScene extends Phaser.Scene {
 
         this.unlockedTalents = [];
         this.talentPoints = 0;
+        this._loadAccountTalents = () => this.saveLoad.loadAccountTalents();
         this._loadAccountTalents();
 
         this.corruption = 0;
@@ -219,7 +227,7 @@ export default class GameScene extends Phaser.Scene {
             } else if (this._savedZone === 'cave') {
                 this._setupZone('cave');
             } else if (this._savedZone === 'meadow') {
-                this._setupMeadow();
+                this.zones.meadow.setup();
             } else if (this._savedZone === 'village') {
                 this._setupZone('village', this.villageFrozen);
             } else if (this._savedZone === 'cemetery') {
@@ -252,7 +260,7 @@ export default class GameScene extends Phaser.Scene {
                 this._onBeforeUnload = null;
             }
             if (this.particles) this.particles.destroy();
-            this._destroyPet();
+            this.petSys.destroy();
             this.doSave();
             stopMusic();
             if (this.multiplayer) {
@@ -275,7 +283,7 @@ export default class GameScene extends Phaser.Scene {
                 this.receiveTalentData(td);
                 this.registry.remove('talentData');
             }
-            this._createPet();
+            this.petSys.create();
             const acc = loadAccount() || {};
             this.crystals = acc.crystals || 0;
             this._savedZone = null;
@@ -416,141 +424,6 @@ export default class GameScene extends Phaser.Scene {
         this.player.body.setOffset(7, 8);
         this.player.body.setCollideWorldBounds(true);
         this.player.play(animKey);
-    }
-
-    _destroyPet() {
-        if (this.petSprite) {
-            this.petSprite.destroy();
-            this.petSprite = null;
-        }
-        this.petData = null;
-        this.petTarget = null;
-    }
-
-    _createPet() {
-        this._destroyPet();
-        this.petAttackTimer = 0;
-        this.petAttackCooldown = 2000;
-        const acc = loadAccount() || {};
-        const equippedPet = acc.equippedPet;
-        if (!equippedPet) return;
-        const petData = PET_DB.find(p => p.id === equippedPet);
-        if (!petData) return;
-        this.petData = petData;
-        this.petLevel = (acc.petLevels || {})[equippedPet] || 1;
-        this.petSprite = this.add.sprite(this.player.x + 20, this.player.y + 10, petData.texKey)
-            .setDepth(9).setScale(1.5);
-        this.tweens.add({
-            targets: this.petSprite,
-            scaleY: 1.6,
-            duration: 1200,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut'
-        });
-    }
-
-    _updatePetFollow() {
-        if (!this.petSprite || !this.player) return;
-        if (this.petTarget && this.petTarget.active && this.petTarget.stats && this.petTarget.stats.hp > 0) {
-            const dx = this.petTarget.x - this.petSprite.x;
-            const dy = this.petTarget.y - this.petSprite.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (this.petData.type === 'tank') {
-                const toEnemyX = this.petTarget.x - this.player.x;
-                const toEnemyY = this.petTarget.y - this.player.y;
-                const enemyDist = Math.sqrt(toEnemyX * toEnemyX + toEnemyY * toEnemyY);
-                const idealDist = Math.min(50, enemyDist * 0.4);
-                const tx = this.player.x + (toEnemyX / (enemyDist || 1)) * idealDist;
-                const ty = this.player.y + (toEnemyY / (enemyDist || 1)) * idealDist;
-                const tdx = tx - this.petSprite.x;
-                const tdy = ty - this.petSprite.y;
-                const tdist = Math.sqrt(tdx * tdx + tdy * tdy);
-                if (tdist > 8) {
-                    this.petSprite.x += (tdx / tdist) * 2.5;
-                    this.petSprite.y += (tdy / tdist) * 2.5;
-                }
-            } else {
-                const stopDist = 48;
-                if (dist > stopDist) {
-                    const speed = 2.8;
-                    this.petSprite.x += (dx / dist) * speed;
-                    this.petSprite.y += (dy / dist) * speed;
-                }
-            }
-            this.petSprite.setFlipX(dx < 0);
-        } else {
-            this.petTarget = null;
-            const offsetX = this.facing === 'left' ? -20 : 20;
-            const targetX = this.player.x + offsetX;
-            const targetY = this.player.y + 10;
-            const dx = targetX - this.petSprite.x;
-            const dy = targetY - this.petSprite.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist > 100) {
-                this.petSprite.x = targetX;
-                this.petSprite.y = targetY;
-            } else {
-                this.petSprite.x += dx * 0.12;
-                this.petSprite.y += dy * 0.12;
-            }
-            this.petSprite.setFlipX(this.facing === 'left');
-        }
-    }
-
-    _updatePetCombat(delta) {
-        if (!this.petSprite || !this.petData) return;
-        const type = this.petData.type;
-        const cooldowns = { attacker: 1500, companion: 2200, tank: 2500, collector: 2000 };
-        this.petAttackCooldown = cooldowns[type] || 2000;
-        this.petAttackTimer -= delta;
-        if (this.petTarget && (!this.petTarget.active || !this.petTarget.stats || this.petTarget.stats.hp <= 0)) {
-            this.petTarget = null;
-        }
-        if (!this.petTarget) {
-            const searchRanges = { attacker: 130, companion: 110, tank: 150, collector: 100 };
-            let closestDist = searchRanges[type] || 120;
-            let closest = null;
-            const groups = [this.enemies, this.villageZombies, this.hellImps, this.caveSmallBats];
-            groups.forEach(grp => {
-                if (!grp) return;
-                grp.getChildren().forEach(e => {
-                    if (!e.active || !e.stats || e.stats.hp <= 0) return;
-                    const d = Phaser.Math.Distance.Between(this.petSprite.x, this.petSprite.y, e.x, e.y);
-                    if (d < closestDist) { closest = e; closestDist = d; }
-                });
-            });
-            const bossList = [this.boss, this.mineBoss, this.caveBoss, this.villageBoss, this.hellBoss, this.snowyIceSpirit, this.castleBoss];
-            bossList.forEach(b => {
-                if (b && b.active && b.stats && b.stats.hp > 0) {
-                    const d = Phaser.Math.Distance.Between(this.petSprite.x, this.petSprite.y, b.x, b.y);
-                    if (d < closestDist) { closest = b; closestDist = d; }
-                }
-            });
-            this.petTarget = closest;
-        }
-        if (this.petTarget && this.petAttackTimer <= 0) {
-            this.petAttackTimer = this.petAttackCooldown;
-            const baseDmg = Math.floor(this.playerDamage * 0.3 * (1 + (this.petLevel - 1) * 0.3));
-            const dmg = Math.max(1, baseDmg);
-            playPetAttack(type);
-            this.tweens.add({
-                targets: this.petSprite,
-                scaleX: 2.0,
-                scaleY: 1.0,
-                duration: 80,
-                yoyo: true,
-                ease: 'Quad.easeOut'
-            });
-            this.combat.hitEnemy(this.petTarget, dmg);
-        }
-    }
-
-    getAggroTarget() {
-        if (!this.petSprite || !this.petData || this.petData.type !== 'tank') return this.player;
-        const petDist = Phaser.Math.Distance.Between(this.petSprite.x, this.petSprite.y, this.player.x, this.player.y);
-        if (petDist > 150) return this.player;
-        return this.petSprite;
     }
 
     /* ===== MULTIPLAYER ===== */
@@ -770,163 +643,8 @@ export default class GameScene extends Phaser.Scene {
 
     /* ===== SAVE/LOAD ===== */
 
-    _collectSaveData() {
-        return {
-            classKey: this.classKey,
-            difficulty: this.difficulty,
-            playerHP: this.playerHP,
-            playerMaxHP: this.playerMaxHP,
-            playerExp: this.playerExp,
-            playerLevel: this.playerLevel,
-            playerX: this.player.x,
-            playerY: this.player.y,
-            zone: this.zone,
-            equipment: this.equipment,
-            materials: this.materials,
-            consumable: this.consumable || null,
-            equipBag: this.equipBag,
-            gold: this.gold || 0,
-            crystals: this.crystals || 0,
-            kills: this.kills,
-            stumpsBroken: this.stumpsBroken,
-            corruption: this.corruption,
-            mineUnlocked: this.mineUnlocked,
-            mineBossDefeated: this.mineBossDefeated,
-            hasSecretKey: this.hasSecretKey,
-            caveBossDefeated: this.caveBossDefeated,
-            bossDefeated: this.bossDefeated,
-            unlockedTalents: this.unlockedTalents,
-            talentPoints: this.talentPoints,
-            villageFrozen: this.villageFrozen,
-            villageRestored: this.villageRestored,
-            villageAllCleared: this.villageAllCleared || false,
-            villageBossDefeated: this.villageBossDefeated || false,
-            hellBossDefeated: this.hellBossDefeated || false,
-            villageThriving: this.villageThriving || false,
-            castleQuestDone: this.castleQuestDone || false,
-            castleRoom: this.castleRoom || 0,
-            castleBossDefeated: this.castleBossDefeated || false,
-            castleKeyObtained: this.castleKeyObtained || false,
-            castleRescued: this.castleRescued || false,
-            innUsed: this.innUsed || false
-        };
-    }
-
-    _collectAccountData() {
-        const acc = loadAccount() || {};
-        const eqPerClass = acc.accountEquipment || {};
-        eqPerClass[this.classKey] = this.accountEquipment;
-        const bagPerClass = acc.accountEquipBag || {};
-        bagPerClass[this.classKey] = this.accountEquipBag;
-        const lockedPerClass = acc.lockedBranchesPerClass || {};
-        lockedPerClass[this.classKey] = this.lockedBranches || [];
-        return {
-            ...acc,
-            accountLevel: this.accountLevel,
-            accountExp: this.accountExp,
-            accountTalentPoints: this.accountTalentPoints,
-            unlockedAccountTalents: this.unlockedAccountTalents,
-            gold: this.gold || 0,
-            crystals: this.crystals || 0,
-            upgradeLevels: this.upgradeLevels || {},
-            accountEquipment: eqPerClass,
-            accountEquipBag: bagPerClass,
-            lockedBranchesPerClass: lockedPerClass
-        };
-    }
-
-    _getHighestClassLevel() {
-        const acc = loadAccount() || {};
-        const map = acc.highestClassLevel || {};
-        map[this.classKey] = Math.max(map[this.classKey] || 0, this.playerLevel || 1);
-        return map;
-    }
-
-    doSave() {
-        saveGame(this._collectSaveData());
-        const accData = this._collectAccountData();
-        accData.highestClassLevel = this._getHighestClassLevel();
-        saveAccount(accData);
-        saveBestiary();
-        saveMaterialBook();
-        saveSoulBook();
-        saveQuests();
-    }
-
-    doLoad() {
-        const data = loadGame();
-        if (!data) return false;
-        this.difficulty = data.difficulty || 'Normal';
-        this.classKey = data.classKey || 'sage';
-        this.playerHP = data.playerHP || this.classStats.maxHp;
-        this.playerMaxHP = data.playerMaxHP || this.classStats.maxHp;
-        this.playerExp = data.playerExp || 0;
-        this.playerLevel = data.playerLevel || 1;
-        if (data.playerX !== undefined) this.player.x = data.playerX;
-        if (data.playerY !== undefined) this.player.y = data.playerY;
-        this.equipment = data.equipment || { weapon: null, armor: null, accessory: null };
-        this.materials = data.materials || [];
-        this.consumable = data.consumable || null;
-        this.equipBag = data.equipBag || [];
-        this.gold = data.gold || 0;
-        this.crystals = data.crystals || 0;
-        this.innUsed = data.innUsed || false;
-        this.kills = data.kills || 0;
-        this.stumpsBroken = data.stumpsBroken || 0;
-        this.corruption = data.corruption || 0;
-        this.mineUnlocked = data.mineUnlocked || false;
-        this.mineBossDefeated = data.mineBossDefeated || false;
-        this.hasSecretKey = data.hasSecretKey || false;
-        this.caveBossDefeated = data.caveBossDefeated || false;
-        this.bossDefeated = data.bossDefeated || false;
-        this.villageFrozen = data.villageFrozen || false;
-        this.villageRestored = data.villageRestored || false;
-        this.villageAllCleared = data.villageAllCleared || false;
-        this.villageBossDefeated = data.villageBossDefeated || false;
-        this.hellBossDefeated = data.hellBossDefeated || false;
-        this.villageThriving = data.villageThriving || false;
-        this.castleQuestDone = data.castleQuestDone || false;
-        this.castleRoom = data.castleRoom || 0;
-        this.castleBossDefeated = data.castleBossDefeated || false;
-        this.castleKeyObtained = data.castleKeyObtained || false;
-        this.castleRescued = data.castleRescued || false;
-        this._savedZone = data.zone || 'forest';
-        this._loadAccountTalents();
-        const acc = loadAccount() || {};
-        this.accountLevel = acc.accountLevel || 1;
-        this.accountExp = acc.accountExp || 0;
-        this.accountTalentPoints = acc.accountTalentPoints || 0;
-        this.unlockedAccountTalents = acc.unlockedAccountTalents || [];
-        const accEquipPerClass2 = acc.accountEquipment || {};
-        const accBagPerClass2 = acc.accountEquipBag || {};
-        this.accountEquipment = accEquipPerClass2[this.classKey] || { ...EMPTY_ACCOUNT_EQUIPMENT };
-        this.accountEquipBag = accBagPerClass2[this.classKey] || [];
-        this.lockedBranches = (acc.lockedBranchesPerClass || {})[this.classKey] || [];
-        this.accountEffects = getAccountTalentEffects(this.unlockedAccountTalents);
-        this.gold = acc.gold || 0;
-        this.crystals = acc.crystals || 0;
-        this.classStats = getClassStats(this.classKey, this.playerLevel);
-        this.talentEffects = getTalentEffects(this.unlockedTalents);
-        this.corruptionMax = this.classStats.corruptionMax + (this.talentEffects.corruptionMax || 0);
-        this.recalcStats();
-        if (this.petSprite) {
-            this.petSprite.x = this.player.x + 20;
-            this.petSprite.y = this.player.y + 10;
-        }
-        return true;
-    }
-
-    _loadAccountTalents() {
-        const data = loadGame();
-        if (data) {
-            this.unlockedTalents = data.unlockedTalents || [];
-            this.talentPoints = data.talentPoints || 0;
-        } else {
-            this.unlockedTalents = [];
-            this.talentPoints = 0;
-        }
-        this.talentEffects = getTalentEffects(this.unlockedTalents);
-    }
+    doSave() { this.saveLoad.doSave(); }
+    doLoad() { return this.saveLoad.doLoad(); }
 
     /* ===== UTILITY ===== */
 
@@ -1249,13 +967,7 @@ export default class GameScene extends Phaser.Scene {
                         this.attack();
                     }
                 } else if (this.zone === 'meadow') {
-                    if (this.meadowGate && Phaser.Math.Distance.Between(
-                        this.player.x, this.player.y, MEADOW_GATE_POS.x, MEADOW_GATE_POS.y
-                    ) < 70) {
-                        this._unlockMeadowGate();
-                    } else {
-                        this.attack();
-                    }
+                    this.zones.meadow.handleSpace();
                 } else if (this.zone === 'cave') {
                     if (this.caveBossDefeated && this.caveStairs && Phaser.Math.Distance.Between(
                         this.player.x, this.player.y, this.caveStairs.x, this.caveStairs.y
@@ -1335,76 +1047,15 @@ export default class GameScene extends Phaser.Scene {
     update(time, delta) {
         this._handleInput();
         this._updateEnemies();
-        this._updateBoss();
+        this.forestBossAI.update(time, delta);
         this._updateCorruption();
         this._updateSpells(delta);
         this._updateConsumableBonuses(delta);
-        this._updatePetFollow();
-        this._updatePetCombat(delta);
+        this.petSys.updateFollow();
+        this.petSys.updateCombat(delta);
 
         if (this.currentZone) {
             this.currentZone.update(time, delta);
-        }
-
-        if (this.zone === 'village' && this.villageFrozen && this.campfire && !this.villageBossDefeated) {
-            const cd = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.campfire.x, this.campfire.y);
-            if (cd < 80) {
-                if (this.campfireHint) this.campfireHint.setText('SPACE = activate');
-            } else if (this.campfireHint) {
-                this.campfireHint.setText('');
-            }
-        }
-        if (this.zone === 'village' && this.villageBossDefeated && this.campfire) {
-            const cd = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.campfire.x, this.campfire.y);
-            if (cd < 80) {
-                if (this.campfireHint) this.campfireHint.setText('SPACE = restore village');
-            } else if (this.campfireHint) {
-                this.campfireHint.setText('');
-            }
-        }
-        if (this.zone === 'cemetery') {
-            if (!this.villageBossSpawned && !this.villageBossDefeated) {
-                this.zones.village?._spawnVillageBoss();
-            }
-            if (this.villageBossDefeated && this.hellPortal) {
-                const pd = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.hellPortal.x, this.hellPortal.y);
-                if (pd < 80) {
-                    if (this.hellPortalHint) this.hellPortalHint.setText('SPACE = enter Hell');
-                } else if (this.hellPortalHint) {
-                    this.hellPortalHint.setText('');
-                }
-            }
-        }
-        if (this.zone === 'hell' && this.hellBossDefeated && this.hellReturnPortal) {
-            const pd = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.hellReturnPortal.x, this.hellReturnPortal.y);
-            if (pd < 80) {
-                if (this.hellReturnPortalHint) this.hellReturnPortalHint.setText('SPACE = return to Village');
-            } else if (this.hellReturnPortalHint) {
-                this.hellReturnPortalHint.setText('');
-            }
-        }
-
-        if (this.zone === 'village' && !this.villageFrozen && this.villageRestored) {
-            this.nearbyShop = null;
-            this.nearbyInn = null;
-            if (this.villageMerchantNPC && this.villageMerchantHint) {
-                const md = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.villageMerchantNPC.x, this.villageMerchantNPC.y);
-                if (md < 50) {
-                    this.nearbyShop = this.villageMerchantNPC;
-                    this.villageMerchantHint.setText('SPACE = shop');
-                } else {
-                    this.villageMerchantHint.setText('');
-                }
-            }
-            if (this.villageInn && this.villageInnHint) {
-                const id = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.villageInn.x, this.villageInn.y);
-                if (id < 40) {
-                    this.nearbyInn = this.villageInn;
-                    this.villageInnHint.setText(this.innUsed ? 'Already rested' : 'SPACE = rest');
-                } else {
-                    this.villageInnHint.setText('');
-                }
-            }
         }
 
         this.updateUI();
@@ -1534,374 +1185,5 @@ export default class GameScene extends Phaser.Scene {
                 }
             }
         });
-    }
-
-    /* ===== BOSS AI (Forest Treant) ===== */
-
-    _updateBoss() {
-        if (!this.bossAlive || !this.boss || !this.boss.active) return;
-        const b = this.boss;
-        const st = b.stats;
-        const delta = this.game.loop.delta;
-
-        b.hpBg.x = b.x;
-        b.hpBg.y = b.y - 50;
-        b.hpFill.x = b.x;
-        b.hpFill.y = b.y - 50;
-        b.hpFill.width = b.hpBg.width * (st.hp / st.maxHp);
-        if (this.bossNameText) {
-            this.bossNameText.x = b.x;
-            this.bossNameText.y = b.y - 60;
-        }
-
-        if (this.menuOpen || this.transitioning) {
-            b.body.setVelocity(0);
-            return;
-        }
-
-        if (st.transitioning) {
-            b.body.setVelocity(0);
-            return;
-        }
-
-        if (st.invulnerable) {
-            b.body.setVelocity(0);
-            return;
-        }
-
-        const hpPct = st.hp / st.maxHp;
-        if (hpPct <= 0.3 && st.phase !== 3) {
-            st.phase = 3;
-            this._bossPhaseTransition(b);
-            return;
-        } else if (hpPct <= 0.6 && st.phase !== 2) {
-            st.phase = 2;
-            this._bossPhaseTransition(b);
-            return;
-        }
-
-        if (st.aiState === 'telegraph') {
-            b.body.setVelocity(0);
-            st.telegraphTimer -= delta;
-            if (st.telegraphTimer <= 0) {
-                this._bossExecuteAttack(b);
-            }
-            return;
-        }
-
-        if (st.aiState === 'attacking') {
-            b.body.setVelocity(0);
-            st.attackDuration -= delta;
-            if (st.attackDuration <= 0) {
-                st.aiState = 'cooldown';
-                st.cooldownTimer = 800;
-                if (b.telegraph) { b.telegraph.destroy(); b.telegraph = null; }
-            }
-            return;
-        }
-
-        if (st.aiState === 'cooldown') {
-            b.body.setVelocity(0);
-            st.cooldownTimer -= delta;
-            if (st.cooldownTimer <= 0) {
-                st.aiState = 'chase';
-            }
-            return;
-        }
-
-        st.aiState = 'chase';
-        const dx = this.player.x - b.x;
-        const dy = this.player.y - b.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const speed = st.phase === 3 ? st.baseSpeed * 1.2 : st.baseSpeed;
-
-        if (dist > 30) {
-            b.body.setVelocity((dx / dist) * speed, (dy / dist) * speed);
-            if (!b.anims.isPlaying || b.anims.currentAnim.key !== 'treant_walk') {
-                b.play('treant_walk');
-            }
-            b.setFlipX(dx < 0);
-        } else {
-            b.body.setVelocity(0);
-            b.stop();
-            b.setFrame(0);
-        }
-
-        st.attackTimer -= delta;
-        st.slamCooldown -= delta;
-        st.rootCooldown -= delta;
-        st.chargeCooldown -= delta;
-
-        if (st.attackTimer <= 0) {
-            const attack = this._pickTreantAttack(st);
-            if (attack) {
-                this._bossTelegraph(b, attack);
-            } else {
-                st.attackTimer = 800;
-            }
-        }
-    }
-
-    _pickTreantAttack(st) {
-        const available = [];
-        if (st.slamCooldown <= 0) available.push('slam');
-        if (st.phase >= 2 && st.rootCooldown <= 0) available.push('roots');
-        if (st.phase >= 3 && st.chargeCooldown <= 0) available.push('charge');
-        if (available.length === 0) return null;
-        return available[Math.floor(Math.random() * available.length)];
-    }
-
-    _bossTelegraph(boss, attackType) {
-        const st = boss.stats;
-        st.aiState = 'telegraph';
-        st.currentAttack = attackType;
-        st.telegraphTimer = 500;
-        boss.body.setVelocity(0);
-
-        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
-
-        if (attackType === 'slam') {
-            const tg = this.add.sprite(boss.x, boss.y, 'boss_telegraph_circle')
-                .setAlpha(0).setDepth(10).setScale(st.aoeRadius / 64);
-            this.tweens.add({ targets: tg, alpha: 0.9, duration: 200 });
-            boss.telegraph = tg;
-            st.slamCooldown = st.phase >= 3 ? 2500 : 4000;
-        } else if (attackType === 'roots') {
-            const tg = this.add.sprite(boss.x, boss.y, 'boss_telegraph_square')
-                .setAlpha(0).setDepth(10).setScale(1.2);
-            this.tweens.add({ targets: tg, alpha: 0.9, duration: 200 });
-            boss.telegraph = tg;
-            st.rootCooldown = st.phase >= 3 ? 5000 : 8000;
-        } else if (attackType === 'charge') {
-            const dx = this.player.x - boss.x;
-            const dy = this.player.y - boss.y;
-            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            const nx = dx / dist;
-            const ny = dy / dist;
-            const angle = Math.atan2(ny, nx);
-            const tg = this.add.sprite(boss.x, boss.y, 'boss_telegraph_line')
-                .setAlpha(0).setDepth(10).setRotation(angle);
-            this.tweens.add({ targets: tg, alpha: 0.9, duration: 200 });
-            boss.telegraph = tg;
-            st.chargeCooldown = 5000;
-        }
-        st.attackTimer = 3000;
-    }
-
-    _bossExecuteAttack(boss) {
-        const st = boss.stats;
-        st.aiState = 'attacking';
-        st.attackDuration = 400;
-
-        if (st.currentAttack === 'slam') {
-            this._treantGroundSlam(boss);
-        } else if (st.currentAttack === 'roots') {
-            this._treantRootSummon(boss);
-        } else if (st.currentAttack === 'charge') {
-            this._treantCharge(boss);
-            st.attackDuration = 600;
-        }
-    }
-
-    _treantGroundSlam(boss) {
-        const st = boss.stats;
-        const dmgMul = st.phase === 3 ? st.aoeDmgMul * 1.5 : st.aoeDmgMul;
-        const aoeDmg = Math.floor(st.damage * dmgMul);
-        const radius = st.aoeRadius;
-        playBossAoE();
-
-        const ring = this.add.sprite(boss.x, boss.y, 'boss_aoe')
-            .setAlpha(0.9).setScale(0.3).setDepth(10);
-        this.tweens.add({
-            targets: ring, scaleX: 1.8, scaleY: 1.8, alpha: 0, duration: 500,
-            onComplete: () => ring.destroy()
-        });
-
-        const ring2 = this.add.sprite(boss.x, boss.y, 'boss_aoe')
-            .setAlpha(0.5).setScale(0.1).setDepth(10);
-        this.tweens.add({
-            targets: ring2, scaleX: 1.2, scaleY: 1.2, alpha: 0, duration: 400, delay: 100,
-            onComplete: () => ring2.destroy()
-        });
-
-        this.time.delayedCall(300, () => {
-            if (!boss.active) return;
-            const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, boss.x, boss.y);
-            if (dist < radius) {
-                this.takeDamage(aoeDmg);
-                const pushX = this.player.x - boss.x;
-                const pushY = this.player.y - boss.y;
-                const pushDist = Math.sqrt(pushX * pushX + pushY * pushY) || 1;
-                this.player.x += (pushX / pushDist) * 45;
-                this.player.y += (pushY / pushDist) * 45;
-            }
-        });
-    }
-
-    _treantRootSummon(boss) {
-        const st = boss.stats;
-        playBossAoE();
-        this.floatingText(boss.x, boss.y - 40, 'ROOTS!', '#22aa44');
-
-        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
-
-        const count = st.phase >= 3 ? 3 : 2;
-        for (let i = 0; i < count; i++) {
-            const angle = (i / count) * Math.PI * 2 + Math.random() * 0.5;
-            const sx = boss.x + Math.cos(angle) * 70;
-            const sy = boss.y + Math.sin(angle) * 70;
-            this._spawnTreantRootAdd(sx, sy);
-        }
-    }
-
-    _spawnTreantRootAdd(x, y) {
-        const e = this.add.sprite(x, y, 'root_add').setDepth(5);
-        this.physics.add.existing(e, false);
-        e.body.setSize(18, 20);
-        e.body.setCollideWorldBounds(true);
-
-        const rootHp = Math.floor(60 * (this.diffMulti.hp || 1));
-        const rootDmg = Math.floor(8 * (this.diffMulti.dmg || 1));
-
-        e.stats = {
-            key: 'root_add', name: 'Treant Root',
-            hp: rootHp, maxHp: rootHp,
-            damage: rootDmg, exp: 5,
-            bw: 18, bh: 20,
-            wTimer: 0, wDir: 0
-        };
-
-        e.hpBg = this.add.rectangle(x, y - 18, 22, 3, 0x333333).setOrigin(0.5).setDepth(11);
-        e.hpFill = this.add.rectangle(x, y - 18, 22, 3, 0x22aa44).setOrigin(0.5).setDepth(11);
-        this.enemies.add(e);
-        if (this.multiplayer && this.mpSync) {
-            this.mpSync.assignMobId(e, 'root_add');
-        }
-    }
-
-    _treantCharge(boss) {
-        const st = boss.stats;
-        const dx = this.player.x - boss.x;
-        const dy = this.player.y - boss.y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const chargeSpeed = st.baseSpeed * 3;
-        const dmg = Math.floor(st.damage * 1.8);
-
-        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
-
-        boss.setTint(0xffaa44);
-        boss.body.setVelocity((dx / dist) * chargeSpeed, (dy / dist) * chargeSpeed);
-
-        this.time.delayedCall(400, () => {
-            if (!boss.active) return;
-            boss.body.setVelocity(0);
-            boss.clearTint();
-            const pdist = Phaser.Math.Distance.Between(this.player.x, this.player.y, boss.x, boss.y);
-            if (pdist < 60) {
-                this.takeDamage(dmg);
-                const pushX = this.player.x - boss.x;
-                const pushY = this.player.y - boss.y;
-                const pushDist = Math.sqrt(pushX * pushX + pushY * pushY) || 1;
-                this.player.x += (pushX / pushDist) * 60;
-                this.player.y += (pushY / pushDist) * 60;
-                this.floatingText(this.player.x, this.player.y - 30, 'CHARGED!', '#ff6622');
-            }
-        });
-    }
-
-    _bossPhaseTransition(boss) {
-        const st = boss.stats;
-        st.transitioning = true;
-        st.invulnerable = true;
-        boss.body.setVelocity(0);
-
-        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
-
-        this.cameras.main.shake(300, 0.01);
-        this.tweens.add({
-            targets: boss, alpha: 0.3, duration: 150, yoyo: true, repeat: 3,
-            onComplete: () => { if (boss.active) boss.setAlpha(1); }
-        });
-
-        const flash = this.add.rectangle(400, 300, GAME_WIDTH, GAME_HEIGHT, 0xffffff)
-            .setAlpha(0).setDepth(20).setScrollFactor(0);
-        this.tweens.add({
-            targets: flash, alpha: 0.4, duration: 200, yoyo: true,
-            onComplete: () => flash.destroy()
-        });
-
-        if (st.phase === 3) {
-            st.baseSpeed = Math.floor(st.baseSpeed * 1.2);
-            st.damage = Math.floor(st.damage * 1.5);
-            this.floatingText(boss.x, boss.y - 50, 'ENRAGED!', '#ff2222');
-        } else if (st.phase === 2) {
-            this.floatingText(boss.x, boss.y - 50, 'PHASE 2!', '#ffaa00');
-        }
-
-        this.time.delayedCall(1200, () => {
-            if (boss.active) {
-                st.transitioning = false;
-                st.invulnerable = false;
-                st.aiState = 'chase';
-                st.attackTimer = 1500;
-            }
-        });
-    }
-
-    /* ===== MEADOW (not yet a zone class) ===== */
-
-    _setupMeadow() {
-        this.cameras.main.setBackgroundColor('#1a3a1a');
-        this.physics.world.setBounds(0, 0, MEADOW_WIDTH, MEADOW_HEIGHT);
-        this.cameras.main.setBounds(0, 0, MEADOW_WIDTH, MEADOW_HEIGHT);
-
-        this.meadowBg = this.add.image(400, 300, 'meadow_ground').setDepth(0);
-
-        this.meadowGate = this.add.sprite(MEADOW_GATE_POS.x, MEADOW_GATE_POS.y, 'mine_gate').setDepth(5);
-        this.physics.add.existing(this.meadowGate, true);
-        this.meadowGate.body.setSize(64, 80);
-
-        this.gateHint = this.add.text(MEADOW_GATE_POS.x, MEADOW_GATE_POS.y + 50, '', {
-            fontSize: '12px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
-
-        this.player.x = 400;
-        this.player.y = 500;
-        this.player.body.setCollideWorldBounds(true);
-        this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
-        this.cameras.main.setDeadzone(100, 80);
-
-        this.zone = 'meadow';
-        startZoneMusic('meadow');
-        this.doSave();
-    }
-
-    _unlockMeadowGate() {
-        if (this.transitioning || this.menuOpen) return;
-        if (this.zone !== 'meadow') return;
-        if (!this.meadowGate) return;
-        const dist = Phaser.Math.Distance.Between(
-            this.player.x, this.player.y, MEADOW_GATE_POS.x, MEADOW_GATE_POS.y
-        );
-        if (dist >= 70) return;
-
-        this.transitioning = true;
-        this.gateHint.setText('');
-        playPortal();
-        this.cameras.main.fadeOut(800, 0, 0, 0);
-        this.time.delayedCall(800, () => {
-            this._clearMeadow();
-            this._setupZone('cave');
-            this.cameras.main.fadeIn(500, 0, 0, 0);
-            this.transitioning = false;
-        });
-    }
-
-    _clearMeadow() {
-        this.physics.world.colliders.destroy();
-        if (this.meadowBg) { this.meadowBg.destroy(); this.meadowBg = null; }
-        if (this.meadowGate) { this.meadowGate.destroy(); this.meadowGate = null; }
-        if (this.gateHint) { this.gateHint.destroy(); this.gateHint = null; }
     }
 }

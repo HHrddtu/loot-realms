@@ -96,18 +96,6 @@ export class CaveZone {
             loot.destroy();
         }, null, s);
 
-        s.physics.add.overlap(s.player, s.caveExtraChests, (p, ch) => {
-            if (!ch.active || ch.opened) return;
-            const dist = Phaser.Math.Distance.Between(p.x, p.y, ch.x, ch.y);
-            if (dist < 45) {
-                ch.opened = true;
-                ch.setTexture('treasure_chest');
-                const gold = 15 + Math.floor(Math.random() * 26);
-                s.gold += gold;
-                s.floatingText(ch.x, ch.y - 20, '+' + gold + ' gold', '#f1c40f');
-            }
-        }, null, s);
-
         s.zone = 'cave';
         s.npc.spawnNPCs();
         s.hintText.setText('Q=quests | I=inventory | TAB=stats | T=talents | P=pause');
@@ -131,6 +119,8 @@ export class CaveZone {
         if (s.caveExtraChests) {
             s.caveExtraChests.getChildren().forEach(ch => {
                 if (ch.hintText) ch.hintText.destroy();
+                if (ch.hpBg) ch.hpBg.destroy();
+                if (ch.hpFill) ch.hpFill.destroy();
             });
             s.caveExtraChests.clear(true, true);
             s.caveExtraChests.destroy();
@@ -401,11 +391,20 @@ export class CaveZone {
             const cx = ox + 50 + Math.random() * (w - 100);
             const cy = 100 + Math.random() * (h - 200);
             const ch = s.add.sprite(cx, cy, 'treasure_chest').setDepth(6);
-            ch.opened = false;
-            ch.hintText = s.add.text(cx, cy - 18, '', {
+            ch.stats = { hp: 40, maxHp: 40 };
+            ch.hpBg = s.add.rectangle(cx, cy - 18, 28, 3, 0x333333).setOrigin(0.5).setDepth(11);
+            ch.hpFill = s.add.rectangle(cx, cy - 18, 28, 3, 0xf1c40f).setOrigin(0.5).setDepth(11);
+            ch.broken = false;
+            ch.loot = [];
+            const count2 = 1 + Math.floor(Math.random() * 2);
+            for (let j = 0; j < count2; j++) {
+                if (Math.random() < 0.5) ch.loot.push(rollZoneEquip(zone));
+            }
+            ch.hintText = s.add.text(cx, cy - 22, '', {
                 fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
                 stroke: '#000', strokeThickness: 2
             }).setOrigin(0.5).setDepth(12);
+            ch.isForestChest = true;
             s.caveExtraChests.add(ch);
             ch.body.setSize(22, 18);
             ch.body.setCollideWorldBounds(true);
@@ -428,11 +427,11 @@ export class CaveZone {
 
         if (s.caveExtraChests) {
             s.caveExtraChests.getChildren().forEach(ch => {
-                if (!ch.active || ch.opened) return;
+                if (!ch.active || ch.broken) return;
                 const cdist = Phaser.Math.Distance.Between(
                     s.player.x, s.player.y, ch.x, ch.y
                 );
-                ch.hintText.setText(cdist < 45 ? 'Open!' : '');
+                ch.hintText.setText(cdist < 45 ? 'Attack!' : '');
             });
         }
 

@@ -791,6 +791,22 @@ export class SpellSystem {
                     }
                 });
             }
+            if (this.scene.forestChests) {
+                this.scene.forestChests.getChildren().forEach(ch => {
+                    if (ch.active && !ch.broken && Phaser.Math.Distance.Between(fb.x, fb.y, ch.x, ch.y) < 20) {
+                        this.scene.hitChest(ch, fb.damage);
+                        hit = true;
+                    }
+                });
+            }
+            if (this.scene.caveExtraChests) {
+                this.scene.caveExtraChests.getChildren().forEach(ch => {
+                    if (ch.active && !ch.broken && Phaser.Math.Distance.Between(fb.x, fb.y, ch.x, ch.y) < 20) {
+                        this.scene.hitChest(ch, fb.damage);
+                        hit = true;
+                    }
+                });
+            }
             if (this.scene.caveBoss && this.scene.caveBoss.active && Phaser.Math.Distance.Between(fb.x, fb.y, this.scene.caveBoss.x, this.scene.caveBoss.y) < 40) {
                 let totalDmg = fb.damage + (fb.dot || 0) * (fb.dotDuration || 0);
                 if (this.scene.computedBossDamage) totalDmg = Math.floor(totalDmg * (1 + this.scene.computedBossDamage / 100));
