@@ -472,6 +472,8 @@ export class CaveZone {
         if (s.zone !== 'cave' || s.menuOpen || s.transitioning) return;
         if (!s.enemies) return;
 
+        const ox = s.caveOffsetX;
+
         s.enemies.getChildren().forEach(e => {
             if (!e.active || !e.stats) return;
             if (e === s.caveBoss) return;
@@ -481,16 +483,33 @@ export class CaveZone {
             const dy = aggroBat.y - e.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
-            if (dist < 200) {
-                const speed = 50;
-                if (dist > 30) {
+            const clampX = Phaser.Math.Clamp(e.x, ox + 16, ox + CAVE_WIDTH - 16);
+            const clampY = Phaser.Math.Clamp(e.y, 16, CAVE_HEIGHT - 16);
+            if (e.x !== clampX || e.y !== clampY) {
+                e.x = clampX;
+                e.y = clampY;
+            }
+
+            if (dist < 250) {
+                const speed = 55;
+                if (dist > 25) {
                     e.body.setVelocity((dx / dist) * speed, (dy / dist) * speed);
                     e.setFlipX(dx < 0);
                 } else {
                     e.body.setVelocity(0);
                 }
             } else {
-                e.body.setVelocity(0);
+                const centerX = ox + CAVE_WIDTH / 2;
+                const centerY = CAVE_HEIGHT / 2;
+                const wDx = centerX - e.x;
+                const wDy = centerY - e.y;
+                const wDist = Math.sqrt(wDx * wDx + wDy * wDy);
+                if (wDist > 60) {
+                    e.body.setVelocity((wDx / wDist) * 25, (wDy / wDist) * 25);
+                    e.setFlipX(wDx < 0);
+                } else {
+                    e.body.setVelocity(0);
+                }
             }
 
             e.hpBg.x = e.x;
@@ -528,7 +547,8 @@ export class CaveZone {
     caveBossSpawnCheck() {
         const s = this.scene;
         if (s.zone !== 'cave' || s.caveBossSpawned || s.caveBossDefeated) return;
-        if (s.enemies.getChildren().length <= 2) {
+        const alive = s.enemies.getChildren().filter(e => e.active);
+        if (alive.length <= 2) {
             s.caveBossSpawned = true;
             this.spawnCaveBoss();
         }
