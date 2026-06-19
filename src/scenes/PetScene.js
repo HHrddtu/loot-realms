@@ -240,7 +240,7 @@ export default class PetScene extends Phaser.Scene {
             .setDepth(200).setInteractive());
         this._panelEls.push(backdrop);
 
-        const bg = this._add(this.add.rectangle(400, 300, 500, 530, 0x0a0a1a, 0.98)
+        const bg = this._add(this.add.rectangle(400, 305, 500, 550, 0x0a0a1a, 0.98)
             .setDepth(201).setStrokeStyle(2, 0xf39c12));
         this._panelEls.push(bg);
 
@@ -272,7 +272,7 @@ export default class PetScene extends Phaser.Scene {
                 fontSize: '10px', fill: rarityColors[rarity], fontFamily: 'Arial', fontStyle: 'bold'
             }).setDepth(202));
             this._panelEls.push(header);
-            yOff += 14;
+            yOff += 16;
 
             pets.forEach(pet => {
                 const stats = getPetStats(pet.id, 1);
@@ -280,26 +280,26 @@ export default class PetScene extends Phaser.Scene {
                 const statNames = { hpPercent: '+{0}%HP', damagePercent: '+{0}%DMG', spellPercent: '+{0}%Spell', critPercent: '+{0}%Crit', speedPercent: '+{0}%SPD', regenPercent: '+{0}%Regen', lootPercent: '+{0}%Loot', damageReduction: '+{0}%DR' };
                 Object.entries(stats).forEach(([k, v]) => { if (statNames[k]) statParts.push(statNames[k].replace('{0}', v)); });
 
-                const petSpr = this._add(this.add.sprite(190, yOff + 1, pet.texKey).setScale(1.5).setDepth(202));
+                const petSpr = this._add(this.add.sprite(190, yOff + 6, pet.texKey).setScale(1.5).setDepth(202));
                 this._panelEls.push(petSpr);
-                const petName = this._add(this.add.text(205, yOff - 4, pet.name, {
+                const petName = this._add(this.add.text(210, yOff, pet.name, {
                     fontSize: '10px', fill: rarityColors[rarity], fontFamily: 'Arial', fontStyle: 'bold'
                 }).setDepth(202));
                 this._panelEls.push(petName);
-                const petStats = this._add(this.add.text(205, yOff + 8, statParts.join('  '), {
+                const petStats = this._add(this.add.text(210, yOff + 12, statParts.join('  '), {
                     fontSize: '8px', fill: '#888', fontFamily: 'Arial'
                 }).setDepth(202));
                 this._panelEls.push(petStats);
-                yOff += 20;
+                yOff += 24;
             });
-            yOff += 3;
+            yOff += 4;
         });
 
         const canBuy = this.crystals >= caseData.price;
-        const buyBtn = this._add(this.add.rectangle(340, 530, 90, 28, canBuy ? 0x27ae60 : 0x555555)
+        const buyBtn = this._add(this.add.rectangle(340, 565, 90, 28, canBuy ? 0x27ae60 : 0x555555)
             .setDepth(202).setStrokeStyle(1, canBuy ? lighten(0x27ae60, 0.3) : 0x444));
         if (canBuy) buyBtn.setInteractive({ useHandCursor: true });
-        const buyTxt = this._add(this.add.text(340, 530, 'BUY', {
+        const buyTxt = this._add(this.add.text(340, 565, 'BUY', {
             fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(202));
         this._panelEls.push(buyBtn, buyTxt);
@@ -310,9 +310,9 @@ export default class PetScene extends Phaser.Scene {
             buyBtn.on('pointerout', () => buyBtn.setFillStyle(0x27ae60));
         }
 
-        const closeBtn = this._add(this.add.rectangle(430, 530, 90, 28, 0x34495e)
+        const closeBtn = this._add(this.add.rectangle(430, 565, 90, 28, 0x34495e)
             .setDepth(202).setStrokeStyle(1, 0x5a6c7d).setInteractive({ useHandCursor: true }));
-        const closeTxt = this._add(this.add.text(430, 530, 'CLOSE', {
+        const closeTxt = this._add(this.add.text(430, 565, 'CLOSE', {
             fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(202));
         this._panelEls.push(closeBtn, closeTxt);

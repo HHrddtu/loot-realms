@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { NPC_DB, QUEST_DB, CART_DRIVER_NPC, GAME_WIDTH, GAME_HEIGHT } from '../config/index.js';
-import { getNpcQuestStatus, getActiveQuests, getAvailableQuests, acceptQuest, completeQuest, isQuestComplete, saveQuests, getQuestProgress } from '../quests.js';
+import { getNpcQuestStatus, getActiveQuests, getAvailableQuests, acceptQuest, completeQuest, isQuestComplete, saveQuests, getQuestProgress, getQuestNpc } from '../quests.js';
 import { rollEquip } from '../utils.js';
 import { getLang } from '../i18n.js';
 import { t } from '../i18n.js';
@@ -364,6 +364,13 @@ export class NpcSystem {
                 const y = 75 + i * 95;
                 const complete = isQuestComplete(q.key);
                 const color = complete ? '#2ecc71' : '#ecf0f1';
+
+                const npc = getQuestNpc(q.key);
+                if (npc && npc.texKey) {
+                    try {
+                        s.questLogGroup.push(mk(s.add.sprite(40, y + 8, npc.texKey).setScale(1.5)));
+                    } catch (e) {}
+                }
 
                 s.questLogGroup.push(mk(s.add.text(60, y, q.name, {
                     fontSize: '15px', fill: color, fontFamily: 'Arial', fontStyle: 'bold'

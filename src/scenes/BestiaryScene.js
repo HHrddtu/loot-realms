@@ -302,12 +302,16 @@ export default class BestiaryScene extends Phaser.Scene {
         }).setDepth(7);
         this.detailElements.push(reqText);
 
+        let curY = py + 280;
+
         if (entry.infoLevel === 'stats') {
             this.detailDesc.setText(`A creature of the ${entry.biome}. Encounters: ${entry.encounters}. Kills: ${entry.kills}.`).setVisible(true);
-            this.detailDesc.setPosition(px + 15, py + 280);
+            this.detailDesc.setPosition(px + 15, curY);
+            curY += this.detailDesc.height + 12;
         } else {
             this.detailDesc.setText(entry.description || '').setVisible(true);
-            this.detailDesc.setPosition(px + 15, py + 280);
+            this.detailDesc.setPosition(px + 15, curY);
+            curY += this.detailDesc.height + 10;
 
             let weakText = '';
             if (entry.weaknesses.length > 0) weakText += t('bestiary.weaknesses') + ': ' + entry.weaknesses.join(', ');
@@ -316,15 +320,19 @@ export default class BestiaryScene extends Phaser.Scene {
                 weakText += t('bestiary.resistances') + ': ' + entry.resistances.join(', ');
             }
             this.detailWeakness.setText(weakText).setVisible(weakText.length > 0);
-            this.detailWeakness.setPosition(px + 15, py + 340);
+            this.detailWeakness.setPosition(px + 15, curY);
+            if (weakText.length > 0) curY += this.detailWeakness.height + 10;
 
             if (entry.abilities.length > 0) {
                 this.detailAbilities.setText(t('bestiary.abilities') + ':\n' + entry.abilities.map(a => '  — ' + a).join('\n')).setVisible(true);
+            } else {
+                this.detailAbilities.setText('').setVisible(false);
             }
-            this.detailAbilities.setPosition(px + 15, py + 390);
+            this.detailAbilities.setPosition(px + 15, curY);
+            if (entry.abilities.length > 0) curY += this.detailAbilities.height + 10;
 
             this.detailLore.setText(entry.lore || '').setVisible((entry.lore || '').length > 0);
-            this.detailLore.setPosition(px + 15, py + 440);
+            this.detailLore.setPosition(px + 15, curY);
         }
     }
 

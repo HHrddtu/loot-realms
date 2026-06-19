@@ -147,6 +147,7 @@ export default class GameScene extends Phaser.Scene {
 
         this.unlockedTalents = [];
         this.talentPoints = 0;
+        this.lockedBranches = [];
         this._loadAccountTalents = () => this.saveLoad.loadAccountTalents();
         this._loadAccountTalents();
 
@@ -859,6 +860,7 @@ export default class GameScene extends Phaser.Scene {
         this.recalcStats();
         this.menuOpen = false;
         this.physics.resume();
+        this.doSave();
     }
 
     /* ===== INPUT ===== */

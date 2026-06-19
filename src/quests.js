@@ -114,6 +114,13 @@ export function isQuestCompleted(qKey) {
     return completedQuests.includes(qKey);
 }
 
+export function getQuestNpc(qKey) {
+    for (const [npcKey, npc] of Object.entries(NPC_DB)) {
+        if (npc.quests && npc.quests.includes(qKey)) return { key: npcKey, ...npc };
+    }
+    return null;
+}
+
 export function getCompletedQuests() {
     return [...completedQuests];
 }
