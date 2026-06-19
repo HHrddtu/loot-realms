@@ -210,7 +210,6 @@ export class ForestZone {
             const ty = 200 + Math.random() * (FOREST_HEIGHT - 400);
             const tex = texKeys[Math.floor(Math.random() * texKeys.length)];
             const trap = s.add.sprite(tx, ty, tex).setDepth(1).setAlpha(0.7);
-            s.physics.add.existing(trap, true);
             trap.onCooldown = false;
             s.trapGroup.add(trap);
             trap.body.setSize(20, 20);
@@ -229,7 +228,6 @@ export class ForestZone {
             const lx = 30 + Math.random() * (GAME_WIDTH - 60);
             const ly = 150 + Math.random() * (FOREST_HEIGHT - 300);
             const loot = s.add.sprite(lx, ly, 'gold_pile').setDepth(1).setAlpha(0.85);
-            s.physics.add.existing(loot, true);
             loot.goldValue = 5 + Math.floor(Math.random() * 11);
             loot.mpId = 'loot_forest_' + i;
             s.groundLootGroup.add(loot);
@@ -248,7 +246,6 @@ export class ForestZone {
             const cx = 50 + Math.random() * (GAME_WIDTH - 100);
             const cy = 180 + Math.random() * (FOREST_HEIGHT - 360);
             const ch = s.add.sprite(cx, cy, 'treasure_chest').setDepth(6);
-            s.physics.add.existing(ch, false);
             ch.opened = false;
             ch.mpId = 'chest_forest_' + i;
             ch.hintText = s.add.text(cx, cy - 18, '', {

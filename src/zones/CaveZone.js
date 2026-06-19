@@ -358,7 +358,6 @@ export class CaveZone {
             const ty = 80 + Math.random() * (h - 160);
             const tex = texKeys[Math.floor(Math.random() * texKeys.length)];
             const trap = s.add.sprite(tx, ty, tex).setDepth(1).setAlpha(0.7);
-            s.physics.add.existing(trap, true);
             trap.onCooldown = false;
             s.trapGroup.add(trap);
             trap.body.setSize(20, 20);
@@ -381,7 +380,6 @@ export class CaveZone {
             const lx = ox + 30 + Math.random() * (w - 60);
             const ly = 60 + Math.random() * (h - 120);
             const loot = s.add.sprite(lx, ly, 'gold_pile').setDepth(1).setAlpha(0.85);
-            s.physics.add.existing(loot, true);
             loot.goldValue = 5 + Math.floor(Math.random() * 11);
             s.groundLootGroup.add(loot);
             loot.body.setSize(10, 8);
@@ -403,7 +401,6 @@ export class CaveZone {
             const cx = ox + 50 + Math.random() * (w - 100);
             const cy = 100 + Math.random() * (h - 200);
             const ch = s.add.sprite(cx, cy, 'treasure_chest').setDepth(6);
-            s.physics.add.existing(ch, false);
             ch.opened = false;
             ch.hintText = s.add.text(cx, cy - 18, '', {
                 fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
