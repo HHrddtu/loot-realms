@@ -55,8 +55,7 @@ export default class TalentScene extends Phaser.Scene {
         this._drawCurrentBranch();
         this._setupScroll();
 
-        this.respecBtn = this.menuBtn(160, 572, 'RESPEC', 0xc0392b, () => this._respec());
-        this.lockBtn = this.menuBtn(300, 572, 'LOCK', 0xe67e22, () => this._lockBranch());
+        // lockBtn и respecBtn создаются в _drawCurrentBranch
         this.menuBtn(440, 572, 'CLOSE', 0x34495e, () => this._close());
         this.menuBtn(580, 572, 'BACK', 0x2980b9, () => this._close());
     }
@@ -232,9 +231,31 @@ export default class TalentScene extends Phaser.Scene {
         this.lineGfx.clear();
 
         const respecCost = this._calcRespecCost();
-        this.respecBtn.label.setText(`RESPEC (${respecCost}g)`);
+        // Удаляем старую кнопку, если она существует
+        if (this.respecBtnObj) {
+            this.respecBtnObj.btn.destroy();
+            this.respecBtnObj.label.destroy();
+        }
+        
+        // Создаем новую кнопку с правильной стоимостью
+        this.respecBtnObj = this.menuBtn(160, 572, 'RESPEC', 0xc0392b, () => this._respec());
+        this.respecBtnObj.label.setText(`RESPEC (${respecCost}g)`);
+        this.respecBtn = this.respecBtnObj.btn;
 
-        this.lockBtn.setVisible(this.activeTab === 'class' && !isLocked);
+        // Удаляем старую кнопку, если она существует
+        if (this.lockBtnObj) {
+            this.lockBtnObj.btn.destroy();
+            this.lockBtnObj.label.destroy();
+        }
+        
+        // Создаем новую кнопку с правильным текстом и функцией
+        const isBranchLocked = this.activeTab === 'class' && this.classBranches[this.activeBranch] &&
+            this.lockedBranches.includes(this.classBranches[this.activeBranch].key);
+        const btnText = isBranchLocked ? 'UNLOCK' : 'LOCK';
+        const btnColor = isBranchLocked ? 0x27ae60 : 0xe67e22;
+        this.lockBtnObj = this.menuBtn(300, 572, btnText, btnColor, isBranchLocked ? () => this._unlockBranch() : () => this._lockBranch());
+        this.lockBtn = this.lockBtnObj.btn;
+        this.lockBtn.setVisible(this.activeTab === 'class');
 
         visibleTalents.forEach(talent => {
             const pos = this._getNodePos(talent);
@@ -484,6 +505,19 @@ export default class TalentScene extends Phaser.Scene {
         this.lockedBranches.push(branch.key);
 
         this.cameras.main.flash(200, 230, 126, 34);
+        this._drawCurrentBranch();
+    }
+
+    _unlockBranch() {
+        if (this.activeTab !== 'class') return;
+        const branch = this.classBranches[this.activeBranch];
+        if (!branch || !this.lockedBranches.includes(branch.key)) return;
+
+        // Удаляем ветку из списка заблокированных
+        this.lockedBranches = this.lockedBranches.filter(key => key !== branch.key);
+        
+        // Визуальный эффект
+        this.cameras.main.flash(200, 34, 126, 230);
         this._drawCurrentBranch();
     }
 

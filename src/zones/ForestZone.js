@@ -210,10 +210,9 @@ export class ForestZone {
             const ty = 200 + Math.random() * (FOREST_HEIGHT - 400);
             const tex = texKeys[Math.floor(Math.random() * texKeys.length)];
             const trap = s.add.sprite(tx, ty, tex).setDepth(1).setAlpha(0.7);
-            s.physics.add.existing(trap, true);
-            trap.body.setSize(20, 20);
             trap.onCooldown = false;
             s.trapGroup.add(trap);
+            trap.body.setSize(20, 20);
             s.traps.push(trap);
             s.tweens.add({
                 targets: trap, alpha: { from: 0.5, to: 0.8 },
@@ -229,11 +228,10 @@ export class ForestZone {
             const lx = 30 + Math.random() * (GAME_WIDTH - 60);
             const ly = 150 + Math.random() * (FOREST_HEIGHT - 300);
             const loot = s.add.sprite(lx, ly, 'gold_pile').setDepth(1).setAlpha(0.85);
-            s.physics.add.existing(loot, true);
-            loot.body.setSize(10, 8);
             loot.goldValue = 5 + Math.floor(Math.random() * 11);
             loot.mpId = 'loot_forest_' + i;
             s.groundLootGroup.add(loot);
+            loot.body.setSize(10, 8);
             s.tweens.add({
                 targets: loot, alpha: { from: 0.6, to: 1 },
                 duration: 800 + Math.random() * 600, yoyo: true, repeat: -1,
@@ -248,9 +246,6 @@ export class ForestZone {
             const cx = 50 + Math.random() * (GAME_WIDTH - 100);
             const cy = 180 + Math.random() * (FOREST_HEIGHT - 360);
             const ch = s.add.sprite(cx, cy, 'treasure_chest').setDepth(6);
-            s.physics.add.existing(ch, false);
-            ch.body.setSize(22, 18);
-            ch.body.setCollideWorldBounds(true);
             ch.opened = false;
             ch.mpId = 'chest_forest_' + i;
             ch.hintText = s.add.text(cx, cy - 18, '', {
@@ -258,6 +253,8 @@ export class ForestZone {
                 stroke: '#000', strokeThickness: 2
             }).setOrigin(0.5).setDepth(12);
             s.forestChests.add(ch);
+            ch.body.setSize(22, 18);
+            ch.body.setCollideWorldBounds(true);
         }
     }
 

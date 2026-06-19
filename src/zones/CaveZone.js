@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import {
-    GAME_WIDTH, CAVE_WIDTH, CAVE_HEIGHT,
+    GAME_WIDTH, GAME_HEIGHT, CAVE_WIDTH, CAVE_HEIGHT,
     CAVE_ENEMY_TYPES, CAVE_BOSS_TYPE,
     CAVE_CHEST_COUNT, CAVE_CHEST_DROP_CHANCE,
     CAVE_CHEST_CLOSED_KEY, CAVE_CHEST_W, CAVE_CHEST_H,
@@ -358,10 +358,9 @@ export class CaveZone {
             const ty = 80 + Math.random() * (h - 160);
             const tex = texKeys[Math.floor(Math.random() * texKeys.length)];
             const trap = s.add.sprite(tx, ty, tex).setDepth(1).setAlpha(0.7);
-            s.physics.add.existing(trap, true);
-            trap.body.setSize(20, 20);
             trap.onCooldown = false;
             s.trapGroup.add(trap);
+            trap.body.setSize(20, 20);
             s.traps.push(trap);
             s.tweens.add({
                 targets: trap, alpha: { from: 0.5, to: 0.8 },
@@ -381,10 +380,9 @@ export class CaveZone {
             const lx = ox + 30 + Math.random() * (w - 60);
             const ly = 60 + Math.random() * (h - 120);
             const loot = s.add.sprite(lx, ly, 'gold_pile').setDepth(1).setAlpha(0.85);
-            s.physics.add.existing(loot, true);
-            loot.body.setSize(10, 8);
             loot.goldValue = 5 + Math.floor(Math.random() * 11);
             s.groundLootGroup.add(loot);
+            loot.body.setSize(10, 8);
             s.tweens.add({
                 targets: loot, alpha: { from: 0.6, to: 1 },
                 duration: 800 + Math.random() * 600, yoyo: true, repeat: -1,
@@ -403,15 +401,14 @@ export class CaveZone {
             const cx = ox + 50 + Math.random() * (w - 100);
             const cy = 100 + Math.random() * (h - 200);
             const ch = s.add.sprite(cx, cy, 'treasure_chest').setDepth(6);
-            s.physics.add.existing(ch, false);
-            ch.body.setSize(22, 18);
-            ch.body.setCollideWorldBounds(true);
             ch.opened = false;
             ch.hintText = s.add.text(cx, cy - 18, '', {
                 fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
                 stroke: '#000', strokeThickness: 2
             }).setOrigin(0.5).setDepth(12);
             s.caveExtraChests.add(ch);
+            ch.body.setSize(22, 18);
+            ch.body.setCollideWorldBounds(true);
         }
     }
 

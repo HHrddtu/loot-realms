@@ -157,6 +157,8 @@ export default class GameScene extends Phaser.Scene {
         this.villageFrozen = false;
         this.villageRestored = false;
         this.villageThriving = false;
+        this.villageBossDefeated = false;
+        this.hellBossDefeated = false;
         this.castleQuestDone = false;
         this.villageMerchantNPC = null;
         this.villageMerchantHint = null;
@@ -555,10 +557,11 @@ export default class GameScene extends Phaser.Scene {
 
     _setupMultiplayer() {
         const names = getPlayerNames();
+        const players = getPlayers();
         const ids = Object.keys(names);
         ids.forEach(id => {
             if (id === getMyId()) return;
-            this._spawnRemotePlayer(id, names[id]);
+            this._spawnRemotePlayer(id, names[id], players[id]?.classKey);
         });
 
         this.mpSync = new MultiplayerSync(this);
@@ -575,7 +578,7 @@ export default class GameScene extends Phaser.Scene {
                     this._remotePlayers[id].sprite.y = p.y;
                     if (p.flipX !== undefined) this._remotePlayers[id].sprite.setFlipX(p.flipX);
                 } else {
-                    this._spawnRemotePlayer(id, data.names?.[id] || '???');
+                    this._spawnRemotePlayer(id, data.names?.[id] || '???', p.classKey);
                     if (this._remotePlayers[id]) {
                         this._remotePlayers[id].sprite.x = p.x;
                         this._remotePlayers[id].sprite.y = p.y;
@@ -614,10 +617,10 @@ export default class GameScene extends Phaser.Scene {
         }
     }
 
-    _spawnRemotePlayer(id, name) {
+    _spawnRemotePlayer(id, name, remoteClassKey) {
         if (id === getMyId()) return;
         if (this._remotePlayers[id]) return;
-        const cls = getClassData(this.classKey);
+        const cls = getClassData(remoteClassKey || this.classKey);
         const walkKey = cls.walkTexKey || 'player_sage_walk';
         const sprite = this.add.sprite(400, 400, walkKey).setDepth(9);
         this.physics.add.existing(sprite, false);

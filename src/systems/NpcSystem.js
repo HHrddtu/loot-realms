@@ -264,14 +264,18 @@ export class NpcSystem {
         const onKey = (e) => {
             if (e.code === 'Space' || e.code === 'Escape' || e.code === 'Enter') {
                 this._closeDialog();
-                s.input.keyboard.off('keydown', onKey);
             }
         };
+        this._dialogKeyHandler = onKey;
         s.input.keyboard.on('keydown', onKey);
     }
 
     _closeDialog() {
         const s = this.scene;
+        if (this._dialogKeyHandler) {
+            s.input.keyboard.off('keydown', this._dialogKeyHandler);
+            this._dialogKeyHandler = null;
+        }
         if (s.dialogGroup) {
             s.dialogGroup.forEach(e => e.destroy());
             s.dialogGroup = [];
