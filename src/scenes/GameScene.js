@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import {
     DIFF_MULT, MATERIAL_SLOTS, EQUIP_BAG_SLOTS, ACCOUNT_EQUIP_BAG_SLOTS, EMPTY_ACCOUNT_EQUIPMENT,
-    CORRUPTION, MINE_BOSS_PORTAL_POS,
+    CORRUPTION,
     GAME_WIDTH, GAME_HEIGHT
 } from '../config/index.js';
 import { playPortal, stopMusic, playPetPickup, startZoneMusic } from '../sound.js';
@@ -936,92 +936,12 @@ export default class GameScene extends Phaser.Scene {
             }
 
             if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
-                if (this.nearbyShop) {
-                    this.zones.village._openShop();
-                } else if (this.nearbyInn) {
-                    this.zones.village._useInn();
-                } else if (this.nearbyNpc) {
+                if (this.nearbyNpc) {
                     this._interactWithNpc();
-                } else if (this.zone === 'forest') {
-                    if (this.player.y < 100) {
-                        this._enterPortal();
-                    } else {
-                        this.attack();
-                    }
-                } else if (this.zone === 'arena') {
-                    if (this.player.y > 500) {
-                        this._exitArena();
-                    } else if (!this.bossDefeated) {
-                        this.attack();
-                    }
-                } else if (this.zone === 'mine') {
-                    if (this.player.y < 100) {
-                        this._exitMine();
-                    } else if (this.mineBossPortal && !this.mineBossDefeated && Phaser.Math.Distance.Between(
-                        this.player.x, this.player.y, MINE_BOSS_PORTAL_POS.x, MINE_BOSS_PORTAL_POS.y
-                    ) < 50) {
-                        this._enterMineBossArena();
-                    } else {
-                        this.attack();
-                    }
-                } else if (this.zone === 'mine_boss') {
-                    if (this.player.y > 500) {
-                        this._exitMineBossArena();
-                    } else if (!this.mineBossDefeated) {
-                        this.attack();
-                    }
-                } else if (this.zone === 'meadow') {
-                    this.zones.meadow.handleSpace();
-                } else if (this.zone === 'cave') {
-                    if (this.caveBossDefeated && this.caveStairs && Phaser.Math.Distance.Between(
-                        this.player.x, this.player.y, this.caveStairs.x, this.caveStairs.y
-                    ) < 50) {
-                        this._enterCaveVillage();
-                    } else {
-                        this.attack();
-                    }
-                } else if (this.zone === 'village') {
-                    if (this.villageFrozen && this.campfire && Phaser.Math.Distance.Between(
-                        this.player.x, this.player.y, this.campfire.x, this.campfire.y
-                    ) < 60) {
-                        this._activateCampfire();
-                    } else if (this.villageFrozen && this.snowyIceSpirit && Phaser.Math.Distance.Between(
-                        this.player.x, this.player.y, this.snowyIceSpirit.x, this.snowyIceSpirit.y
-                    ) < 80) {
-                        this.attack();
-                    } else if (!this.villageFrozen && this.villageAllCleared && this.villageChildNPC && Phaser.Math.Distance.Between(
-                        this.player.x, this.player.y, this.villageChildNPC.x, this.villageChildNPC.y
-                    ) < 50) {
-                        this._talkToChild();
-                    } else if (!this.villageFrozen && this.villageAllCleared && this.villageCemeteryGate && Phaser.Math.Distance.Between(
-                        this.player.x, this.player.y, this.villageCemeteryGate.x, this.villageCemeteryGate.y
-                    ) < 50) {
-                        this._enterCemetery();
-                    } else if (!this.villageFrozen && this.villageRestored && !this.villageThriving && !this.castleQuestDone && this.castleChildNPC && Phaser.Math.Distance.Between(
-                        this.player.x, this.player.y, this.castleChildNPC.x, this.castleChildNPC.y
-                    ) < 50) {
-                        this.zones.village._talkToCastleChild();
-                    } else {
-                        this.attack();
-                    }
-                } else if (this.zone === 'cemetery') {
-                    if (this.villageBossDefeated && this.hellPortal && Phaser.Math.Distance.Between(
-                        this.player.x, this.player.y, this.hellPortal.x, this.hellPortal.y
-                    ) < 60) {
-                        this._enterHell();
-                    } else {
-                        this.attack();
-                    }
-                } else if (this.zone === 'hell') {
-                    if (this.hellBossDefeated && this.hellReturnPortal && Phaser.Math.Distance.Between(
-                        this.player.x, this.player.y, this.hellReturnPortal.x, this.hellReturnPortal.y
-                    ) < 60) {
-                        this._exitHell();
-                    } else {
-                        this.attack();
-                    }
-                } else         if (this.zone === 'castle') {
-                    this.zones.castle.handleSpace();
+                } else if (this.currentZone && typeof this.currentZone.handleSpace === 'function') {
+                    this.currentZone.handleSpace();
+                } else {
+                    this.attack();
                 }
             }
             if (Phaser.Input.Keyboard.JustDown(this.iKey)) this.toggleInventory();

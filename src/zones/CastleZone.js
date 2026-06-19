@@ -11,10 +11,11 @@ import { rollBossCrystals } from '../config/pets.js';
 import { playLoot, playBossAoE, playBossDeath, playPortal, startZoneMusic } from '../sound.js';
 import { recordKill } from '../bestiary.js';
 import { recordSoulCollect } from '../soulBook.js';
+import { BaseZone } from '../systems/BaseZone.js';
 
-export class CastleZone {
+export class CastleZone extends BaseZone {
     constructor(scene) {
-        this.scene = scene;
+        super(scene);
     }
 
     setup(roomIndex = 0) {
@@ -61,67 +62,45 @@ export class CastleZone {
         startZoneMusic('castle');
     }
 
-    clear() {
-        this.scene.physics.world.colliders.destroy();
-        if (this.scene.fireballs) {
-            this.scene.fireballs.forEach(fb => { if (fb.glow) fb.glow.destroy(); fb.destroy(); });
-            this.scene.fireballs = [];
-        }
-        if (this.scene.enemyProjectiles) {
-            this.scene.enemyProjectiles.forEach(p => { if (p && p.destroy) p.destroy(); });
-            this.scene.enemyProjectiles = [];
-        }
-        if (this.scene.shieldActive) {
-            this.scene.shieldActive = false;
-            this.scene.shieldHP = 0;
-            if (this.scene.shieldVfx) { this.scene.shieldVfx.destroy(); this.scene.shieldVfx = null; }
-        }
-        if (this.scene.enemies && this.scene.enemies.getLength && this.scene.enemies.getLength() > 0) {
-            this.scene.enemies.getChildren().forEach(e => {
-                if (e.hpBg) e.hpBg.destroy();
-                if (e.hpFill) e.hpFill.destroy();
-                if (e.nameText) e.nameText.destroy();
-            });
-            this.scene.enemies.clear(true, true);
-        }
-        if (this.scene.enemies) { this.scene.enemies.destroy(); this.scene.enemies = null; }
-        if (this.scene.villageChests && this.scene.villageChests.getLength && this.scene.villageChests.getLength() > 0) {
-            this.scene.villageChests.getChildren().forEach(ch => {
+    _destroyZoneSpecific() {
+        const s = this.scene;
+        if (s.villageChests && s.villageChests.getLength && s.villageChests.getLength() > 0) {
+            s.villageChests.getChildren().forEach(ch => {
                 if (ch.hintText) ch.hintText.destroy();
                 if (ch.hpBg) ch.hpBg.destroy();
                 if (ch.hpFill) ch.hpFill.destroy();
             });
-            this.scene.villageChests.clear(true, true);
+            s.villageChests.clear(true, true);
         }
-        if (this.scene.villageChests) { this.scene.villageChests.destroy(); this.scene.villageChests = null; }
-        if (this.scene.castleDecor) {
-            this.scene.castleDecor.forEach(d => { if (d && d.destroy) d.destroy(); });
-            this.scene.castleDecor = null;
+        if (s.villageChests) { s.villageChests.destroy(); s.villageChests = null; }
+        if (s.castleDecor) {
+            s.castleDecor.forEach(d => { if (d && d.destroy) d.destroy(); });
+            s.castleDecor = null;
         }
-        if (this.scene.castleBg) { this.scene.castleBg.destroy(); this.scene.castleBg = null; }
-        if (this.scene.castleAtticDoor) { if (this.scene.castleAtticDoor.destroy) this.scene.castleAtticDoor.destroy(); this.scene.castleAtticDoor = null; }
-        if (this.scene.castleAtticHint) { if (this.scene.castleAtticHint.destroy) this.scene.castleAtticHint.destroy(); this.scene.castleAtticHint = null; }
-        if (this.scene.castleStairsUp) { if (this.scene.castleStairsUp.destroy) this.scene.castleStairsUp.destroy(); this.scene.castleStairsUp = null; }
-        if (this.scene.castleStairsUpHint) { if (this.scene.castleStairsUpHint.destroy) this.scene.castleStairsUpHint.destroy(); this.scene.castleStairsUpHint = null; }
-        if (this.scene.castleBossDoor) { if (this.scene.castleBossDoor.destroy) this.scene.castleBossDoor.destroy(); this.scene.castleBossDoor = null; }
-        if (this.scene.castleBossDoorHint) { if (this.scene.castleBossDoorHint.destroy) this.scene.castleBossDoorHint.destroy(); this.scene.castleBossDoorHint = null; }
-        if (this.scene.castleBoss) {
-            if (this.scene.castleBoss.hpBg) this.scene.castleBoss.hpBg.destroy();
-            if (this.scene.castleBoss.hpFill) this.scene.castleBoss.hpFill.destroy();
-            if (this.scene.castleBossNameText) this.scene.castleBossNameText.destroy();
-            this.scene.castleBoss.destroy();
-            this.scene.castleBoss = null;
+        if (s.castleBg) { s.castleBg.destroy(); s.castleBg = null; }
+        if (s.castleAtticDoor) { if (s.castleAtticDoor.destroy) s.castleAtticDoor.destroy(); s.castleAtticDoor = null; }
+        if (s.castleAtticHint) { if (s.castleAtticHint.destroy) s.castleAtticHint.destroy(); s.castleAtticHint = null; }
+        if (s.castleStairsUp) { if (s.castleStairsUp.destroy) s.castleStairsUp.destroy(); s.castleStairsUp = null; }
+        if (s.castleStairsUpHint) { if (s.castleStairsUpHint.destroy) s.castleStairsUpHint.destroy(); s.castleStairsUpHint = null; }
+        if (s.castleBossDoor) { if (s.castleBossDoor.destroy) s.castleBossDoor.destroy(); s.castleBossDoor = null; }
+        if (s.castleBossDoorHint) { if (s.castleBossDoorHint.destroy) s.castleBossDoorHint.destroy(); s.castleBossDoorHint = null; }
+        if (s.castleBoss) {
+            if (s.castleBoss.hpBg) s.castleBoss.hpBg.destroy();
+            if (s.castleBoss.hpFill) s.castleBoss.hpFill.destroy();
+            if (s.castleBossNameText) s.castleBossNameText.destroy();
+            s.castleBoss.destroy();
+            s.castleBoss = null;
         }
-        if (this.scene.castleVillagers) {
-            this.scene.castleVillagers.forEach(v => { if (v && v.destroy) v.destroy(); });
-            this.scene.castleVillagers = null;
+        if (s.castleVillagers) {
+            s.castleVillagers.forEach(v => { if (v && v.destroy) v.destroy(); });
+            s.castleVillagers = null;
         }
-        if (this.scene.castleElder) { if (this.scene.castleElder.destroy) this.scene.castleElder.destroy(); this.scene.castleElder = null; }
-        if (this.scene.castleElderHint) { if (this.scene.castleElderHint.destroy) this.scene.castleElderHint.destroy(); this.scene.castleElderHint = null; }
-        if (this.scene.defeatedText) { this.scene.defeatedText.destroy(); this.scene.defeatedText = null; }
-        if (this.scene.defeatedLoot) {
-            this.scene.defeatedLoot.forEach(t => { if (t && t.destroy) t.destroy(); });
-            this.scene.defeatedLoot = null;
+        if (s.castleElder) { if (s.castleElder.destroy) s.castleElder.destroy(); s.castleElder = null; }
+        if (s.castleElderHint) { if (s.castleElderHint.destroy) s.castleElderHint.destroy(); s.castleElderHint = null; }
+        if (s.defeatedText) { s.defeatedText.destroy(); s.defeatedText = null; }
+        if (s.defeatedLoot) {
+            s.defeatedLoot.forEach(t => { if (t && t.destroy) t.destroy(); });
+            s.defeatedLoot = null;
         }
     }
 

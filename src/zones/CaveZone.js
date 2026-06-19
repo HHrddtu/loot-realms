@@ -8,10 +8,12 @@ import {
 } from '../config/index.js';
 import { rollZoneEquip } from '../utils.js';
 import { playPortal, playBossAoE, startZoneMusic } from '../sound.js';
+import { BossAI } from '../systems/BossAI.js';
+import { BaseZone } from '../systems/BaseZone.js';
 
-export class CaveZone {
+export class CaveZone extends BaseZone {
     constructor(scene) {
-        this.scene = scene;
+        super(scene);
     }
 
     setup() {
@@ -105,13 +107,10 @@ export class CaveZone {
         }
     }
 
-    clear() {
+    _destroyZoneSpecific() {
         const s = this.scene;
-        s.physics.world.colliders.destroy();
         if (s.traps) {
-            s.traps.forEach(t => {
-                if (t && t.destroy) t.destroy();
-            });
+            s.traps.forEach(t => { if (t && t.destroy) t.destroy(); });
             s.traps = null;
         }
         if (s.trapGroup) { s.trapGroup.clear(true, true); s.trapGroup.destroy(); s.trapGroup = null; }
@@ -126,30 +125,6 @@ export class CaveZone {
             s.caveExtraChests.destroy();
             s.caveExtraChests = null;
         }
-        if (s.fireballs) {
-            s.fireballs.forEach(fb => { if (fb.glow) fb.glow.destroy(); fb.destroy(); });
-            s.fireballs = [];
-        }
-        if (s.enemyProjectiles) {
-            s.enemyProjectiles.forEach(p => { if (p && p.destroy) p.destroy(); });
-            s.enemyProjectiles = [];
-        }
-        if (s.shieldActive) {
-            s.shieldActive = false;
-            s.shieldHP = 0;
-            if (s.shieldVfx) { s.shieldVfx.destroy(); s.shieldVfx = null; }
-        }
-        if (s.enemies && s.enemies.getLength && s.enemies.getLength() > 0) {
-            s.enemies.getChildren().forEach(e => {
-                if (e.hpBg) e.hpBg.destroy();
-                if (e.hpFill) e.hpFill.destroy();
-                if (e.nameText) e.nameText.destroy();
-                if (e.aoeRing) { e.aoeRing.destroy(); }
-                if (e.aoeRing2) { e.aoeRing2.destroy(); }
-            });
-            s.enemies.clear(true, true);
-        }
-        if (s.enemies) { s.enemies.destroy(); s.enemies = null; }
         if (s.stumps && s.stumps.getLength && s.stumps.getLength() > 0) s.stumps.clear(true, true);
         if (s.stumps) { s.stumps.destroy(); s.stumps = null; }
         if (s.caveChests && s.caveChests.getLength && s.caveChests.getLength() > 0) {
@@ -169,34 +144,34 @@ export class CaveZone {
             s.caveSmallBats.clear(true, true);
         }
         if (s.caveSmallBats) { s.caveSmallBats.destroy(); s.caveSmallBats = null; }
-        if (s.caveBg) { s.caveBg.destroy(); s.caveBg = null; }
-        if (s.caveDarkness) { s.caveDarkness.destroy(); s.caveDarkness = null; }
-        if (s.caveTorches) {
-            s.caveTorches.forEach(t => {
-                if (t.torch) t.torch.destroy();
-                if (t.glow) t.glow.destroy();
-            });
-            s.caveTorches = null;
-        }
-        if (s.caveStairs) { s.caveStairs.destroy(); s.caveStairs = null; }
-        if (s.caveStairsHint) { s.caveStairsHint.destroy(); s.caveStairsHint = null; }
         if (s.caveBoss) {
             if (s.caveBoss.hpBg) s.caveBoss.hpBg.destroy();
             if (s.caveBoss.hpFill) s.caveBoss.hpFill.destroy();
-            if (s.caveBossNameText) s.caveBossNameText.destroy();
-            if (s.caveBoss.aoeRing) { s.caveBoss.aoeRing.destroy(); }
-            if (s.caveBoss.aoeRing2) { s.caveBoss.aoeRing2.destroy(); }
-            if (s.caveBoss.telegraph) { s.caveBoss.telegraph.destroy(); }
-            if (s.caveBoss.auraRing) { s.caveBoss.auraRing.destroy(); }
+            if (s.caveBoss.aoeRing) s.caveBoss.aoeRing.destroy();
+            if (s.caveBoss.aoeRing2) s.caveBoss.aoeRing2.destroy();
+            if (s.caveBoss.telegraph) s.caveBoss.telegraph.destroy();
+            if (s.caveBoss.auraRing) s.caveBoss.auraRing.destroy();
             s.caveBoss.destroy();
             s.caveBoss = null;
         }
+        if (s.caveBossNameText) { s.caveBossNameText.destroy(); s.caveBossNameText = null; }
         if (s.caveBossTimer) { s.caveBossTimer.destroy(); s.caveBossTimer = null; }
+        if (s.caveBg) { s.caveBg.destroy(); s.caveBg = null; }
+        if (s.caveDarkness) { s.caveDarkness.destroy(); s.caveDarkness = null; }
+        if (s.caveStairs) { s.caveStairs.destroy(); s.caveStairs = null; }
+        if (s.caveStairsHint) { s.caveStairsHint.destroy(); s.caveStairsHint = null; }
+        if (s.caveTorches) {
+            s.caveTorches.forEach(t => { if (t.torch) t.torch.destroy(); if (t.glow) t.glow.destroy(); });
+            s.caveTorches = null;
+        }
         if (s.defeatedText) { s.defeatedText.destroy(); s.defeatedText = null; }
         if (s.defeatedLoot) {
             s.defeatedLoot.forEach(t => { if (t && t.destroy) t.destroy(); });
             s.defeatedLoot = null;
         }
+        s.caveBossAlive = false;
+        s.caveBossSpawned = false;
+        s.caveBossDefeated = false;
     }
 
     update(time, delta) {
@@ -771,43 +746,18 @@ export class CaveZone {
     }
 
     _caveBossPhaseTransition(boss) {
+        BossAI.phaseTransition(this.scene, boss, 'PHASE 2!', '#bf77f6');
+    }
+
+    handleSpace() {
         const s = this.scene;
-        const st = boss.stats;
-        st.transitioning = true;
-        st.invulnerable = true;
-        boss.body.setVelocity(0);
-
-        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
-
-        s.cameras.main.shake(300, 0.01);
-        s.tweens.add({
-            targets: boss, alpha: 0.3, duration: 150, yoyo: true, repeat: 3,
-            onComplete: () => { if (boss.active) boss.setAlpha(1); }
-        });
-
-        const flash = s.add.rectangle(GAME_WIDTH / 2, 300, GAME_WIDTH, GAME_HEIGHT, 0xffffff)
-            .setAlpha(0).setDepth(20).setScrollFactor(0);
-        s.tweens.add({
-            targets: flash, alpha: 0.4, duration: 200, yoyo: true,
-            onComplete: () => flash.destroy()
-        });
-
-        if (st.phase === 3) {
-            st.baseSpeed = Math.floor(st.baseSpeed * 1.2);
-            st.damage = Math.floor(st.damage * 1.5);
-            s.floatingText(boss.x, boss.y - 50, 'ENRAGED!', '#ff2222');
-        } else if (st.phase === 2) {
-            s.floatingText(boss.x, boss.y - 50, 'PHASE 2!', '#bf77f6');
+        if (s.caveBossDefeated && s.caveStairs && Phaser.Math.Distance.Between(
+            s.player.x, s.player.y, s.caveStairs.x, s.caveStairs.y
+        ) < 50) {
+            s._enterCaveVillage();
+        } else {
+            s.attack();
         }
-
-        s.time.delayedCall(1200, () => {
-            if (boss.active) {
-                st.transitioning = false;
-                st.invulnerable = false;
-                st.aiState = 'chase';
-                st.attackTimer = 1500;
-            }
-        });
     }
 
     caveBossDash(boss) {
