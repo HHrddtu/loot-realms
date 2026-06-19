@@ -936,10 +936,10 @@ export default class GameScene extends Phaser.Scene {
             }
 
             if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
-                if (this.nearbyNpc) {
-                    this._interactWithNpc();
-                } else if (this.currentZone && typeof this.currentZone.handleSpace === 'function') {
+                if (this.currentZone && typeof this.currentZone.handleSpace === 'function') {
                     this.currentZone.handleSpace();
+                } else if (this.nearbyNpc) {
+                    this._interactWithNpc();
                 } else {
                     this.attack();
                 }

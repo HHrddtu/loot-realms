@@ -20,10 +20,11 @@ import { recordKill } from '../bestiary.js';
 import { onKill } from '../quests.js';
 import { recordSoulCollect } from '../soulBook.js';
 import { VillageShop } from './village/VillageShop.js';
+import { BaseZone } from '../systems/BaseZone.js';
 
-export class VillageZone {
+export class VillageZone extends BaseZone {
     constructor(scene) {
-        this.scene = scene;
+        super(scene);
         this.shop = new VillageShop(scene);
     }
 
@@ -117,100 +118,113 @@ export class VillageZone {
         }
     }
 
-    clear() {
-        this.scene.physics.world.colliders.destroy();
-        if (this.scene.fireballs) {
-            this.scene.fireballs.forEach(fb => { if (fb.glow) fb.glow.destroy(); fb.destroy(); });
-            this.scene.fireballs = [];
-        }
-        if (this.scene.enemyProjectiles) {
-            this.scene.enemyProjectiles.forEach(p => { if (p && p.destroy) p.destroy(); });
-            this.scene.enemyProjectiles = [];
-        }
-        if (this.scene.particles) {
-            this.scene.particles.stopEnvironment();
-        }
-        if (this.scene.shieldActive) {
-            this.scene.shieldActive = false;
-            this.scene.shieldHP = 0;
-            if (this.scene.shieldVfx) { this.scene.shieldVfx.destroy(); this.scene.shieldVfx = null; }
-        }
-        if (this.scene.enemies && this.scene.enemies.getLength && this.scene.enemies.getLength() > 0) {
-            this.scene.enemies.getChildren().forEach(e => {
-                if (e.hpBg) e.hpBg.destroy();
-                if (e.hpFill) e.hpFill.destroy();
-                if (e.nameText) e.nameText.destroy();
-            });
-            this.scene.enemies.clear(true, true);
-        }
-        if (this.scene.enemies) { this.scene.enemies.destroy(); this.scene.enemies = null; }
-        if (this.scene.villageChests && this.scene.villageChests.getLength && this.scene.villageChests.getLength() > 0) {
-            this.scene.villageChests.getChildren().forEach(ch => {
+    _destroyZoneSpecific() {
+        const s = this.scene;
+        if (s.particles) { s.particles.stopEnvironment(); }
+        if (s.villageChests && s.villageChests.getLength && s.villageChests.getLength() > 0) {
+            s.villageChests.getChildren().forEach(ch => {
                 if (ch.hintText) ch.hintText.destroy();
                 if (ch.hpBg) ch.hpBg.destroy();
                 if (ch.hpFill) ch.hpFill.destroy();
             });
-            this.scene.villageChests.clear(true, true);
+            s.villageChests.clear(true, true);
         }
-        if (this.scene.villageChests) { this.scene.villageChests.destroy(); this.scene.villageChests = null; }
-        if (this.scene.villageCorpses) { this.scene.villageCorpses.clear(true, true); this.scene.villageCorpses.destroy(); this.scene.villageCorpses = null; }
-        if (this.scene.villageZombies && this.scene.villageZombies.getLength && this.scene.villageZombies.getLength() > 0) {
-            this.scene.villageZombies.getChildren().forEach(e => {
+        if (s.villageChests) { s.villageChests.destroy(); s.villageChests = null; }
+        if (s.villageCorpses) { s.villageCorpses.clear(true, true); s.villageCorpses.destroy(); s.villageCorpses = null; }
+        if (s.villageZombies && s.villageZombies.getLength && s.villageZombies.getLength() > 0) {
+            s.villageZombies.getChildren().forEach(e => {
                 if (e.hpBg) e.hpBg.destroy();
                 if (e.hpFill) e.hpFill.destroy();
             });
-            this.scene.villageZombies.clear(true, true);
+            s.villageZombies.clear(true, true);
         }
-        if (this.scene.villageZombies) { this.scene.villageZombies.destroy(); this.scene.villageZombies = null; }
-        if (this.scene.villageDecor) {
-            this.scene.villageDecor.forEach(d => { if (d && d.destroy) d.destroy(); });
-            this.scene.villageDecor = null;
+        if (s.villageZombies) { s.villageZombies.destroy(); s.villageZombies = null; }
+        if (s.villageDecor) {
+            s.villageDecor.forEach(d => { if (d && d.destroy) d.destroy(); });
+            s.villageDecor = null;
         }
-        if (this.scene.villageBg) { this.scene.villageBg.destroy(); this.scene.villageBg = null; }
-        if (this.scene.villageChildNPC) { if (this.scene.villageChildNPC.destroy) this.scene.villageChildNPC.destroy(); this.scene.villageChildNPC = null; }
-        if (this.scene.villageChildHint) { this.scene.villageChildHint.destroy(); this.scene.villageChildHint = null; }
-        if (this.scene.villageBoss) {
-            if (this.scene.villageBoss.hpBg) this.scene.villageBoss.hpBg.destroy();
-            if (this.scene.villageBoss.hpFill) this.scene.villageBoss.hpFill.destroy();
-            if (this.scene.villageBossNameText) this.scene.villageBossNameText.destroy();
-            this.scene.villageBoss.destroy();
-            this.scene.villageBoss = null;
+        if (s.villageBg) { s.villageBg.destroy(); s.villageBg = null; }
+        if (s.villageChildNPC) { if (s.villageChildNPC.destroy) s.villageChildNPC.destroy(); s.villageChildNPC = null; }
+        if (s.villageChildHint) { s.villageChildHint.destroy(); s.villageChildHint = null; }
+        if (s.villageBoss) {
+            if (s.villageBoss.hpBg) s.villageBoss.hpBg.destroy();
+            if (s.villageBoss.hpFill) s.villageBoss.hpFill.destroy();
+            if (s.villageBossNameText) s.villageBossNameText.destroy();
+            s.villageBoss.destroy();
+            s.villageBoss = null;
         }
-        this.scene.villageBossClones = null;
-        if (this.scene.villageCemeteryGate) { this.scene.villageCemeteryGate.destroy(); this.scene.villageCemeteryGate = null; }
-        if (this.scene.hellPortal) { if (this.scene.hellPortal.destroy) this.scene.hellPortal.destroy(); this.scene.hellPortal = null; }
-        if (this.scene.hellPortalHint) { if (this.scene.hellPortalHint.destroy) this.scene.hellPortalHint.destroy(); this.scene.hellPortalHint = null; }
-        if (this.scene.campfire) { if (this.scene.campfire.destroy) this.scene.campfire.destroy(); this.scene.campfire = null; }
-        if (this.scene.campfireHint) { if (this.scene.campfireHint.destroy) this.scene.campfireHint.destroy(); this.scene.campfireHint = null; }
-        if (this.scene.castleChildNPC) { if (this.scene.castleChildNPC.destroy) this.scene.castleChildNPC.destroy(); this.scene.castleChildNPC = null; }
-        if (this.scene.castleChildHint) { if (this.scene.castleChildHint.destroy) this.scene.castleChildHint.destroy(); this.scene.castleChildHint = null; }
-        if (this.scene.villageMerchantNPC) { if (this.scene.villageMerchantNPC.destroy) this.scene.villageMerchantNPC.destroy(); this.scene.villageMerchantNPC = null; }
-        if (this.scene.villageMerchantHint) { if (this.scene.villageMerchantHint.destroy) this.scene.villageMerchantHint.destroy(); this.scene.villageMerchantHint = null; }
-        if (this.scene.villageInn) { if (this.scene.villageInn.destroy) this.scene.villageInn.destroy(); this.scene.villageInn = null; }
-        if (this.scene.villageInnHint) { if (this.scene.villageInnHint.destroy) this.scene.villageInnHint.destroy(); this.scene.villageInnHint = null; }
-        if (this.scene.shopGroup) { this.scene.shopGroup.forEach(e => { if (e && e.destroy) e.destroy(); }); this.scene.shopGroup = []; }
-        if (this.scene.snowyIceSpirit) {
-            if (this.scene.snowyIceSpirit.hpBg) this.scene.snowyIceSpirit.hpBg.destroy();
-            if (this.scene.snowyIceSpirit.hpFill) this.scene.snowyIceSpirit.hpFill.destroy();
-            if (this.scene.snowyIceSpiritNameText) this.scene.snowyIceSpiritNameText.destroy();
-            this.scene.snowyIceSpirit.destroy();
-            this.scene.snowyIceSpirit = null;
+        s.villageBossClones = null;
+        if (s.villageCemeteryGate) { s.villageCemeteryGate.destroy(); s.villageCemeteryGate = null; }
+        if (s.hellPortal) { if (s.hellPortal.destroy) s.hellPortal.destroy(); s.hellPortal = null; }
+        if (s.hellPortalHint) { if (s.hellPortalHint.destroy) s.hellPortalHint.destroy(); s.hellPortalHint = null; }
+        if (s.campfire) { if (s.campfire.destroy) s.campfire.destroy(); s.campfire = null; }
+        if (s.campfireHint) { if (s.campfireHint.destroy) s.campfireHint.destroy(); s.campfireHint = null; }
+        if (s.castleChildNPC) { if (s.castleChildNPC.destroy) s.castleChildNPC.destroy(); s.castleChildNPC = null; }
+        if (s.castleChildHint) { if (s.castleChildHint.destroy) s.castleChildHint.destroy(); s.castleChildHint = null; }
+        if (s.villageMerchantNPC) { if (s.villageMerchantNPC.destroy) s.villageMerchantNPC.destroy(); s.villageMerchantNPC = null; }
+        if (s.villageMerchantHint) { if (s.villageMerchantHint.destroy) s.villageMerchantHint.destroy(); s.villageMerchantHint = null; }
+        if (s.villageInn) { if (s.villageInn.destroy) s.villageInn.destroy(); s.villageInn = null; }
+        if (s.villageInnHint) { if (s.villageInnHint.destroy) s.villageInnHint.destroy(); s.villageInnHint = null; }
+        if (s.shopGroup) { s.shopGroup.forEach(e => { if (e && e.destroy) e.destroy(); }); s.shopGroup = []; }
+        if (s.snowyIceSpirit) {
+            if (s.snowyIceSpirit.hpBg) s.snowyIceSpirit.hpBg.destroy();
+            if (s.snowyIceSpirit.hpFill) s.snowyIceSpirit.hpFill.destroy();
+            if (s.snowyIceSpiritNameText) s.snowyIceSpiritNameText.destroy();
+            s.snowyIceSpirit.destroy();
+            s.snowyIceSpirit = null;
         }
-        if (this.scene.snowyIceShards) {
-            this.scene.snowyIceShards.getChildren().forEach(s => {
+        if (s.snowyIceShards) {
+            s.snowyIceShards.getChildren().forEach(s => {
                 if (s.hpBg) s.hpBg.destroy();
                 if (s.hpFill) s.hpFill.destroy();
             });
-            this.scene.snowyIceShards.clear(true, true);
-            this.scene.snowyIceShards.destroy();
-            this.scene.snowyIceShards = null;
+            s.snowyIceShards.clear(true, true);
+            s.snowyIceShards.destroy();
+            s.snowyIceShards = null;
         }
-        this.scene.snowyVillageAllCleared = false;
-        this.scene.villageFrozen = false;
-        if (this.scene.defeatedText) { this.scene.defeatedText.destroy(); this.scene.defeatedText = null; }
-        if (this.scene.defeatedLoot) {
-            this.scene.defeatedLoot.forEach(t => { if (t && t.destroy) t.destroy(); });
-            this.scene.defeatedLoot = null;
+        s.snowyVillageAllCleared = false;
+        s.villageFrozen = false;
+        if (s.defeatedText) { s.defeatedText.destroy(); s.defeatedText = null; }
+        if (s.defeatedLoot) {
+            s.defeatedLoot.forEach(t => { if (t && t.destroy) t.destroy(); });
+            s.defeatedLoot = null;
+        }
+    }
+
+    handleSpace() {
+        const s = this.scene;
+        if (s.nearbyShop) {
+            this._openShop();
+            return;
+        }
+        if (s.nearbyInn) {
+            this._useInn();
+            return;
+        }
+        if (s.villageFrozen && s.campfire && Phaser.Math.Distance.Between(
+            s.player.x, s.player.y, s.campfire.x, s.campfire.y
+        ) < 60) {
+            this._activateCampfire();
+        } else if (s.villageFrozen && s.snowyIceSpirit && Phaser.Math.Distance.Between(
+            s.player.x, s.player.y, s.snowyIceSpirit.x, s.snowyIceSpirit.y
+        ) < 80) {
+            s.attack();
+        } else if (!s.villageFrozen && s.villageAllCleared && s.villageChildNPC && Phaser.Math.Distance.Between(
+            s.player.x, s.player.y, s.villageChildNPC.x, s.villageChildNPC.y
+        ) < 50) {
+            this._talkToChild();
+        } else if (!s.villageFrozen && s.villageAllCleared && s.villageCemeteryGate && Phaser.Math.Distance.Between(
+            s.player.x, s.player.y, s.villageCemeteryGate.x, s.villageCemeteryGate.y
+        ) < 50) {
+            this._enterCemetery();
+        } else if (!s.villageFrozen && s.villageRestored && !s.villageThriving && !s.castleQuestDone && s.castleChildNPC && Phaser.Math.Distance.Between(
+            s.player.x, s.player.y, s.castleChildNPC.x, s.castleChildNPC.y
+        ) < 50) {
+            this._talkToCastleChild();
+        } else if (s.nearbyNpc) {
+            s.npc.interactWithNpc();
+        } else {
+            s.attack();
         }
     }
 
