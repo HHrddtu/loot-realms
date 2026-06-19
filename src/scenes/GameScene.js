@@ -646,6 +646,7 @@ export default class GameScene extends Phaser.Scene {
 
     doSave() { this.saveLoad.doSave(); }
     doLoad() { return this.saveLoad.doLoad(); }
+    getAggroTarget() { return this.petSys.getAggroTarget(); }
 
     /* ===== UTILITY ===== */
 
