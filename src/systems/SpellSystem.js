@@ -435,8 +435,8 @@ export class SpellSystem {
         let foundTarget = false;
 
         const allTargets = [
-            ...(this.scene.enemies ? this.scene.enemies.getChildren() : []),
-            ...(this.scene.villageZombies ? this.scene.villageZombies.getChildren() : [])
+            ...(this.scene.enemies && this.scene.enemies.scene ? this.scene.enemies.getChildren() : []),
+            ...(this.scene.villageZombies && this.scene.villageZombies.scene ? this.scene.villageZombies.getChildren() : [])
         ];
         let nearestDist = 60;
         allTargets.forEach(e => {
@@ -608,10 +608,10 @@ export class SpellSystem {
 
         // Armor shred timer decay
         const allEnemies = [
-            ...(this.scene.enemies ? this.scene.enemies.getChildren() : []),
-            ...(this.scene.villageZombies ? this.scene.villageZombies.getChildren() : []),
-            ...(this.scene.hellImps ? this.scene.hellImps.getChildren() : []),
-            ...(this.scene.caveSmallBats ? this.scene.caveSmallBats.getChildren() : [])
+            ...(this.scene.enemies && this.scene.enemies.scene ? this.scene.enemies.getChildren() : []),
+            ...(this.scene.villageZombies && this.scene.villageZombies.scene ? this.scene.villageZombies.getChildren() : []),
+            ...(this.scene.hellImps && this.scene.hellImps.scene ? this.scene.hellImps.getChildren() : []),
+            ...(this.scene.caveSmallBats && this.scene.caveSmallBats.scene ? this.scene.caveSmallBats.getChildren() : [])
         ];
         allEnemies.forEach(e => {
             if (e.active && e.armorShredTimer && e.armorShredTimer > 0) {
