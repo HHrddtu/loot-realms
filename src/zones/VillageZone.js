@@ -86,8 +86,8 @@ export class VillageZone extends BaseZone {
                     this._spawnCastleChild();
                 });
             }
-            this._spawnVillageShop();
-            this._spawnVillageInn();
+            this.shop.spawnShop();
+            this.shop.spawnInn();
         }
 
         this.scene.physics.add.overlap(this.scene.player, this.scene.enemies, (p, e) => {
@@ -184,21 +184,17 @@ export class VillageZone extends BaseZone {
         }
         s.snowyVillageAllCleared = false;
         s.villageFrozen = false;
-        if (s.defeatedText) { s.defeatedText.destroy(); s.defeatedText = null; }
-        if (s.defeatedLoot) {
-            s.defeatedLoot.forEach(t => { if (t && t.destroy) t.destroy(); });
-            s.defeatedLoot = null;
-        }
+        this._destroyDefeatedUI();
     }
 
     handleSpace() {
         const s = this.scene;
         if (s.nearbyShop) {
-            this._openShop();
+            this.shop.openShop();
             return;
         }
         if (s.nearbyInn) {
-            this._useInn();
+            this.shop.useInn();
             return;
         }
         if (s.villageFrozen && s.campfire && Phaser.Math.Distance.Between(
@@ -221,6 +217,10 @@ export class VillageZone extends BaseZone {
             s.player.x, s.player.y, s.castleChildNPC.x, s.castleChildNPC.y
         ) < 50) {
             this._talkToCastleChild();
+        } else if (!s.villageFrozen && s.villageBossDefeated && s.hellPortal && Phaser.Math.Distance.Between(
+            s.player.x, s.player.y, s.hellPortal.x, s.hellPortal.y
+        ) < 60) {
+            this.scene.zones.hell.enterHell();
         } else if (s.nearbyNpc) {
             s.npc.interactWithNpc();
         } else {
@@ -229,6 +229,7 @@ export class VillageZone extends BaseZone {
     }
 
     update(time, delta) {
+        this._updateBossClones();
         this._updateVillageMobs();
         this._updateSnowyVillageMobs();
         this._updateVillageBoss();
@@ -240,29 +241,41 @@ export class VillageZone extends BaseZone {
         this._updateShopInnHints();
     }
 
-    _spawnVillageShop() { this.shop.spawnShop(); }
-
-    _spawnVillageInn() { this.shop.spawnInn(); }
-
-    _useInn() { this.shop.useInn(); }
-
-    _openShop() { this.shop.openShop(); }
-
-    _openShopTab(tabIndex) { this.shop.openShopTab(tabIndex); }
-
-    _renderShopTab(tabIndex, mk, goldText, crystalText, capText) { this.shop._renderShopTab(tabIndex, mk, goldText, crystalText, capText); }
-
-    _renderPotionsTab(mk, updateCurrency) { this.shop._renderPotionsTab(mk, updateCurrency); }
-
-    _renderBoostsTab(mk, updateCurrency) { this.shop._renderBoostsTab(mk, updateCurrency); }
-
-    _renderUpgradesTab(mk, updateCurrency) { this.shop._renderUpgradesTab(mk, updateCurrency); }
-
-    _renderCasesTab(mk, updateCurrency) { this.shop._renderCasesTab(mk, updateCurrency); }
-
-    _openCase(caseId) { this.shop._openCase(caseId); }
-
-    _closeShop() { this.shop.closeShop(); }
+    _updateBossClones() {
+        const s = this.scene;
+        if (!s.enemies) return;
+        s.enemies.getChildren().forEach(e => {
+            if (!e.active || !e.stats || !e.stats.isBossClone) return;
+            const dx = s.player.x - e.x;
+            const dy = s.player.y - e.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const spd = e.stats.speed || 60;
+            if (dist > 16) {
+                const chaseSpd = dist < 80 ? spd * 1.4 : spd;
+                e.body.setVelocity((dx / dist) * chaseSpd, (dy / dist) * chaseSpd);
+                e.setFlipX(dx < 0);
+            } else {
+                e.body.setVelocity(0);
+            }
+            if (s.anims.exists('purple_demon_walk_anim') && !e.anims.isPlaying) {
+                e.play('purple_demon_walk_anim');
+            }
+            const delta = s.game.loop.delta;
+            e.stats.meteorTimer = (e.stats.meteorTimer || 0) + delta;
+            if (e.stats.meteorTimer >= (e.stats.meteorInterval || 8000)) {
+                e.stats.meteorTimer = 0;
+                this._villageBossMeteor(e);
+            }
+            e.stats.corpseTimer = (e.stats.corpseTimer || 0) + delta;
+            if (e.stats.corpseTimer >= (e.stats.corpseInterval || 10000)) {
+                e.stats.corpseTimer = 0;
+                this._villageBossSummonCorpses(e);
+            }
+            if (e.hpFill) {
+                e.hpFill.width = e.hpBg.width * (e.stats.hp / e.stats.maxHp);
+            }
+        });
+    }
 
     _updateCastleChildHint() {
         if (!this.scene.castleChildNPC || !this.scene.castleChildHint) return;
@@ -533,7 +546,7 @@ export class VillageZone extends BaseZone {
                 this.scene.time.delayedCall(800, () => {
                     cartImg.destroy();
                     cartText.destroy();
-                    this.scene.zones.castle.setup(0);
+                    this.scene._setupZone('castle', 0);
                     this.scene.cameras.main.fadeIn(500, 0, 0, 0);
                     this.scene.transitioning = false;
                     this.scene.menuOpen = false;
