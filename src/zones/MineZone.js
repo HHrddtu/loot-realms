@@ -1,18 +1,19 @@
 import Phaser from 'phaser';
-import {
-    GAME_WIDTH, GAME_HEIGHT, FOREST_HEIGHT,
-    MINE_ENEMY_TYPES, MINE_ENEMY_COUNT, MINE_BOSS_TYPE,
-    MINE_ROCK_COUNT, MINE_CRYSTAL_COUNT,
-    MINE_EXIT_POS, MINE_RETURN_POS, MINE_BOSS_PORTAL_POS,
-    MINE_CHEST_COUNT, MINE_CHEST_DROP_CHANCE,
-    ARENA_EXIT_POS, DIFF_MULT, DIFF_COLORS
-} from '../config/index.js';
-import { rollZoneEquip, rollZoneMaterial } from '../utils.js';
-import { playPortal, playBossAoE, startZoneMusic } from '../sound.js';
+import { GAME_WIDTH, GAME_HEIGHT, FOREST_HEIGHT, MINE_EXIT_POS, MINE_RETURN_POS, MINE_BOSS_PORTAL_POS, ARENA_EXIT_POS } from '../config/index.js';
+import { playPortal, startZoneMusic } from '../sound.js';
+import { BaseZone } from '../systems/BaseZone.js';
+import { MineSpawner } from './MineSpawner.js';
+import { MineBoss } from './MineBoss.js';
 
-export class MineZone {
+export class MineZone extends BaseZone {
     constructor(scene) {
-        this.scene = scene;
+        super(scene);
+        this.spawner = new MineSpawner(scene, this);
+        this.bossAI = new MineBoss(scene, this);
+        this.bossDefeated = false;
+        this.bossAlive = false;
+        this.isUnlocked = false;
+        this.hasSecretKey = false;
     }
 
     setup() {
@@ -51,13 +52,13 @@ export class MineZone {
         s.mineCrystals = s.physics.add.group();
         s.mineChests = s.physics.add.group();
 
-        this.spawnMineEnemies();
-        this.spawnMineRocks();
-        this.spawnMineCrystals();
-        this.spawnMineChests();
-        this.spawnMineTorches();
-        this.spawnMineDecor();
-        this.spawnMineCart();
+        this.spawner.spawnEnemies();
+        this.spawner.spawnRocks();
+        this.spawner.spawnCrystals();
+        this.spawner.spawnChests();
+        this.spawner.spawnTorches();
+        this.spawner.spawnDecor();
+        this.spawner.spawnCart();
 
         s.mineDarkness = s.add.image(400, 300, 'mine_darkness').setDepth(13).setAlpha(0.9).setScrollFactor(0);
 
@@ -66,9 +67,6 @@ export class MineZone {
                 s.combat.takeDamage(e.stats.damage);
             }
         }, null, s);
-
-        s.mineBossDefeated = false;
-        s.mineBossAlive = false;
 
         s.zone = 'mine';
         s.npc.spawnNPCs();
@@ -80,40 +78,12 @@ export class MineZone {
             s.particles.startCandleGlow(600, 500);
             s.particles.startCandleGlow(400, 800);
         }
+        this.bossDefeated = false;
+        this.bossAlive = false;
     }
 
-    clear() {
+    _destroyZoneSpecific() {
         const s = this.scene;
-        s.physics.world.colliders.destroy();
-        if (s.fireballs) {
-            s.fireballs.forEach(fb => { if (fb.glow) fb.glow.destroy(); fb.destroy(); });
-            s.fireballs = [];
-        }
-        if (s.enemyProjectiles) {
-            s.enemyProjectiles.forEach(p => { if (p && p.destroy) p.destroy(); });
-            s.enemyProjectiles = [];
-        }
-        if (s.shieldActive) {
-            s.shieldActive = false;
-            s.shieldHP = 0;
-            if (s.shieldVfx) { s.shieldVfx.destroy(); s.shieldVfx = null; }
-        }
-        if (s.enemies && s.enemies.getLength && s.enemies.getLength() > 0) {
-            s.enemies.getChildren().forEach(e => {
-                if (e.hpBg) e.hpBg.destroy();
-                if (e.hpFill) e.hpFill.destroy();
-            });
-            s.enemies.clear(true, true);
-        }
-        if (s.enemies) { s.enemies.destroy(); s.enemies = null; }
-        if (s.stumps && s.stumps.getLength && s.stumps.getLength() > 0) {
-            s.stumps.getChildren().forEach(st => {
-                if (st.hpBg) st.hpBg.destroy();
-                if (st.hpFill) st.hpFill.destroy();
-            });
-            s.stumps.clear(true, true);
-        }
-        if (s.stumps) { s.stumps.destroy(); s.stumps = null; }
         if (s.mineRocks && s.mineRocks.getLength && s.mineRocks.getLength() > 0) {
             s.mineRocks.clear(true, true);
         }
@@ -175,44 +145,12 @@ export class MineZone {
             this.checkMineExitProximity();
             this.updateMineCart();
         } else if (s.zone === 'mine_boss') {
-            this.checkMineBossArenaExitProximity();
-            this.updateMineBoss();
+            this.bossAI.checkExitProximity();
+            this.bossAI.update(delta);
         }
     }
 
-    spawnMineEnemies() {
-        for (let i = 0; i < MINE_ENEMY_COUNT; i++) {
-            const t = MINE_ENEMY_TYPES[i % MINE_ENEMY_TYPES.length];
-            const e = this.makeMineEnemy(t, 80 + Math.random() * 640, 200 + Math.random() * 500);
-            if (this.scene.multiplayer && this.scene.mpSync && e) {
-                this.scene.mpSync.assignMobId(e, t.key);
-            }
-        }
-    }
-
-    makeMineEnemy(t, x, y) {
-        const s = this.scene;
-        const e = s.add.sprite(x, y, t.key).setDepth(5);
-        s.physics.add.existing(e, false);
-        e.body.setSize(t.bw, t.bh);
-        e.body.setCollideWorldBounds(true);
-
-        e.stats = {
-            key: t.key, name: t.name,
-            hp: Math.floor(t.hp * s.diffMulti.hp),
-            maxHp: Math.floor(t.hp * s.diffMulti.hp),
-            damage: Math.floor(t.dmg * s.diffMulti.dmg),
-            exp: Math.floor(t.exp * s.diffMulti.exp),
-            bw: t.bw, bh: t.bh,
-            wTimer: 0, wDir: 0
-        };
-
-        const hw = t.bw + 4;
-        e.hpBg = s.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
-        e.hpFill = s.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0xe74c3c).setOrigin(0.5).setDepth(11);
-        s.enemies.add(e);
-        return e;
-    }
+    makeMineEnemy(t, x, y) { return this.spawner.makeEnemy(t, x, y); }
 
     spawnMineRocks() {
         const s = this.scene;
@@ -431,7 +369,7 @@ export class MineZone {
 
     checkMineExitProximity() {
         const s = this.scene;
-        if (s.zone !== 'mine' || s.transitioning || s.menuOpen) return;
+        if (s.zone !== 'mine' || s.transitioning || s.menuOpen || !s.exitHint) return;
         const dist = Phaser.Math.Distance.Between(
             s.player.x, s.player.y, MINE_EXIT_POS.x, MINE_EXIT_POS.y
         );
@@ -441,7 +379,7 @@ export class MineZone {
             s.exitHint.setText('');
         }
 
-        if (s.mineBossPortal && !s.mineBossDefeated) {
+        if (s.mineBossPortal && !this.bossDefeated) {
             const bdist = Phaser.Math.Distance.Between(
                 s.player.x, s.player.y, MINE_BOSS_PORTAL_POS.x, MINE_BOSS_PORTAL_POS.y
             );
@@ -494,7 +432,7 @@ export class MineZone {
         const s = this.scene;
         if (s.transitioning || s.menuOpen) return;
         if (s.zone !== 'mine') return;
-        if (s.mineBossDefeated) return;
+        if (this.bossDefeated) return;
 
         s.transitioning = true;
         s.mineBossPortalHint.setText('');
@@ -508,87 +446,20 @@ export class MineZone {
         });
     }
 
-    setupBossArena() {
-        const s = this.scene;
-        s.cameras.main.setBackgroundColor('#0a0510');
-        s.physics.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
-        s.cameras.main.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
-
-        s.add.image(400, 300, 'boss_ground').setDepth(0);
-
-        s.mineArenaExit = s.add.sprite(ARENA_EXIT_POS.x, ARENA_EXIT_POS.y, 'mine_ladder').setDepth(1);
-        s.mineArenaExitHint = s.add.text(ARENA_EXIT_POS.x, ARENA_EXIT_POS.y + 50, '', {
-            fontSize: '11px', fill: '#bf77f6', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
-
-        s.player.x = 400;
-        s.player.y = 500;
-        s.player.body.setCollideWorldBounds(true);
-        s.cameras.main.stopFollow();
-
-        s.mineBossDefeated = false;
-        s.mineBossAlive = false;
-
-        s.enemies = s.physics.add.group();
-        s.stumps = s.physics.add.group();
-        this.spawnMineBoss();
-
-        s.physics.add.overlap(s.player, s.enemies, (p, e) => {
-            if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
-                s.combat.takeDamage(e.stats.damage);
-            }
-        }, null, s);
-
-        s.zone = 'mine_boss';
-        s.hintText.setText('Defeat the Skeleton Lord! | I=inventory | TAB=stats | P=pause');
-        startZoneMusic('mine_boss');
-    }
+    setupBossArena() { this.bossAI.setupArena(); }
 
     clearBossArena() {
-        const s = this.scene;
-        s.physics.world.colliders.destroy();
-        if (s.mineBoss) {
-            if (s.mineBoss.hpBg) s.mineBoss.hpBg.destroy();
-            if (s.mineBoss.hpFill) s.mineBoss.hpFill.destroy();
-            if (s.mineBossNameText) s.mineBossNameText.destroy();
-            if (s.mineBoss.aoeRing) { s.mineBoss.aoeRing.destroy(); s.mineBoss.aoeRing = null; }
-            if (s.mineBoss.aoeRing2) { s.mineBoss.aoeRing2.destroy(); s.mineBoss.aoeRing2 = null; }
-            if (s.mineBoss.telegraph) { s.mineBoss.telegraph.destroy(); s.mineBoss.telegraph = null; }
-            if (s.mineBoss.auraRing) { s.mineBoss.auraRing.destroy(); s.mineBoss.auraRing = null; }
-            s.mineBoss.destroy();
-            s.mineBoss = null;
-        }
-        if (s.bossTimer) { s.bossTimer.destroy(); s.bossTimer = null; }
-        if (s.defeatedText) { s.defeatedText.destroy(); s.defeatedText = null; }
-        if (s.defeatedLoot) {
-            s.defeatedLoot.forEach(t => { if (t && t.destroy) t.destroy(); });
-            s.defeatedLoot = null;
-        }
-        if (s.enemies && s.enemies.getLength && s.enemies.getLength() > 0) {
-            s.enemies.getChildren().forEach(e => {
-                if (e.hpBg) e.hpBg.destroy();
-                if (e.hpFill) e.hpFill.destroy();
-            });
-            s.enemies.clear(true, true);
-        }
-        if (s.enemies) { s.enemies.destroy(); s.enemies = null; }
-        if (s.stumps && s.stumps.getLength && s.stumps.getLength() > 0) s.stumps.clear(true, true);
-        if (s.stumps) { s.stumps.destroy(); s.stumps = null; }
-        if (s.mineArenaExit) { s.mineArenaExit.destroy(); s.mineArenaExit = null; }
-        if (s.mineArenaExitHint) { s.mineArenaExitHint.destroy(); s.mineArenaExitHint = null; }
-        s.mineBossAlive = false;
+        this.bossAI.clearArena();
+        this._destroyDefeatedUI();
+        this._destroyStumps();
     }
 
     exitMineBossArena() {
         const s = this.scene;
         if (s.transitioning || s.menuOpen) return;
         if (s.zone !== 'mine_boss') return;
-        const dist = Phaser.Math.Distance.Between(
-            s.player.x, s.player.y, ARENA_EXIT_POS.x, ARENA_EXIT_POS.y
-        );
+        const dist = Phaser.Math.Distance.Between(s.player.x, s.player.y, ARENA_EXIT_POS.x, ARENA_EXIT_POS.y);
         if (dist >= 50) return;
-
         s.transitioning = true;
         if (s.mineArenaExitHint) s.mineArenaExitHint.setText('');
         playPortal();
@@ -601,444 +472,28 @@ export class MineZone {
         });
     }
 
-    checkMineBossArenaExitProximity() {
+    handleSpace() {
         const s = this.scene;
-        if (s.zone !== 'mine_boss' || s.transitioning || s.menuOpen) return;
-        const dist = Phaser.Math.Distance.Between(
-            s.player.x, s.player.y, ARENA_EXIT_POS.x, ARENA_EXIT_POS.y
-        );
-        if (dist < 50) {
-            if (s.mineArenaExitHint) s.mineArenaExitHint.setText('SPACE to exit');
+        if (s.nearbyNpc) {
+            s.npc.interactWithNpc();
+            return;
+        }
+        if (s.zone === 'mine_boss') {
+            if (s.player.y > 500) {
+                this.exitMineBossArena();
+            } else if (!this.bossDefeated) {
+                s.attack();
+            }
+            return;
+        }
+        if (s.player.y < 100) {
+            this.exitMine();
+        } else if (s.mineBossPortal && !this.bossDefeated && Phaser.Math.Distance.Between(
+            s.player.x, s.player.y, MINE_BOSS_PORTAL_POS.x, MINE_BOSS_PORTAL_POS.y
+        ) < 50) {
+            this.enterMineBossArena();
         } else {
-            if (s.mineArenaExitHint) s.mineArenaExitHint.setText('');
+            s.attack();
         }
-    }
-
-    spawnMineBoss() {
-        const s = this.scene;
-        const bt = MINE_BOSS_TYPE;
-        const hp = Math.floor(bt.hp[s.difficulty] || bt.hp.Normal);
-        const dmg = Math.floor(bt.dmg[s.difficulty] || bt.dmg.Normal);
-        const exp = Math.floor(bt.exp[s.difficulty] || bt.exp.Normal);
-        const spd = bt.speeds[s.difficulty] || bt.speeds.Normal;
-
-        s.mineBoss = s.add.sprite(400, 200, 'skeleton_lord_walk').setDepth(5);
-        s.physics.add.existing(s.mineBoss, false);
-        s.mineBoss.body.setSize(bt.bw, bt.bh);
-        s.mineBoss.body.setCollideWorldBounds(true);
-        s.mineBoss.play('skeleton_lord_walk');
-
-        s.mineBoss.stats = {
-            name: bt.name,
-            hp: hp, maxHp: hp,
-            damage: dmg, exp: exp,
-            speed: spd,
-            bw: bt.bw, bh: bt.bh,
-            aoeTimer: 0, aoeInterval: bt.aoeInterval,
-            aoeDmgMul: bt.aoeDmgMul, aoeRadius: bt.aoeRadius,
-            phase: 1,
-            aiState: 'chase',
-            attackTimer: 3000,
-            cooldownTimer: 0,
-            currentAttack: null,
-            invulnerable: false,
-            baseSpeed: spd,
-            baseDamage: dmg,
-            telegraphTimer: 0,
-            attackDuration: 0,
-            transitioning: false,
-            aoeCooldown: 0,
-            boneCooldown: 0,
-            auraCooldown: 0,
-            summonCooldown: 0,
-            auraActive: false,
-            auraTimer: 0
-        };
-
-        const hw = bt.bw + 20;
-        s.mineBoss.hpBg = s.add.rectangle(400, 130, hw, 5, 0x222222).setOrigin(0.5).setDepth(15);
-        s.mineBoss.hpFill = s.add.rectangle(400, 130, hw, 5, 0x9b59b6).setOrigin(0.5).setDepth(15);
-
-        s.mineBossNameText = s.add.text(400, 118, bt.name, {
-            fontSize: '12px', fill: DIFF_COLORS[s.difficulty] || '#bf77f6', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(15);
-
-        s.mineBossAlive = true;
-        s.enemies.add(s.mineBoss);
-        if (s.multiplayer && s.mpSync) {
-            s.mpSync.assignMobId(s.mineBoss, 'mineBoss');
-        }
-    }
-
-    updateMineBoss() {
-        const s = this.scene;
-        if (!s.mineBossAlive || !s.mineBoss || !s.mineBoss.active) return;
-        const b = s.mineBoss;
-        const st = b.stats;
-        const delta = s.game.loop.delta;
-
-        b.hpBg.x = b.x;
-        b.hpBg.y = b.y - 40;
-        b.hpFill.x = b.x;
-        b.hpFill.y = b.y - 40;
-        b.hpFill.width = b.hpBg.width * (st.hp / st.maxHp);
-        if (s.mineBossNameText) {
-            s.mineBossNameText.x = b.x;
-            s.mineBossNameText.y = b.y - 50;
-        }
-
-        if (s.menuOpen || s.transitioning) {
-            b.body.setVelocity(0);
-            return;
-        }
-
-        if (st.transitioning) {
-            b.body.setVelocity(0);
-            return;
-        }
-
-        if (st.invulnerable) {
-            b.body.setVelocity(0);
-            return;
-        }
-
-        const hpPct = st.hp / st.maxHp;
-        if (hpPct <= 0.3 && st.phase !== 3) {
-            st.phase = 3;
-            this._mineBossPhaseTransition(b);
-            return;
-        } else if (hpPct <= 0.6 && st.phase !== 2) {
-            st.phase = 2;
-            this._mineBossPhaseTransition(b);
-            return;
-        }
-
-        if (st.auraActive) {
-            st.auraTimer -= delta;
-            if (st.auraTimer <= 0) {
-                st.auraActive = false;
-                if (b.auraRing) { b.auraRing.destroy(); b.auraRing = null; }
-            } else {
-                const pdist = Phaser.Math.Distance.Between(s.player.x, s.player.y, b.x, b.y);
-                if (pdist < 90) {
-                    const auraDmg = Math.floor(st.damage * 0.3);
-                    s.combat.takeDamage(auraDmg);
-                    s.floatingText(s.player.x, s.player.y - 30, 'DEATH AURA!', '#9b59b6');
-                }
-            }
-        }
-
-        if (st.aiState === 'telegraph') {
-            b.body.setVelocity(0);
-            st.telegraphTimer -= delta;
-            if (st.telegraphTimer <= 0) {
-                this._mineBossExecuteAttack(b);
-            }
-            return;
-        }
-
-        if (st.aiState === 'attacking') {
-            b.body.setVelocity(0);
-            st.attackDuration -= delta;
-            if (st.attackDuration <= 0) {
-                st.aiState = 'cooldown';
-                st.cooldownTimer = 1000;
-                if (b.telegraph) { b.telegraph.destroy(); b.telegraph = null; }
-            }
-            return;
-        }
-
-        if (st.aiState === 'cooldown') {
-            b.body.setVelocity(0);
-            st.cooldownTimer -= delta;
-            if (st.cooldownTimer <= 0) {
-                st.aiState = 'chase';
-            }
-            return;
-        }
-
-        st.aiState = 'chase';
-        const dx = s.player.x - b.x;
-        const dy = s.player.y - b.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const speed = st.phase === 3 ? st.baseSpeed * 1.2 : st.baseSpeed;
-
-        if (dist > 30) {
-            b.body.setVelocity((dx / dist) * speed, (dy / dist) * speed);
-            if (!b.anims.isPlaying || b.anims.currentAnim.key !== 'skeleton_lord_walk') {
-                b.play('skeleton_lord_walk');
-            }
-            b.setFlipX(dx < 0);
-        } else {
-            b.body.setVelocity(0);
-            b.stop();
-            b.setFrame(0);
-        }
-
-        st.attackTimer -= delta;
-        st.aoeCooldown -= delta;
-        st.boneCooldown -= delta;
-        st.auraCooldown -= delta;
-        st.summonCooldown -= delta;
-
-        if (st.attackTimer <= 0) {
-            const attack = this._pickSkeletonLordAttack(st);
-            if (attack) {
-                this._mineBossTelegraph(b, attack);
-            } else {
-                st.attackTimer = 800;
-            }
-        }
-    }
-
-    _pickSkeletonLordAttack(st) {
-        const available = [];
-        if (st.aoeCooldown <= 0) available.push('aoe');
-        if (st.phase >= 2 && st.boneCooldown <= 0) available.push('bone');
-        if (st.phase >= 2 && st.auraCooldown <= 0) available.push('aura');
-        if (st.phase >= 3 && st.summonCooldown <= 0) available.push('summon');
-        if (available.length === 0) return null;
-        return available[Math.floor(Math.random() * available.length)];
-    }
-
-    _mineBossTelegraph(boss, attackType) {
-        const s = this.scene;
-        const st = boss.stats;
-        st.aiState = 'telegraph';
-        st.currentAttack = attackType;
-        st.telegraphTimer = 500;
-        boss.body.setVelocity(0);
-
-        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
-
-        if (attackType === 'aoe') {
-            const tg = s.add.sprite(boss.x, boss.y, 'boss_telegraph_circle')
-                .setAlpha(0).setDepth(10).setScale(st.aoeRadius / 64);
-            s.tweens.add({ targets: tg, alpha: 0.9, duration: 200 });
-            boss.telegraph = tg;
-            st.aoeCooldown = st.phase >= 3 ? 3500 : 6000;
-        } else if (attackType === 'bone') {
-            const dx = s.player.x - boss.x;
-            const dy = s.player.y - boss.y;
-            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            const angle = Math.atan2(dy, dx);
-            const tg = s.add.sprite(boss.x, boss.y, 'boss_telegraph_line')
-                .setAlpha(0).setDepth(10).setRotation(angle);
-            s.tweens.add({ targets: tg, alpha: 0.9, duration: 200 });
-            boss.telegraph = tg;
-            st.boneCooldown = st.phase >= 3 ? 3000 : 5000;
-        } else if (attackType === 'aura') {
-            const tg = s.add.sprite(boss.x, boss.y, 'boss_telegraph_circle')
-                .setAlpha(0).setDepth(10).setScale(0.7);
-            s.tweens.add({ targets: tg, alpha: 0.7, duration: 200 });
-            boss.telegraph = tg;
-            st.auraCooldown = st.phase >= 3 ? 5000 : 7000;
-        } else if (attackType === 'summon') {
-            const tg = s.add.sprite(boss.x, boss.y, 'boss_telegraph_square')
-                .setAlpha(0).setDepth(10).setScale(1.5);
-            s.tweens.add({ targets: tg, alpha: 0.9, duration: 200 });
-            boss.telegraph = tg;
-            st.summonCooldown = 12000;
-        }
-        st.attackTimer = 3000;
-    }
-
-    _mineBossExecuteAttack(boss) {
-        const st = boss.stats;
-        st.aiState = 'attacking';
-        st.attackDuration = 400;
-
-        if (st.currentAttack === 'aoe') {
-            this._skeletonLordAoE(boss);
-        } else if (st.currentAttack === 'bone') {
-            this._skeletonLordBoneThrow(boss);
-            st.attackDuration = 300;
-        } else if (st.currentAttack === 'aura') {
-            this._skeletonLordDeathAura(boss);
-            st.attackDuration = 300;
-        } else if (st.currentAttack === 'summon') {
-            this._skeletonLordSummon(boss);
-            st.attackDuration = 500;
-        }
-    }
-
-    _skeletonLordAoE(boss) {
-        const s = this.scene;
-        const st = boss.stats;
-        const dmgMul = st.phase === 3 ? st.aoeDmgMul * 1.5 : st.aoeDmgMul;
-        const aoeDmg = Math.floor(st.damage * dmgMul);
-        const radius = st.aoeRadius;
-        playBossAoE();
-
-        const ring = s.add.sprite(boss.x, boss.y, 'skeleton_lord_aoe')
-            .setAlpha(0.9).setScale(0.3).setDepth(10);
-        s.tweens.add({
-            targets: ring, scaleX: 1.8, scaleY: 1.8, alpha: 0, duration: 600,
-            onComplete: () => ring.destroy()
-        });
-
-        const ring2 = s.add.sprite(boss.x, boss.y, 'skeleton_lord_aoe')
-            .setAlpha(0.5).setScale(0.1).setDepth(10);
-        s.tweens.add({
-            targets: ring2, scaleX: 1.2, scaleY: 1.2, alpha: 0, duration: 500, delay: 100,
-            onComplete: () => ring2.destroy()
-        });
-
-        s.time.delayedCall(350, () => {
-            if (!boss.active) return;
-            const dist = Phaser.Math.Distance.Between(s.player.x, s.player.y, boss.x, boss.y);
-            if (dist < radius) {
-                s.combat.takeDamage(aoeDmg);
-                const pushX = s.player.x - boss.x;
-                const pushY = s.player.y - boss.y;
-                const pushDist = Math.sqrt(pushX * pushX + pushY * pushY) || 1;
-                s.player.x += (pushX / pushDist) * 45;
-                s.player.y += (pushY / pushDist) * 45;
-            }
-        });
-    }
-
-    _skeletonLordBoneThrow(boss) {
-        const s = this.scene;
-        const st = boss.stats;
-        playBossAoE();
-
-        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
-
-        const dx = s.player.x - boss.x;
-        const dy = s.player.y - boss.y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const boneSpeed = 250;
-        const boneDmg = Math.floor(st.damage * 1.2);
-
-        const bone = s.add.sprite(boss.x, boss.y, 'bone_projectile').setDepth(8);
-        s.physics.add.existing(bone, false);
-        bone.body.setVelocity((dx / dist) * boneSpeed, (dy / dist) * boneSpeed);
-        bone.body.setSize(14, 6);
-        bone.rotation = Math.atan2(dy, dx);
-
-        if (!s.enemyProjectiles) s.enemyProjectiles = [];
-        s.enemyProjectiles.push(bone);
-
-        s.time.delayedCall(2000, () => {
-            if (bone.active) bone.destroy();
-        });
-
-        const checkHit = s.time.addEvent({
-            delay: 30,
-            repeat: 66,
-            callback: () => {
-                if (!bone.active) { checkHit.remove(); return; }
-                const pdist = Phaser.Math.Distance.Between(bone.x, bone.y, s.player.x, s.player.y);
-                if (pdist < 20) {
-                    s.combat.takeDamage(boneDmg);
-                    s.floatingText(s.player.x, s.player.y - 30, 'BONE!', '#d4c5a9');
-                    bone.destroy();
-                    checkHit.remove();
-                }
-            }
-        });
-    }
-
-    _skeletonLordDeathAura(boss) {
-        const s = this.scene;
-        const st = boss.stats;
-
-        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
-
-        st.auraActive = true;
-        st.auraTimer = 3000;
-
-        if (boss.auraRing) { boss.auraRing.destroy(); boss.auraRing = null; }
-        boss.auraRing = s.add.sprite(boss.x, boss.y, 'boss_telegraph_circle')
-            .setAlpha(0.5).setDepth(9).setScale(0.7).setTint(0x9b59b6);
-
-        s.floatingText(boss.x, boss.y - 40, 'DEATH AURA!', '#9b59b6');
-        playBossAoE();
-    }
-
-    _skeletonLordSummon(boss) {
-        const s = this.scene;
-        const st = boss.stats;
-        playBossAoE();
-        s.floatingText(boss.x, boss.y - 40, 'SUMMONING!', '#9b59b6');
-
-        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
-
-        const count = st.phase >= 3 ? 3 : 2;
-        for (let i = 0; i < count; i++) {
-            const angle = (i / count) * Math.PI * 2 + Math.random() * 0.5;
-            const sx = boss.x + Math.cos(angle) * 80;
-            const sy = boss.y + Math.sin(angle) * 80;
-            this._spawnBossSkeletonAdd(sx, sy);
-        }
-    }
-
-    _spawnBossSkeletonAdd(x, y) {
-        const s = this.scene;
-        const bt = { bw: 18, bh: 24 };
-        const e = s.add.sprite(x, y, 'skeleton_warrior').setDepth(5);
-        s.physics.add.existing(e, false);
-        e.body.setSize(bt.bw, bt.bh);
-        e.body.setCollideWorldBounds(true);
-
-        const skelHp = Math.floor(80 * (s.diffMulti.hp || 1));
-        const skelDmg = Math.floor(10 * (s.diffMulti.dmg || 1));
-
-        e.stats = {
-            key: 'skeleton_warrior', name: 'Skeleton Guard',
-            hp: skelHp, maxHp: skelHp,
-            damage: skelDmg, exp: 15,
-            bw: bt.bw, bh: bt.bh,
-            wTimer: 0, wDir: 0
-        };
-
-        e.hpBg = s.add.rectangle(x, y - 18, 22, 3, 0x333333).setOrigin(0.5).setDepth(11);
-        e.hpFill = s.add.rectangle(x, y - 18, 22, 3, 0x9b59b6).setOrigin(0.5).setDepth(11);
-        s.enemies.add(e);
-        if (s.multiplayer && s.mpSync) {
-            s.mpSync.assignMobId(e, 'skeleton_guard');
-        }
-    }
-
-    _mineBossPhaseTransition(boss) {
-        const s = this.scene;
-        const st = boss.stats;
-        st.transitioning = true;
-        st.invulnerable = true;
-        boss.body.setVelocity(0);
-
-        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
-
-        s.cameras.main.shake(300, 0.01);
-        s.tweens.add({
-            targets: boss, alpha: 0.3, duration: 150, yoyo: true, repeat: 3,
-            onComplete: () => { if (boss.active) boss.setAlpha(1); }
-        });
-
-        const flash = s.add.rectangle(400, 300, GAME_WIDTH, GAME_HEIGHT, 0xffffff)
-            .setAlpha(0).setDepth(20).setScrollFactor(0);
-        s.tweens.add({
-            targets: flash, alpha: 0.4, duration: 200, yoyo: true,
-            onComplete: () => flash.destroy()
-        });
-
-        if (st.phase === 3) {
-            st.baseSpeed = Math.floor(st.baseSpeed * 1.2);
-            st.damage = Math.floor(st.damage * 1.5);
-            s.floatingText(boss.x, boss.y - 50, 'ENRAGED!', '#ff2222');
-        } else if (st.phase === 2) {
-            s.floatingText(boss.x, boss.y - 50, 'PHASE 2!', '#9b59b6');
-        }
-
-        s.time.delayedCall(1200, () => {
-            if (boss.active) {
-                st.transitioning = false;
-                st.invulnerable = false;
-                st.aiState = 'chase';
-                st.attackTimer = 1500;
-            }
-        });
     }
 }
