@@ -71,10 +71,19 @@ export class VillageSpawner {
         const ox = this.scene.villageOffsetX;
         this.scene.villageDecor.forEach(d => d.destroy());
         this.scene.villageDecor = [];
-        const restoredKey = 'village_restored';
         VILLAGE_HOUSE_POSITIONS.forEach(hp => {
-            this.scene.villageDecor.push(this.scene.add.sprite(ox + hp.x, hp.y, restoredKey).setDepth(2));
+            const house = this.scene.add.sprite(ox + hp.x, hp.y, 'village_house').setDepth(2).setTint(0xaaeeaa);
+            this.scene.villageDecor.push(house);
         });
+        const roadY = 80;
+        for (let rx = 0; rx < 3; rx++) {
+            this.scene.villageDecor.push(this.scene.add.sprite(ox + 50 + rx * 200, roadY, 'village_road').setDepth(1));
+        }
+        if (!this.scene.villageCemeteryGate) {
+            const gx = ox + VILLAGE_WIDTH / 2, gy = 2000;
+            this.scene.villageCemeteryGate = this.scene.add.rectangle(gx, gy, 40, 20, 0x666666).setDepth(5);
+            this.scene.physics.add.existing(this.scene.villageCemeteryGate, true);
+        }
     }
 
     spawnVillageChests() {
