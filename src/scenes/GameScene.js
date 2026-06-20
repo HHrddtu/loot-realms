@@ -22,6 +22,7 @@ import { ParticleSystem } from '../systems/ParticleSystem.js';
 import { PetSystem } from '../systems/PetSystem.js';
 import { SaveLoadSystem } from '../systems/SaveLoadSystem.js';
 import { ForestBossAI } from '../systems/ForestBossAI.js';
+import { EnemyAI } from '../systems/EnemyAI.js';
 import { ForestZone } from '../zones/ForestZone.js';
 import { ArenaZone } from '../zones/ArenaZone.js';
 import { MineZone } from '../zones/MineZone.js';
@@ -229,7 +230,7 @@ export default class GameScene extends Phaser.Scene {
             } else if (this._savedZone === 'cave') {
                 this._setupZone('cave');
             } else if (this._savedZone === 'meadow') {
-                this.zones.meadow.setup();
+                this._setupZone('meadow');
             } else if (this._savedZone === 'village') {
                 this._setupZone('village', this.villageFrozen);
             } else if (this._savedZone === 'cemetery') {
@@ -648,6 +649,12 @@ export default class GameScene extends Phaser.Scene {
     doSave() { this.saveLoad.doSave(); }
     doLoad() { return this.saveLoad.doLoad(); }
     getAggroTarget() { return this.petSys.getAggroTarget(); }
+    _makeEnemy(t, x, y) { this.combat.makeEnemy(t, x, y); }
+    _makeMineEnemy(t, x, y) { if (this.zones.mine) this.zones.mine.makeMineEnemy(t, x, y); }
+    _villageBossSplit(boss) { if (this.zones.village) this.zones.village._villageBossSplit(boss); }
+    _killBossClone(clone) { if (this.zones.village) this.zones.village._killBossClone(clone); }
+    _victoryHellBoss() { if (this.zones.hell) this.zones.hell._victoryHellBoss(); }
+    _snowyIceSpiritDied() { if (this.zones.village) this.zones.village._snowyIceSpiritDied(); }
 
     /* ===== UTILITY ===== */
 
@@ -803,36 +810,6 @@ export default class GameScene extends Phaser.Scene {
     _startCartRide() { if (this.npc) this.npc.startCartRide(); }
     _openQuestLog() { if (this.npc) this.npc.openQuestLog(); }
     _closeQuestLog() { if (this.npc) this.npc.closeQuestLog(); }
-
-    /* ===== ZONE ACTION DELEGATION ===== */
-
-    _enterPortal() { if (this.zones.forest) this.zones.forest.enterPortal(); }
-    _exitArena() { if (this.zones.arena) this.zones.arena.exitArena(); }
-    _exitMine() { if (this.zones.mine) this.zones.mine.exitMine(); }
-    _enterMineBossArena() { if (this.zones.mine) this.zones.mine.enterMineBossArena(); }
-    _exitMineBossArena() { if (this.zones.mine) this.zones.mine.exitMineBossArena(); }
-    _enterCaveVillage() { if (this.zones.cave) this.zones.cave.enterCaveVillage(); }
-    _activateCampfire() { if (this.zones.village) this.zones.village._activateCampfire(); }
-    _talkToChild() { if (this.zones.village) this.zones.village._talkToChild(); }
-    _enterCemetery() { if (this.zones.village) this.zones.village._enterCemetery(); }
-    _openShop() { if (this.zones.village) this.zones.village._openShop(); }
-    _useInn() { if (this.zones.village) this.zones.village._useInn(); }
-    _enterHell() { if (this.zones.hell) this.zones.hell.enterHell(); }
-    _exitHell() { if (this.zones.hell) this.zones.hell.exitHell(); }
-    _villageBossMeteor(boss) { if (this.zones.village) this.zones.village._villageBossMeteor(boss); }
-    _villageBossSummonCorpses(boss) { if (this.zones.village) this.zones.village._villageBossSummonCorpses(boss); }
-    _villageBossSplit(boss) { if (this.zones.village) this.zones.village._villageBossSplit(boss); }
-    _killBossClone(clone) { if (this.zones.village) this.zones.village._killBossClone(clone); }
-    _victoryHellBoss() { if (this.zones.hell) this.zones.hell.victoryHellBoss(); }
-    _snowyIceSpiritDied() { if (this.zones.village) this.zones.village._snowyIceSpiritDied(); }
-    _clearVillage() { if (this.zones.village) this.zones.village.clear(); }
-    _setupVillage(frozen) { if (this.zones.village) this.zones.village.setup(frozen); }
-    _makeEnemy(t, x, y) { if (this.combat) this.combat.makeEnemy(t, x, y); }
-    _makeMineEnemy(t, x, y) { if (this.zones.mine) this.zones.mine.makeMineEnemy(t, x, y); }
-    _drawEquippedPanel() { if (this.ui) this.ui._drawEquippedPanel(); }
-    _drawMaterialsPanel() { if (this.ui) this.ui._drawMaterialsPanel(); }
-    _drawEquipmentBagPanel() { if (this.ui) this.ui._drawEquipmentBagPanel(); }
-    _drawCloseButton() { if (this.ui) this.ui._drawCloseButton(); }
 
     /* ===== SCENE RESUME ===== */
 
@@ -1035,79 +1012,14 @@ export default class GameScene extends Phaser.Scene {
         if (!this.enemies) return;
         this.enemies.getChildren().forEach(e => {
             if (!e.active || !e.stats) return;
-            if (e === this.villageBoss) return;
+            if (e.stats.isBossClone) return;
 
             if (!this.bestiarySeen[e.stats.key]) {
                 recordEncounter(e.stats.key);
                 this.bestiarySeen[e.stats.key] = true;
             }
 
-            e.hpBg.x = e.x;
-            e.hpBg.y = e.y - e.stats.bh / 2 - 8;
-            e.hpFill.x = e.x;
-            e.hpFill.y = e.hpBg.y;
-
-            if (this.menuOpen || this.transitioning) {
-                e.body.setVelocity(0);
-                return;
-            }
-
-            if (e.stats.isBossClone) {
-                const dx = this.player.x - e.x;
-                const dy = this.player.y - e.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                const spd = e.stats.speed || 60;
-                if (dist > 16) {
-                    const chaseSpd = dist < 80 ? spd * 1.4 : spd;
-                    e.body.setVelocity((dx / dist) * chaseSpd, (dy / dist) * chaseSpd);
-                    e.setFlipX(dx < 0);
-                } else {
-                    e.body.setVelocity(0);
-                }
-
-                if (this.anims.exists('purple_demon_walk_anim') && !e.anims.isPlaying) {
-                    e.play('purple_demon_walk_anim');
-                }
-
-                e.stats.meteorTimer += this.game.loop.delta;
-                if (e.stats.meteorTimer >= e.stats.meteorInterval) {
-                    e.stats.meteorTimer = 0;
-                    this._villageBossMeteor(e);
-                }
-
-                e.stats.corpseTimer += this.game.loop.delta;
-                if (e.stats.corpseTimer >= e.stats.corpseInterval) {
-                    e.stats.corpseTimer = 0;
-                    this._villageBossSummonCorpses(e);
-                }
-
-                if (e.hpFill) {
-                    e.hpFill.width = e.hpBg.width * (e.stats.hp / e.stats.maxHp);
-                }
-            } else {
-                e.stats.wTimer++;
-                if (e.stats.wTimer > 60) {
-                    e.stats.wTimer = 0;
-                    e.stats.wDir = Math.floor(Math.random() * 5);
-                }
-                const sp = 50;
-                if (e.stats.wDir === 1) e.body.setVelocityX(-sp);
-                else if (e.stats.wDir === 2) e.body.setVelocityX(sp);
-                else if (e.stats.wDir === 3) e.body.setVelocityY(-sp);
-                else if (e.stats.wDir === 4) e.body.setVelocityY(sp);
-                else e.body.setVelocity(0);
-
-                const isMoving = e.stats.wDir !== 0;
-                if (isMoving && e.walkAnimKey) {
-                    if (!e.anims.isPlaying || e.anims.currentAnim.key !== e.walkAnimKey) {
-                        e.play(e.walkAnimKey);
-                    }
-                    e.setFlipX(e.body.velocity.x < 0);
-                } else if (!isMoving) {
-                    e.stop();
-                    e.setFrame(0);
-                }
-            }
+            EnemyAI.updateWanderChase(e, this.player, this);
         });
     }
 }
