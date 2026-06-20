@@ -653,7 +653,7 @@ export default class GameScene extends Phaser.Scene {
     _makeMineEnemy(t, x, y) { if (this.zones.mine) this.zones.mine.makeMineEnemy(t, x, y); }
     _villageBossSplit(boss) { if (this.zones.village) this.zones.village._villageBossSplit(boss); }
     _killBossClone(clone) { if (this.zones.village) this.zones.village._killBossClone(clone); }
-    _victoryHellBoss() { if (this.zones.hell) this.zones.hell._victoryHellBoss(); }
+    _victoryHellBoss() { if (this.zones.hell) this.zones.hell.victoryHellBoss(); }
     _snowyIceSpiritDied() { if (this.zones.village) this.zones.village._snowyIceSpiritDied(); }
 
     /* ===== UTILITY ===== */
