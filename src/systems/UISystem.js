@@ -7,6 +7,7 @@ import { loadAccount, saveAccount } from '../save.js';
 import { getTalentEffects } from '../talents.js';
 import { getAccountTalentEffects } from '../accountTalents.js';
 import { initMaterialBook, getMaterialBookData } from '../materialBook.js';
+import { SPELLS } from '../config/spells.js';
 
 export class UISystem {
     constructor(scene) {
@@ -26,33 +27,27 @@ export class UISystem {
     showDamageFlash() { this.hud.showDamageFlash(); }
     _mkEl(el) { return el.setScrollFactor(0).setDepth(200); }
 
-    _openTalentTree() {
+    _pauseAndLaunch(sceneName, data) {
         if (this.scene.menuOpen || this.scene.transitioning) return;
         this.scene.menuOpen = true; this.scene.physics.pause();
         if (this.scene.enemies) this.scene.enemies.getChildren().forEach(e => { if (e.body) e.body.setVelocity(0); });
         if (this.scene.stumps) this.scene.stumps.getChildren().forEach(s => { if (s.body) s.body.setVelocity(0); });
-        this.scene.scene.launch('TalentTree', { unlockedTalents: this.scene.unlockedTalents, talentPoints: this.scene.talentPoints, classKey: this.scene.classKey, unlockedAccountTalents: this.scene.unlockedAccountTalents, accountTalentPoints: this.scene.accountTalentPoints, accountLevel: this.scene.accountLevel, lockedBranches: this.scene.lockedBranches || [], playerGold: this.scene.gold || 0, returnScene: 'Game' });
+        this.scene.scene.launch(sceneName, { ...data, returnScene: 'Game' });
         this.scene.scene.pause();
+    }
+
+    _openTalentTree() {
+        this._pauseAndLaunch('TalentTree', { unlockedTalents: this.scene.unlockedTalents, talentPoints: this.scene.talentPoints, classKey: this.scene.classKey, unlockedAccountTalents: this.scene.unlockedAccountTalents, accountTalentPoints: this.scene.accountTalentPoints, accountLevel: this.scene.accountLevel, lockedBranches: this.scene.lockedBranches || [], playerGold: this.scene.gold || 0 });
     }
 
     _openBestiary() {
-        if (this.scene.menuOpen || this.scene.transitioning) return;
-        this.scene.menuOpen = true; this.scene.physics.pause();
-        if (this.scene.enemies) this.scene.enemies.getChildren().forEach(e => { if (e.body) e.body.setVelocity(0); });
-        if (this.scene.stumps) this.scene.stumps.getChildren().forEach(s => { if (s.body) s.body.setVelocity(0); });
         const bookScene = this.scene.classKey === 'alchemist' ? 'MaterialBook' : this.scene.classKey === 'angel' ? 'SoulBook' : 'Bestiary';
-        this.scene.scene.launch(bookScene, { classKey: this.scene.classKey, difficulty: this.scene.difficulty, returnScene: 'Game' });
-        this.scene.scene.pause();
+        this._pauseAndLaunch(bookScene, { classKey: this.scene.classKey, difficulty: this.scene.difficulty });
     }
 
     _openCrafting() {
-        if (this.scene.menuOpen || this.scene.transitioning) return;
-        this.scene.menuOpen = true; this.scene.physics.pause();
-        if (this.scene.enemies) this.scene.enemies.getChildren().forEach(e => { if (e.body) e.body.setVelocity(0); });
-        if (this.scene.stumps) this.scene.stumps.getChildren().forEach(s => { if (s.body) s.body.setVelocity(0); });
         initMaterialBook();
-        this.scene.scene.launch('Craft', { materials: this.scene.materials, equipBag: this.scene.equipBag, maxEquipBag: this.scene.maxEquipBag, isAlchemist: this.scene.classKey === 'alchemist', returnScene: 'Game', classKey: this.scene.classKey, difficulty: this.scene.difficulty, materialBookData: getMaterialBookData(), hasRelicCraftBonus: !!(this.scene.relicEffects && this.scene.relicEffects.craft_bonus), onCraftResult: (result) => { if (result.items) result.items.forEach(item => { if (this.scene.addEquip(item)) this.hud.floatingText(this.scene.player.x, this.scene.player.y - 40, '+' + item.name, '#2ecc71'); }); this.scene.materials = result.materials || this.scene.materials; } });
-        this.scene.scene.pause();
+        this._pauseAndLaunch('Craft', { materials: this.scene.materials, equipBag: this.scene.equipBag, maxEquipBag: this.scene.maxEquipBag, isAlchemist: this.scene.classKey === 'alchemist', classKey: this.scene.classKey, difficulty: this.scene.difficulty, materialBookData: getMaterialBookData(), hasRelicCraftBonus: !!(this.scene.relicEffects && this.scene.relicEffects.craft_bonus), onCraftResult: (result) => { if (result.items) result.items.forEach(item => { if (this.scene.addEquip(item)) this.hud.floatingText(this.scene.player.x, this.scene.player.y - 40, '+' + item.name, '#2ecc71'); }); this.scene.materials = result.materials || this.scene.materials; } });
     }
 
     _openSpellAssign() {
