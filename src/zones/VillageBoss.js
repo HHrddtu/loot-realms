@@ -26,10 +26,10 @@ export class VillageBoss {
         if (this.scene.anims.exists('purple_demon_walk_anim')) b.play('purple_demon_walk_anim');
         b.stats = { name: bt.name, hp, maxHp: hp, damage: dmg, exp, bw: bt.bw, bh: bt.bh, speed: bt.speeds[this.scene.difficulty] || bt.speeds.Normal, meteorTimer: 0, meteorInterval: bt.meteorInterval, meteorRadius: bt.meteorRadius, meteorDmgMul: bt.meteorDmgMul, corpseTimer: 0, corpseInterval: bt.corpseInterval, corpseCount: bt.corpseCount, splitThreshold: bt.splitThreshold, splitDone: false };
         const hpW = 80;
-        b.hpBg = this.scene.add.rectangle(400, 120, hpW, 6, 0x000000).setDepth(12).setScrollFactor(0);
-        b.hpFill = this.scene.add.rectangle(400 - hpW / 2, 120, hpW, 6, 0x9b59b6).setOrigin(0, 0.5).setDepth(12).setScrollFactor(0);
+        b.hpBg = this.scene.add.rectangle(bx, by - bt.bh / 2 - 12, hpW, 6, 0x000000).setDepth(12);
+        b.hpFill = this.scene.add.rectangle(bx - hpW / 2, by - bt.bh / 2 - 12, hpW, 6, 0x9b59b6).setOrigin(0, 0.5).setDepth(12);
         b.hpBg.setVisible(false); b.hpFill.setVisible(false);
-        this.scene.villageBossNameText = this.scene.add.text(400, 105, bt.name, { fontSize: '14px', fill: DIFF_COLORS[this.scene.difficulty] || '#9b59b6', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 3 }).setOrigin(0.5).setDepth(12).setScrollFactor(0).setVisible(false);
+        this.scene.villageBossNameText = this.scene.add.text(bx, by - bt.bh / 2 - 24, bt.name, { fontSize: '14px', fill: DIFF_COLORS[this.scene.difficulty] || '#9b59b6', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 3 }).setOrigin(0.5).setDepth(12).setVisible(false);
         this.scene.villageBoss = b;
         this.scene.enemies.add(b);
         this.scene.floatingText(bx, by - 60, 'PURPLE DEMON APPEARS!', '#9b59b6');
@@ -43,7 +43,9 @@ export class VillageBoss {
         if (s.menuOpen || s.transitioning) { b.body.setVelocity(0); return; }
         if (st.hp > 0) {
             b.hpBg.setVisible(true); b.hpFill.setVisible(true); s.villageBossNameText.setVisible(true);
-            b.hpBg.x = 400; b.hpBg.y = 120; b.hpFill.x = 400 - 40; b.hpFill.y = 120;
+            b.hpBg.x = b.x; b.hpBg.y = b.y - st.bh / 2 - 12;
+            b.hpFill.x = b.x - 40; b.hpFill.y = b.y - st.bh / 2 - 12;
+            s.villageBossNameText.x = b.x; s.villageBossNameText.y = b.y - st.bh / 2 - 24;
             b.hpFill.width = 80 * (st.hp / st.maxHp);
         }
         const dx = s.player.x - b.x, dy = s.player.y - b.y, dist = Math.sqrt(dx * dx + dy * dy);
@@ -78,7 +80,8 @@ export class VillageBoss {
                 e.stats.corpseTimer = (e.stats.corpseTimer || 0) + dt;
                 if (e.stats.corpseTimer >= (e.stats.corpseInterval || 15000)) { e.stats.corpseTimer = 0; this._villageBossSummonCorpses(e); }
             }
-            if (e.hpFill) e.hpFill.width = e.hpBg.width * (e.stats.hp / e.stats.maxHp);
+            if (e.hpBg) { e.hpBg.x = e.x; e.hpBg.y = e.y - 44; }
+            if (e.hpFill) { e.hpFill.x = e.x - 20; e.hpFill.y = e.y - 44; e.hpFill.width = 40 * (e.stats.hp / e.stats.maxHp); }
         });
     }
 
@@ -152,17 +155,19 @@ export class VillageBoss {
             s.zones.village.bossClones.push(clone);
         }
         s.floatingText(boss.x, boss.y - 50, 'SPLIT!', '#9b59b6');
-        s.tweens.add({ targets: boss, alpha: 0, duration: 500, onComplete: () => { boss.hpBg.destroy(); boss.hpFill.destroy(); s.villageBossNameText.destroy(); s.villageBoss.destroy(); s.villageBoss = null; } });
+        s.villageBoss = null;
+        s.tweens.add({ targets: boss, alpha: 0, duration: 500, onComplete: () => { boss.hpBg.destroy(); boss.hpFill.destroy(); s.villageBossNameText.destroy(); boss.destroy(); } });
     }
 
     killBossClone(clone) {
         const s = this.scene;
-        if (s.villageBossClones) {
-            const idx = s.villageBossClones.indexOf(clone);
-            if (idx !== -1) s.villageBossClones.splice(idx, 1);
+        const clones = s.zones.village.bossClones;
+        if (clones) {
+            const idx = clones.indexOf(clone);
+            if (idx !== -1) clones.splice(idx, 1);
         }
         clone.hpBg.destroy(); clone.hpFill.destroy(); clone.destroy();
-        if (!s.villageBossClones || s.villageBossClones.length === 0) {
+        if (!clones || clones.length === 0) {
             s.zones.village.bossDefeated = true;
             this._victoryBossClone();
         }
@@ -204,8 +209,8 @@ export class VillageBoss {
         e.body.setSize(bt.bw, bt.bh); e.body.setCollideWorldBounds(true);
         e.stats = { key: bt.key, name: bt.name, hp: Math.floor(bt.hp * this.scene.diffMulti.hp), maxHp: Math.floor(bt.hp * this.scene.diffMulti.hp), damage: Math.floor(bt.dmg * this.scene.diffMulti.dmg), exp: Math.floor(bt.exp * this.scene.diffMulti.exp), bw: bt.bw, bh: bt.bh, frostTimer: 0, frostInterval: bt.frostInterval, blizzardTimer: 0, blizzardInterval: bt.blizzardInterval, shardTimer: 0, shardInterval: bt.shardInterval };
         const hpW = 60;
-        e.hpBg = this.scene.add.rectangle(400, 120, hpW, 5, 0x000000).setDepth(12).setScrollFactor(0);
-        e.hpFill = this.scene.add.rectangle(400 - hpW / 2, 120, hpW, 5, 0x3498db).setOrigin(0, 0.5).setDepth(12).setScrollFactor(0);
+        e.hpBg = this.scene.add.rectangle(bx, by - bt.bh / 2 - 12, hpW, 5, 0x000000).setDepth(12);
+        e.hpFill = this.scene.add.rectangle(bx - hpW / 2, by - bt.bh / 2 - 12, hpW, 5, 0x3498db).setOrigin(0, 0.5).setDepth(12);
         e.hpBg.setVisible(false); e.hpFill.setVisible(false);
         this.scene.snowyIceSpirit = e;
         return e;
@@ -219,7 +224,8 @@ export class VillageBoss {
         if (s.menuOpen || s.transitioning) { e.body.setVelocity(0); return; }
         if (st.hp > 0) {
             e.hpBg.setVisible(true); e.hpFill.setVisible(true);
-            e.hpBg.x = 400; e.hpBg.y = 120; e.hpFill.x = 400 - 30; e.hpFill.y = 120;
+            e.hpBg.x = e.x; e.hpBg.y = e.y - st.bh / 2 - 12;
+            e.hpFill.x = e.x - 30; e.hpFill.y = e.y - st.bh / 2 - 12;
             e.hpFill.width = 60 * (st.hp / st.maxHp);
         }
         const dx = s.player.x - e.x, dy = s.player.y - e.y, dist = Math.sqrt(dx * dx + dy * dy);
@@ -278,8 +284,8 @@ export class VillageBoss {
 
     iceSpiritDied() {
         const s = this.scene;
-        if (s.villageBossDefeated) return;
-        s.villageBossDefeated = true;
+        if (s.zones.village.bossDefeated) return;
+        s.zones.village.bossDefeated = true;
         playBossDeath();
         const ox = s.villageOffsetX;
         if (s.snowyIceSpirit) {
