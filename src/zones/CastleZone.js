@@ -26,6 +26,9 @@ export class CastleZone extends BaseZone {
 
     setup(roomIndex = 0) {
         this.scene._destroyOrphanedCaveStairs();
+        // Clean up village NPCs that might still be visible
+        if (this.scene.castleChildNPC) { this.scene.castleChildNPC.destroy(); this.scene.castleChildNPC = null; }
+        if (this.scene.castleChildHint) { this.scene.castleChildHint.destroy(); this.scene.castleChildHint = null; }
         this.scene.cameras.main.setBackgroundColor('#2c2c2c');
         this.scene.physics.world.setBounds(0, 0, CASTLE_WIDTH, CASTLE_ROOM_HEIGHT);
         this.scene.cameras.main.setBounds(0, 0, CASTLE_WIDTH, CASTLE_ROOM_HEIGHT);

@@ -59,12 +59,6 @@ export class VillageSpawner {
                 });
             }
         });
-        if (!frozen) {
-            const roadY = 80;
-            for (let rx = 0; rx < 3; rx++) {
-                this.scene.villageDecor.push(this.scene.add.sprite(ox + 50 + rx * 200, roadY, 'village_road').setDepth(1));
-            }
-        }
     }
 
     showVillageClearedDecor() {
