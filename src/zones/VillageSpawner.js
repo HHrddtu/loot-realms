@@ -75,10 +75,11 @@ export class VillageSpawner {
             const house = this.scene.add.sprite(ox + hp.x, hp.y, 'village_house').setDepth(2);
             this.scene.villageDecor.push(house);
         });
-        const roadY = 80;
-        for (let rx = 0; rx < 3; rx++) {
-            this.scene.villageDecor.push(this.scene.add.sprite(ox + 50 + rx * 200, roadY, 'village_road').setDepth(1));
-        }
+        // Roads between houses
+        const roadYPositions = [370, 620, 920, 1170, 1620];
+        roadYPositions.forEach(ry => {
+            this.scene.villageDecor.push(this.scene.add.sprite(ox + VILLAGE_WIDTH / 2, ry, 'village_road').setDepth(1));
+        });
         if (!this.scene.villageCemeteryGate) {
             const gx = ox + VILLAGE_WIDTH / 2, gy = 2000;
             this.scene.villageCemeteryGate = this.scene.add.rectangle(gx, gy, 40, 20, 0x666666).setDepth(5);
@@ -114,14 +115,20 @@ export class VillageSpawner {
 
     spawnChildNPC() {
         const ox = this.scene.villageOffsetX;
-        this.scene.villageChildNPC = this.scene.add.sprite(ox + VILLAGE_CHILD_HOUSE.x + 30, VILLAGE_CHILD_HOUSE.y + 25, 'child_npc').setDepth(8);
-        this.scene.villageChildHint = this.scene.add.text(ox + VILLAGE_CHILD_HOUSE.x + 30, VILLAGE_CHILD_HOUSE.y + 50, '', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setDepth(12);
+        // Spawn child near the child house (below the house)
+        const childX = ox + VILLAGE_CHILD_HOUSE.x + VILLAGE_CHILD_HOUSE.w / 2;
+        const childY = VILLAGE_CHILD_HOUSE.y + VILLAGE_CHILD_HOUSE.h + 15;
+        this.scene.villageChildNPC = this.scene.add.sprite(childX, childY, 'child_npc').setDepth(8);
+        this.scene.villageChildHint = this.scene.add.text(childX, childY + 20, '', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setDepth(12);
     }
 
     spawnCastleChild() {
         const ox = this.scene.villageOffsetX;
-        this.scene.castleChildNPC = this.scene.add.sprite(ox + VILLAGE_WIDTH / 2, 50, 'child_npc').setDepth(8);
-        this.scene.castleChildHint = this.scene.add.text(ox + VILLAGE_WIDTH / 2, 40, '', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setDepth(12);
+        // Spawn child near village entrance, not at top of screen
+        const childX = ox + VILLAGE_WIDTH / 2;
+        const childY = 200;
+        this.scene.castleChildNPC = this.scene.add.sprite(childX, childY, 'child_npc').setDepth(8);
+        this.scene.castleChildHint = this.scene.add.text(childX, childY + 20, '', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setDepth(12);
     }
 
     /* ===== SNOWY VILLAGE SPAWN ===== */

@@ -507,7 +507,9 @@ export class VillageZone extends BaseZone {
 
     _checkVillageProgress() {
         if (this.scene.zone !== 'village' || this.scene.zones.village.isFrozen || this.scene.zones.village.allCleared) return;
-        if (!this.scene.enemies || this.scene.enemies.getLength() === 0) {
+        const enemiesAlive = this.scene.enemies && this.scene.enemies.scene && this.scene.enemies.getLength && this.scene.enemies.getLength() > 0;
+        const zombiesAlive = this.scene.villageZombies && this.scene.villageZombies.scene && this.scene.villageZombies.getLength && this.scene.villageZombies.getLength() > 0;
+        if (!enemiesAlive && !zombiesAlive) {
             this.scene.zones.village.allCleared = true;
             this.spawner.spawnChildNPC();
             this.spawner.showVillageClearedDecor();
