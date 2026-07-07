@@ -4,7 +4,7 @@ import {
     CORRUPTION,
     GAME_WIDTH, GAME_HEIGHT
 } from '../config/index.js';
-import { playPortal, stopMusic, playPetPickup, startZoneMusic } from '../sound.js';
+import { stopMusic, startZoneMusic } from '../sound.js';
 import { loadAccount } from '../save.js';
 import { getClassData, getClassStats } from '../classes.js';
 import { getTalentEffects } from '../talents.js';
@@ -32,9 +32,8 @@ import { HellZone } from '../zones/HellZone.js';
 import { SnowyZone } from '../zones/SnowyZone.js';
 import { CastleZone } from '../zones/CastleZone.js';
 import { MeadowZone } from '../zones/MeadowZone.js';
-import { isHost, getMyId, getPlayers, getPlayerNames, onStateUpdate, onLoot, onKey, sendInput, sendGameState, sendLootPickup, sendKeyPickup } from '../network.js';
 import { MultiplayerManager } from '../systems/MultiplayerManager.js';
-import { CRYSTAL_RUN_CAPS, canGetCrystals } from '../config/pets.js';
+import { CRYSTAL_RUN_CAPS } from '../config/pets.js';
 import { getKeybinds, parseKeyCode } from '../keybinds.js';
 import { createAllAnimations } from '../config/animations.js';
 
