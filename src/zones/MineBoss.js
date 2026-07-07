@@ -1,12 +1,16 @@
 import Phaser from 'phaser';
 import { MINE_BOSS_TYPE, DIFF_COLORS, GAME_WIDTH, GAME_HEIGHT, DIFF_MULT, SECRET_KEY_ITEM } from '../config/index.js';
 import { playBossAoE } from '../sound.js';
-import { BossAI } from '../systems/BossAI.js';
+import { BaseBossAI } from '../systems/BaseBossAI.js';
 
-export class MineBoss {
+export class MineBoss extends BaseBossAI {
     constructor(scene, zone) {
-        this.scene = scene;
-        this.zone = zone;
+        super(scene, zone, {
+            bossRef: 'mineBoss',
+            nameTextRef: 'mineBossNameText',
+            color: '#9b59b6',
+            animKey: 'skeleton_lord_walk'
+        });
     }
 
     spawn() {
@@ -32,55 +36,17 @@ export class MineBoss {
         if (s.multiplayer && s.mpSync) s.mpSync.assignMobId(b, 'mineBoss');
     }
 
-    update(delta) {
-        const s = this.scene;
-        const b = s.mineBoss;
-        if (!s.mineBossAlive || !b || !b.active) return;
-        const st = b.stats;
-        BossAI.updateHpBar(b, {
-            x: b.x, y: b.y - 50,
-            nameText: s.mineBossNameText, nameYOffset: -10
-        });
-        if (s.menuOpen || s.transitioning) { b.body.setVelocity(0); return; }
-        if (st.transitioning || st.invulnerable) { b.body.setVelocity(0); return; }
-
-        const hpPct = st.hp / st.maxHp;
-        if (hpPct <= 0.3 && st.phase !== 3) { st.phase = 3; this._phaseTransition(b); return; }
-        else if (hpPct <= 0.6 && st.phase !== 2) { st.phase = 2; this._phaseTransition(b); return; }
-
-        if (st.aiState === 'telegraph') {
-            b.body.setVelocity(0); st.telegraphTimer -= delta;
-            if (st.telegraphTimer <= 0) this._executeAttack(b);
-            return;
-        }
-        if (st.aiState === 'attacking') {
-            b.body.setVelocity(0); st.attackDuration -= delta;
-            if (st.attackDuration <= 0) { st.aiState = 'cooldown'; st.cooldownTimer = 800; if (b.telegraph) { b.telegraph.destroy(); b.telegraph = null; } }
-            return;
-        }
-        if (st.aiState === 'cooldown') {
-            b.body.setVelocity(0); st.cooldownTimer -= delta;
-            if (st.cooldownTimer <= 0) st.aiState = 'chase';
-            return;
-        }
-
-        st.aiState = 'chase';
-        const dx = s.player.x - b.x, dy = s.player.y - b.y, dist = Math.sqrt(dx * dx + dy * dy);
-        const speed = st.phase === 3 ? st.baseSpeed * 1.2 : st.baseSpeed;
-        if (dist > 30) {
-            b.body.setVelocity((dx / dist) * speed, (dy / dist) * speed);
-            if (s.anims.exists('skeleton_lord_walk') && !b.anims.isPlaying) b.play('skeleton_lord_walk');
-            b.setFlipX(dx < 0);
-        } else { b.body.setVelocity(0); b.stop(); b.setFrame(0); }
-
-        st.attackTimer -= delta; st.aoeTimer -= delta; st.boneTimer -= delta; st.auraTimer -= delta; st.summonTimer -= delta;
-        if (st.attackTimer <= 0) {
-            const attack = this._pickAttack(st);
-            if (attack) { this._telegraph(b, attack); } else { st.attackTimer = 800; }
-        }
+    _tickTimers(boss, delta) {
+        const st = boss.stats;
+        super._tickTimers(boss, delta);
+        st.aoeTimer -= delta;
+        st.boneTimer -= delta;
+        st.auraTimer -= delta;
+        st.summonTimer -= delta;
     }
 
-    _pickAttack(st) {
+    _pickAttack(boss) {
+        const st = boss.stats;
         const available = [];
         if (st.aoeTimer <= 0) available.push('aoe');
         if (st.phase >= 2 && st.boneTimer <= 0) available.push('bone');
@@ -92,9 +58,7 @@ export class MineBoss {
 
     _telegraph(boss, attackType) {
         const s = this.scene; const st = boss.stats;
-        st.aiState = 'telegraph'; st.currentAttack = attackType; st.telegraphTimer = 500;
-        boss.body.setVelocity(0);
-        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
+        super._telegraph(boss, attackType);
         if (attackType === 'aoe') {
             const tg = s.add.sprite(boss.x, boss.y, 'boss_telegraph_circle').setAlpha(0).setDepth(10).setScale(st.aoeRadius / 64);
             s.tweens.add({ targets: tg, alpha: 0.9, duration: 200 });
@@ -112,7 +76,6 @@ export class MineBoss {
         } else if (attackType === 'summon') {
             st.summonTimer = st.phase >= 3 ? 12000 : 18000;
         }
-        st.attackTimer = 3000;
     }
 
     _executeAttack(boss) {
@@ -189,10 +152,6 @@ export class MineBoss {
         e.hpBg = s.add.rectangle(x, y - 18, 22, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = s.add.rectangle(x, y - 18, 22, 3, 0x9b59b6).setOrigin(0.5).setDepth(11);
         s.enemies.add(e);
-    }
-
-    _phaseTransition(boss) {
-        BossAI.phaseTransition(this.scene, boss, 'PHASE 2!', '#9b59b6');
     }
 
     clearArena() {

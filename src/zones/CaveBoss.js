@@ -4,12 +4,16 @@ import {
     GAME_WIDTH, DIFF_COLORS
 } from '../config/index.js';
 import { playBossAoE } from '../sound.js';
-import { BossAI } from '../systems/BossAI.js';
+import { BaseBossAI } from '../systems/BaseBossAI.js';
 
-export class CaveBoss {
+export class CaveBoss extends BaseBossAI {
     constructor(scene, zone) {
-        this.scene = scene;
-        this.zone = zone;
+        super(scene, zone, {
+            bossRef: 'caveBoss',
+            nameTextRef: 'caveBossNameText',
+            color: '#bf77f6',
+            animKey: 'giant_bat_walk_anim'
+        });
     }
 
     spawnCaveBoss() {
@@ -78,92 +82,29 @@ export class CaveBoss {
 
         BossAI.updateHpBar(b, { x: GAME_WIDTH / 2, y: 100 });
 
-        if (s.menuOpen || s.transitioning) {
-            b.body.setVelocity(0);
-            return;
-        }
-
-        if (st.transitioning || st.invulnerable) {
-            b.body.setVelocity(0);
-            return;
-        }
-
+        if (s.menuOpen || s.transitioning) { b.body.setVelocity(0); return; }
+        if (st.transitioning || st.invulnerable) { b.body.setVelocity(0); return; }
         if (st.isDashing) return;
 
         const hpPct = st.hp / st.maxHp;
-        if (hpPct <= 0.3 && st.phase !== 3) {
-            st.phase = 3;
-            this._caveBossPhaseTransition(b);
-            return;
-        } else if (hpPct <= 0.6 && st.phase !== 2) {
-            st.phase = 2;
-            this._caveBossPhaseTransition(b);
-            return;
-        }
+        if (hpPct <= 0.3 && st.phase !== 3) { st.phase = 3; this._phaseTransition(b); return; }
+        if (hpPct <= 0.6 && st.phase !== 2) { st.phase = 2; this._phaseTransition(b); return; }
 
-        if (!st.summoned && st.phase >= 2) {
-            st.summoned = true;
-            this.caveBossSummon(b);
-        }
+        if (!st.summoned && st.phase >= 2) { st.summoned = true; this.caveBossSummon(b); }
 
-        if (st.aiState === 'telegraph') {
-            b.body.setVelocity(0);
-            st.telegraphTimer -= delta;
-            if (st.telegraphTimer <= 0) {
-                this._caveBossExecuteAttack(b);
-            }
-            return;
-        }
+        this._updateStateMachine(b, delta);
+    }
 
-        if (st.aiState === 'attacking') {
-            b.body.setVelocity(0);
-            st.attackDuration -= delta;
-            if (st.attackDuration <= 0) {
-                st.aiState = 'cooldown';
-                st.cooldownTimer = 800;
-                if (b.telegraph) { b.telegraph.destroy(); b.telegraph = null; }
-            }
-            return;
-        }
-
-        if (st.aiState === 'cooldown') {
-            b.body.setVelocity(0);
-            st.cooldownTimer -= delta;
-            if (st.cooldownTimer <= 0) {
-                st.aiState = 'chase';
-            }
-            return;
-        }
-
-        st.aiState = 'chase';
-        const dx = s.player.x - b.x;
-        const dy = s.player.y - b.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const speed = st.phase === 3 ? st.baseSpeed * 1.2 : st.baseSpeed;
-
-        if (dist > 50) {
-            b.body.setVelocity((dx / dist) * speed, (dy / dist) * speed);
-            b.setFlipX(dx < 0);
-        } else {
-            b.body.setVelocity(0);
-        }
-
-        st.attackTimer -= delta;
+    _tickTimers(boss, delta) {
+        const st = boss.stats;
+        super._tickTimers(boss, delta);
         st.dashCooldown -= delta;
         st.screechCooldownTimer -= delta;
         st.summonCooldown -= delta;
-
-        if (st.attackTimer <= 0) {
-            const attack = this._pickCaveBossAttack(st);
-            if (attack) {
-                this._caveBossTelegraph(b, attack);
-            } else {
-                st.attackTimer = 800;
-            }
-        }
     }
 
-    _pickCaveBossAttack(st) {
+    _pickAttack(boss) {
+        const st = boss.stats;
         const available = [];
         if (st.screechCooldownTimer <= 0) available.push('screech');
         if (st.dashCooldown <= 0) available.push('dash');
@@ -172,15 +113,10 @@ export class CaveBoss {
         return available[Math.floor(Math.random() * available.length)];
     }
 
-    _caveBossTelegraph(boss, attackType) {
+    _telegraph(boss, attackType) {
         const s = this.scene;
         const st = boss.stats;
-        st.aiState = 'telegraph';
-        st.currentAttack = attackType;
-        st.telegraphTimer = 500;
-        boss.body.setVelocity(0);
-
-        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
+        super._telegraph(boss, attackType);
 
         if (attackType === 'screech') {
             const tg = s.add.sprite(boss.x, boss.y, 'boss_telegraph_circle')
@@ -205,10 +141,9 @@ export class CaveBoss {
             boss.telegraph = tg;
             st.summonCooldown = 12000;
         }
-        st.attackTimer = 3000;
     }
 
-    _caveBossExecuteAttack(boss) {
+    _executeAttack(boss) {
         const st = boss.stats;
         st.aiState = 'attacking';
         st.attackDuration = 400;
@@ -222,10 +157,6 @@ export class CaveBoss {
             this.caveBossSummon(boss);
             st.attackDuration = 500;
         }
-    }
-
-    _caveBossPhaseTransition(boss) {
-        BossAI.phaseTransition(this.scene, boss, 'PHASE 2!', '#bf77f6');
     }
 
     caveBossDash(boss) {
