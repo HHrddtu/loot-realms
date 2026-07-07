@@ -69,7 +69,7 @@ export class PlayerSystem {
         let accDodgePercent = (ae.dodgePercent || 0);
         let accCorruptionMax = 0;
 
-        const accScale = (1 + lvl * 0.1);
+        const accScale = 1; // Account equipment bonuses are flat, not scaled by level
         const accDiffMult = diffMult.hp;
 
         Object.values(this.scene.accountEquipment).forEach(item => {
@@ -120,6 +120,23 @@ export class PlayerSystem {
         const accFlatHp = accLvl * 2;
         const accFlatDmg = accLvl * 1;
         const accFlatSpd = accLvl * 1;
+
+        // DEBUG: detailed damage breakdown
+        const finalBaseDmg = cls.stats.damage + (lvl - 1) * growth.dmgPerLevel + bonusDmg + accFlatDmg;
+        console.log('[DEBUG] Damage breakdown:', {
+            classBase: cls.stats.damage,
+            levelBonus: (lvl - 1) * growth.dmgPerLevel,
+            equipBonus: bonusDmg,
+            accLevelBonus: accFlatDmg,
+            finalBase: finalBaseDmg,
+            dmgMult: dmgMult,
+            result: Math.floor(finalBaseDmg * dmgMult),
+            equipped: {
+                weapon: this.scene.equipment.weapon?.name,
+                armor: this.scene.equipment.armor?.name,
+                accessory: this.scene.equipment.accessory?.name
+            }
+        });
 
         this.scene.playerMaxHP = Math.floor((cls.stats.hp + (lvl - 1) * growth.hpPerLevel + bonusHP + accFlatHp) * hpMult);
         this.scene.playerDamage = Math.floor((cls.stats.damage + (lvl - 1) * growth.dmgPerLevel + bonusDmg + accFlatDmg) * dmgMult);
@@ -207,6 +224,7 @@ export class PlayerSystem {
             copy.locked = (copy.rarity === 'legendary' || copy.rarity === 'epic' || copy.locked);
         }
         this.scene.equipBag.push(copy);
+        console.log('[DEBUG] equip added:', item.name, item.rarity, item.stats);
         return true;
     }
 
@@ -416,7 +434,10 @@ export class PlayerSystem {
             this.scene.playerLevel++;
             this.scene.talentPoints++;
             this.scene.classStats = getClassStats(this.scene.classKey, this.scene.playerLevel);
+            const oldDmg = this.scene.playerDamage;
             this.recalcStats();
+            const newDmg = this.scene.playerDamage;
+            console.log('[DEBUG] Level up:', this.scene.playerLevel, 'damage:', oldDmg, '->', newDmg);
             this.scene.playerHP = this.scene.playerMaxHP;
             playLevelUp();
             this.scene.cameras.main.flash(300, 241, 196, 15);
