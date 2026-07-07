@@ -139,7 +139,7 @@ export default class GameScene extends Phaser.Scene {
         this.corruption = 0;
         this.corruptionMax = this.classStats ? this.classStats.corruptionMax : CORRUPTION.max;
 
-        this.spellCooldowns = { fireball: 0, shield: 0, heal: 0 };
+        this.spellCooldowns = this.spellSys.cast.cooldowns;
         this.shieldActive = false;
         this.shieldHP = 0;
         this.shieldTimer = 0;

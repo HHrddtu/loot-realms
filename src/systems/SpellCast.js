@@ -3,6 +3,35 @@ import { CORRUPTION } from '../config/index.js';
 export class SpellCast {
     constructor(scene) {
         this.scene = scene;
+
+        // Spell state (moved from GameScene)
+        this.cooldowns = { fireball: 0, shield: 0, heal: 0 };
+        this.shieldActive = false;
+        this.shieldHP = 0;
+        this.shieldTimer = 0;
+        this.shieldVfx = null;
+        this.lifeLinkActive = false;
+        this.lifeLinkTimer = 0;
+        this.lifeLinkHealPerSec = 0;
+        this.divineBlessingTimer = 0;
+        this.divineBlessingDmgBuff = 0;
+        this.divineBlessingDefBuff = 0;
+    }
+
+    /** Sync state to scene for backward compatibility */
+    syncToScene() {
+        const s = this.scene;
+        s.spellCooldowns = this.cooldowns;
+        s.shieldActive = this.shieldActive;
+        s.shieldHP = this.shieldHP;
+        s.shieldTimer = this.shieldTimer;
+        s.shieldVfx = this.shieldVfx;
+        s.lifeLinkActive = this.lifeLinkActive;
+        s.lifeLinkTimer = this.lifeLinkTimer;
+        s.lifeLinkHealPerSec = this.lifeLinkHealPerSec;
+        s._divineBlessingTimer = this.divineBlessingTimer;
+        s._divineBlessingDmgBuff = this.divineBlessingDmgBuff;
+        s._divineBlessingDefBuff = this.divineBlessingDefBuff;
     }
 
     _updateCorruption() {
