@@ -115,9 +115,15 @@ export class PlayerSystem {
         const moveSpeedBonus = (ae.moveSpeedPercent || 0) + (te.moveSpeedPercent || 0) + ((this.scene._consumableBonusSpd || 0) * 100);
         const spdMult = 1 + accSpdPercent / 100 + moveSpeedBonus / 100;
 
-        this.scene.playerMaxHP = Math.floor((cls.stats.hp + (lvl - 1) * growth.hpPerLevel + bonusHP) * hpMult);
-        this.scene.playerDamage = Math.floor((cls.stats.damage + (lvl - 1) * growth.dmgPerLevel + bonusDmg) * dmgMult);
-        this.scene.playerSpeed = Math.floor((cls.stats.speed + (lvl - 1) * growth.speedPerLevel + bonusSpeed) * spdMult);
+        // Account level flat bonus: +2 HP, +1 DMG, +1 SPD per account level
+        const accLvl = this.scene.accountLevel || 1;
+        const accFlatHp = accLvl * 2;
+        const accFlatDmg = accLvl * 1;
+        const accFlatSpd = accLvl * 1;
+
+        this.scene.playerMaxHP = Math.floor((cls.stats.hp + (lvl - 1) * growth.hpPerLevel + bonusHP + accFlatHp) * hpMult);
+        this.scene.playerDamage = Math.floor((cls.stats.damage + (lvl - 1) * growth.dmgPerLevel + bonusDmg + accFlatDmg) * dmgMult);
+        this.scene.playerSpeed = Math.floor((cls.stats.speed + (lvl - 1) * growth.speedPerLevel + bonusSpeed + accFlatSpd) * spdMult);
         this.scene.corruptionMax = cls.stats.corruptionMax + (te.corruptionMax || 0) + accCorruptionMax;
 
         this.scene.bestiaryBonuses = getAllBestiaryBonuses(this.scene.difficulty);
