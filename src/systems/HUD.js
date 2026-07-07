@@ -47,6 +47,7 @@ export class HUD {
         this.scene.petBtnText.on('pointerout', () => this.scene.petBtnText.setStyle({ fill: '#e67e22' }));
 
         this.scene.hintText = this.scene.add.text(400, 588, '', { fontSize: '10px', fill: '#555', fontFamily: 'Arial' }).setOrigin(0.5).setScrollFactor(0).setDepth(20);
+        this.scene.saveIndicator = this.scene.add.text(790, 18, '', { fontSize: '9px', fill: '#27ae60', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0.5).setScrollFactor(0).setDepth(23);
         this.scene.muteText = this.scene.add.text(790, 30, 'SOUND', { fontSize: '10px', fill: '#27ae60', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0.5).setScrollFactor(0).setDepth(23).setInteractive({ useHandCursor: true });
         this.scene.muteText.on('pointerdown', () => this._toggleMute());
         this.scene.talentText = this.scene.add.text(400, 36, '', { fontSize: '9px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setScrollFactor(0).setDepth(23);
@@ -162,6 +163,20 @@ export class HUD {
         const m = toggleMute();
         this.scene.muteText.setText(m ? 'MUTE' : 'SOUND');
         this.scene.muteText.setColor(m ? '#e74c3c' : '#27ae60');
+    }
+
+    showSaveIndicator() {
+        if (!this.scene.saveIndicator) return;
+        this.scene.saveIndicator.setText('Saving...');
+        this.scene.saveIndicator.setColor('#27ae60');
+        this.scene.time.delayedCall(1500, () => {
+            if (this.scene.saveIndicator) {
+                this.scene.saveIndicator.setText('Saved!');
+                this.scene.time.delayedCall(1000, () => {
+                    if (this.scene.saveIndicator) this.scene.saveIndicator.setText('');
+                });
+            }
+        });
     }
 
     updateUI() {

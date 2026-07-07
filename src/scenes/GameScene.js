@@ -354,7 +354,7 @@ export default class GameScene extends Phaser.Scene {
 
     /* ===== SAVE/LOAD ===== */
 
-    doSave() { this.saveLoad.doSave(); }
+    doSave() { this.saveLoad.doSave(); if (this.ui && this.ui.hud) this.ui.hud.showSaveIndicator(); }
     doLoad() { return this.saveLoad.doLoad(); }
     getAggroTarget() { return this.petSys.getAggroTarget(); }
     _makeEnemy(t, x, y) { this.combat.makeEnemy(t, x, y); }
