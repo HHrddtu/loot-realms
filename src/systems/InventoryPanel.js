@@ -30,6 +30,8 @@ export class InventoryPanel {
         if (item.questItem) lines.push({ text: '\u2605 Quest Item', color: '#f39c12', size: '10px', bold: true });
         if (item.relic) lines.push({ text: '\u2605 Relic', color: '#9b59b6', size: '10px', bold: true });
         if (item.slot) lines.push({ text: 'Slot: ' + item.slot.charAt(0).toUpperCase() + item.slot.slice(1), color: '#95a5a6', size: '10px', bold: false });
+        
+        // Item stats
         if (item.type === 'material' || item.type === 'equip') {
             const s = item.stats || {};
             if (s.hp) lines.push({ text: '+' + s.hp + ' HP', color: '#2ecc71', size: '11px', bold: false });
@@ -49,8 +51,30 @@ export class InventoryPanel {
             if (s.regenPercent) lines.push({ text: '+' + s.regenPercent + '% Regen', color: '#2ecc71', size: '11px' });
             if (s.corruptionMax) lines.push({ text: '+' + s.corruptionMax + ' CorrMax', color: '#2ecc71', size: '11px' });
         }
+        
+        // Item comparison (if hovering over bag item and something is equipped)
+        if (item.type === 'equip' && item.slot) {
+            const equipped = this.scene.equipment[item.slot];
+            if (equipped && equipped !== item) {
+                lines.push({ text: '--- vs Equipped ---', color: '#f39c12', size: '10px', bold: true });
+                const newStats = item.stats || {};
+                const oldStats = equipped.stats || {};
+                const statNames = { hp: 'HP', dmg: 'DMG', speed: 'SPD', crit: 'Crit' };
+                for (const [key, label] of Object.entries(statNames)) {
+                    const oldVal = oldStats[key] || 0;
+                    const newVal = newStats[key] || 0;
+                    const diff = newVal - oldVal;
+                    if (oldVal > 0 || newVal > 0) {
+                        const diffText = diff > 0 ? '+' + diff : diff.toString();
+                        const diffColor = diff > 0 ? '#2ecc71' : diff < 0 ? '#e74c3c' : '#888';
+                        lines.push({ text: label + ': ' + oldVal + ' -> ' + newVal + ' (' + diffText + ')', color: diffColor, size: '10px', bold: false });
+                    }
+                }
+            }
+        }
+        
         if (item.effect) lines.push({ text: 'Effect: ' + item.effect, color: '#f39c12', size: '10px' });
-        lines.push({ text: 'RMB=lock/unlock', color: '#555', size: '9px' });
+        lines.push({ text: 'Click=equip | RMB=lock', color: '#555', size: '9px' });
         const maxW = 180, lineH = 16, padX = 10, padY = 8;
         const totalH = lines.length * lineH + padY * 2;
         let tx = x + 20, ty = y - totalH / 2;
