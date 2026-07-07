@@ -36,6 +36,7 @@ import { isHost, getMyId, getPlayers, getPlayerNames, onStateUpdate, onLoot, onK
 import { MultiplayerSync } from '../multiplayer.js';
 import { CRYSTAL_RUN_CAPS, canGetCrystals } from '../config/pets.js';
 import { getKeybinds, parseKeyCode } from '../keybinds.js';
+import { createAllAnimations } from '../config/animations.js';
 
 
 export default class GameScene extends Phaser.Scene {
@@ -267,123 +268,7 @@ export default class GameScene extends Phaser.Scene {
     /* ===== ANIMATIONS ===== */
 
     _createAnimations() {
-        const anims = this.anims;
-
-        if (!anims.exists('sage_walk_right')) {
-            anims.create({ key: 'sage_walk_right', frames: anims.generateFrameNumbers('player_sage_walk', { start: 0, end: 3 }), frameRate: 8, repeat: -1 });
-            anims.create({ key: 'sage_idle', frames: [{ key: 'player_sage', frame: 0 }], frameRate: 1 });
-        }
-        if (!anims.exists('sage_attack')) {
-            anims.create({ key: 'sage_attack', frames: anims.generateFrameNumbers('player_sage_attack', { start: 0, end: 2 }), frameRate: 10, repeat: 0 });
-        }
-        if (!anims.exists('alchemist_walk_right')) {
-            anims.create({ key: 'alchemist_walk_right', frames: anims.generateFrameNumbers('player_alchemist_walk', { start: 0, end: 3 }), frameRate: 7, repeat: -1 });
-        }
-        if (!anims.exists('alchemist_attack')) {
-            anims.create({ key: 'alchemist_attack', frames: anims.generateFrameNumbers('player_alchemist_attack', { start: 0, end: 2 }), frameRate: 10, repeat: 0 });
-        }
-        if (!anims.exists('angel_walk_right')) {
-            anims.create({ key: 'angel_walk_right', frames: anims.generateFrameNumbers('player_angel_walk', { start: 0, end: 3 }), frameRate: 7, repeat: -1 });
-        }
-        if (!anims.exists('angel_attack')) {
-            anims.create({ key: 'angel_attack', frames: anims.generateFrameNumbers('player_angel_attack', { start: 0, end: 2 }), frameRate: 10, repeat: 0 });
-        }
-        if (!anims.exists('goblin_walk')) {
-            anims.create({ key: 'goblin_walk', frames: anims.generateFrameNumbers('goblin_walk', { start: 0, end: 3 }), frameRate: 6, repeat: -1 });
-            anims.create({ key: 'goblin_attack', frames: anims.generateFrameNumbers('goblin_attack', { start: 0, end: 2 }), frameRate: 10, repeat: 0 });
-        }
-        if (!anims.exists('slime_walk')) {
-            anims.create({ key: 'slime_walk', frames: anims.generateFrameNumbers('slime_walk', { start: 0, end: 3 }), frameRate: 5, repeat: -1 });
-        }
-        if (!anims.exists('rat_walk')) {
-            anims.create({ key: 'rat_walk', frames: anims.generateFrameNumbers('rat_walk', { start: 0, end: 3 }), frameRate: 8, repeat: -1 });
-        }
-        if (!anims.exists('skeleton_walk')) {
-            anims.create({ key: 'skeleton_walk', frames: anims.generateFrameNumbers('skeleton_walk', { start: 0, end: 3 }), frameRate: 5, repeat: -1 });
-            anims.create({ key: 'skeleton_attack', frames: anims.generateFrameNumbers('skeleton_attack', { start: 0, end: 2 }), frameRate: 8, repeat: 0 });
-        }
-        if (!anims.exists('skeleton_archer_walk_anim')) {
-            anims.create({ key: 'skeleton_archer_walk_anim', frames: anims.generateFrameNumbers('skeleton_archer_walk', { start: 0, end: 3 }), frameRate: 5, repeat: -1 });
-        }
-        if (!anims.exists('skeleton_shaman_walk_anim')) {
-            anims.create({ key: 'skeleton_shaman_walk_anim', frames: anims.generateFrameNumbers('skeleton_shaman_walk', { start: 0, end: 3 }), frameRate: 4, repeat: -1 });
-        }
-        if (!anims.exists('treant_walk')) {
-            anims.create({ key: 'treant_walk', frames: anims.generateFrameNumbers('treant_walk', { start: 0, end: 3 }), frameRate: 3, repeat: -1 });
-        }
-        if (!anims.exists('skeleton_lord_walk')) {
-            anims.create({ key: 'skeleton_lord_walk', frames: anims.generateFrameNumbers('skeleton_lord_walk', { start: 0, end: 3 }), frameRate: 4, repeat: -1 });
-            anims.create({ key: 'skeleton_lord_attack', frames: anims.generateFrameNumbers('skeleton_lord_attack', { start: 0, end: 2 }), frameRate: 6, repeat: 0 });
-        }
-        if (!anims.exists('cave_spider_walk_anim')) {
-            anims.create({ key: 'cave_spider_walk_anim', frames: anims.generateFrameNumbers('cave_spider_walk', { start: 0, end: 3 }), frameRate: 8, repeat: -1 });
-        }
-        if (!anims.exists('cave_bat_walk_anim')) {
-            anims.create({ key: 'cave_bat_walk_anim', frames: anims.generateFrameNumbers('cave_bat_walk', { start: 0, end: 3 }), frameRate: 7, repeat: -1 });
-        }
-        if (!anims.exists('stone_golem_walk_anim')) {
-            anims.create({ key: 'stone_golem_walk_anim', frames: anims.generateFrameNumbers('stone_golem_walk', { start: 0, end: 3 }), frameRate: 3, repeat: -1 });
-        }
-        if (!anims.exists('earth_worm_walk_anim')) {
-            anims.create({ key: 'earth_worm_walk_anim', frames: anims.generateFrameNumbers('earth_worm_walk', { start: 0, end: 3 }), frameRate: 4, repeat: -1 });
-        }
-        if (!anims.exists('giant_bat_walk_anim')) {
-            anims.create({ key: 'giant_bat_walk_anim', frames: anims.generateFrameNumbers('giant_bat_walk', { start: 0, end: 3 }), frameRate: 5, repeat: -1 });
-        }
-        if (!anims.exists('small_bat_walk_anim')) {
-            anims.create({ key: 'small_bat_walk_anim', frames: anims.generateFrameNumbers('small_bat_walk', { start: 0, end: 3 }), frameRate: 7, repeat: -1 });
-        }
-        if (!anims.exists('village_brute_walk_anim')) {
-            anims.create({ key: 'village_brute_walk_anim', frames: anims.generateFrameNumbers('village_brute_walk', { start: 0, end: 3 }), frameRate: 4, repeat: -1 });
-        }
-        if (!anims.exists('village_stalker_walk_anim')) {
-            anims.create({ key: 'village_stalker_walk_anim', frames: anims.generateFrameNumbers('village_stalker_walk', { start: 0, end: 3 }), frameRate: 9, repeat: -1 });
-        }
-        if (!anims.exists('village_spitter_walk_anim')) {
-            anims.create({ key: 'village_spitter_walk_anim', frames: anims.generateFrameNumbers('village_spitter_walk', { start: 0, end: 3 }), frameRate: 6, repeat: -1 });
-        }
-        if (!anims.exists('village_curser_walk_anim')) {
-            anims.create({ key: 'village_curser_walk_anim', frames: anims.generateFrameNumbers('village_curser_walk', { start: 0, end: 3 }), frameRate: 5, repeat: -1 });
-        }
-        if (!anims.exists('zombie_walk_anim')) {
-            anims.create({ key: 'zombie_walk_anim', frames: anims.generateFrameNumbers('zombie_walk', { start: 0, end: 3 }), frameRate: 3, repeat: -1 });
-        }
-        if (!anims.exists('purple_demon_walk_anim')) {
-            anims.create({ key: 'purple_demon_walk_anim', frames: anims.generateFrameNumbers('purple_demon_walk', { start: 0, end: 3 }), frameRate: 4, repeat: -1 });
-        }
-        if (!anims.exists('hell_guard_walk_anim')) {
-            anims.create({ key: 'hell_guard_walk_anim', frames: anims.generateFrameNumbers('hell_guard_walk', { start: 0, end: 3 }), frameRate: 4, repeat: -1 });
-        }
-        if (!anims.exists('hell_stalker_walk_anim')) {
-            anims.create({ key: 'hell_stalker_walk_anim', frames: anims.generateFrameNumbers('hell_stalker_walk', { start: 0, end: 3 }), frameRate: 9, repeat: -1 });
-        }
-        if (!anims.exists('hell_archer_walk_anim')) {
-            anims.create({ key: 'hell_archer_walk_anim', frames: anims.generateFrameNumbers('hell_archer_walk', { start: 0, end: 3 }), frameRate: 6, repeat: -1 });
-        }
-        if (!anims.exists('hell_mage_walk_anim')) {
-            anims.create({ key: 'hell_mage_walk_anim', frames: anims.generateFrameNumbers('hell_mage_walk', { start: 0, end: 3 }), frameRate: 5, repeat: -1 });
-        }
-        if (!anims.exists('hell_priest_walk_anim')) {
-            anims.create({ key: 'hell_priest_walk_anim', frames: anims.generateFrameNumbers('hell_priest_walk', { start: 0, end: 3 }), frameRate: 5, repeat: -1 });
-        }
-        if (!anims.exists('hell_imp_walk_anim')) {
-            anims.create({ key: 'hell_imp_walk_anim', frames: anims.generateFrameNumbers('hell_imp_walk', { start: 0, end: 3 }), frameRate: 8, repeat: -1 });
-        }
-        if (!anims.exists('red_demon_walk_anim')) {
-            anims.create({ key: 'red_demon_walk_anim', frames: anims.generateFrameNumbers('red_demon_walk', { start: 0, end: 3 }), frameRate: 4, repeat: -1 });
-        }
-        if (!anims.exists('bandit_melee_walk_anim')) {
-            anims.create({ key: 'bandit_melee_walk_anim', frames: [{ key: 'bandit_melee', frame: 0 }], frameRate: 1, repeat: -1 });
-        }
-        if (!anims.exists('bandit_ranger_walk_anim')) {
-            anims.create({ key: 'bandit_ranger_walk_anim', frames: [{ key: 'bandit_ranger', frame: 0 }], frameRate: 1, repeat: -1 });
-        }
-        if (!anims.exists('bandit_elite_walk_anim')) {
-            anims.create({ key: 'bandit_elite_walk_anim', frames: [{ key: 'bandit_elite', frame: 0 }], frameRate: 1, repeat: -1 });
-        }
-        if (!anims.exists('bandit_leader_walk_anim')) {
-            anims.create({ key: 'bandit_leader_walk_anim', frames: [{ key: 'bandit_leader', frame: 0 }], frameRate: 1, repeat: -1 });
-        }
+        createAllAnimations(this.anims);
     }
 
     /* ===== PLAYER ===== */
@@ -873,25 +758,23 @@ export default class GameScene extends Phaser.Scene {
         let isMoving = false;
 
         if (!this.menuOpen && !this.transitioning) {
-            if (this.cursors.left.isDown) {
-                body.setVelocityX(-this.playerSpeed);
-                this.facing = 'left';
-                isMoving = true;
-            } else if (this.cursors.right.isDown) {
-                body.setVelocityX(this.playerSpeed);
-                this.facing = 'right';
-                isMoving = true;
-            }
-            if (this.cursors.up.isDown) {
-                body.setVelocityY(-this.playerSpeed);
-                this.facing = 'up';
-                isMoving = true;
-            } else if (this.cursors.down.isDown) {
-                body.setVelocityY(this.playerSpeed);
-                this.facing = 'down';
-                isMoving = true;
+            // Movement
+            const moveMap = [
+                [this.cursors.left, 'left', -1, 0],
+                [this.cursors.right, 'right', 1, 0],
+                [this.cursors.up, 'up', 0, -1],
+                [this.cursors.down, 'down', 0, 1],
+            ];
+            for (const [key, dir, dx, dy] of moveMap) {
+                if (key.isDown) {
+                    body.setVelocityX(dx * this.playerSpeed);
+                    body.setVelocityY(dy * this.playerSpeed);
+                    this.facing = dir;
+                    isMoving = true;
+                }
             }
 
+            // Walk animation
             if (isMoving && !this.playerAttacking) {
                 const cls = this.classData || getClassData(this.classKey);
                 const walkAnim = cls.walkAnim || 'sage_walk_right';
@@ -904,31 +787,8 @@ export default class GameScene extends Phaser.Scene {
                 this.player.setFrame(0);
             }
 
-            if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
-                if (this.currentZone && typeof this.currentZone.handleSpace === 'function') {
-                    this.currentZone.handleSpace();
-                } else if (this.nearbyNpc) {
-                    this._interactWithNpc();
-                } else {
-                    this.attack();
-                }
-            }
-            if (Phaser.Input.Keyboard.JustDown(this.iKey)) this.toggleInventory();
-            if (Phaser.Input.Keyboard.JustDown(this.pKey)) this.togglePause();
-            if (Phaser.Input.Keyboard.JustDown(this.tKey)) this._openTalentTree();
-            if (Phaser.Input.Keyboard.JustDown(this.mKey)) this._toggleMute();
-            if (Phaser.Input.Keyboard.JustDown(this.fKey)) {
-                if (this.playerSys) this.playerSys.useConsumable();
-            }
-            const spells = this._getClassSpells();
-            if (Phaser.Input.Keyboard.JustDown(this.qKey)) this._castSpell(spells.q);
-            if (Phaser.Input.Keyboard.JustDown(this.wKey)) this._castSpell(spells.w);
-            if (Phaser.Input.Keyboard.JustDown(this.eKey)) this._castSpell(spells.e);
-            if (Phaser.Input.Keyboard.JustDown(this.rKey)) this._castSpell(spells.r);
-            if (Phaser.Input.Keyboard.JustDown(this.bKey)) this._openBestiary();
-            if (Phaser.Input.Keyboard.JustDown(this.nKey)) this._openQuestLog();
-            if (Phaser.Input.Keyboard.JustDown(this.cKey)) this._openCrafting();
-            if (Phaser.Input.Keyboard.JustDown(this.xKey)) this._openSpellAssign();
+            // Action keys
+            this._handleActionKeys();
         } else if (this.invOpen) {
             if (Phaser.Input.Keyboard.JustDown(this.iKey)) this.closeInventory();
             if (Phaser.Input.Keyboard.JustDown(this.pKey)) {
@@ -936,6 +796,39 @@ export default class GameScene extends Phaser.Scene {
                 this.togglePause();
             }
         }
+    }
+
+    _handleActionKeys() {
+        const JustDown = Phaser.Input.Keyboard.JustDown;
+
+        // SPACE: zone > npc > attack
+        if (JustDown(this.spaceKey)) {
+            if (this.currentZone && typeof this.currentZone.handleSpace === 'function') {
+                this.currentZone.handleSpace();
+            } else if (this.nearbyNpc) {
+                this._interactWithNpc();
+            } else {
+                this.attack();
+            }
+        }
+
+        // UI keys
+        if (JustDown(this.iKey)) this.toggleInventory();
+        if (JustDown(this.pKey)) this.togglePause();
+        if (JustDown(this.tKey)) this._openTalentTree();
+        if (JustDown(this.mKey)) this._toggleMute();
+        if (JustDown(this.fKey) && this.playerSys) this.playerSys.useConsumable();
+        if (JustDown(this.bKey)) this._openBestiary();
+        if (JustDown(this.nKey)) this._openQuestLog();
+        if (JustDown(this.cKey)) this._openCrafting();
+        if (JustDown(this.xKey)) this._openSpellAssign();
+
+        // Spell keys
+        const spells = this._getClassSpells();
+        if (JustDown(this.qKey)) this._castSpell(spells.q);
+        if (JustDown(this.wKey)) this._castSpell(spells.w);
+        if (JustDown(this.eKey)) this._castSpell(spells.e);
+        if (JustDown(this.rKey)) this._castSpell(spells.r);
     }
 
     /* ===== GAME LOOP ===== */
