@@ -3,6 +3,19 @@ export class BaseZone {
         this.scene = scene;
     }
 
+    /**
+     * Set up common enemy overlap (player takes damage on contact).
+     * Call in zone setup after creating enemies group.
+     */
+    setupEnemyOverlap() {
+        const s = this.scene;
+        s.physics.add.overlap(s.player, s.enemies, (p, e) => {
+            if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
+                s.combat.takeDamage(e.stats.damage);
+            }
+        }, null, s);
+    }
+
     clear() {
         const s = this.scene;
         s.physics.world.colliders.destroy();

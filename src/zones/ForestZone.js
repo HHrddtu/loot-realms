@@ -45,11 +45,7 @@ export class ForestZone extends BaseZone {
         this.spawnForestGroundLoot();
         this.spawnForestChests();
 
-        s.physics.add.overlap(s.player, s.enemies, (p, e) => {
-            if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
-                s.combat.takeDamage(e.stats.damage);
-            }
-        }, null, s);
+        this.setupEnemyOverlap();
 
         s.physics.add.overlap(s.player, s.trapGroup, (p, trap) => {
             if (!trap.active || trap.onCooldown || s.menuOpen || s.transitioning) return;

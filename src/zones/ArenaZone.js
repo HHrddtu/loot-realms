@@ -43,11 +43,7 @@ export class ArenaZone extends BaseZone {
             this.spawnBoss();
         }
 
-        s.physics.add.overlap(s.player, s.enemies, (p, e) => {
-            if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
-                s.combat.takeDamage(e.stats.damage);
-            }
-        }, null, s);
+        this.setupEnemyOverlap();
 
         s.zone = 'arena';
         s.hintText.setText(s.zones.mine.isUnlocked ? 'Enter the Mine! | I=inventory | TAB=stats | P=pause' : 'Defeat the Ancient Treant! | I=inventory | TAB=stats | P=pause');

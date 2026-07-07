@@ -54,11 +54,7 @@ export class HellZone extends BaseZone {
         this.spawner.spawnHellCamps();
         this.spawner.spawnHellLavaCircles();
 
-        s.physics.add.overlap(s.player, s.enemies, (p, e) => {
-            if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
-                s.combat.takeDamage(e.stats.damage);
-            }
-        }, null, s);
+        this.setupEnemyOverlap();
 
         s.physics.add.overlap(s.player, s.hellImps, (p, e) => {
             if (e.active && e.stats && !s.menuOpen && !s.transitioning) {

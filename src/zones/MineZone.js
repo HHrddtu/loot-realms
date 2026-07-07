@@ -62,11 +62,7 @@ export class MineZone extends BaseZone {
 
         s.mineDarkness = s.add.image(400, 300, 'mine_darkness').setDepth(13).setAlpha(0.9).setScrollFactor(0);
 
-        s.physics.add.overlap(s.player, s.enemies, (p, e) => {
-            if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
-                s.combat.takeDamage(e.stats.damage);
-            }
-        }, null, s);
+        this.setupEnemyOverlap();
 
         s.zone = 'mine';
         s.npc.spawnNPCs();
@@ -472,11 +468,7 @@ export class MineZone extends BaseZone {
         s.stumps = s.physics.add.group();
         this.bossAI.spawn();
 
-        s.physics.add.overlap(s.player, s.enemies, (p, e) => {
-            if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
-                s.combat.takeDamage(e.stats.damage);
-            }
-        }, null, s);
+        this.setupEnemyOverlap();
 
         s.zone = 'mine_boss';
         s.hintText.setText('Defeat the Skeleton Lord! | I=inventory | TAB=stats | P=pause');

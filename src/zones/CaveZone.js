@@ -53,11 +53,7 @@ export class CaveZone extends BaseZone {
         this.bossSpawned = false;
         s.caveSmallBats = s.physics.add.group();
 
-        s.physics.add.overlap(s.player, s.enemies, (p, e) => {
-            if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
-                s.combat.takeDamage(e.stats.damage);
-            }
-        }, null, s);
+        this.setupEnemyOverlap();
 
         s.physics.add.overlap(s.player, s.caveSmallBats, (p, e) => {
             if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
