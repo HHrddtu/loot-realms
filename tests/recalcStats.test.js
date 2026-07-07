@@ -108,19 +108,21 @@ describe('PlayerSystem.recalcStats', () => {
     });
 
     it('sets base stats for level 1 sage', () => {
+        scene.accountLevel = 1; // +2 HP, +1 DMG, +1 SPD
         system.recalcStats();
-        expect(scene.playerMaxHP).toBe(100);
-        expect(scene.playerDamage).toBe(20);
-        expect(scene.playerSpeed).toBe(150);
+        expect(scene.playerMaxHP).toBe(102); // 100 + 2 account
+        expect(scene.playerDamage).toBe(21); // 20 + 1 account
+        expect(scene.playerSpeed).toBe(151); // 150 + 1 account
         expect(scene.corruptionMax).toBe(100);
     });
 
     it('increases stats per level', () => {
         scene.playerLevel = 10;
+        scene.accountLevel = 1; // +2 HP, +1 DMG, +1 SPD
         system.recalcStats();
-        expect(scene.playerMaxHP).toBe(100 + 9 * 15);
-        expect(scene.playerDamage).toBe(20 + 9 * 4);
-        expect(scene.playerSpeed).toBe(150 + 9 * 2);
+        expect(scene.playerMaxHP).toBe(100 + 9 * 15 + 2);
+        expect(scene.playerDamage).toBe(20 + 9 * 4 + 1);
+        expect(scene.playerSpeed).toBe(150 + 9 * 2 + 1);
     });
 
     it('applies material stat bonuses', () => {
@@ -128,10 +130,11 @@ describe('PlayerSystem.recalcStats', () => {
             { stats: { hp: 10, dmg: 5, speed: 3 } },
             { stats: { hp: 5, dmg: 2 } }
         ];
+        scene.accountLevel = 1; // +2 HP, +1 DMG, +1 SPD
         system.recalcStats();
-        expect(scene.playerMaxHP).toBe(100 + 15);
-        expect(scene.playerDamage).toBe(20 + 7);
-        expect(scene.playerSpeed).toBe(150 + 3);
+        expect(scene.playerMaxHP).toBe(100 + 15 + 2);
+        expect(scene.playerDamage).toBe(20 + 7 + 1);
+        expect(scene.playerSpeed).toBe(150 + 3 + 1);
     });
 
     it('applies equipment stat bonuses with difficulty multiplier', () => {
@@ -140,37 +143,41 @@ describe('PlayerSystem.recalcStats', () => {
             armor: null,
             accessory: null
         };
+        scene.accountLevel = 1; // +2 HP, +1 DMG, +1 SPD
         const diffMult = { hp: 1, dmg: 1 };
         system.recalcStats();
-        expect(scene.playerMaxHP).toBe(100 + 20 * (diffMult.hp));
-        expect(scene.playerDamage).toBe(20 + 10 * (diffMult.dmg));
+        expect(scene.playerMaxHP).toBe(100 + 20 * diffMult.hp + 2);
+        expect(scene.playerDamage).toBe(20 + 10 * diffMult.dmg + 1);
     });
 
     it('preserves HP ratio after recalc', () => {
         scene.playerHP = 50;
         scene.playerMaxHP = 100;
         scene.materials = [{ stats: { hp: 100 } }];
+        scene.accountLevel = 1; // +2 HP
         system.recalcStats();
-        expect(scene.playerHP).toBe(Math.floor((50 / 100) * 200));
-        expect(scene.playerMaxHP).toBe(200);
+        expect(scene.playerMaxHP).toBe(202); // 100 + 100 material + 2 account
+        expect(scene.playerHP).toBe(Math.floor((50 / 100) * 202));
     });
 
     it('calculates different classes correctly', () => {
         scene.classKey = 'alchemist';
         scene.classData = mockClassData.alchemist;
+        scene.accountLevel = 1; // +2 HP, +1 DMG, +1 SPD
         system.recalcStats();
-        expect(scene.playerMaxHP).toBe(120);
-        expect(scene.playerDamage).toBe(15);
-        expect(scene.playerSpeed).toBe(140);
+        expect(scene.playerMaxHP).toBe(122); // 120 + 2 account
+        expect(scene.playerDamage).toBe(16); // 15 + 1 account
+        expect(scene.playerSpeed).toBe(141); // 140 + 1 account
     });
 
     it('handles no materials and no equipment gracefully', () => {
         scene.materials = [];
         scene.equipment = { weapon: null, armor: null, accessory: null };
+        scene.accountLevel = 1; // Account level 1 gives +2 HP, +1 DMG, +1 SPD
         system.recalcStats();
-        expect(scene.playerMaxHP).toBe(100);
-        expect(scene.playerDamage).toBe(20);
-        expect(scene.playerSpeed).toBe(150);
+        expect(scene.playerMaxHP).toBe(102); // 100 + 2 account bonus
+        expect(scene.playerDamage).toBe(21); // 20 + 1 account bonus
+        expect(scene.playerSpeed).toBe(151); // 150 + 1 account bonus
     });
 
     it('applies corruption max from class and talents', () => {

@@ -11,6 +11,7 @@ function createMockScene() {
         shieldHP: 50,
         shieldVfx: { destroy: vi.fn() },
         enemies: {
+            scene: true,
             getLength: () => 2,
             getChildren: () => [
                 { hpBg: { destroy: vi.fn() }, hpFill: { destroy: vi.fn() }, nameText: { destroy: vi.fn() } },
@@ -20,6 +21,7 @@ function createMockScene() {
             destroy: vi.fn()
         },
         stumps: {
+            scene: true,
             getLength: () => 1,
             getChildren: () => [{ hpBg: { destroy: vi.fn() }, hpFill: { destroy: vi.fn() } }],
             clear: vi.fn(),
