@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { VILLAGE_BOSS_TYPE, VILLAGE_CORPSE_MINION, SNOWY_BOSS_MINION,
-         SNOWY_VILLAGE_BOSS_TYPE, DIFF_COLORS, VILLAGE_WIDTH, GAME_WIDTH, GAME_HEIGHT, WARMTH_CORE } from '../config/index.js';
+         SNOWY_VILLAGE_BOSS_TYPE, DIFF_COLORS, VILLAGE_WIDTH, GAME_WIDTH, GAME_HEIGHT, WARMTH_CORE, MAGMA_ARMOR } from '../config/index.js';
 import { rollBossCrystals } from '../config/pets.js';
 import { rollZoneEquip, rollVillageAccountEquip } from '../utils.js';
 import { playBossDeath, playBossAoE, playLoot } from '../sound.js';
@@ -175,6 +175,8 @@ export class VillageBoss {
         s.defeatedText = s.add.text(ox + VILLAGE_WIDTH / 2, 230, 'PURPLE DEMON DEFEATED!', { fontSize: '28px', fill: '#9b59b6', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 4 }).setOrigin(0.5).setScrollFactor(0);
         s.tweens.add({ targets: s.defeatedText, alpha: 0, duration: 5000, onComplete: () => { if (s.defeatedText) s.defeatedText.destroy(); s.defeatedText = null; } });
         const lootItems = [];
+        // Always drop Magma Armor for Hell zone
+        if (s.addEquip({ ...MAGMA_ARMOR, type: 'equip' })) { lootItems.push(MAGMA_ARMOR); playLoot(); }
         [rollZoneEquip('village'), rollZoneEquip('village')].forEach(item => { if (item && s.addEquip(item)) { lootItems.push(item); playLoot(); } });
         if (Math.random() < 0.4) { const acc = rollVillageAccountEquip(); if (acc && s.addAccountEquip(acc)) { lootItems.push({ ...acc, name: acc.name + ' [ACCOUNT]' }); playLoot(); } }
         s.defeatedLoot = [];

@@ -618,19 +618,20 @@ export default class GameScene extends Phaser.Scene {
 
         if (!this.menuOpen && !this.transitioning) {
             // Movement
-            const moveMap = [
-                [this.cursors.left, 'left', -1, 0],
-                [this.cursors.right, 'right', 1, 0],
-                [this.cursors.up, 'up', 0, -1],
-                [this.cursors.down, 'down', 0, 1],
-            ];
-            for (const [key, dir, dx, dy] of moveMap) {
-                if (key.isDown) {
-                    body.setVelocityX(dx * this.playerSpeed);
-                    body.setVelocityY(dy * this.playerSpeed);
-                    this.facing = dir;
-                    isMoving = true;
-                }
+            let moveX = 0, moveY = 0;
+            if (this.cursors.left.isDown) moveX = -1;
+            else if (this.cursors.right.isDown) moveX = 1;
+            if (this.cursors.up.isDown) moveY = -1;
+            else if (this.cursors.down.isDown) moveY = 1;
+
+            if (moveX !== 0 || moveY !== 0) {
+                // Normalize diagonal movement so speed is consistent
+                const len = Math.sqrt(moveX * moveX + moveY * moveY);
+                body.setVelocityX((moveX / len) * this.playerSpeed);
+                body.setVelocityY((moveY / len) * this.playerSpeed);
+                if (moveX !== 0) this.facing = moveX < 0 ? 'left' : 'right';
+                else this.facing = moveY < 0 ? 'up' : 'down';
+                isMoving = true;
             }
 
             // Walk animation
