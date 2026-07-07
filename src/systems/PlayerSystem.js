@@ -33,8 +33,8 @@ export class PlayerSystem {
     }
 
     recalcStats() {
-        if (this._statsRecalcedThisFrame) return;
-        this._statsRecalcedThisFrame = true;
+        // Guard removed: recalcStats must run every time it's called
+        // (e.g., after equipping items, level up, etc.)
         const hpRatio = this.scene.playerMaxHP > 0 ? this.scene.playerHP / this.scene.playerMaxHP : 1;
         const cls = this.scene.classData || getClassData(this.scene.classKey);
         const growth = cls.growth;
@@ -115,6 +115,15 @@ export class PlayerSystem {
         const moveSpeedBonus = (ae.moveSpeedPercent || 0) + (te.moveSpeedPercent || 0) + ((this.scene._consumableBonusSpd || 0) * 100);
         const spdMult = 1 + accSpdPercent / 100 + moveSpeedBonus / 100;
 
+        // DEBUG: dmgMult breakdown
+        console.log('[DEBUG] dmgMult breakdown:', {
+            te_damagePercent: te.damagePercent,
+            accDmgPercent: accDmgPercent,
+            boostDmgPct: boostDmgPct,
+            divineDmgBuff: divineDmgBuff,
+            finalDmgMult: dmgMult
+        });
+
         // Account level flat bonus: +2 HP, +1 DMG, +1 SPD per account level
         const accLvl = this.scene.accountLevel || 1;
         const accFlatHp = accLvl * 2;
@@ -141,6 +150,9 @@ export class PlayerSystem {
         this.scene.playerMaxHP = Math.floor((cls.stats.hp + (lvl - 1) * growth.hpPerLevel + bonusHP + accFlatHp) * hpMult);
         this.scene.playerDamage = Math.floor((cls.stats.damage + (lvl - 1) * growth.dmgPerLevel + bonusDmg + accFlatDmg) * dmgMult);
         this.scene.playerSpeed = Math.floor((cls.stats.speed + (lvl - 1) * growth.speedPerLevel + bonusSpeed + accFlatSpd) * spdMult);
+        
+        // DEBUG: actual assigned damage
+        console.log('[DEBUG] Assigned:', this.scene.playerDamage, 'calc:', Math.floor(finalBaseDmg * dmgMult));
         this.scene.corruptionMax = cls.stats.corruptionMax + (te.corruptionMax || 0) + accCorruptionMax;
 
         this.scene.bestiaryBonuses = getAllBestiaryBonuses(this.scene.difficulty);
