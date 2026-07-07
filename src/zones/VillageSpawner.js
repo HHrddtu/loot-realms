@@ -75,11 +75,6 @@ export class VillageSpawner {
             const house = this.scene.add.sprite(ox + hp.x, hp.y, 'village_house').setDepth(2);
             this.scene.villageDecor.push(house);
         });
-        // Roads between houses
-        const roadYPositions = [370, 620, 920, 1170, 1620];
-        roadYPositions.forEach(ry => {
-            this.scene.villageDecor.push(this.scene.add.sprite(ox + VILLAGE_WIDTH / 2, ry, 'village_road').setDepth(1));
-        });
         if (!this.scene.villageCemeteryGate) {
             const gx = ox + VILLAGE_WIDTH / 2, gy = 2000;
             this.scene.villageCemeteryGate = this.scene.add.rectangle(gx, gy, 40, 20, 0x666666).setDepth(5);

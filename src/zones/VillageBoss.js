@@ -185,10 +185,9 @@ export class VillageBoss {
             s.defeatedLoot.push(lt);
             s.tweens.add({ targets: lt, alpha: 0, duration: 5000, onComplete: () => { if (lt.active) lt.destroy(); } });
         });
-        s.villageCemeteryGate = s.add.rectangle(ox + VILLAGE_WIDTH / 2, 350, 60, 12, 0x9b59b6, 0.5).setDepth(2);
         s.hellPortal = s.add.sprite(ox + VILLAGE_WIDTH / 2, 380, 'hell_portal').setDepth(1);
         s.hellPortalHint = s.add.text(ox + VILLAGE_WIDTH / 2, 420, '', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setDepth(12);
-        s.time.delayedCall(3000, () => { s.floatingText(ox + VILLAGE_WIDTH / 2, 360, 'Cemetery gate appeared!', '#2ecc71'); });
+        s.time.delayedCall(3000, () => { s.floatingText(ox + VILLAGE_WIDTH / 2, 360, 'Hell portal appeared!', '#e74c3c'); });
         s.checkLevelUp(); s._checkAccountLevelUp(); s.ui.updateUI();
         const hc = rollBossCrystals('village', s.difficulty);
         if (hc > 0) { const granted = s.awardCrystals(hc, ox + VILLAGE_WIDTH / 2, 310); if (granted > 0) s.floatingText(ox + VILLAGE_WIDTH / 2, 310, '+' + granted + ' \u{1F48E}', '#3498db'); }
