@@ -38,6 +38,7 @@ export class HUD {
         this.scene.heroAccBarFill = s(this.scene.add.rectangle(101, 64, 0, 2, 0xe67e22).setOrigin(0, 0.5));
         this.scene.heroHint = sx(this.scene.add.text(58, 74, '', { fontSize: '8px', fill: '#666', fontFamily: 'Arial' }));
         this.scene.diffText = sx(this.scene.add.text(185, 4, '', { fontSize: '9px', fill: '#f39c12', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0));
+        this.scene.zoneText = sx(this.scene.add.text(400, 4, '', { fontSize: '11px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5, 0));
         this.scene.goldText = sx(this.scene.add.text(185, 86, '', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0));
         this.scene.crystalText = sx(this.scene.add.text(185, 98, '', { fontSize: '11px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0));
         this.scene.petBtnText = sx(this.scene.add.text(185, 114, '', { fontSize: '11px', fill: '#e67e22', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0).setInteractive({ useHandCursor: true }));
@@ -192,6 +193,10 @@ export class HUD {
         if (this.scene.heroAccBarFill) this.scene.heroAccBarFill.width = Math.max(0, 82 * (this.scene.accountExp / accReq));
         if (this.scene.heroHint) this.scene.heroHint.setText(this.scene.talentPoints > 0 ? 'Talents: ' + this.scene.talentPoints + ' [T]' : '');
         if (this.scene.diffText) this.scene.diffText.setText(this.scene.difficulty).setColor(DIFF_COLORS[this.scene.difficulty] || '#f39c12');
+        
+        // Zone indicator
+        const zoneNames = { forest: 'Forest', arena: 'Arena', mine: 'Mine', cave: 'Cave', village: 'Village', hell: 'Hell', snowy: 'Snowy Village', castle: 'Castle', meadow: 'Meadow', cemetery: 'Cemetery', mine_boss: 'Mine Boss' };
+        if (this.scene.zoneText) this.scene.zoneText.setText(zoneNames[this.scene.zone] || this.scene.zone);
         this.scene.talentText.setText(this.scene.talentPoints > 0 ? 'TALENTS: ' + this.scene.talentPoints + ' [T]' : '');
         if (this.scene.goldText) this.scene.goldText.setText('Gold: ' + (this.scene.gold || 0));
         if (this.scene.crystalText) this.scene.crystalText.setText('\u{1F48E} ' + (this.scene.crystals || 0));

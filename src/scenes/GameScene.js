@@ -110,8 +110,6 @@ export default class GameScene extends Phaser.Scene {
         this.invOpen = false;
         this.invGroup = [];
         this._tooltipGroup = [];
-        this.zones.mine.isUnlocked = false;
-        this.zones.mine.hasSecretKey = false;
         this.cartDriverNpc = null;
         this.meadowGate = null;
         this.meadowBg = null;
