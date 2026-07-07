@@ -1,19 +1,26 @@
 import Phaser from 'phaser';
 import {
     GAME_WIDTH, GAME_HEIGHT,
-    HELL_WIDTH, HELL_HEIGHT, HELL_CAMP_COUNT, HELL_MOBS_PER_CAMP,
+    HELL_WIDTH, HELL_HEIGHT,
     HELL_LAVA_DAMAGE, HELL_LAVA_INTERVAL, HELL_HEAT_DAMAGE,
-    HELL_ENEMY_TYPES, HELL_CAMP_POSITIONS, HELL_LAVA_POSITIONS,
-    HELL_BOSS_TYPE, HELL_BOSS_MINION, HEAT_CRYSTAL,
-    BOSS_DROP_CHANCE, RARITY_COLORS, VILLAGE_WIDTH, CEMETERY_HEIGHT, DIFF_COLORS
+    HEAT_CRYSTAL,
+    BOSS_DROP_CHANCE, RARITY_COLORS, VILLAGE_WIDTH, CEMETERY_HEIGHT
 } from '../config/index.js';
 import { rollEquip, rollAccountEquip } from '../utils.js';
 import { rollBossCrystals } from '../config/pets.js';
 import { playBossDeath, playLoot, playPortal } from '../sound.js';
 
-export class HellZone {
+import { BaseZone } from '../systems/BaseZone.js';
+import { HellSpawner } from './HellSpawner.js';
+import { HellBoss } from './HellBoss.js';
+
+export class HellZone extends BaseZone {
     constructor(scene) {
-        this.scene = scene;
+        super(scene);
+        this.bossDefeated = false;
+        this.bossSpawned = false;
+        this.spawner = new HellSpawner(this);
+        this.bossAI = new HellBoss(this);
     }
 
     setup() {
@@ -38,14 +45,14 @@ export class HellZone {
         s.hellImps = s.physics.add.group();
         s.hellLavaCircles = [];
         s.hellBoss = null;
-        s.hellBossDefeated = false;
-        s.hellBossSpawned = false;
+        this.bossDefeated = false;
+        this.bossSpawned = false;
         s.hellHeatTimer = 0;
         s.hellLavaCooldown = false;
         s.hellReturnPortal = null;
 
-        this.spawnHellCamps();
-        this.spawnHellLavaCircles();
+        this.spawner.spawnHellCamps();
+        this.spawner.spawnHellLavaCircles();
 
         s.physics.add.overlap(s.player, s.enemies, (p, e) => {
             if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
@@ -66,31 +73,8 @@ export class HellZone {
         }
     }
 
-    clear() {
+    _destroyZoneSpecific() {
         const s = this.scene;
-        s.physics.world.colliders.destroy();
-        if (s.fireballs) {
-            s.fireballs.forEach(fb => { if (fb.glow) fb.glow.destroy(); fb.destroy(); });
-            s.fireballs = [];
-        }
-        if (s.enemyProjectiles) {
-            s.enemyProjectiles.forEach(p => { if (p && p.destroy) p.destroy(); });
-            s.enemyProjectiles = [];
-        }
-        if (s.shieldActive) {
-            s.shieldActive = false;
-            s.shieldHP = 0;
-            if (s.shieldVfx) { s.shieldVfx.destroy(); s.shieldVfx = null; }
-        }
-        if (s.enemies && s.enemies.getLength && s.enemies.getLength() > 0) {
-            s.enemies.getChildren().forEach(e => {
-                if (e.hpBg) e.hpBg.destroy();
-                if (e.hpFill) e.hpFill.destroy();
-                if (e.nameText) e.nameText.destroy();
-            });
-            s.enemies.clear(true, true);
-        }
-        if (s.enemies) { s.enemies.destroy(); s.enemies = null; }
         if (s.hellImps && s.hellImps.getLength && s.hellImps.getLength() > 0) {
             s.hellImps.getChildren().forEach(e => {
                 if (e.hpBg) e.hpBg.destroy();
@@ -120,79 +104,38 @@ export class HellZone {
         if (s.hellBg) { s.hellBg.destroy(); s.hellBg = null; }
         if (s.hellReturnPortal) { if (s.hellReturnPortal.destroy) s.hellReturnPortal.destroy(); s.hellReturnPortal = null; }
         if (s.hellReturnPortalHint) { s.hellReturnPortalHint.destroy(); s.hellReturnPortalHint = null; }
-        if (s.defeatedText) { s.defeatedText.destroy(); s.defeatedText = null; }
-        if (s.defeatedLoot) {
-            s.defeatedLoot.forEach(t => { if (t && t.destroy) t.destroy(); });
-            s.defeatedLoot = null;
+        this._destroyDefeatedUI();
+    }
+
+    handleSpace() {
+        const s = this.scene;
+        if (s.nearbyNpc) {
+            s.npc.interactWithNpc();
+            return;
+        }
+        if (s.zone === 'cemetery') {
+            if (s.zones.village.bossDefeated && s.hellPortal && Phaser.Math.Distance.Between(
+                s.player.x, s.player.y, s.hellPortal.x, s.hellPortal.y
+            ) < 60) {
+                this.enterHell();
+            }
+        } else if (s.zone === 'hell') {
+            if (this.bossDefeated && s.hellReturnPortal && Phaser.Math.Distance.Between(
+                s.player.x, s.player.y, s.hellReturnPortal.x, s.hellReturnPortal.y
+            ) < 60) {
+                this.exitHell();
+            } else {
+                s.attack();
+            }
         }
     }
 
     update(time, delta) {
         this.updateHellLava(time, delta);
         this.updateHellMobs(delta);
-        this.updateHellBoss();
+        this.bossAI.updateHellBoss();
         this.updateHellImps();
         this.checkReturnPortal();
-    }
-
-    spawnHellCamps() {
-        const s = this.scene;
-        const ox = s.hellOffsetX;
-        const roleOrder = ['tank', 'assassin', 'archer', 'mage', 'healer'];
-        for (let i = 0; i < HELL_CAMP_COUNT; i++) {
-            const cp = HELL_CAMP_POSITIONS[i];
-            for (let j = 0; j < HELL_MOBS_PER_CAMP; j++) {
-                const role = roleOrder[j];
-                const t = HELL_ENEMY_TYPES[role];
-                const angle = (j / HELL_MOBS_PER_CAMP) * Math.PI * 2;
-                const ex = ox + cp.x + Math.cos(angle) * 35;
-                const ey = cp.y + Math.sin(angle) * 30;
-                this.makeHellEnemy(t, ex, ey, i);
-            }
-        }
-    }
-
-    makeHellEnemy(t, x, y, campIndex) {
-        const s = this.scene;
-        const walkTex = t.key + '_walk';
-        const animKey = t.key + '_walk_anim';
-        const e = s.add.sprite(x, y, walkTex).setDepth(5);
-        s.physics.add.existing(e, false);
-        e.body.setSize(t.bw, t.bh);
-        e.body.setCollideWorldBounds(true);
-        if (s.anims.exists(animKey)) e.play(animKey);
-
-        const rangedInterval = t.role === 'archer' ? 1500 : t.role === 'mage' ? 2000 : t.role === 'healer' ? 2200 : 2000;
-        e.stats = {
-            key: t.key, name: t.name,
-            hp: Math.floor(t.hp * s.diffMulti.hp),
-            maxHp: Math.floor(t.hp * s.diffMulti.hp),
-            damage: Math.floor(t.dmg * s.diffMulti.dmg),
-            exp: Math.floor(t.exp * s.diffMulti.exp),
-            bw: t.bw, bh: t.bh, role: t.role,
-            campIndex: campIndex,
-            rangedTimer: 0, rangedInterval
-        };
-
-        const hpW = t.bw + 10;
-        e.hpBg = s.add.rectangle(x, y - t.bh / 2 - 8, hpW, 4, 0x000000).setOrigin(0.5).setDepth(6);
-        e.hpFill = s.add.rectangle(x, y - t.bh / 2 - 8, hpW, 4, 0xff0000).setOrigin(0.5).setDepth(6);
-
-        s.enemies.add(e);
-        if (s.multiplayer && s.mpSync) {
-            s.mpSync.assignMobId(e, t.key);
-        }
-        return e;
-    }
-
-    spawnHellLavaCircles() {
-        const s = this.scene;
-        const ox = s.hellOffsetX;
-        HELL_LAVA_POSITIONS.forEach(lp => {
-            const gfx = s.add.sprite(ox + lp.x, lp.y, 'hell_lava_circle').setDepth(1).setAlpha(0.4);
-            const vfx = s.add.sprite(ox + lp.x, lp.y, 'hell_lava_circle').setDepth(1).setAlpha(0).setScale(1);
-            s.hellLavaCircles.push({ x: ox + lp.x, y: lp.y, r: lp.r, gfx, vfx, timer: 0 });
-        });
     }
 
     updateHellLava(time, delta) {
@@ -222,8 +165,8 @@ export class HellZone {
         if (s.zone !== 'hell' || s.menuOpen || s.transitioning) return;
         if (!s.enemies) return;
 
-        if (s.enemies.getLength() === 0 && !s.hellBossSpawned && !s.hellBossDefeated) {
-            this.spawnHellBoss();
+        if (s.enemies.getLength() === 0 && !this.bossSpawned && !this.bossDefeated) {
+            this.bossAI.spawnHellBoss();
         }
 
         s.hellHeatTimer += s.game.loop.delta;
@@ -343,208 +286,10 @@ export class HellZone {
         }
     }
 
-    spawnHellBoss() {
-        const s = this.scene;
-        if (s.hellBossSpawned) return;
-        s.hellBossSpawned = true;
-        const bt = HELL_BOSS_TYPE;
-        const ox = s.hellOffsetX;
-        const hp = Math.floor(bt.hp[s.difficulty] || bt.hp.Normal);
-        const dmg = Math.floor(bt.dmg[s.difficulty] || bt.dmg.Normal);
-        const exp = Math.floor(bt.exp[s.difficulty] || bt.exp.Normal);
-        const spd = bt.speeds[s.difficulty] || bt.speeds.Normal;
-
-        const bx = ox + HELL_WIDTH / 2;
-        const by = HELL_HEIGHT / 2;
-        const b = s.add.sprite(bx, by, 'red_demon_walk').setDepth(5);
-        s.physics.add.existing(b, false);
-        b.body.setSize(bt.bw, bt.bh);
-        b.body.setCollideWorldBounds(true);
-        if (s.anims.exists('red_demon_walk_anim')) b.play('red_demon_walk_anim');
-
-        b.stats = {
-            key: bt.key, name: bt.name,
-            hp, maxHp: hp, damage: dmg, exp,
-            speed: spd, bw: bt.bw, bh: bt.bh,
-            aoeTimer: 0, aoeInterval: bt.fireWaveInterval,
-            meteorTimer: 0, meteorInterval: bt.meteorInterval,
-            summonTimer: 0, summonInterval: bt.summonInterval
-        };
-
-        const hpW = 80;
-        b.hpBg = s.add.rectangle(400, 110, hpW, 6, 0x000000).setDepth(12).setScrollFactor(0);
-        b.hpFill = s.add.rectangle(400 - hpW / 2, 110, hpW, 6, 0xff2200).setOrigin(0, 0.5).setDepth(12).setScrollFactor(0);
-        b.hpBg.setVisible(false);
-        b.hpFill.setVisible(false);
-        s.hellBossNameText = s.add.text(400, 95, bt.name, {
-            fontSize: '14px', fill: DIFF_COLORS[s.difficulty] || '#ff4400', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 3
-        }).setOrigin(0.5).setDepth(12).setScrollFactor(0).setVisible(false);
-
-        s.hellBoss = b;
-        s.hellBossFireWaveVfx = [];
-        s.enemies.add(b);
-        if (s.multiplayer && s.mpSync) {
-            s.mpSync.assignMobId(b, 'hellBoss');
-        }
-
-        s.floatingText(bx, by - 60, 'RED DEMON APPEARS!', '#ff2200');
-    }
-
-    updateHellBoss() {
-        const s = this.scene;
-        if (!s.hellBoss || !s.hellBoss.active) return;
-        const b = s.hellBoss;
-        const st = b.stats;
-
-        if (s.menuOpen || s.transitioning) {
-            b.body.setVelocity(0);
-            return;
-        }
-
-        if (st.hp > 0) {
-            b.hpBg.setVisible(true);
-            b.hpFill.setVisible(true);
-            s.hellBossNameText.setVisible(true);
-            b.hpBg.x = 400;
-            b.hpBg.y = 110;
-            b.hpFill.x = 400 - 40;
-            b.hpFill.y = 110;
-            b.hpFill.width = 80 * (st.hp / st.maxHp);
-        }
-
-        const dx = s.player.x - b.x;
-        const dy = s.player.y - b.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist > 30) {
-            const nx = dx / dist;
-            const ny = dy / dist;
-            b.body.setVelocity(nx * st.speed, ny * st.speed);
-            if (s.anims.exists('red_demon_walk_anim') && !b.anims.isPlaying) b.play('red_demon_walk_anim');
-            b.setFlipX(dx < 0);
-        } else {
-            b.body.setVelocity(0);
-        }
-
-        const delta = s.game.loop.delta;
-
-        st.aoeTimer += delta;
-        if (st.aoeTimer >= st.aoeInterval) {
-            st.aoeTimer = 0;
-            this.fireWave(b);
-        }
-
-        st.meteorTimer += delta;
-        if (st.meteorTimer >= st.meteorInterval) {
-            st.meteorTimer = 0;
-            this.meteor(b);
-        }
-
-        st.summonTimer += delta;
-        if (st.summonTimer >= st.summonInterval) {
-            st.summonTimer = 0;
-            this.summon(b);
-        }
-    }
-
-    fireWave(boss) {
-        const s = this.scene;
-        if (!boss || !boss.active) return;
-        const dx = s.player.x - boss.x;
-        const dy = s.player.y - boss.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist > 200) return;
-
-        const dmg = Math.floor(boss.stats.damage * HELL_BOSS_TYPE.fireWaveDmgMul);
-        const radius = HELL_BOSS_TYPE.fireWaveRadius;
-
-        const vfx = s.add.sprite(boss.x, boss.y, 'fire_wave_vfx').setDepth(8).setScale(2).setAlpha(0.7);
-        s.hellBossFireWaveVfx.push(vfx);
-        s.tweens.add({
-            targets: vfx, x: s.player.x, y: s.player.y, alpha: 0, duration: 500,
-            onComplete: () => { if (vfx.active) vfx.destroy(); }
-        });
-
-        s.time.delayedCall(500, () => {
-            const pd = Phaser.Math.Distance.Between(boss.x, boss.y, s.player.x, s.player.y);
-            if (pd < radius) {
-                s.combat.takeDamage(dmg);
-                s.floatingText(s.player.x, s.player.y - 20, '-' + dmg + ' FIRE WAVE', '#ff4400');
-            }
-        });
-    }
-
-    meteor(boss) {
-        const s = this.scene;
-        if (!boss || !boss.active) return;
-        const ox = s.hellOffsetX;
-        for (let i = 0; i < 3; i++) {
-            const mx = s.player.x + Phaser.Math.Between(-80, 80);
-            const my = s.player.y + Phaser.Math.Between(-80, 80);
-            const clampedX = Phaser.Math.Clamp(mx, ox + 20, ox + HELL_WIDTH - 20);
-            const clampedY = Phaser.Math.Clamp(my, 20, HELL_HEIGHT - 20);
-
-            const meteor = s.add.sprite(clampedX, clampedY - 200, 'meteor_vfx').setDepth(8).setAlpha(0.8);
-            s.tweens.add({
-                targets: meteor, y: clampedY, alpha: 1, duration: 800, delay: i * 200,
-                ease: 'Quad.easeIn',
-                onComplete: () => {
-                    if (meteor.active) meteor.destroy();
-                    const pd = Phaser.Math.Distance.Between(clampedX, clampedY, s.player.x, s.player.y);
-                    if (pd < HELL_BOSS_TYPE.meteorRadius) {
-                        const dmg = Math.floor(boss.stats.damage * HELL_BOSS_TYPE.meteorDmgMul);
-                        s.combat.takeDamage(dmg);
-                        s.floatingText(s.player.x, s.player.y - 20, '-' + dmg + ' METEOR', '#ff6600');
-                    }
-                }
-            });
-        }
-    }
-
-    summon(boss) {
-        const s = this.scene;
-        if (!boss || !boss.active) return;
-        const bt = HELL_BOSS_MINION;
-        const ox = s.hellOffsetX;
-        for (let i = 0; i < HELL_BOSS_TYPE.summonCount; i++) {
-            const angle = (i / HELL_BOSS_TYPE.summonCount) * Math.PI * 2;
-            const ix = boss.x + Math.cos(angle) * 60;
-            const iy = boss.y + Math.sin(angle) * 60;
-            const clampedX = Phaser.Math.Clamp(ix, ox + 10, ox + HELL_WIDTH - 10);
-            const clampedY = Phaser.Math.Clamp(iy, 10, HELL_HEIGHT - 10);
-
-            const imp = s.add.sprite(clampedX, clampedY, 'hell_imp_walk').setDepth(5);
-            s.physics.add.existing(imp, false);
-            imp.body.setSize(bt.bw, bt.bh);
-            imp.body.setCollideWorldBounds(true);
-            if (s.anims.exists('hell_imp_walk_anim')) imp.play('hell_imp_walk_anim');
-
-            const hp = Math.floor(bt.hp * s.diffMulti.hp);
-            imp.stats = {
-                key: bt.key, name: bt.name,
-                hp, maxHp: hp,
-                damage: Math.floor(bt.dmg * s.diffMulti.dmg),
-                exp: Math.floor(bt.exp * s.diffMulti.exp),
-                bw: bt.bw, bh: bt.bh, speed: 80
-            };
-
-            const hpW = bt.bw + 6;
-            imp.hpBg = s.add.rectangle(clampedX, clampedY - bt.bh / 2 - 6, hpW, 3, 0x000000).setDepth(6);
-            imp.hpFill = s.add.rectangle(clampedX - hpW / 2, clampedY - bt.bh / 2 - 6, hpW, 3, 0xff0000).setOrigin(0, 0.5).setDepth(6);
-
-            s.hellImps.add(imp);
-            if (s.multiplayer && s.mpSync) {
-                s.mpSync.assignMobId(imp, 'hell_imp');
-            }
-        }
-        s.floatingText(boss.x, boss.y - 50, 'SUMMONED ' + HELL_BOSS_TYPE.summonCount + ' IMPS!', '#ff4400');
-    }
-
     victoryHellBoss() {
         const s = this.scene;
-        if (s.hellBossDefeated) return;
-        s.hellBossDefeated = true;
+        if (this.bossDefeated) return;
+        this.bossDefeated = true;
         playBossDeath();
         const ox = s.hellOffsetX;
 
@@ -633,7 +378,7 @@ export class HellZone {
     enterHell() {
         const s = this.scene;
         if (s.transitioning || s.menuOpen) return;
-        if (s.zone !== 'cemetery' || !s.villageBossDefeated) return;
+        if (s.zone !== 'cemetery' || !s.zones.village.bossDefeated) return;
         const ox = s.villageOffsetX;
         const dist = Phaser.Math.Distance.Between(
             s.player.x, s.player.y, ox + VILLAGE_WIDTH / 2, CEMETERY_HEIGHT - 40
@@ -644,9 +389,7 @@ export class HellZone {
         playPortal();
         s.cameras.main.fadeOut(800, 255, 0, 0);
         s.time.delayedCall(800, () => {
-            s.currentZone.clear();
-            this.setup();
-            s.currentZone = this;
+            s._setupZone('hell');
             s.cameras.main.fadeIn(500, 0, 0, 0);
             s.transitioning = false;
         });
@@ -655,7 +398,7 @@ export class HellZone {
     exitHell() {
         const s = this.scene;
         if (s.transitioning || s.menuOpen) return;
-        if (s.zone !== 'hell' || !s.hellBossDefeated) return;
+        if (s.zone !== 'hell' || !this.bossDefeated) return;
         const ox = s.hellOffsetX;
         const dist = Phaser.Math.Distance.Between(
             s.player.x, s.player.y, ox + HELL_WIDTH / 2, HELL_HEIGHT / 2 + 60
@@ -667,7 +410,7 @@ export class HellZone {
         s.cameras.main.fadeOut(800, 0, 0, 0);
         s.time.delayedCall(800, () => {
             this.clear();
-            s._setupZone('village', !s.villageRestored);
+            s._setupZone('village', !s.zones.village.isRestored);
             s.cameras.main.fadeIn(500, 0, 0, 0);
             s.transitioning = false;
         });
@@ -702,7 +445,7 @@ export class HellZone {
     checkReturnPortal() {
         const s = this.scene;
         if (s.zone !== 'hell' || s.transitioning || s.menuOpen) return;
-        if (s.hellBossDefeated && s.hellReturnPortal) {
+        if (this.bossDefeated && s.hellReturnPortal) {
             const pd = Phaser.Math.Distance.Between(
                 s.player.x, s.player.y, s.hellReturnPortal.x, s.hellReturnPortal.y
             );

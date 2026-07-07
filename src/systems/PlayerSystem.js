@@ -17,6 +17,7 @@ import { getPetStats } from '../config/pets.js';
 export class PlayerSystem {
     constructor(scene) {
         this.scene = scene;
+        this._statsRecalcedThisFrame = false;
     }
 
     _createPlayer() {
@@ -31,41 +32,9 @@ export class PlayerSystem {
         this.scene.player.play(animKey);
     }
 
-    _initStats() {
-        this.scene.diffMulti = DIFF_MULT[this.scene.difficulty] || DIFF_MULT.Normal;
-        this.scene.classData = getClassData(this.scene.classKey);
-        this.scene.classStats = getClassStats(this.scene.classKey, 1);
-        this.scene.playerHP = this.scene.classStats.maxHp;
-        this.scene.playerMaxHP = this.scene.classStats.maxHp;
-        this.scene.playerDamage = this.scene.classStats.damage;
-        this.scene.playerSpeed = this.scene.classStats.speed;
-        this.scene.playerExp = 0;
-        this.scene.playerLevel = 1;
-        this.scene.attackCooldown = false;
-        this.scene.playerAttacking = false;
-        this.scene.facing = 'right';
-        this.scene.invincible = false;
-        this.scene.menuOpen = false;
-        this.scene.kills = 0;
-        this.scene.stumpsBroken = 0;
-        this.scene.talentEffects = getTalentEffects([]);
-
-        const acc = loadAccount() || {};
-        this.scene.accountLevel = acc.accountLevel || 1;
-        this.scene.accountExp = acc.accountExp || 0;
-        this.scene.accountTalentPoints = acc.accountTalentPoints || 0;
-        this.scene.unlockedAccountTalents = acc.unlockedAccountTalents || [];
-        this.scene.accountEffects = getAccountTalentEffects(this.scene.unlockedAccountTalents);
-
-        this.scene.equippedPet = acc.equippedPet || null;
-        this.scene.petLevels = acc.petLevels || {};
-        this.scene.upgradeLevels = acc.upgradeLevels || {};
-        this.scene.activeBoosts = acc.activeBoosts || {};
-
-        this.recalcStats();
-    }
-
     recalcStats() {
+        if (this._statsRecalcedThisFrame) return;
+        this._statsRecalcedThisFrame = true;
         const hpRatio = this.scene.playerMaxHP > 0 ? this.scene.playerHP / this.scene.playerMaxHP : 1;
         const cls = this.scene.classData || getClassData(this.scene.classKey);
         const growth = cls.growth;
@@ -196,6 +165,10 @@ export class PlayerSystem {
         this.scene.computedAccCritPercent = accCritPercent;
         this.scene.computedAccDodgePercent = accDodgePercent;
         this.scene.computedAccSpellPercent = accSpellPercent;
+    }
+
+    resetStatsRecalcFlag() {
+        this._statsRecalcedThisFrame = false;
     }
 
     _initInventory() {

@@ -20,18 +20,31 @@ import { recordKill } from '../bestiary.js';
 import { onKill } from '../quests.js';
 import { recordSoulCollect } from '../soulBook.js';
 import { VillageShop } from './village/VillageShop.js';
+import { VillageSpawner } from './VillageSpawner.js';
+import { VillageBoss } from './VillageBoss.js';
 import { BaseZone } from '../systems/BaseZone.js';
 
 export class VillageZone extends BaseZone {
     constructor(scene) {
         super(scene);
         this.shop = new VillageShop(scene);
+        this.spawner = new VillageSpawner(scene, this);
+        this.boss = new VillageBoss(scene, this);
+        this.isFrozen = false;
+        this.isRestored = false;
+        this.isThriving = false;
+        this.bossDefeated = false;
+        this.snowyBossDefeated = false;
+        this.allCleared = false;
+        this.snowyAllCleared = false;
+        this.bossClones = null;
+        this.bossSpawned = false;
     }
 
     setup(frozen = false) {
         this.scene._destroyOrphanedCaveStairs();
         const ox = (GAME_WIDTH - VILLAGE_WIDTH) / 2;
-        this.scene.villageFrozen = frozen;
+        this.isFrozen = frozen;
         if (frozen) {
             this.scene.cameras.main.setBackgroundColor('#1a2438');
         } else {
@@ -55,12 +68,8 @@ export class VillageZone extends BaseZone {
         this.scene.villageCorpses = this.scene.physics.add.group();
         this.scene.villageZombies = this.scene.physics.add.group();
         this.scene.villageCampsCleared = 0;
-        this.scene.villageAllCleared = false;
         this.scene.childSpawned = false;
         this.scene.villageBossAlive = false;
-        this.scene.villageBossDefeated = false;
-        this.scene.villageBossSpawned = false;
-        this.scene.snowyVillageAllCleared = false;
         this.scene.snowyIceSpirit = null;
         this.scene.snowyIceSpiritNameText = null;
         this.scene.snowyIceSpiritAbilities = null;
@@ -71,19 +80,23 @@ export class VillageZone extends BaseZone {
         this.scene.castleChildHint = null;
 
         if (frozen) {
-            this._spawnSnowyVillageCamps();
-            this._spawnSnowyVillageChests();
-            this._spawnSnowyCampfire();
-        } else if (!this.scene.villageRestored) {
-            this._spawnVillageCamps();
-            this._spawnVillageDecor();
-            this._spawnVillageChests();
+            this.spawner.spawnSnowyVillageCamps();
+            this.spawner.spawnSnowyVillageChests();
+            this.spawner.spawnSnowyCampfire();
+            this._snowyCheckTimer = this.scene.time.addEvent({
+                delay: 1000, loop: true,
+                callback: () => this.scene.zones.snowy._checkSnowyVillageProgress()
+            });
+        } else if (!this.scene.zones.village.isRestored) {
+            this.spawner.spawnVillageCamps();
+            this.spawner.spawnVillageDecor(false);
+            this.spawner.spawnVillageChests();
         } else {
-            this._spawnVillageDecor();
-            this._showVillageClearedDecor();
-            if (!this.scene.villageThriving && !this.scene.castleQuestDone) {
+            this.spawner.spawnVillageDecor(false);
+            this.spawner.showVillageClearedDecor();
+                if (!this.scene.zones.village.isThriving && !this.scene.zones.castle.questDone) {
                 this.scene.time.delayedCall(1500, () => {
-                    this._spawnCastleChild();
+                    this.spawner.spawnCastleChild();
                 });
             }
             this.shop.spawnShop();
@@ -153,7 +166,7 @@ export class VillageZone extends BaseZone {
             s.villageBoss.destroy();
             s.villageBoss = null;
         }
-        s.villageBossClones = null;
+        this.bossClones = null;
         if (s.villageCemeteryGate) { s.villageCemeteryGate.destroy(); s.villageCemeteryGate = null; }
         if (s.hellPortal) { if (s.hellPortal.destroy) s.hellPortal.destroy(); s.hellPortal = null; }
         if (s.hellPortalHint) { if (s.hellPortalHint.destroy) s.hellPortalHint.destroy(); s.hellPortalHint = null; }
@@ -182,8 +195,9 @@ export class VillageZone extends BaseZone {
             s.snowyIceShards.destroy();
             s.snowyIceShards = null;
         }
-        s.snowyVillageAllCleared = false;
-        s.villageFrozen = false;
+        s.zones.village.snowyAllCleared = false;
+        s.zones.village.snowyBossDefeated = false;
+        this.isFrozen = false;
         this._destroyDefeatedUI();
     }
 
@@ -197,27 +211,27 @@ export class VillageZone extends BaseZone {
             this.shop.useInn();
             return;
         }
-        if (s.villageFrozen && s.campfire && Phaser.Math.Distance.Between(
+        if (s.zones.village.isFrozen && s.campfire && Phaser.Math.Distance.Between(
             s.player.x, s.player.y, s.campfire.x, s.campfire.y
         ) < 60) {
             this._activateCampfire();
-        } else if (s.villageFrozen && s.snowyIceSpirit && Phaser.Math.Distance.Between(
+        } else if (s.zones.village.isFrozen && s.snowyIceSpirit && Phaser.Math.Distance.Between(
             s.player.x, s.player.y, s.snowyIceSpirit.x, s.snowyIceSpirit.y
         ) < 80) {
             s.attack();
-        } else if (!s.villageFrozen && s.villageAllCleared && s.villageChildNPC && Phaser.Math.Distance.Between(
+        } else if (!s.zones.village.isFrozen && s.zones.village.allCleared && s.villageChildNPC && Phaser.Math.Distance.Between(
             s.player.x, s.player.y, s.villageChildNPC.x, s.villageChildNPC.y
         ) < 50) {
             this._talkToChild();
-        } else if (!s.villageFrozen && s.villageAllCleared && s.villageCemeteryGate && Phaser.Math.Distance.Between(
+        } else if (!s.zones.village.isFrozen && s.zones.village.allCleared && s.villageCemeteryGate && Phaser.Math.Distance.Between(
             s.player.x, s.player.y, s.villageCemeteryGate.x, s.villageCemeteryGate.y
         ) < 50) {
             this._enterCemetery();
-        } else if (!s.villageFrozen && s.villageRestored && !s.villageThriving && !s.castleQuestDone && s.castleChildNPC && Phaser.Math.Distance.Between(
+        } else if (!s.zones.village.isFrozen && s.zones.village.isRestored && !s.zones.village.isThriving && !s.zones.castle.questDone && s.castleChildNPC && Phaser.Math.Distance.Between(
             s.player.x, s.player.y, s.castleChildNPC.x, s.castleChildNPC.y
         ) < 50) {
             this._talkToCastleChild();
-        } else if (!s.villageFrozen && s.villageBossDefeated && s.hellPortal && Phaser.Math.Distance.Between(
+        } else if (!s.zones.village.isFrozen && s.zones.village.bossDefeated && s.hellPortal && Phaser.Math.Distance.Between(
             s.player.x, s.player.y, s.hellPortal.x, s.hellPortal.y
         ) < 60) {
             this.scene.zones.hell.enterHell();
@@ -229,52 +243,15 @@ export class VillageZone extends BaseZone {
     }
 
     update(time, delta) {
-        this._updateBossClones();
+        this.boss.updateBossClones();
         this._updateVillageMobs();
         this._updateSnowyVillageMobs();
-        this._updateVillageBoss();
-        this._updateSnowyVillageBoss();
+        this.boss.updateBoss(delta);
+        this.boss.updateSnowyBoss(delta);
         this._checkVillageProgress();
-        this._checkSnowyVillageProgress();
         this._updateCastleChildHint();
         this._updateCampfireHints();
         this._updateShopInnHints();
-    }
-
-    _updateBossClones() {
-        const s = this.scene;
-        if (!s.enemies) return;
-        s.enemies.getChildren().forEach(e => {
-            if (!e.active || !e.stats || !e.stats.isBossClone) return;
-            const dx = s.player.x - e.x;
-            const dy = s.player.y - e.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            const spd = e.stats.speed || 60;
-            if (dist > 16) {
-                const chaseSpd = dist < 80 ? spd * 1.4 : spd;
-                e.body.setVelocity((dx / dist) * chaseSpd, (dy / dist) * chaseSpd);
-                e.setFlipX(dx < 0);
-            } else {
-                e.body.setVelocity(0);
-            }
-            if (s.anims.exists('purple_demon_walk_anim') && !e.anims.isPlaying) {
-                e.play('purple_demon_walk_anim');
-            }
-            const delta = s.game.loop.delta;
-            e.stats.meteorTimer = (e.stats.meteorTimer || 0) + delta;
-            if (e.stats.meteorTimer >= (e.stats.meteorInterval || 8000)) {
-                e.stats.meteorTimer = 0;
-                this._villageBossMeteor(e);
-            }
-            e.stats.corpseTimer = (e.stats.corpseTimer || 0) + delta;
-            if (e.stats.corpseTimer >= (e.stats.corpseInterval || 10000)) {
-                e.stats.corpseTimer = 0;
-                this._villageBossSummonCorpses(e);
-            }
-            if (e.hpFill) {
-                e.hpFill.width = e.hpBg.width * (e.stats.hp / e.stats.maxHp);
-            }
-        });
     }
 
     _updateCastleChildHint() {
@@ -290,136 +267,8 @@ export class VillageZone extends BaseZone {
         }
     }
 
-    _spawnVillageCamps() {
-        const ox = this.scene.villageOffsetX;
-        const roleOrder = ['tank', 'assassin', 'archer', 'healer'];
-        for (let i = 0; i < VILLAGE_CAMP_COUNT; i++) {
-            const cp = VILLAGE_CAMP_POSITIONS[i];
-            for (let j = 0; j < VILLAGE_MOBS_PER_CAMP; j++) {
-                const role = roleOrder[j];
-                const t = VILLAGE_ENEMY_TYPES[role];
-                const angle = (j / VILLAGE_MOBS_PER_CAMP) * Math.PI * 2;
-                const ex = ox + cp.x + Math.cos(angle) * 30;
-                const ey = cp.y + Math.sin(angle) * 25;
-                this._makeVillageEnemy(t, ex, ey, i);
-            }
-        }
-    }
-
-    _makeVillageEnemy(t, x, y, campIndex) {
-        const walkTex = t.key + '_walk';
-        const animKey = t.key + '_walk_anim';
-        const e = this.scene.add.sprite(x, y, walkTex).setDepth(5);
-        this.scene.physics.add.existing(e, false);
-        e.body.setSize(t.bw, t.bh);
-        e.body.setCollideWorldBounds(true);
-        if (this.scene.anims.exists(animKey)) e.play(animKey);
-
-        const rangedInterval = t.role === 'archer' ? 1800 : t.role === 'healer' ? 2500 : 2000;
-        e.stats = {
-            key: t.key, name: t.name,
-            hp: Math.floor(t.hp * this.scene.diffMulti.hp),
-            maxHp: Math.floor(t.hp * this.scene.diffMulti.hp),
-            damage: Math.floor(t.dmg * this.scene.diffMulti.dmg),
-            exp: Math.floor(t.exp * this.scene.diffMulti.exp),
-            bw: t.bw, bh: t.bh, role: t.role,
-            campIndex: campIndex,
-            wTimer: 0, wDir: 0,
-            rangedTimer: 0, rangedInterval
-        };
-
-        const hw = t.bw + 4;
-        e.hpBg = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
-        e.hpFill = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0xe74c3c).setOrigin(0.5).setDepth(11);
-        this.scene.enemies.add(e);
-        if (this.scene.multiplayer && this.scene.mpSync) {
-            this.scene.mpSync.assignMobId(e, t.key);
-        }
-        return e;
-    }
-
-    _spawnVillageDecor() {
-        const ox = this.scene.villageOffsetX;
-        this.scene.villageDecor = [];
-
-        VILLAGE_HOUSE_POSITIONS.forEach(hp => {
-            const h = this.scene.add.image(ox + hp.x, hp.y, 'village_house').setDepth(2);
-            this.scene.villageDecor.push(h);
-        });
-
-        const ch = this.scene.add.image(ox + VILLAGE_CHILD_HOUSE.x, VILLAGE_CHILD_HOUSE.y, 'village_house').setDepth(2);
-        this.scene.villageDecor.push(ch);
-
-        VILLAGE_CORPSE_POSITIONS.forEach(cp => {
-            const c = this.scene.add.image(ox + cp.x, cp.y, 'village_corpse').setDepth(1).setAlpha(0.8);
-            this.scene.villageDecor.push(c);
-        });
-
-        VILLAGE_GARDEN_POSITIONS.forEach(gp => {
-            const g = this.scene.add.image(ox + gp.x, gp.y, 'village_garden').setDepth(1);
-            this.scene.villageDecor.push(g);
-        });
-
-        for (let y = 1980; y < 2010; y += 12) {
-            const f = this.scene.add.image(ox + 100, y, 'village_fence').setDepth(1);
-            this.scene.villageDecor.push(f);
-            const f2 = this.scene.add.image(ox + 600, y, 'village_fence').setDepth(1);
-            this.scene.villageDecor.push(f2);
-        }
-        this.scene.villageCemeteryGate = this.scene.add.rectangle(ox + VILLAGE_WIDTH / 2, 2000, 60, 12, 0x8a30a0, 0.35).setDepth(2);
-
-        this.scene._villageClearedDecor = false;
-    }
-
-    _showVillageClearedDecor() {
-        if (this.scene._villageClearedDecor) return;
-        this.scene._villageClearedDecor = true;
-        const ox = this.scene.villageOffsetX;
-        VILLAGE_CORPSE_POSITIONS.forEach(cp => {
-            const c = this.scene.add.image(ox + cp.x, cp.y, 'village_corpse').setDepth(1).setAlpha(0.4).setTint(0x555555);
-            this.scene.villageDecor.push(c);
-        });
-    }
-
-    _spawnVillageChests() {
-        const ox = this.scene.villageOffsetX;
-        const count = VILLAGE_CHEST_COUNT_MIN + Math.floor(Math.random() * (VILLAGE_CHEST_COUNT_MAX - VILLAGE_CHEST_COUNT_MIN + 1));
-        for (let i = 0; i < count; i++) {
-            const cy = 100 + Math.random() * (VILLAGE_HEIGHT - 200);
-            const cx = ox + 50 + Math.random() * (VILLAGE_WIDTH - 100);
-            this._createVillageChest(cx, cy);
-        }
-    }
-
-    _createVillageChest(x, y) {
-        const ch = this.scene.add.sprite(x, y, VILLAGE_CHEST_CLOSED_KEY).setDepth(6);
-        this.scene.physics.add.existing(ch, false);
-        ch.body.setSize(VILLAGE_CHEST_W, VILLAGE_CHEST_H);
-        ch.body.setCollideWorldBounds(true);
-        ch.stats = { hp: 60, maxHp: 60 };
-        ch.hpBg = this.scene.add.rectangle(x, y - 16, VILLAGE_CHEST_W + 4, 3, 0x333333).setOrigin(0.5).setDepth(11);
-        ch.hpFill = this.scene.add.rectangle(x, y - 16, VILLAGE_CHEST_W + 4, 3, 0xf39c12).setOrigin(0.5).setDepth(11);
-        ch.loot = [];
-        const count = 1 + Math.floor(Math.random() * 2);
-        for (let i = 0; i < count; i++) {
-            if (Math.random() < VILLAGE_CHEST_DROP_CHANCE) {
-                ch.loot.push(rollZoneEquip('village'));
-            }
-        }
-        if (Math.random() < VILLAGE_CHEST_EQUIP_DROP_CHANCE) {
-            ch.loot.push(rollZoneEquip('village'));
-        }
-        ch.hintText = this.scene.add.text(x, y - 20, '', {
-            fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
-        ch.broken = false;
-        this.scene.villageChests.add(ch);
-        return ch;
-    }
-
     _activateCampfire() {
-        if (!this.scene.villageFrozen || !this.scene.campfire) return;
+        if (!this.scene.zones.village.isFrozen || !this.scene.campfire) return;
         const dist = Phaser.Math.Distance.Between(this.scene.player.x, this.scene.player.y, this.scene.campfire.x, this.scene.campfire.y);
         if (dist >= 60) return;
 
@@ -442,7 +291,7 @@ export class VillageZone extends BaseZone {
         this.scene.cameras.main.fadeOut(1500, 255, 200, 100);
 
         this.scene.time.delayedCall(1500, () => {
-            this.scene.villageRestored = true;
+            this.scene.zones.village.isRestored = true;
             this.clear();
             this.setup(false);
             this.scene.cameras.main.fadeIn(1000, 255, 200, 100);
@@ -450,37 +299,12 @@ export class VillageZone extends BaseZone {
 
             this.scene.time.delayedCall(500, () => {
                 this.scene.floatingText(this.scene.villageOffsetX + VILLAGE_WIDTH / 2, 200, 'The village is restored!', '#ff6600');
-                if (!this.scene.villageThriving && !this.scene.castleQuestDone) {
+            if (!this.scene.zones.village.isThriving && !this.scene.zones.castle.questDone) {
                     this.scene.time.delayedCall(2000, () => {
-                        this._spawnCastleChild();
+                        this.spawner.spawnCastleChild();
                     });
                 }
             });
-        });
-    }
-
-    _spawnCastleChild() {
-        if (this.scene.castleChildNPC) return;
-        const ox = this.scene.villageOffsetX;
-        const house = VILLAGE_HOUSE_POSITIONS[1];
-        const x = ox + house.x + 35;
-        const y = house.y + 10;
-
-        this.scene.castleChildNPC = this.scene.add.sprite(x, y, 'child_npc').setDepth(6);
-        this.scene.castleChildHint = this.scene.add.text(x, y - 20, '', {
-            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
-
-        this.scene.tweens.add({
-            targets: this.scene.castleChildNPC,
-            y: y - 3, duration: 1500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
-        });
-
-        this.scene.time.delayedCall(1000, () => {
-            if (this.scene.castleChildHint && this.scene.castleChildHint.active) {
-                this.scene.castleChildHint.setText('SPACE to talk');
-            }
         });
     }
 
@@ -492,6 +316,8 @@ export class VillageZone extends BaseZone {
         if (dist >= 50) return;
 
         this.scene.castleChildHint.setText('');
+        if (this.scene.castleChildNPC) { this.scene.castleChildNPC.destroy(); this.scene.castleChildNPC = null; }
+        if (this.scene.castleChildHint) { this.scene.castleChildHint.destroy(); this.scene.castleChildHint = null; }
 
         const msgText = this.scene.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 80,
             'They took everyone! Bandits from the east castle!\nPlease, you have to save them!', {
@@ -562,10 +388,11 @@ export class VillageZone extends BaseZone {
 
         const delta = this.scene.game.loop.delta;
 
+        const aggro = this.scene.getAggroTarget();
+
         this.scene.enemies.getChildren().forEach(e => {
             if (!e.active || !e.stats) return;
 
-            const aggro = this.scene.getAggroTarget();
             const dx = aggro.x - e.x;
             const dy = aggro.y - e.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
@@ -679,37 +506,12 @@ export class VillageZone extends BaseZone {
     }
 
     _checkVillageProgress() {
-        if (this.scene.zone !== 'village' || this.scene.villageFrozen || this.scene.villageAllCleared) return;
+        if (this.scene.zone !== 'village' || this.scene.zones.village.isFrozen || this.scene.zones.village.allCleared) return;
         if (!this.scene.enemies || this.scene.enemies.getLength() === 0) {
-            this.scene.villageAllCleared = true;
-            this._spawnChildNPC();
-            this._showVillageClearedDecor();
+            this.scene.zones.village.allCleared = true;
+            this.spawner.spawnChildNPC();
+            this.spawner.showVillageClearedDecor();
         }
-    }
-
-    _spawnChildNPC() {
-        if (this.scene.childSpawned) return;
-        this.scene.childSpawned = true;
-        const ox = this.scene.villageOffsetX;
-        const x = ox + VILLAGE_CHILD_HOUSE.x + 35;
-        const y = VILLAGE_CHILD_HOUSE.y + 10;
-
-        this.scene.villageChildNPC = this.scene.add.sprite(x, y, 'child_npc').setDepth(6);
-        this.scene.villageChildHint = this.scene.add.text(x, y - 20, '', {
-            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
-
-        this.scene.tweens.add({
-            targets: this.scene.villageChildNPC,
-            y: y - 3, duration: 1500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
-        });
-
-        this.scene.time.delayedCall(1000, () => {
-            if (this.scene.villageChildHint && this.scene.villageChildHint.active) {
-                this.scene.villageChildHint.setText('SPACE to talk');
-            }
-        });
     }
 
     _talkToChild() {
@@ -739,12 +541,16 @@ export class VillageZone extends BaseZone {
                 this.scene.villageChildNPC.destroy();
                 this.scene.villageChildNPC = null;
             }
+            if (this.scene.villageChildHint && this.scene.villageChildHint.active) {
+                this.scene.villageChildHint.destroy();
+                this.scene.villageChildHint = null;
+            }
         });
     }
 
     _enterCemetery() {
         if (this.scene.transitioning || this.scene.menuOpen) return;
-        if (this.scene.zone !== 'village' || !this.scene.villageAllCleared) return;
+        if (this.scene.zone !== 'village' || !this.scene.zones.village.allCleared) return;
         const ox = this.scene.villageOffsetX;
         const dist = Phaser.Math.Distance.Between(
             this.scene.player.x, this.scene.player.y, ox + VILLAGE_WIDTH / 2, 2000
@@ -782,11 +588,9 @@ export class VillageZone extends BaseZone {
         this.scene.villageChests = this.scene.physics.add.group();
         this.scene.villageCorpses = this.scene.physics.add.group();
         this.scene.villageZombies = this.scene.physics.add.group();
-        this.scene.villageBossClones = null;
+        this.bossClones = null;
         this.scene.villageBossAlive = false;
-        this.scene.villageBossDefeated = false;
-        this.scene.villageBossSpawned = false;
-
+ 
         this.scene.villageDecor = [];
         for (let y = 10; y < CEMETERY_HEIGHT; y += 40) {
             const f1 = this.scene.add.image(ox + 30, y, 'village_fence').setDepth(1).setAlpha(0.6);
@@ -822,691 +626,24 @@ export class VillageZone extends BaseZone {
         }
 
         this.scene.time.delayedCall(1200, () => {
-            if (this.scene.zone === 'cemetery' && !this.scene.villageBossSpawned && !this.scene.villageBossDefeated) {
-                this._spawnVillageBoss();
+            if (this.scene.zone === 'cemetery' && !this.bossSpawned && !this.bossDefeated) {
+                this.bossSpawned = true;
+                this.boss.spawnVillageBoss();
             }
         });
-    }
-
-    _spawnVillageBoss() {
-        if (this.scene.villageBossSpawned) return;
-        try {
-            const bt = VILLAGE_BOSS_TYPE;
-            const hp = Math.floor(bt.hp[this.scene.difficulty] || bt.hp.Normal);
-            const dmg = Math.floor(bt.dmg[this.scene.difficulty] || bt.dmg.Normal);
-            const exp = Math.floor(bt.exp[this.scene.difficulty] || bt.exp.Normal);
-            const spd = bt.speeds[this.scene.difficulty] || bt.speeds.Normal;
-            const ox = this.scene.villageOffsetX;
-
-            this.scene.villageBossSpawned = true;
-            this.scene.villageBossAlive = true;
-
-            this.scene.villageBoss = this.scene.add.sprite(ox + VILLAGE_WIDTH / 2, CEMETERY_HEIGHT - 80, 'purple_demon_walk').setDepth(5);
-            this.scene.physics.add.existing(this.scene.villageBoss, false);
-            this.scene.villageBoss.body.setSize(bt.bw, bt.bh);
-            this.scene.villageBoss.body.setCollideWorldBounds(true);
-            if (this.scene.anims.exists('purple_demon_walk_anim')) this.scene.villageBoss.play('purple_demon_walk_anim');
-
-            this.scene.villageBoss.stats = {
-                name: bt.name, hp: hp, maxHp: hp,
-                damage: dmg, exp: exp, speed: spd,
-                bw: bt.bw, bh: bt.bh,
-                meteorTimer: 0, meteorInterval: bt.meteorInterval,
-                meteorRadius: bt.meteorRadius, meteorDmgMul: bt.meteorDmgMul,
-                corpseTimer: 0, corpseInterval: bt.corpseInterval,
-                corpseCount: bt.corpseCount,
-                splitThreshold: bt.splitThreshold,
-                splitDone: false
-            };
-
-            const hw = bt.bw + 20;
-            this.scene.villageBoss.hpBg = this.scene.add.rectangle(ox + VILLAGE_WIDTH / 2, 100, hw, 5, 0x333333).setOrigin(0.5).setDepth(15).setScrollFactor(0);
-            this.scene.villageBoss.hpFill = this.scene.add.rectangle(ox + VILLAGE_WIDTH / 2, 100, hw, 5, 0x8a30a0).setOrigin(0.5).setDepth(15).setScrollFactor(0);
-            this.scene.villageBossNameText = this.scene.add.text(ox + VILLAGE_WIDTH / 2, 85, bt.name, {
-                fontSize: '12px', fill: DIFF_COLORS[this.scene.difficulty] || '#bf77f6', fontFamily: 'Arial', fontStyle: 'bold',
-                stroke: '#000', strokeThickness: 2
-            }).setOrigin(0.5).setDepth(15).setScrollFactor(0);
-
-            if (this.scene.enemies) this.scene.enemies.add(this.scene.villageBoss);
-            if (this.scene.multiplayer && this.scene.mpSync) {
-                this.scene.mpSync.assignMobId(this.scene.villageBoss, 'villageBoss');
-            }
-
-            try { playBossAoE(); } catch(e) {}
-            this.scene.floatingText(ox + VILLAGE_WIDTH / 2, CEMETERY_HEIGHT / 2, 'PURPLE DEMON AWAKENS!', '#8a30a0');
-        } catch(e) {
-            console.error('[Cemetery] Boss spawn error:', e);
-            this.scene.villageBossSpawned = false;
-            this.scene.villageBossAlive = false;
-        }
-    }
-
-    _updateVillageBoss() {
-        if (!this.scene.villageBossAlive || !this.scene.villageBoss || !this.scene.villageBoss.active) return;
-        const b = this.scene.villageBoss;
-        const s = b.stats;
-        const ox = this.scene.villageOffsetX;
-
-        b.hpBg.x = ox + VILLAGE_WIDTH / 2;
-        b.hpBg.y = 100;
-        b.hpFill.x = ox + VILLAGE_WIDTH / 2;
-        b.hpFill.y = 100;
-
-        if (this.scene.menuOpen || this.scene.transitioning) {
-            b.body.setVelocity(0);
-            return;
-        }
-
-        const dx = this.scene.player.x - b.x;
-        const dy = this.scene.player.y - b.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist > 16) {
-            const chaseSpeed = dist < 80 ? s.speed * 1.4 : s.speed;
-            b.body.setVelocity((dx / dist) * chaseSpeed, (dy / dist) * chaseSpeed);
-            b.setFlipX(dx < 0);
-        } else {
-            b.body.setVelocity(0);
-        }
-
-        s.meteorTimer += this.scene.game.loop.delta;
-        if (s.meteorTimer >= s.meteorInterval) {
-            s.meteorTimer = 0;
-            this._villageBossMeteor(b);
-        }
-
-        s.corpseTimer += this.scene.game.loop.delta;
-        if (s.corpseTimer >= s.corpseInterval) {
-            s.corpseTimer = 0;
-            this._villageBossSummonCorpses(b);
-        }
-
-        if (!s.splitDone && s.hp / s.maxHp <= s.splitThreshold) {
-            s.splitDone = true;
-            this._villageBossSplit(b);
-        }
-    }
-
-    _villageBossMeteor(boss) {
-        const ox = this.scene.villageOffsetX;
-        const dmg = Math.floor(boss.stats.damage * boss.stats.meteorDmgMul);
-        playBossAoE();
-
-        const meteorCount = 3;
-        for (let i = 0; i < meteorCount; i++) {
-            const mx = ox + 80 + Math.random() * (VILLAGE_WIDTH - 160);
-            const my = this.scene.player.y - 20 + Math.random() * 40;
-
-            const warning = this.scene.add.circle(mx, my, 15, 0xff4400, 0.4).setDepth(12);
-            this.scene.tweens.add({
-                targets: warning, alpha: 0, duration: 600,
-                onComplete: () => warning.destroy()
-            });
-
-            this.scene.time.delayedCall(600, () => {
-                const meteor = this.scene.add.sprite(mx, my - 100, 'meteor_vfx').setDepth(10);
-                this.scene.tweens.add({
-                    targets: meteor, y: my, duration: 300, ease: 'Quad.easeIn',
-                    onComplete: () => {
-                        meteor.destroy();
-                        const dist = Phaser.Math.Distance.Between(mx, my, this.scene.player.x, this.scene.player.y);
-                        if (dist < boss.stats.meteorRadius) {
-                            this.scene.combat.takeDamage(dmg);
-                            this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, 'METEOR!', '#ff4400');
-                        }
-                        const ring = this.scene.add.circle(mx, my, 5, 0xff4400, 0.6).setDepth(12);
-                        this.scene.tweens.add({
-                            targets: ring, scaleX: 5, scaleY: 5, alpha: 0, duration: 400,
-                            onComplete: () => ring.destroy()
-                        });
-                    }
-                });
-            });
-        }
-    }
-
-    _villageBossSummonCorpses(boss) {
-        const ox = this.scene.villageOffsetX;
-        playBossAoE();
-        this.scene.floatingText(boss.x, boss.y - 40, 'RISE!', '#5a6a4a');
-
-        for (let i = 0; i < boss.stats.corpseCount; i++) {
-            const angle = (i / boss.stats.corpseCount) * Math.PI * 2;
-            const sx = boss.x + Math.cos(angle) * 60;
-            const sy = boss.y + Math.sin(angle) * 50;
-            const clampedX = Phaser.Math.Clamp(sx, ox + 20, ox + VILLAGE_WIDTH - 20);
-            const clampedY = Phaser.Math.Clamp(sy, 20, CEMETERY_HEIGHT - 20);
-            this._spawnVillageZombie(clampedX, clampedY);
-        }
-    }
-
-    _spawnVillageZombie(x, y) {
-        const bt = VILLAGE_CORPSE_MINION;
-        const e = this.scene.add.sprite(x, y, 'zombie_walk').setDepth(5);
-        this.scene.physics.add.existing(e, false);
-        e.body.setSize(bt.bw, bt.bh);
-        e.body.setCollideWorldBounds(true);
-        if (this.scene.anims.exists('zombie_walk_anim')) e.play('zombie_walk_anim');
-
-        e.stats = {
-            key: bt.key, name: bt.name,
-            hp: Math.floor(bt.hp * this.scene.diffMulti.hp),
-            maxHp: Math.floor(bt.hp * this.scene.diffMulti.hp),
-            damage: Math.floor(bt.dmg * this.scene.diffMulti.dmg),
-            exp: Math.floor(bt.exp * this.scene.diffMulti.exp),
-            bw: bt.bw, bh: bt.bh
-        };
-
-        const hw = bt.bw + 4;
-        e.hpBg = this.scene.add.rectangle(x, y - bt.bh / 2 - 6, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
-        e.hpFill = this.scene.add.rectangle(x, y - bt.bh / 2 - 6, hw, 3, 0x5a6a4a).setOrigin(0.5).setDepth(11);
-        this.scene.villageZombies.add(e);
-        if (this.scene.multiplayer && this.scene.mpSync) {
-            this.scene.mpSync.assignMobId(e, 'zombie');
-        }
-    }
-
-    _villageBossSplit(boss) {
-        this.scene.floatingText(boss.x, boss.y - 40, 'SPLIT!', '#ff0000');
-        playBossAoE();
-
-        this.scene.villageBossClones = [];
-        const ox = this.scene.villageOffsetX;
-        const bt = VILLAGE_BOSS_TYPE;
-        const fullHp = Math.floor(bt.hp[this.scene.difficulty] || bt.hp.Normal);
-        const fullDmg = Math.floor(bt.dmg[this.scene.difficulty] || bt.dmg.Normal);
-        const fullSpd = bt.speeds[this.scene.difficulty] || bt.speeds.Normal;
-
-        for (let i = 0; i < 2; i++) {
-            const angle = (i / 2) * Math.PI * 2;
-            const sx = boss.x + Math.cos(angle) * 70;
-            const sy = boss.y + Math.sin(angle) * 60;
-            const clampX = Phaser.Math.Clamp(sx, ox + 20, ox + VILLAGE_WIDTH - 20);
-            const clampY = Phaser.Math.Clamp(sy, 20, CEMETERY_HEIGHT - 20);
-
-            const clone = this.scene.add.sprite(clampX, clampY, 'purple_demon_walk').setDepth(5).setAlpha(1);
-            this.scene.physics.add.existing(clone, false);
-            clone.body.setSize(bt.bw, bt.bh);
-            clone.body.setCollideWorldBounds(true);
-            if (this.scene.anims.exists('purple_demon_walk_anim')) clone.play('purple_demon_walk_anim');
-
-            clone.stats = {
-                key: 'purple_demon_clone_' + i, name: bt.name,
-                hp: fullHp, maxHp: fullHp, damage: fullDmg,
-                exp: Math.floor(bt.exp[this.scene.difficulty] || bt.exp.Normal) * 0.5 | 0,
-                speed: fullSpd, bw: bt.bw, bh: bt.bh,
-                isBossClone: true,
-                meteorTimer: 0, meteorInterval: bt.meteorInterval,
-                meteorRadius: bt.meteorRadius, meteorDmgMul: bt.meteorDmgMul,
-                corpseTimer: 0, corpseInterval: bt.corpseInterval,
-                corpseCount: bt.corpseCount,
-                wTimer: 0, wDir: 0
-            };
-
-            const hw = bt.bw + 10;
-            clone.hpBg = this.scene.add.rectangle(clampX, clampY - bt.bh / 2 - 8, hw, 4, 0x333333).setOrigin(0.5).setDepth(11);
-            clone.hpFill = this.scene.add.rectangle(clampX, clampY - bt.bh / 2 - 8, hw, 4, 0x8a30a0).setOrigin(0.5).setDepth(11);
-
-            this.scene.enemies.add(clone);
-            this.scene.villageBossClones.push(clone);
-            if (this.scene.multiplayer && this.scene.mpSync) {
-                this.scene.mpSync.assignMobId(clone, 'boss_clone');
-            }
-        }
-
-        boss.body.setVelocity(0);
-        this.scene.tweens.add({
-            targets: boss, alpha: 0, scaleX: 0.5, scaleY: 0.5, duration: 500,
-            onComplete: () => {
-                if (boss.hpBg) boss.hpBg.destroy();
-                if (boss.hpFill) boss.hpFill.destroy();
-                if (boss.active) boss.destroy();
-            }
-        });
-        if (this.scene.villageBossNameText) this.scene.villageBossNameText.destroy();
-        this.scene.villageBoss = null;
-        this.scene.villageBossAlive = false;
-
-        this.scene.floatingText(ox + VILLAGE_WIDTH / 2, CEMETERY_HEIGHT / 2, 'DEMON CLONES APPEAR!', '#ff4444');
-    }
-
-    _killBossClone(clone) {
-        if (clone._killed) return;
-        clone._killed = true;
-        clone.body.setVelocity(0);
-        clone.setTint(0xff0000);
-        const exp = clone.stats.exp;
-        if (exp > 0) {
-            const expBonus = 1 + (this.scene.accountEffects ? (this.scene.accountEffects.expPercent || 0) / 100 : 0);
-            this.scene.playerExp += exp;
-            this.scene.accountExp += Math.floor(exp * expBonus);
-            this.scene.floatingText(clone.x, clone.y - 30, '+' + exp + ' EXP', '#f1c40f');
-        }
-        if (this.scene.particles) this.scene.particles.spawnBossDeath(clone.x, clone.y);
-
-        this.scene.tweens.add({
-            targets: clone, alpha: 0, scaleX: 1.5, scaleY: 1.5, duration: 800,
-            onComplete: () => {
-                if (clone.hpBg) clone.hpBg.destroy();
-                if (clone.hpFill) clone.hpFill.destroy();
-                clone.destroy();
-            }
-        });
-
-        if (clone.stats && clone.stats.key) {
-            recordKill(clone.stats.key);
-            recordSoulCollect(clone.stats.key);
-            onKill(clone.stats.key);
-        }
-        this.scene.kills++;
-        this.scene._updateQuestIcons();
-
-        if (this.scene.villageBossClones) {
-            const idx = this.scene.villageBossClones.indexOf(clone);
-            if (idx !== -1) this.scene.villageBossClones.splice(idx, 1);
-        }
-
-        if (!this.scene.villageBossClones || this.scene.villageBossClones.length === 0) {
-            this.scene.time.delayedCall(800, () => {
-                this._victoryBossClone();
-            });
-        }
-    }
-
-    _victoryBossClone() {
-        const ox = this.scene.villageOffsetX;
-        this.scene.villageBossDefeated = true;
-        playBossDeath();
-
-        this.scene.defeatedText = this.scene.add.text(ox + VILLAGE_WIDTH / 2, 250, 'PURPLE DEMON DEFEATED!', {
-            fontSize: '26px', fill: '#8a30a0', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 4
-        }).setOrigin(0.5).setScrollFactor(0);
-        this.scene.tweens.add({
-            targets: this.scene.defeatedText, alpha: 0, duration: 5000,
-            onComplete: () => { if (this.scene.defeatedText) this.scene.defeatedText.destroy(); this.scene.defeatedText = null; }
-        });
-
-        this.scene.defeatedLoot = [];
-        const lootItems = [];
-
-        const magmaArmor = { ...MAGMA_ARMOR, type: 'equip' };
-        if (this.scene.addEquip(magmaArmor)) {
-            lootItems.push(magmaArmor);
-            playLoot();
-        }
-
-        if (Math.random() < 0.6) {
-            const item = rollEquip();
-            if (this.scene.addEquip(item)) {
-                lootItems.push(item);
-                playLoot();
-            }
-        }
-
-        if (Math.random() < BOSS_DROP_CHANCE) {
-            const accItem = rollVillageAccountEquip();
-            if (this.scene.addAccountEquip(accItem)) {
-                lootItems.push({ ...accItem, name: accItem.name + ' [ACCOUNT]' });
-                playLoot();
-            }
-        }
-
-        if (Math.random() < 0.3) {
-            const accItem2 = rollAccountEquip();
-            if (this.scene.addAccountEquip(accItem2)) {
-                lootItems.push({ ...accItem2, name: accItem2.name + ' [ACCOUNT]' });
-                playLoot();
-            }
-        }
-
-        lootItems.forEach((item, i) => {
-            const rc = '#' + RARITY_COLORS[item.rarity].toString(16).padStart(6, '0');
-            const lt = this.scene.add.text(this.scene.villageOffsetX + VILLAGE_WIDTH / 2, 280 + i * 22, '+' + item.name, {
-                fontSize: '14px', fill: rc, fontFamily: 'Arial', fontStyle: 'bold',
-                stroke: '#000', strokeThickness: 2
-            }).setOrigin(0.5).setScrollFactor(0);
-            this.scene.defeatedLoot.push(lt);
-            this.scene.tweens.add({
-                targets: lt, alpha: 0, duration: 5000,
-                onComplete: () => { if (lt.active) lt.destroy(); }
-            });
-        });
-
-        this.scene.time.delayedCall(6000, () => {
-            if (this.scene.zone === 'cemetery') {
-                this.scene.floatingText(this.scene.villageOffsetX + VILLAGE_WIDTH / 2, CEMETERY_HEIGHT / 2,
-                    'Village saved... for now.', '#2ecc71');
-            }
-        });
-
-        this.scene.hellPortal = this.scene.add.rectangle(this.scene.villageOffsetX + VILLAGE_WIDTH / 2, CEMETERY_HEIGHT - 40, 60, 12, 0xff2200, 0.5).setDepth(2);
-        this.scene.hellPortalHint = this.scene.add.text(this.scene.villageOffsetX + VILLAGE_WIDTH / 2, CEMETERY_HEIGHT - 55, '', {
-            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
-
-        this.scene.checkLevelUp();
-        this.scene._checkAccountLevelUp();
-        this.scene.updateUI();
-
-        const vc = rollBossCrystals('village', this.scene.difficulty);
-        if (vc > 0) {
-            const granted = this.scene.awardCrystals(vc, this.scene.villageOffsetX + VILLAGE_WIDTH / 2, 310);
-            if (granted > 0) {
-                this.scene.floatingText(this.scene.villageOffsetX + VILLAGE_WIDTH / 2, 310, '+' + granted + ' \u{1F48E}', '#3498db');
-            }
-        }
-    }
-
-    _spawnSnowyVillageCamps() {
-        const ox = this.scene.villageOffsetX;
-        const roleOrder = ['tank', 'assassin', 'archer', 'healer'];
-        for (let i = 0; i < SNOWY_VILLAGE_CAMP_POSITIONS.length; i++) {
-            const cp = SNOWY_VILLAGE_CAMP_POSITIONS[i];
-            for (let j = 0; j < 4; j++) {
-                const role = roleOrder[j % roleOrder.length];
-                const t = SNOWY_VILLAGE_ENEMY_TYPES[role];
-                const angle = (j / 4) * Math.PI * 2;
-                const ex = ox + cp.x + Math.cos(angle) * 30;
-                const ey = cp.y + Math.sin(angle) * 25;
-                this._makeSnowyVillageEnemy(t, ex, ey, i);
-            }
-        }
-    }
-
-    _makeSnowyVillageEnemy(t, x, y, campIndex) {
-        const walkTex = t.key + '_walk';
-        const animKey = t.key + '_walk_anim';
-        const e = this.scene.add.sprite(x, y, walkTex).setDepth(5);
-        this.scene.physics.add.existing(e, false);
-        e.body.setSize(t.bw, t.bh);
-        e.body.setCollideWorldBounds(true);
-        if (this.scene.anims.exists(animKey)) e.play(animKey);
-
-        e.stats = {
-            key: t.key, name: t.name,
-            hp: Math.floor(t.hp * this.scene.diffMulti.hp),
-            maxHp: Math.floor(t.hp * this.scene.diffMulti.hp),
-            damage: Math.floor(t.dmg * this.scene.diffMulti.dmg),
-            exp: Math.floor(t.exp * this.scene.diffMulti.exp),
-            bw: t.bw, bh: t.bh, role: t.role,
-            campIndex: campIndex,
-            wTimer: 0, wDir: 0
-        };
-
-        const hw = t.bw + 4;
-        e.hpBg = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
-        e.hpFill = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x3498db).setOrigin(0.5).setDepth(11);
-        this.scene.enemies.add(e);
-        if (this.scene.multiplayer && this.scene.mpSync) {
-            this.scene.mpSync.assignMobId(e, t.key);
-        }
-        return e;
-    }
-
-    _spawnSnowyVillageChests() {
-        const ox = this.scene.villageOffsetX;
-        for (let i = 0; i < SNOWY_VILLAGE_CHEST_COUNT; i++) {
-            const cy = 100 + Math.random() * (VILLAGE_HEIGHT - 200);
-            const cx = ox + 50 + Math.random() * (VILLAGE_WIDTH - 100);
-            this._createSnowyVillageChest(cx, cy);
-        }
-    }
-
-    _createSnowyVillageChest(x, y) {
-        const ch = this.scene.add.sprite(x, y, 'snowy_barrel').setDepth(6);
-        this.scene.physics.add.existing(ch, false);
-        ch.body.setSize(18, 22);
-        ch.body.setCollideWorldBounds(true);
-        ch.stats = { hp: 60, maxHp: 60 };
-        ch.hpBg = this.scene.add.rectangle(x, y - 16, 22, 3, 0x333333).setOrigin(0.5).setDepth(11);
-        ch.hpFill = this.scene.add.rectangle(x, y - 16, 22, 3, 0x3498db).setOrigin(0.5).setDepth(11);
-        ch.loot = [];
-        const count = 1 + Math.floor(Math.random() * 2);
-        for (let i = 0; i < count; i++) {
-            if (Math.random() < SNOWY_VILLAGE_CHEST_DROP_CHANCE) {
-                ch.loot.push(rollZoneEquip('snowy'));
-            }
-        }
-        if (Math.random() < VILLAGE_CHEST_EQUIP_DROP_CHANCE) {
-            ch.loot.push(rollZoneEquip('snowy'));
-        }
-        ch.hintText = this.scene.add.text(x, y - 20, '', {
-            fontSize: '10px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
-        ch.broken = false;
-        this.scene.villageChests.add(ch);
-        return ch;
-    }
-
-    _spawnSnowyCampfire() {
-        const ox = this.scene.villageOffsetX;
-        const cf = this.scene.add.image(ox + VILLAGE_WIDTH / 2, 100, 'campfire').setDepth(6);
-        this.scene.physics.add.existing(cf, false);
-        cf.body.setSize(24, 30);
-        cf.body.setCollideWorldBounds(true);
-        this.scene.campfire = cf;
-        this.scene.campfireHint = this.scene.add.text(ox + VILLAGE_WIDTH / 2, 70, '', {
-            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
-    }
-
-    _spawnSnowyVillageBoss() {
-        if (this.scene.snowyIceSpirit) return;
-        const ox = this.scene.villageOffsetX;
-        const x = ox + VILLAGE_WIDTH / 2;
-        const y = VILLAGE_HEIGHT - 100;
-
-        const walkTex = SNOWY_VILLAGE_BOSS_TYPE.key + '_walk';
-        const animKey = SNOWY_VILLAGE_BOSS_TYPE.key + '_walk_anim';
-        const e = this.scene.add.sprite(x, y, walkTex).setDepth(6);
-        this.scene.physics.add.existing(e, false);
-        e.body.setSize(SNOWY_VILLAGE_BOSS_TYPE.bw, SNOWY_VILLAGE_BOSS_TYPE.bh);
-        e.body.setCollideWorldBounds(true);
-        if (this.scene.anims.exists(animKey)) e.play(animKey);
-
-        const bt = SNOWY_VILLAGE_BOSS_TYPE;
-        const diffKey = this.scene.difficulty || 'Normal';
-        e.stats = {
-            key: bt.key, name: bt.name,
-            hp: Math.floor((bt.hp[diffKey] || bt.hp.Normal)),
-            maxHp: Math.floor((bt.hp[diffKey] || bt.hp.Normal)),
-            damage: Math.floor((bt.dmg[diffKey] || bt.dmg.Normal)),
-            exp: Math.floor((bt.exp[diffKey] || bt.exp.Normal)),
-            bw: bt.bw, bh: bt.bh
-        };
-
-        const hpW = 80;
-        e.hpBg = this.scene.add.rectangle(400, 56, hpW, 6, 0x333333).setOrigin(0.5).setScrollFactor(0).setDepth(20);
-        e.hpFill = this.scene.add.rectangle(400 - hpW / 2, 56, hpW, 6, 0x3498db).setOrigin(0, 0.5).setScrollFactor(0).setDepth(20);
-        this.scene.snowyIceSpiritNameText = this.scene.add.text(400, 44, bt.name, {
-            fontSize: '13px', fill: DIFF_COLORS[this.scene.difficulty] || '#3498db', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setScrollFactor(0).setDepth(20);
-
-        this.scene.snowyIceSpirit = e;
-        this.scene.snowyIceSpiritAbilities = { frostWaveTimer: 0, blizzardTimer: 0, summonTimer: 0 };
-        this.scene.snowyIceShards = this.scene.physics.add.group();
-    }
-
-    _updateSnowyVillageBoss() {
-        if (!this.scene.snowyIceSpirit || !this.scene.snowyIceSpirit.active) return;
-        const b = this.scene.snowyIceSpirit;
-        const s = b.stats;
-
-        b.hpBg.x = 400;
-        b.hpBg.y = 56;
-        b.hpFill.x = 400 - b.hpBg.width / 2;
-        b.hpFill.y = 56;
-        b.hpFill.width = b.hpBg.width * (s.hp / s.maxHp);
-
-        if (b.hp <= 0) {
-            this._snowyIceSpiritDied();
-            return;
-        }
-
-        const dx = this.scene.player.x - b.x;
-        const dy = this.scene.player.y - b.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const chaseSpeed = dist < 80 ? 80 : 60;
-        if (dist > 16) {
-            b.body.setVelocity((dx / dist) * chaseSpeed, (dy / dist) * chaseSpeed);
-            b.setFlipX(dx < 0);
-        } else {
-            b.body.setVelocity(0);
-            if (!this.scene.menuOpen && !this.scene.transitioning) {
-                this.scene.combat.takeDamage(Math.floor(b.stats.damage * 0.5));
-            }
-        }
-
-        const ab = this.scene.snowyIceSpiritAbilities;
-        ab.frostWaveTimer += this.scene.game.loop.delta;
-        ab.blizzardTimer += this.scene.game.loop.delta;
-        ab.summonTimer += this.scene.game.loop.delta;
-
-        if (ab.frostWaveTimer >= 5000) {
-            ab.frostWaveTimer = 0;
-            this._snowyFrostWave(b);
-        }
-        if (ab.blizzardTimer >= 8000) {
-            ab.blizzardTimer = 0;
-            this._snowyBlizzard(b);
-        }
-        if (ab.summonTimer >= 12000) {
-            ab.summonTimer = 0;
-            this._snowySummonShards(b);
-        }
-
-        if (this.scene.snowyIceShards && this.scene.snowyIceShards.getLength() > 0) {
-            this.scene.snowyIceShards.getChildren().forEach(s => {
-                if (!s.active || !s.stats) return;
-                const sdx = this.scene.player.x - s.x;
-                const sdy = this.scene.player.y - s.y;
-                const sd = Math.sqrt(sdx * sdx + sdy * sdy);
-                if (sd < 200) {
-                    if (sd > 15) {
-                        s.body.setVelocity((sdx / sd) * 90, (sdy / sd) * 90);
-                        s.setFlipX(sdx < 0);
-                    } else {
-                        s.body.setVelocity(0);
-                    }
-                } else {
-                    s.body.setVelocity(0);
-                }
-                if (s.hpBg) { s.hpBg.x = s.x; s.hpBg.y = s.y - s.stats.bh / 2 - 6; }
-                if (s.hpFill) { s.hpFill.x = s.x; s.hpFill.y = s.y - s.stats.bh / 2 - 6; }
-            });
-        }
-    }
-
-    _snowyFrostWave(boss) {
-        if (!boss || !boss.active) return;
-        const ox = this.scene.villageOffsetX;
-        const px = this.scene.player.x;
-        const py = this.scene.player.y;
-        const dx = px - boss.x;
-        const dy = py - boss.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist > 250) return;
-        if (dist < 100) {
-            this.scene.combat.takeDamage(Math.floor(boss.stats.damage * 0.6));
-        }
-        const vfx = this.scene.add.image(boss.x + dx * 0.5, boss.y + dy * 0.5, 'frost_wave_vfx').setDepth(10).setAlpha(0.7);
-        this.scene.tweens.add({ targets: vfx, alpha: 0, scale: 1.5, duration: 600, onComplete: () => vfx.destroy() });
-    }
-
-    _snowyBlizzard(boss) {
-        if (!boss || !boss.active) return;
-        const dist = Phaser.Math.Distance.Between(this.scene.player.x, this.scene.player.y, boss.x, boss.y);
-        if (dist < 150) {
-            this.scene.combat.takeDamage(Math.floor(boss.stats.damage * 0.8));
-        }
-        const vfx = this.scene.add.image(boss.x, boss.y, 'blizzard_vfx').setDepth(10).setAlpha(0.7).setScale(1.5);
-        this.scene.tweens.add({ targets: vfx, alpha: 0, scale: 2, duration: 800, onComplete: () => vfx.destroy() });
-    }
-
-    _snowySummonShards(boss) {
-        if (!boss || !boss.active || !this.scene.snowyIceShards) return;
-        for (let i = 0; i < 3; i++) {
-            const angle = (i / 3) * Math.PI * 2;
-            const sx = boss.x + Math.cos(angle) * 50;
-            const sy = boss.y + Math.sin(angle) * 40;
-            const shard = this.scene.add.sprite(sx, sy, 'ice_shard').setDepth(5);
-            this.scene.physics.add.existing(shard, false);
-            shard.body.setSize(10, 12);
-            shard.body.setCollideWorldBounds(true);
-            const dm = this.scene.diffMulti || { hp: 1, dmg: 1 };
-            shard.stats = { hp: Math.floor(SNOWY_BOSS_MINION.hp * dm.hp), maxHp: Math.floor(SNOWY_BOSS_MINION.hp * dm.hp), damage: Math.floor(SNOWY_BOSS_MINION.dmg * dm.dmg), bh: 12 };
-            shard.hpBg = this.scene.add.rectangle(sx, sy - 12, 14, 3, 0x333333).setOrigin(0.5).setDepth(11);
-            shard.hpFill = this.scene.add.rectangle(sx, sy - 12, 14, 3, 0x3498db).setOrigin(0.5).setDepth(11);
-            this.scene.snowyIceShards.add(shard);
-        }
-    }
-
-    _snowyIceSpiritDied() {
-        if (!this.scene.snowyIceSpirit) return;
-        playBossDeath();
-        const ox = this.scene.villageOffsetX;
-        if (this.scene.particles) this.scene.particles.spawnBossDeath(this.scene.snowyIceSpirit.x, this.scene.snowyIceSpirit.y);
-
-        if (this.scene.snowyIceSpirit.hpBg) this.scene.snowyIceSpirit.hpBg.destroy();
-        if (this.scene.snowyIceSpirit.hpFill) this.scene.snowyIceSpirit.hpFill.destroy();
-        if (this.scene.snowyIceSpiritNameText) this.scene.snowyIceSpiritNameText.destroy();
-        this.scene.snowyIceSpirit.destroy();
-        this.scene.snowyIceSpirit = null;
-
-        if (this.scene.snowyIceShards) {
-            this.scene.snowyIceShards.getChildren().forEach(s => {
-                if (s.hpBg) s.hpBg.destroy();
-                if (s.hpFill) s.hpFill.destroy();
-            });
-            this.scene.snowyIceShards.clear(true, true);
-        }
-
-        this.scene.defeatedText = this.scene.add.text(ox + VILLAGE_WIDTH / 2, 200, 'ICE SPIRIT DEFEATED!', {
-            fontSize: '22px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 4
-        }).setOrigin(0.5).setScrollFactor(0);
-        this.scene.tweens.add({
-            targets: this.scene.defeatedText, alpha: 0, duration: 5000,
-            onComplete: () => { if (this.scene.defeatedText) this.scene.defeatedText.destroy(); this.scene.defeatedText = null; }
-        });
-
-        const warmCore = { ...WARMTH_CORE, type: 'equip' };
-        if (this.scene.addEquip(warmCore)) {
-            this.scene.floatingText(ox + VILLAGE_WIDTH / 2, 230, '+' + warmCore.name, '#ff6600');
-            playLoot();
-        }
-
-        this.scene.villageBossDefeated = true;
-        this.scene.checkLevelUp();
-        this.scene._checkAccountLevelUp();
-        this.scene.updateUI();
-
-        this.scene.time.delayedCall(2000, () => {
-            this.scene.floatingText(ox + VILLAGE_WIDTH / 2, 260, 'Use Warmth Core at the campfire!', '#f1c40f');
-        });
-
-        const sc = rollBossCrystals('snowy', this.scene.difficulty);
-        if (sc > 0) {
-            const granted = this.scene.awardCrystals(sc, ox + VILLAGE_WIDTH / 2, 290);
-            if (granted > 0) {
-                this.scene.floatingText(ox + VILLAGE_WIDTH / 2, 290, '+' + granted + ' \u{1F48E}', '#3498db');
-            }
-        }
     }
 
     _updateSnowyVillageMobs() {
-        if (this.scene.zone !== 'village' || !this.scene.villageFrozen || this.scene.menuOpen || this.scene.transitioning) return;
-        if (!this.scene.enemies) return;
+        const s = this.scene;
+        if (s.zone !== 'village' || !s.zones.village.isFrozen || s.menuOpen || s.transitioning) return;
+        if (!s.enemies) return;
 
-        const delta = this.scene.game.loop.delta;
+        const delta = s.game.loop.delta;
+        let activeEnemies = 0;
 
-        this.scene.enemies.getChildren().forEach(e => {
+        s.enemies.getChildren().forEach(e => {
             if (!e.active || !e.stats) return;
+            activeEnemies++;
             const aggro = this.scene.getAggroTarget();
             const dx = aggro.x - e.x;
             const dy = aggro.y - e.y;
@@ -1560,23 +697,20 @@ export class VillageZone extends BaseZone {
         });
 
         this._updateEnemyProjectiles();
-    }
 
-    _checkSnowyVillageProgress() {
-        if (this.scene.zone !== 'village' || !this.scene.villageFrozen || this.scene.snowyVillageAllCleared) return;
-        if (!this.scene.enemies || this.scene.enemies.getLength() === 0) {
-            this.scene.snowyVillageAllCleared = true;
-            this.scene.floatingText(this.scene.villageOffsetX + VILLAGE_WIDTH / 2, 180, 'All winter spirits vanquished!', '#3498db');
-            this.scene.time.delayedCall(2000, () => {
-                this._spawnSnowyVillageBoss();
-                this.scene.floatingText(this.scene.villageOffsetX + VILLAGE_WIDTH / 2, 200, 'ICE SPIRIT has appeared!', '#ff4444');
+        if (activeEnemies === 0 && !s.zones.village.snowyAllCleared) {
+            s.zones.village.snowyAllCleared = true;
+            s.floatingText(s.villageOffsetX + VILLAGE_WIDTH / 2, 180, 'All winter spirits vanquished!', '#3498db');
+            s.time.delayedCall(2000, () => {
+                this.scene.zones.snowy._spawnSnowyVillageBoss();
+                s.floatingText(s.villageOffsetX + VILLAGE_WIDTH / 2, 200, 'ICE SPIRIT has appeared!', '#ff4444');
             });
         }
     }
 
     _updateCampfireHints() {
         const s = this.scene;
-        if (s.zone === 'village' && s.villageFrozen && s.campfire && !s.villageBossDefeated) {
+        if (s.zone === 'village' && s.zones.village.isFrozen && s.campfire && !s.zones.village.bossDefeated) {
             const cd = Phaser.Math.Distance.Between(s.player.x, s.player.y, s.campfire.x, s.campfire.y);
             if (cd < 80) {
                 if (s.campfireHint) s.campfireHint.setText('SPACE = activate');
@@ -1584,7 +718,7 @@ export class VillageZone extends BaseZone {
                 s.campfireHint.setText('');
             }
         }
-        if (s.zone === 'village' && s.villageBossDefeated && s.campfire) {
+        if (s.zone === 'village' && s.zones.village.bossDefeated && s.campfire) {
             const cd = Phaser.Math.Distance.Between(s.player.x, s.player.y, s.campfire.x, s.campfire.y);
             if (cd < 80) {
                 if (s.campfireHint) s.campfireHint.setText('SPACE = restore village');
@@ -1593,10 +727,7 @@ export class VillageZone extends BaseZone {
             }
         }
         if (s.zone === 'cemetery') {
-            if (!s.villageBossSpawned && !s.villageBossDefeated) {
-                this._spawnVillageBoss();
-            }
-            if (s.villageBossDefeated && s.hellPortal) {
+            if (s.zones.village.bossDefeated && s.hellPortal) {
                 const pd = Phaser.Math.Distance.Between(s.player.x, s.player.y, s.hellPortal.x, s.hellPortal.y);
                 if (pd < 80) {
                     if (s.hellPortalHint) s.hellPortalHint.setText('SPACE = enter Hell');
@@ -1609,7 +740,7 @@ export class VillageZone extends BaseZone {
 
     _updateShopInnHints() {
         const s = this.scene;
-        if (s.zone === 'village' && !s.villageFrozen && s.villageRestored) {
+        if (s.zone === 'village' && !s.zones.village.isFrozen && s.zones.village.isRestored) {
             s.nearbyShop = null;
             s.nearbyInn = null;
             if (s.villageMerchantNPC && s.villageMerchantHint) {

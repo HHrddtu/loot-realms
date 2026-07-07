@@ -5,10 +5,13 @@ import { rollEquip, rollAccountEquip } from '../utils.js';
 import { recordKill } from '../bestiary.js';
 import { recordSoulCollect } from '../soulBook.js';
 import { onKill } from '../quests.js';
+import { BaseZone } from '../systems/BaseZone.js';
 
-export class ArenaZone {
+export class ArenaZone extends BaseZone {
     constructor(scene) {
-        this.scene = scene;
+        super(scene);
+        this.bossDefeated = false;
+        this.bossAlive = false;
     }
 
     setup() {
@@ -19,7 +22,7 @@ export class ArenaZone {
 
         s.add.image(400, 300, 'boss_ground').setDepth(0);
 
-        s.exitPortal = s.add.sprite(ARENA_EXIT_POS.x, ARENA_EXIT_POS.y, s.mineUnlocked ? 'mine_ladder' : 'boss_portal').setDepth(1);
+        s.exitPortal = s.add.sprite(ARENA_EXIT_POS.x, ARENA_EXIT_POS.y, s.zones.mine.isUnlocked ? 'mine_ladder' : 'boss_portal').setDepth(1);
         s.exitHint = s.add.text(ARENA_EXIT_POS.x, ARENA_EXIT_POS.y + 50, '', {
             fontSize: '11px', fill: '#aa50ee', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 2
@@ -30,13 +33,13 @@ export class ArenaZone {
         s.player.body.setCollideWorldBounds(true);
         s.cameras.main.stopFollow();
 
-        s.bossAlive = false;
-        s.bossDefeated = s.mineUnlocked;
+        this.bossAlive = false;
+        this.bossDefeated = s.zones.mine.isUnlocked;
 
         s.enemies = s.physics.add.group();
         s.stumps = s.physics.add.group();
 
-        if (!s.mineUnlocked) {
+        if (!s.zones.mine.isUnlocked) {
             this.spawnBoss();
         }
 
@@ -47,26 +50,12 @@ export class ArenaZone {
         }, null, s);
 
         s.zone = 'arena';
-        s.hintText.setText(s.mineUnlocked ? 'Enter the Mine! | I=inventory | TAB=stats | P=pause' : 'Defeat the Ancient Treant! | I=inventory | TAB=stats | P=pause');
+        s.hintText.setText(s.zones.mine.isUnlocked ? 'Enter the Mine! | I=inventory | TAB=stats | P=pause' : 'Defeat the Ancient Treant! | I=inventory | TAB=stats | P=pause');
         startZoneMusic('arena');
     }
 
-    clear() {
+    _destroyZoneSpecific() {
         const s = this.scene;
-        s.physics.world.colliders.destroy();
-        if (s.fireballs) {
-            s.fireballs.forEach(fb => { if (fb.glow) fb.glow.destroy(); fb.destroy(); });
-            s.fireballs = [];
-        }
-        if (s.enemyProjectiles) {
-            s.enemyProjectiles.forEach(p => { if (p && p.destroy) p.destroy(); });
-            s.enemyProjectiles = [];
-        }
-        if (s.shieldActive) {
-            s.shieldActive = false;
-            s.shieldHP = 0;
-            if (s.shieldVfx) { s.shieldVfx.destroy(); s.shieldVfx = null; }
-        }
         if (s.boss) {
             if (s.boss.hpBg) s.boss.hpBg.destroy();
             if (s.boss.hpFill) s.boss.hpFill.destroy();
@@ -78,30 +67,24 @@ export class ArenaZone {
             s.boss = null;
         }
         if (s.bossTimer) { s.bossTimer.destroy(); s.bossTimer = null; }
-        if (s.defeatedText) { s.defeatedText.destroy(); s.defeatedText = null; }
-        if (s.defeatedLoot) {
-            s.defeatedLoot.forEach(t => { if (t && t.destroy) t.destroy(); });
-            s.defeatedLoot = null;
-        }
-        if (s.enemies && s.enemies.getLength && s.enemies.getLength() > 0) {
-            s.enemies.getChildren().forEach(e => {
-                if (e.hpBg) e.hpBg.destroy();
-                if (e.hpFill) e.hpFill.destroy();
-            });
-            s.enemies.clear(true, true);
-        }
-        if (s.enemies) { s.enemies.destroy(); s.enemies = null; }
-        if (s.stumps && s.stumps.getLength && s.stumps.getLength() > 0) {
-            s.stumps.getChildren().forEach(st => {
-                if (st.hpBg) st.hpBg.destroy();
-                if (st.hpFill) st.hpFill.destroy();
-            });
-            s.stumps.clear(true, true);
-        }
-        if (s.stumps) { s.stumps.destroy(); s.stumps = null; }
+        this._destroyDefeatedUI();
+        this._destroyStumps();
         if (s.exitPortal) { s.exitPortal.destroy(); s.exitPortal = null; }
         if (s.exitHint) { s.exitHint.destroy(); s.exitHint = null; }
-        s.bossAlive = false;
+        this.bossAlive = false;
+    }
+
+    handleSpace() {
+        const s = this.scene;
+        if (s.nearbyNpc) {
+            s.npc.interactWithNpc();
+            return;
+        }
+        if (s.player.y > 500) {
+            this.exitArena();
+        } else if (!this.bossDefeated) {
+            s.attack();
+        }
     }
 
     update(time, delta) {
@@ -155,7 +138,7 @@ export class ArenaZone {
             stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5).setDepth(15);
 
-        s.bossAlive = true;
+        this.bossAlive = true;
         s.enemies.add(s.boss);
         if (s.multiplayer && s.mpSync) {
             s.mpSync.assignMobId(s.boss, 'boss');
@@ -167,7 +150,7 @@ export class ArenaZone {
         if (s.zone !== 'arena' || s.transitioning || s.menuOpen) return;
         const dist = Phaser.Math.Distance.Between(s.player.x, s.player.y, ARENA_EXIT_POS.x, ARENA_EXIT_POS.y);
         if (dist < 50) {
-            s.exitHint.setText(s.mineUnlocked ? 'SPACE to enter the Mine' : 'SPACE to exit');
+            s.exitHint.setText(s.zones.mine.isUnlocked ? 'SPACE to enter the Mine' : 'SPACE to exit');
         } else {
             s.exitHint.setText('');
         }
@@ -186,7 +169,7 @@ export class ArenaZone {
         s.cameras.main.fadeOut(500, 0, 0, 0);
         s.time.delayedCall(500, () => {
             this.clear();
-            if (s.mineUnlocked) {
+            if (s.zones.mine.isUnlocked) {
                 s._setupZone('mine');
             } else {
                 s._setupZone('forest');

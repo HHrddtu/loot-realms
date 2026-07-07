@@ -7,15 +7,15 @@ import {
 import { playPortal, startZoneMusic } from '../sound.js';
 import { recordEncounter } from '../bestiary.js';
 import { rollZoneEquip } from '../utils.js';
+import { BaseZone } from '../systems/BaseZone.js';
 
-export class ForestZone {
+export class ForestZone extends BaseZone {
     constructor(scene) {
-        this.scene = scene;
+        super(scene);
     }
 
     setup() {
         const s = this.scene;
-        s.bossDefeated = false;
         s.cameras.main.setBackgroundColor('#16213e');
         s.physics.world.setBounds(0, 0, GAME_WIDTH, FOREST_HEIGHT);
         s.cameras.main.setBounds(0, 0, GAME_WIDTH, FOREST_HEIGHT);
@@ -90,13 +90,10 @@ export class ForestZone {
         }
     }
 
-    clear() {
+    _destroyZoneSpecific() {
         const s = this.scene;
-        s.physics.world.colliders.destroy();
         if (s.traps) {
-            s.traps.forEach(t => {
-                if (t && t.destroy) t.destroy();
-            });
+            s.traps.forEach(t => { if (t && t.destroy) t.destroy(); });
             s.traps = null;
         }
         if (s.trapGroup) { s.trapGroup.clear(true, true); s.trapGroup.destroy(); s.trapGroup = null; }
@@ -111,25 +108,22 @@ export class ForestZone {
             s.forestChests.destroy();
             s.forestChests = null;
         }
-        if (s.enemyProjectiles) {
-            s.enemyProjectiles.forEach(p => { if (p && p.destroy) p.destroy(); });
-            s.enemyProjectiles = [];
-        }
-        if (s.enemies && s.enemies.getLength && s.enemies.getLength() > 0) {
-            s.enemies.getChildren().forEach(e => {
-                if (e.hpBg) e.hpBg.destroy();
-                if (e.hpFill) e.hpFill.destroy();
-            });
-            s.enemies.clear(true, true);
-        }
-        if (s.enemies) { s.enemies.destroy(); s.enemies = null; }
         if (s.forestBg) { s.forestBg.destroy(); s.forestBg = null; }
         if (s.portalSprite) { s.portalSprite.destroy(); s.portalSprite = null; }
         if (s.portalHint) { s.portalHint.destroy(); s.portalHint = null; }
-        s.npcSprites.forEach(n => { if (n.nameTag) n.nameTag.destroy(); if (n.questIcon) n.questIcon.destroy(); n.destroy(); });
-        s.npcSprites = [];
-        s.questIcons = [];
-        s.nearbyNpc = null;
+    }
+
+    handleSpace() {
+        const s = this.scene;
+        if (s.nearbyNpc) {
+            s.npc.interactWithNpc();
+            return;
+        }
+        if (s.player.y < 100) {
+            this.enterPortal();
+        } else {
+            s.attack();
+        }
     }
 
     update(time, delta) {

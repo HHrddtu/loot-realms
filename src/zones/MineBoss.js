@@ -37,9 +37,10 @@ export class MineBoss {
         const b = s.mineBoss;
         if (!s.mineBossAlive || !b || !b.active) return;
         const st = b.stats;
-        b.hpBg.x = b.x; b.hpBg.y = b.y - 50; b.hpFill.x = b.x; b.hpFill.y = b.y - 50;
-        b.hpFill.width = b.hpBg.width * (st.hp / st.maxHp);
-        if (s.mineBossNameText) { s.mineBossNameText.x = b.x; s.mineBossNameText.y = b.y - 60; }
+        BossAI.updateHpBar(b, {
+            x: b.x, y: b.y - 50,
+            nameText: s.mineBossNameText, nameYOffset: -10
+        });
         if (s.menuOpen || s.transitioning) { b.body.setVelocity(0); return; }
         if (st.transitioning || st.invulnerable) { b.body.setVelocity(0); return; }
 

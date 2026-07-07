@@ -23,9 +23,9 @@ export class CombatLoot {
         else if (enemy === s.villageBoss) {
             const bs = s.villageBoss.stats;
             if (!bs.splitDone && (bs.hp / bs.maxHp <= VILLAGE_BOSS_TYPE.splitThreshold || bs.hp <= 0)) {
-                bs.splitDone = true;
                 s.zones.village.boss.splitBoss(s.villageBoss);
             }
+            return;
         } else if (enemy === s.hellBoss) { s.zones.hell.victoryHellBoss(); }
         else if (enemy === s.snowyIceSpirit) { s.zones.village.boss.iceSpiritDied(); }
         else if (enemy === s.castleBoss) { /* handled by CastleZone._updateBoss */ }

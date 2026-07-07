@@ -41,7 +41,7 @@ export class NpcSystem {
         });
 
         if (s.cartDriverNpc) { s.cartDriverNpc.destroy(); s.cartDriverNpc = null; }
-        if (s.zone === 'forest' && s.hasSecretKey) {
+        if (s.zone === 'forest' && s.zones.mine.hasSecretKey) {
             const cd = CART_DRIVER_NPC.cart_driver;
             const spr = s.add.sprite(cd.x, cd.y, cd.texKey).setDepth(8);
             s.physics.add.existing(spr, true);
@@ -118,7 +118,7 @@ export class NpcSystem {
         if (!s.nearbyNpc) return;
         const npcKey = s.nearbyNpc.npcKey;
 
-        if (npcKey === 'cart_driver' && s.hasSecretKey) {
+        if (npcKey === 'cart_driver' && s.zones.mine.hasSecretKey) {
             this.startCartRide();
             return;
         }
@@ -324,12 +324,12 @@ export class NpcSystem {
                     s.cameras.main.fadeOut(800, 0, 0, 0);
                     s.time.delayedCall(800, () => {
                         cartText.destroy();
-                        s.zones.meadow.setup();
+                        s._setupZone('meadow');
                         s.cameras.main.fadeIn(500, 0, 0, 0);
                         s.transitioning = false;
                         s.menuOpen = false;
                         s.physics.resume();
-                        s.hasSecretKey = false;
+                        s.zones.mine.hasSecretKey = false;
                         s.doSave();
                     });
                 });

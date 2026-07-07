@@ -446,12 +446,71 @@ export class MineZone extends BaseZone {
         });
     }
 
-    setupBossArena() { this.bossAI.setupArena(); }
+    setupBossArena() {
+        const s = this.scene;
+        s.cameras.main.setBackgroundColor('#0a0510');
+        s.physics.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        s.cameras.main.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+        s.add.image(400, 300, 'boss_ground').setDepth(0);
+
+        s.mineArenaExit = s.add.sprite(ARENA_EXIT_POS.x, ARENA_EXIT_POS.y, 'mine_ladder').setDepth(1);
+        s.mineArenaExitHint = s.add.text(ARENA_EXIT_POS.x, ARENA_EXIT_POS.y + 50, '', {
+            fontSize: '11px', fill: '#bf77f6', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
+        }).setOrigin(0.5).setDepth(12);
+
+        s.player.x = 400;
+        s.player.y = 500;
+        s.player.body.setCollideWorldBounds(true);
+        s.cameras.main.stopFollow();
+
+        this.bossDefeated = false;
+        this.bossAlive = false;
+
+        s.enemies = s.physics.add.group();
+        s.stumps = s.physics.add.group();
+        this.bossAI.spawn();
+
+        s.physics.add.overlap(s.player, s.enemies, (p, e) => {
+            if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
+                s.combat.takeDamage(e.stats.damage);
+            }
+        }, null, s);
+
+        s.zone = 'mine_boss';
+        s.hintText.setText('Defeat the Skeleton Lord! | I=inventory | TAB=stats | P=pause');
+        startZoneMusic('mine_boss');
+    }
 
     clearBossArena() {
-        this.bossAI.clearArena();
+        const s = this.scene;
+        s.physics.world.colliders.destroy();
+        if (s.mineBoss) {
+            if (s.mineBoss.hpBg) s.mineBoss.hpBg.destroy();
+            if (s.mineBoss.hpFill) s.mineBoss.hpFill.destroy();
+            if (s.mineBossNameText) s.mineBossNameText.destroy();
+            if (s.mineBoss.aoeRing) { s.mineBoss.aoeRing.destroy(); s.mineBoss.aoeRing = null; }
+            if (s.mineBoss.aoeRing2) { s.mineBoss.aoeRing2.destroy(); s.mineBoss.aoeRing2 = null; }
+            if (s.mineBoss.telegraph) { s.mineBoss.telegraph.destroy(); s.mineBoss.telegraph = null; }
+            if (s.mineBoss.auraRing) { s.mineBoss.auraRing.destroy(); s.mineBoss.auraRing = null; }
+            s.mineBoss.destroy();
+            s.mineBoss = null;
+        }
+        if (s.bossTimer) { s.bossTimer.destroy(); s.bossTimer = null; }
         this._destroyDefeatedUI();
+        if (s.enemies && s.enemies.getLength && s.enemies.getLength() > 0) {
+            s.enemies.getChildren().forEach(e => {
+                if (e.hpBg) e.hpBg.destroy();
+                if (e.hpFill) e.hpFill.destroy();
+            });
+            s.enemies.clear(true, true);
+        }
+        if (s.enemies) { s.enemies.destroy(); s.enemies = null; }
         this._destroyStumps();
+        if (s.mineArenaExit) { s.mineArenaExit.destroy(); s.mineArenaExit = null; }
+        if (s.mineArenaExitHint) { s.mineArenaExitHint.destroy(); s.mineArenaExitHint = null; }
+        this.bossAlive = false;
     }
 
     exitMineBossArena() {

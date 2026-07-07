@@ -1,23 +1,11 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from './config/index.js';
 import BootScene from './scenes/BootScene.js';
-import LoginScene from './scenes/LoginScene.js';
-import MenuScene from './scenes/MenuScene.js';
-import LobbyScene from './scenes/LobbyScene.js';
-import ClassSelectScene from './scenes/ClassSelectScene.js';
-import GameScene from './scenes/GameScene.js';
-import TalentScene from './scenes/TalentScene.js';
-import BestiaryScene from './scenes/BestiaryScene.js';
-import MaterialBookScene from './scenes/MaterialBookScene.js';
-import SoulBookScene from './scenes/SoulBookScene.js';
-import CraftScene from './scenes/CraftScene.js';
-import PetScene from './scenes/PetScene.js';
-import KeybindScene from './scenes/KeybindScene.js';
 import { loadLang } from './i18n.js';
 
 loadLang();
 
-new Phaser.Game({
+const game = new Phaser.Game({
     type: Phaser.AUTO,
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
@@ -28,5 +16,24 @@ new Phaser.Game({
         default: 'arcade',
         arcade: { gravity: { y: 0 }, debug: false }
     },
-    scene: [BootScene, LoginScene, MenuScene, LobbyScene, ClassSelectScene, GameScene, TalentScene, BestiaryScene, MaterialBookScene, SoulBookScene, CraftScene, PetScene, KeybindScene]
+    scene: [BootScene]
+});
+
+const LAZY_SCENES = [
+    { key: 'Login', path: () => import('./scenes/LoginScene.js') },
+    { key: 'Menu', path: () => import('./scenes/MenuScene.js') },
+    { key: 'Lobby', path: () => import('./scenes/LobbyScene.js') },
+    { key: 'ClassSelect', path: () => import('./scenes/ClassSelectScene.js') },
+    { key: 'Game', path: () => import('./scenes/GameScene.js') },
+    { key: 'TalentTree', path: () => import('./scenes/TalentScene.js') },
+    { key: 'Bestiary', path: () => import('./scenes/BestiaryScene.js') },
+    { key: 'MaterialBook', path: () => import('./scenes/MaterialBookScene.js') },
+    { key: 'SoulBook', path: () => import('./scenes/SoulBookScene.js') },
+    { key: 'Craft', path: () => import('./scenes/CraftScene.js') },
+    { key: 'Pet', path: () => import('./scenes/PetScene.js') },
+    { key: 'Keybinds', path: () => import('./scenes/KeybindScene.js') }
+];
+
+LAZY_SCENES.forEach(s => {
+    s.path().then(mod => game.scene.add(s.key, mod.default, false));
 });

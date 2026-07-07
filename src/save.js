@@ -4,6 +4,8 @@ import { saveAccountToFirestore, loadAccountFromFirestore, getCurrentUser, isAno
 const SAVE_KEY = 'webgame_save';
 const ACCOUNT_KEY = 'webgame_account';
 
+export const GAME_SAVE_VERSION = 1;
+
 /* ===== GAME SAVE (per-class, per-session) ===== */
 
 export function saveGame(data) {
@@ -16,11 +18,19 @@ export function saveGame(data) {
     }
 }
 
+export function migrateGame(data) {
+    if (!data) return null;
+    // Future migrations go here
+    data.version = GAME_SAVE_VERSION;
+    return data;
+}
+
 export function loadGame() {
     try {
         const json = localStorage.getItem(SAVE_KEY);
         if (!json) return null;
-        return JSON.parse(json);
+        const data = JSON.parse(json);
+        return migrateGame(data);
     } catch (e) {
         return null;
     }

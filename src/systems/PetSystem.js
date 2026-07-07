@@ -111,8 +111,10 @@ export class PetSystem {
             let closest = null;
             const groups = [s.enemies, s.villageZombies, s.hellImps, s.caveSmallBats];
             groups.forEach(grp => {
-                if (!grp) return;
-                grp.getChildren().forEach(e => {
+                if (!grp || !grp.scene) return;
+                let children;
+                try { children = grp.getChildren(); } catch (e) { return; }
+                children.forEach(e => {
                     if (!e.active || !e.stats || e.stats.hp <= 0) return;
                     const d = Phaser.Math.Distance.Between(this.petSprite.x, this.petSprite.y, e.x, e.y);
                     if (d < closestDist) { closest = e; closestDist = d; }

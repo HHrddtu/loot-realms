@@ -8,11 +8,14 @@ import {
 } from '../config/index.js';
 import { playBossDeath, playLoot } from '../sound.js';
 import { rollVillageEquip, rollEquip } from '../utils.js';
+import { BaseZone } from '../systems/BaseZone.js';
 
-export class SnowyZone {
+export class SnowyZone extends BaseZone {
     constructor(scene) {
-        this.scene = scene;
+        super(scene);
     }
+
+    setup() {} /* no-op — used as utility via VillageZone */
 
     _spawnSnowyVillageCamps() {
         const ox = this.scene.villageOffsetX;
@@ -115,7 +118,7 @@ export class SnowyZone {
         if (this.scene.snowyIceSpirit) return;
         const ox = this.scene.villageOffsetX;
         const x = ox + VILLAGE_WIDTH / 2;
-        const y = VILLAGE_HEIGHT - 100;
+        const y = Math.min(this.scene.player.y + 200, VILLAGE_HEIGHT - 100);
 
         const walkTex = SNOWY_VILLAGE_BOSS_TYPE.key + '_walk';
         const animKey = SNOWY_VILLAGE_BOSS_TYPE.key + '_walk_anim';
@@ -133,16 +136,20 @@ export class SnowyZone {
             maxHp: Math.floor((bt.hp[diffKey] || bt.hp.Normal)),
             damage: Math.floor((bt.dmg[diffKey] || bt.dmg.Normal)),
             exp: Math.floor((bt.exp[diffKey] || bt.exp.Normal)),
-            bw: bt.bw, bh: bt.bh
+            bw: bt.bw, bh: bt.bh,
+            frostTimer: 0, frostInterval: bt.frostWaveInterval,
+            blizzardTimer: 0, blizzardInterval: bt.blizzardInterval,
+            shardTimer: 0, shardInterval: bt.summonInterval
         };
 
         const hpW = 80;
-        e.hpBg = this.scene.add.rectangle(400, 56, hpW, 6, 0x333333).setOrigin(0.5).setScrollFactor(0).setDepth(20);
-        e.hpFill = this.scene.add.rectangle(400 - hpW / 2, 56, hpW, 6, 0x3498db).setOrigin(0, 0.5).setScrollFactor(0).setDepth(20);
-        this.scene.snowyIceSpiritNameText = this.scene.add.text(400, 44, bt.name, {
-            fontSize: '13px', fill: DIFF_COLORS[this.scene.difficulty] || '#3498db', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setScrollFactor(0).setDepth(20);
+        e.hpBg = this.scene.add.rectangle(400, 110, hpW, 6, 0x000000).setOrigin(0.5).setDepth(20).setScrollFactor(0);
+        e.hpFill = this.scene.add.rectangle(400 - hpW / 2, 110, hpW, 6, 0x3498db).setOrigin(0, 0.5).setDepth(20).setScrollFactor(0);
+        e.hpBg.setVisible(false); e.hpFill.setVisible(false);
+        this.scene.snowyIceSpiritNameText = this.scene.add.text(400, 95, bt.name, {
+            fontSize: '14px', fill: DIFF_COLORS[this.scene.difficulty] || '#3498db', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 3
+        }).setOrigin(0.5).setDepth(20).setScrollFactor(0).setVisible(false);
 
         this.scene.snowyIceSpirit = e;
         this.scene.snowyIceSpiritAbilities = { frostWaveTimer: 0, blizzardTimer: 0, summonTimer: 0 };
@@ -296,7 +303,7 @@ export class SnowyZone {
             playLoot();
         }
 
-        this.scene.villageBossDefeated = true;
+        this.scene.zones.village.snowyBossDefeated = true;
         this.scene.checkLevelUp();
         this.scene._checkAccountLevelUp();
         this.scene.updateUI();
@@ -307,7 +314,7 @@ export class SnowyZone {
     }
 
     _updateSnowyVillageMobs() {
-        if (this.scene.zone !== 'village' || !this.scene.villageFrozen || this.scene.menuOpen || this.scene.transitioning) return;
+        if (this.scene.zone !== 'village' || !this.scene.zones.village.isFrozen || this.scene.menuOpen || this.scene.transitioning) return;
         if (!this.scene.enemies) return;
 
         this.scene.enemies.getChildren().forEach(e => {
@@ -349,9 +356,12 @@ export class SnowyZone {
     }
 
     _checkSnowyVillageProgress() {
-        if (this.scene.zone !== 'village' || !this.scene.villageFrozen || this.scene.snowyVillageAllCleared) return;
-        if (!this.scene.enemies || this.scene.enemies.getLength() === 0) {
-            this.scene.snowyVillageAllCleared = true;
+        if (this.scene.zone !== 'village' || !this.scene.zones.village.isFrozen || this.scene.zones.village.snowyAllCleared) return;
+        if (!this.scene.enemies) return;
+        let count = 0;
+        this.scene.enemies.getChildren().forEach(e => { if (e.active && e.stats) count++; });
+        if (count === 0) {
+            this.scene.zones.village.snowyAllCleared = true;
             this.scene.floatingText(this.scene.villageOffsetX + VILLAGE_WIDTH / 2, 180, 'All winter spirits vanquished!', '#3498db');
             this.scene.time.delayedCall(2000, () => {
                 this._spawnSnowyVillageBoss();
@@ -361,7 +371,7 @@ export class SnowyZone {
     }
 
     _activateCampfire() {
-        if (!this.scene.villageFrozen || !this.scene.campfire) return;
+        if (!this.scene.zones.village.isFrozen || !this.scene.campfire) return;
         const dist = Phaser.Math.Distance.Between(this.scene.player.x, this.scene.player.y, this.scene.campfire.x, this.scene.campfire.y);
         if (dist >= 60) return;
 
@@ -384,7 +394,7 @@ export class SnowyZone {
         this.scene.cameras.main.fadeOut(1500, 255, 200, 100);
 
         this.scene.time.delayedCall(1500, () => {
-            this.scene.villageRestored = true;
+            this.scene.zones.village.isRestored = true;
             this.scene._clearVillage();
             this.scene._setupVillage(false);
             this.scene.cameras.main.fadeIn(1000, 255, 200, 100);

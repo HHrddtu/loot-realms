@@ -32,6 +32,10 @@ export class CombatCore {
         if (s.invincible) return;
         amount = Math.floor(amount) || 0;
         if (amount <= 0) return;
+        if (s.computedDamageReduction > 0) {
+            amount = Math.floor(amount * (1 - Math.min(s.computedDamageReduction, 90) / 100));
+            if (amount <= 0) amount = 1;
+        }
         if (s.shieldActive && s.shieldHP > 0) {
             if (s.lifeLinkActive) amount = Math.floor(amount * 0.7);
             const absorbed = Math.min(s.shieldHP, amount);
@@ -65,7 +69,7 @@ export class CombatCore {
     attack() {
         const s = this.scene;
         if (s.attackCooldown || s.menuOpen || s.transitioning) return;
-        if (s.zone === 'arena' && s.bossDefeated) return;
+        if (s.zone === 'arena' && s.zones.arena.bossDefeated) return;
         s.attackCooldown = true; s.playerAttacking = true;
         const cls = s.classData || getClassData(s.classKey);
         s.player.play(cls.attackAnim || 'sage_attack');
@@ -146,16 +150,20 @@ export class CombatCore {
     }
 
     _forEachGroup(group, fn) {
-        if (!group || !group.getLength) return;
-        group.getChildren().forEach(child => {
+        if (!group || !group.scene) return;
+        let children;
+        try { children = group.getChildren(); } catch (e) { return; }
+        children.forEach(child => {
             if (!child.active || !child.stats || child.broken) return;
             fn(child);
         });
     }
 
     _forEachGroupInRange(group, ax, ay, range, fn) {
-        if (!group || !group.getLength) return;
-        group.getChildren().forEach(child => {
+        if (!group || !group.scene) return;
+        let children;
+        try { children = group.getChildren(); } catch (e) { return; }
+        children.forEach(child => {
             if (!child.active || !child.stats || child.broken) return;
             if (Phaser.Math.Distance.Between(ax, ay, child.x, child.y) <= range) fn(child);
         });

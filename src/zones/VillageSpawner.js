@@ -175,12 +175,16 @@ export class VillageSpawner {
     spawnSnowyVillageBoss() {
         const ox = this.scene.villageOffsetX;
         const bt = SNOWY_VILLAGE_BOSS_TYPE;
+        const diffKey = this.scene.difficulty || 'Normal';
         const bx = ox + VILLAGE_WIDTH / 2, by = 250;
         const e = this.scene.add.sprite(bx, by, 'ice_spirit_walk').setDepth(5);
         this.scene.physics.add.existing(e, false);
         e.body.setSize(bt.bw, bt.bh);
         e.body.setCollideWorldBounds(true);
-        e.stats = { key: bt.key, name: bt.name, hp: Math.floor(bt.hp * this.scene.diffMulti.hp), maxHp: Math.floor(bt.hp * this.scene.diffMulti.hp), damage: Math.floor(bt.dmg * this.scene.diffMulti.dmg), exp: Math.floor(bt.exp * this.scene.diffMulti.exp), bw: bt.bw, bh: bt.bh, frostTimer: 0, frostInterval: bt.frostInterval, blizzardTimer: 0, blizzardInterval: bt.blizzardInterval, shardTimer: 0, shardInterval: bt.shardInterval };
+        const hp = Math.floor(bt.hp[diffKey] || bt.hp.Normal);
+        const dmg = Math.floor(bt.dmg[diffKey] || bt.dmg.Normal);
+        const exp = Math.floor(bt.exp[diffKey] || bt.exp.Normal);
+        e.stats = { key: bt.key, name: bt.name, hp, maxHp: hp, damage: dmg, exp, bw: bt.bw, bh: bt.bh, frostTimer: 0, frostInterval: bt.frostWaveInterval, blizzardTimer: 0, blizzardInterval: bt.blizzardInterval, shardTimer: 0, shardInterval: bt.summonInterval };
         const hpW = 60;
         e.hpBg = this.scene.add.rectangle(400, 120, hpW, 5, 0x000000).setDepth(12).setScrollFactor(0);
         e.hpFill = this.scene.add.rectangle(400 - hpW / 2, 120, hpW, 5, 0x3498db).setOrigin(0, 0.5).setDepth(12).setScrollFactor(0);

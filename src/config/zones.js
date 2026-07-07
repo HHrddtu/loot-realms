@@ -63,7 +63,7 @@ export const VILLAGE_HOUSE_POSITIONS = [
     { x: 120, y: 1550, w: 60, h: 50 },
     { x: 550, y: 1800, w: 60, h: 50 }
 ];
-export const VILLAGE_CHILD_HOUSE = { x: 300, y: 1920, w: 60, h: 50 };
+export const VILLAGE_CHILD_HOUSE = { x: 580, y: 550, w: 60, h: 50 };
 export const VILLAGE_CORPSE_POSITIONS = [
     { x: 150, y: 180 }, { x: 450, y: 350 }, { x: 300, y: 600 },
     { x: 550, y: 850 }, { x: 130, y: 1050 }, { x: 400, y: 1300 },

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config/index.js';
 import { playBossAoE } from '../sound.js';
+import { BossAI } from './BossAI.js';
 
 export class ForestBossAI {
     constructor(scene) {
@@ -9,19 +10,14 @@ export class ForestBossAI {
 
     update(time, delta) {
         const s = this.scene;
-        if (!s.bossAlive || !s.boss || !s.boss.active) return;
+        if (!s.zones.arena.bossAlive || !s.boss || !s.boss.active) return;
         const b = s.boss;
         const st = b.stats;
 
-        b.hpBg.x = b.x;
-        b.hpBg.y = b.y - 50;
-        b.hpFill.x = b.x;
-        b.hpFill.y = b.y - 50;
-        b.hpFill.width = b.hpBg.width * (st.hp / st.maxHp);
-        if (s.bossNameText) {
-            s.bossNameText.x = b.x;
-            s.bossNameText.y = b.y - 60;
-        }
+        BossAI.updateHpBar(b, {
+            x: b.x, y: b.y - 50,
+            nameText: s.bossNameText, nameYOffset: -10
+        });
 
         if (s.menuOpen || s.transitioning) {
             b.body.setVelocity(0);
@@ -284,42 +280,6 @@ export class ForestBossAI {
     }
 
     _bossPhaseTransition(boss) {
-        const s = this.scene;
-        const st = boss.stats;
-        st.transitioning = true;
-        st.invulnerable = true;
-        boss.body.setVelocity(0);
-
-        if (boss.telegraph) { boss.telegraph.destroy(); boss.telegraph = null; }
-
-        s.cameras.main.shake(300, 0.01);
-        s.tweens.add({
-            targets: boss, alpha: 0.3, duration: 150, yoyo: true, repeat: 3,
-            onComplete: () => { if (boss.active) boss.setAlpha(1); }
-        });
-
-        const flash = s.add.rectangle(400, 300, GAME_WIDTH, GAME_HEIGHT, 0xffffff)
-            .setAlpha(0).setDepth(20).setScrollFactor(0);
-        s.tweens.add({
-            targets: flash, alpha: 0.4, duration: 200, yoyo: true,
-            onComplete: () => flash.destroy()
-        });
-
-        if (st.phase === 3) {
-            st.baseSpeed = Math.floor(st.baseSpeed * 1.2);
-            st.damage = Math.floor(st.damage * 1.5);
-            s.floatingText(boss.x, boss.y - 50, 'ENRAGED!', '#ff2222');
-        } else if (st.phase === 2) {
-            s.floatingText(boss.x, boss.y - 50, 'PHASE 2!', '#ffaa00');
-        }
-
-        s.time.delayedCall(1200, () => {
-            if (boss.active) {
-                st.transitioning = false;
-                st.invulnerable = false;
-                st.aiState = 'chase';
-                st.attackTimer = 1500;
-            }
-        });
+        BossAI.phaseTransition(this.scene, boss, 'PHASE 2!', '#ffaa00');
     }
 }

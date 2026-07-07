@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
 import { MEADOW_GATE_POS, MEADOW_WIDTH, MEADOW_HEIGHT } from '../config/index.js';
 import { playPortal, startZoneMusic } from '../sound.js';
+import { BaseZone } from '../systems/BaseZone.js';
 
-export class MeadowZone {
+export class MeadowZone extends BaseZone {
     constructor(scene) {
-        this.scene = scene;
+        super(scene);
     }
 
     setup() {
@@ -38,6 +39,10 @@ export class MeadowZone {
     handleSpace() {
         const s = this.scene;
         if (s.transitioning || s.menuOpen) return;
+        if (s.nearbyNpc) {
+            s.npc.interactWithNpc();
+            return;
+        }
         if (s.zone !== 'meadow') return;
         if (!s.meadowGate) return;
         const dist = Phaser.Math.Distance.Between(
@@ -53,8 +58,10 @@ export class MeadowZone {
         playPortal();
         s.cameras.main.fadeOut(800, 0, 0, 0);
         s.time.delayedCall(800, () => {
+            const savedCaveBoss = s.zones.cave.bossDefeated;
             this.clear();
-            s.zones.cave.setup();
+            s._setupZone('cave');
+            s.zones.cave.bossDefeated = savedCaveBoss;
             s.cameras.main.fadeIn(500, 0, 0, 0);
             s.transitioning = false;
         });
@@ -69,9 +76,8 @@ export class MeadowZone {
         }
     }
 
-    clear() {
+    _destroyZoneSpecific() {
         const s = this.scene;
-        s.physics.world.colliders.destroy();
         if (s.meadowBg) { s.meadowBg.destroy(); s.meadowBg = null; }
         if (s.meadowGate) { s.meadowGate.destroy(); s.meadowGate = null; }
         if (s.gateHint) { s.gateHint.destroy(); s.gateHint = null; }

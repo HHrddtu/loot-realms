@@ -54,23 +54,8 @@ export default class GameScene extends Phaser.Scene {
         this.zone = 'forest';
         this.transitioning = false;
 
-        this.enemies = null;
-        this.stumps = null;
-        this.boss = null;
-        this.bossTimer = null;
-        this.bossNameText = null;
         this.defeatedText = null;
         this.defeatedLoot = null;
-        this.exitPortal = null;
-        this.exitHint = null;
-        this.mineRocks = null;
-        this.mineCrystals = null;
-        this.mineChests = null;
-        this.mineTorches = null;
-        this.mineDarkness = null;
-        this.mineBoss = null;
-        this.mineBossNameText = null;
-        this.mineBossTimer = null;
 
         this.combat = new CombatSystem(this);
         this.playerSys = new PlayerSystem(this);
@@ -125,10 +110,8 @@ export default class GameScene extends Phaser.Scene {
         this.invOpen = false;
         this.invGroup = [];
         this._tooltipGroup = [];
-        this.bossDefeated = false;
-        this.mineUnlocked = false;
-        this.hasSecretKey = false;
-        this.caveBossDefeated = false;
+        this.zones.mine.isUnlocked = false;
+        this.zones.mine.hasSecretKey = false;
         this.cartDriverNpc = null;
         this.meadowGate = null;
         this.meadowBg = null;
@@ -164,22 +147,11 @@ export default class GameScene extends Phaser.Scene {
         this.lifeLinkHealPerSec = 0;
         this.fireballs = [];
         this.enemyProjectiles = [];
-        this.villageFrozen = false;
-        this.villageRestored = false;
-        this.villageThriving = false;
-        this.villageBossDefeated = false;
-        this.hellBossDefeated = false;
-        this.castleQuestDone = false;
         this.villageMerchantNPC = null;
         this.villageMerchantHint = null;
         this.villageInn = null;
         this.villageInnHint = null;
         this.shopGroup = [];
-        this.castleRoom = 0;
-        this.castleFloorCleared = false;
-        this.castleBossDefeated = false;
-        this.castleKeyObtained = false;
-        this.castleRescued = false;
         this.castleChildNPC = null;
         this.castleChildHint = null;
         this._consumableBonusDmg = 0;
@@ -232,7 +204,7 @@ export default class GameScene extends Phaser.Scene {
             } else if (this._savedZone === 'meadow') {
                 this._setupZone('meadow');
             } else if (this._savedZone === 'village') {
-                this._setupZone('village', this.villageFrozen);
+                this._setupZone('village', this.zones.village.isFrozen);
             } else if (this._savedZone === 'cemetery') {
                 this._setupZone('village', false);
                 this.zone = 'cemetery';
@@ -241,10 +213,9 @@ export default class GameScene extends Phaser.Scene {
                 this._setupZone('hell');
             } else if (this._savedZone === 'snowy') {
                 this._setupZone('village', true);
-                this.zone = 'snowy';
                 startZoneMusic('snowy');
             } else if (this._savedZone === 'castle') {
-                this._setupZone('castle', this.castleRoom || 0);
+                this._setupZone('castle', this.zones.castle.currentRoom || 0);
             } else {
                 this._setupZone('forest');
             }
@@ -475,9 +446,9 @@ export default class GameScene extends Phaser.Scene {
 
         this._mpKeyHandler = (data) => {
             if (!data) return;
-            if (data.key === 'secret') this.hasSecretKey = true;
-            if (data.key === 'mine') this.mineUnlocked = true;
-            if (data.key === 'cave') this.caveBossDefeated = true;
+            if (data.key === 'secret') this.zones.mine.hasSecretKey = true;
+            if (data.key === 'mine') this.zones.mine.isUnlocked = true;
+            if (data.key === 'cave') this.zones.cave.bossDefeated = true;
         };
 
         onStateUpdate(this._mpStateHandler);
@@ -651,10 +622,10 @@ export default class GameScene extends Phaser.Scene {
     getAggroTarget() { return this.petSys.getAggroTarget(); }
     _makeEnemy(t, x, y) { this.combat.makeEnemy(t, x, y); }
     _makeMineEnemy(t, x, y) { if (this.zones.mine) this.zones.mine.makeMineEnemy(t, x, y); }
-    _villageBossSplit(boss) { if (this.zones.village) this.zones.village._villageBossSplit(boss); }
-    _killBossClone(clone) { if (this.zones.village) this.zones.village._killBossClone(clone); }
+    _villageBossSplit(boss) { if (this.zones.village) this.zones.village.boss.splitBoss(boss); }
+    _killBossClone(clone) { if (this.zones.village) this.zones.village.boss.killBossClone(clone); }
     _victoryHellBoss() { if (this.zones.hell) this.zones.hell.victoryHellBoss(); }
-    _snowyIceSpiritDied() { if (this.zones.village) this.zones.village._snowyIceSpiritDied(); }
+    _snowyIceSpiritDied() { if (this.zones.village) this.zones.village.boss.iceSpiritDied(); }
     _setupVillage(frozen) {
         if (!this.zones.village) return;
         this.zones.village.setup(frozen);
@@ -662,6 +633,20 @@ export default class GameScene extends Phaser.Scene {
         this.zone = 'village';
     }
     _clearVillage() { if (this.zones.village) this.zones.village._destroyZoneSpecific(); }
+
+    _updateRegen(delta) {
+        if (!this.player || this.playerHP <= 0 || this.playerHP >= this.playerMaxHP) return;
+        this._regenTimer = (this._regenTimer || 0) + delta;
+        if (this._regenTimer >= 1000) {
+            this._regenTimer -= 1000;
+            const flat = this.computedRegenFlat || 0;
+            const pct = this.computedRegenPercent || 0;
+            const heal = Math.floor(flat + (this.playerMaxHP * pct / 100));
+            if (heal > 0) {
+                this.playerHP = Math.min(this.playerMaxHP, this.playerHP + heal);
+            }
+        }
+    }
 
     /* ===== UTILITY ===== */
 
@@ -728,14 +713,14 @@ export default class GameScene extends Phaser.Scene {
             startZoneMusic(zoneName);
             if (zoneName === 'castle') {
                 const savedFlags = {
-                    castleBossDefeated: this.castleBossDefeated,
-                    castleKeyObtained: this.castleKeyObtained,
-                    castleRescued: this.castleRescued,
-                    castleAtticUnlocked: this.castleAtticUnlocked,
-                    castleQuestDone: this.castleQuestDone
+                    castleBossDefeated: this.zones.castle.bossDefeated,
+                    castleKeyObtained: this.zones.castle.keyObtained,
+                    castleRescued: this.zones.castle.rescued,
+                    castleAtticUnlocked: this.zones.castle.atticUnlocked,
+                    castleQuestDone: this.zones.castle.questDone
                 };
                 zone.setup(...args);
-                Object.assign(this, savedFlags);
+                Object.assign(this.zones.castle, savedFlags);
             } else {
                 zone.setup(...args);
             }
@@ -946,19 +931,24 @@ export default class GameScene extends Phaser.Scene {
             if (Phaser.Input.Keyboard.JustDown(this.xKey)) this._openSpellAssign();
         } else if (this.invOpen) {
             if (Phaser.Input.Keyboard.JustDown(this.iKey)) this.closeInventory();
-            if (Phaser.Input.Keyboard.JustDown(this.pKey)) this.closeInventory();
+            if (Phaser.Input.Keyboard.JustDown(this.pKey)) {
+                this.closeInventory();
+                this.togglePause();
+            }
         }
     }
 
     /* ===== GAME LOOP ===== */
 
     update(time, delta) {
+        if (this.playerSys) this.playerSys.resetStatsRecalcFlag();
         this._handleInput();
         this._updateEnemies();
         this.forestBossAI.update(time, delta);
         this._updateCorruption();
         this._updateSpells(delta);
         this._updateConsumableBonuses(delta);
+        this._updateRegen(delta);
         this.petSys.updateFollow();
         this.petSys.updateCombat(delta);
 
@@ -1017,16 +1007,19 @@ export default class GameScene extends Phaser.Scene {
 
     _updateEnemies() {
         if (!this.enemies) return;
-        this.enemies.getChildren().forEach(e => {
+        let children;
+        try { children = this.enemies.getChildren(); } catch (e) { return; }
+        children.forEach(e => {
             if (!e.active || !e.stats) return;
             if (e.stats.isBossClone) return;
+            if (e === this.villageBoss || e === this.hellBoss || e === this.boss || e === this.mineBoss || e === this.caveBoss || e === this.castleBoss || e === this.snowyIceSpirit) return;
 
             if (!this.bestiarySeen[e.stats.key]) {
-                recordEncounter(e.stats.key);
+                try { recordEncounter(e.stats.key); } catch (e2) {}
                 this.bestiarySeen[e.stats.key] = true;
             }
 
-            EnemyAI.updateWanderChase(e, this.player, this);
+            try { EnemyAI.updateWanderChase(e, this.player, this); } catch (e2) {}
         });
     }
 }

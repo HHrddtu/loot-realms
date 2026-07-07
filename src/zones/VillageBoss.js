@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
 import { VILLAGE_BOSS_TYPE, VILLAGE_CORPSE_MINION, SNOWY_BOSS_MINION,
-         SNOWY_VILLAGE_BOSS_TYPE, DIFF_COLORS, VILLAGE_WIDTH, GAME_WIDTH, GAME_HEIGHT } from '../config/index.js';
+         SNOWY_VILLAGE_BOSS_TYPE, DIFF_COLORS, VILLAGE_WIDTH, GAME_WIDTH, GAME_HEIGHT, WARMTH_CORE } from '../config/index.js';
 import { rollBossCrystals } from '../config/pets.js';
 import { rollZoneEquip, rollVillageAccountEquip } from '../utils.js';
 import { playBossDeath, playBossAoE, playLoot } from '../sound.js';
 import { recordKill } from '../bestiary.js';
 import { onKill } from '../quests.js';
+import { BossAI } from '../systems/BossAI.js';
 
 export class VillageBoss {
     constructor(scene, zone) {
@@ -42,11 +43,10 @@ export class VillageBoss {
         const st = b.stats;
         if (s.menuOpen || s.transitioning) { b.body.setVelocity(0); return; }
         if (st.hp > 0) {
-            b.hpBg.setVisible(true); b.hpFill.setVisible(true); s.villageBossNameText.setVisible(true);
-            b.hpBg.x = b.x; b.hpBg.y = b.y - st.bh / 2 - 12;
-            b.hpFill.x = b.x - 40; b.hpFill.y = b.y - st.bh / 2 - 12;
-            s.villageBossNameText.x = b.x; s.villageBossNameText.y = b.y - st.bh / 2 - 24;
-            b.hpFill.width = 80 * (st.hp / st.maxHp);
+            BossAI.updateHpBar(b, {
+                x: b.x, y: b.y - st.bh / 2 - 12, width: 80, fillOffsetX: -40,
+                nameText: s.villageBossNameText, nameYOffset: -12, show: true
+            });
         }
         const dx = s.player.x - b.x, dy = s.player.y - b.y, dist = Math.sqrt(dx * dx + dy * dy);
         if (dist > 30) {
@@ -76,12 +76,7 @@ export class VillageBoss {
             const dt = s.game.loop.delta;
             e.stats.meteorTimer = (e.stats.meteorTimer || 0) + dt;
             if (e.stats.meteorTimer >= (e.stats.meteorInterval || 8000)) { e.stats.meteorTimer = 0; this._villageBossMeteor(e); }
-            if (s.villageZombies && (!s.villageZombies.getLength || s.villageZombies.getLength() < 20)) {
-                e.stats.corpseTimer = (e.stats.corpseTimer || 0) + dt;
-                if (e.stats.corpseTimer >= (e.stats.corpseInterval || 15000)) { e.stats.corpseTimer = 0; this._villageBossSummonCorpses(e); }
-            }
-            if (e.hpBg) { e.hpBg.x = e.x; e.hpBg.y = e.y - 44; }
-            if (e.hpFill) { e.hpFill.x = e.x - 20; e.hpFill.y = e.y - 44; e.hpFill.width = 40 * (e.stats.hp / e.stats.maxHp); }
+            BossAI.updateHpBar(e, { x: e.x, y: e.y - 44, width: 40, fillOffsetX: -20 });
         });
     }
 
@@ -111,7 +106,7 @@ export class VillageBoss {
     _villageBossSummonCorpses(boss) {
         const s = this.scene;
         if (!boss || !boss.active) return;
-        if (s.villageZombies && s.villageZombies.getLength && s.villageZombies.getLength() >= 20) return;
+        if (s.villageZombies && s.villageZombies.getLength && s.villageZombies.getLength() >= 8) return;
         const ox = s.villageOffsetX;
         const bt = VILLAGE_CORPSE_MINION;
         for (let i = 0; i < VILLAGE_BOSS_TYPE.corpseCount; i++) {
@@ -155,8 +150,7 @@ export class VillageBoss {
             s.zones.village.bossClones.push(clone);
         }
         s.floatingText(boss.x, boss.y - 50, 'SPLIT!', '#9b59b6');
-        s.villageBoss = null;
-        s.tweens.add({ targets: boss, alpha: 0, duration: 500, onComplete: () => { boss.hpBg.destroy(); boss.hpFill.destroy(); s.villageBossNameText.destroy(); boss.destroy(); } });
+        s.tweens.add({ targets: boss, alpha: 0, duration: 500, onComplete: () => { boss.hpBg.destroy(); boss.hpFill.destroy(); s.villageBossNameText.destroy(); boss.destroy(); s.villageBoss = null; } });
     }
 
     killBossClone(clone) {
@@ -222,11 +216,12 @@ export class VillageBoss {
         if (!e || !e.active) return;
         const st = e.stats;
         if (s.menuOpen || s.transitioning) { e.body.setVelocity(0); return; }
+        if (st.hp <= 0) { this.iceSpiritDied(); return; }
         if (st.hp > 0) {
-            e.hpBg.setVisible(true); e.hpFill.setVisible(true);
-            e.hpBg.x = e.x; e.hpBg.y = e.y - st.bh / 2 - 12;
-            e.hpFill.x = e.x - 30; e.hpFill.y = e.y - st.bh / 2 - 12;
-            e.hpFill.width = 60 * (st.hp / st.maxHp);
+            BossAI.updateHpBar(e, {
+                x: 400, y: 110, width: 80, fillOffsetX: -40,
+                nameText: s.snowyIceSpiritNameText, nameYOffset: -15, show: true
+            });
         }
         const dx = s.player.x - e.x, dy = s.player.y - e.y, dist = Math.sqrt(dx * dx + dy * dy);
         if (dist > 80) {
@@ -243,49 +238,56 @@ export class VillageBoss {
     _snowyFrostWave(boss) {
         const s = this.scene;
         if (!boss || !boss.active) return;
-        const dmg = Math.floor(boss.stats.damage * 0.8);
-        if (Phaser.Math.Distance.Between(s.player.x, s.player.y, boss.x, boss.y) < 160) {
+        const dx = s.player.x - boss.x;
+        const dy = s.player.y - boss.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 250) return;
+        const dmg = Math.floor(boss.stats.damage * 0.6);
+        if (dist < 100) {
             s.combat.takeDamage(dmg);
             s.floatingText(s.player.x, s.player.y - 20, '-' + dmg + ' FROST', '#3498db');
         }
+        const vfx = s.add.image(boss.x + dx * 0.5, boss.y + dy * 0.5, 'frost_wave_vfx').setDepth(10).setAlpha(0.7);
+        s.tweens.add({ targets: vfx, alpha: 0, scale: 1.5, duration: 600, onComplete: () => vfx.destroy() });
     }
 
     _snowyBlizzard(boss) {
         const s = this.scene;
         if (!boss || !boss.active) return;
-        for (let i = 0; i < 4; i++) {
-            const bx = s.player.x + (Math.random() - 0.5) * 200, by = s.player.y + (Math.random() - 0.5) * 200;
-            const icicle = s.add.sprite(bx, by - 100, 'icicle').setDepth(8);
-            s.tweens.add({
-                targets: icicle, y: by, duration: 300 + i * 100,
-                onComplete: () => { icicle.destroy(); const dmg = Math.floor(boss.stats.damage * 0.5); if (Phaser.Math.Distance.Between(bx, by, s.player.x, s.player.y) < 40) { s.combat.takeDamage(dmg); s.floatingText(s.player.x, s.player.y - 20, '-' + dmg + ' ICICLE', '#3498db'); } }
-            });
+        const dist = Phaser.Math.Distance.Between(s.player.x, s.player.y, boss.x, boss.y);
+        if (dist < 150) {
+            const dmg = Math.floor(boss.stats.damage * 0.8);
+            s.combat.takeDamage(dmg);
+            s.floatingText(s.player.x, s.player.y - 20, '-' + dmg + ' BLIZZARD', '#3498db');
         }
+        const vfx = s.add.image(boss.x, boss.y, 'blizzard_vfx').setDepth(10).setAlpha(0.7).setScale(1.5);
+        s.tweens.add({ targets: vfx, alpha: 0, scale: 2, duration: 800, onComplete: () => vfx.destroy() });
     }
 
     _snowySummonShards(boss) {
         const s = this.scene;
-        if (!boss || !boss.active) return;
+        if (!boss || !boss.active || !s.snowyIceShards) return;
         const ox = s.villageOffsetX;
-        const count = 3;
-        for (let i = 0; i < count; i++) {
-            const angle = (i / count) * Math.PI * 2;
-            const sx = s.player.x + Math.cos(angle) * 120, sy = s.player.y + Math.sin(angle) * 120;
-            const shard = s.add.sprite(sx, sy, 'ice_shard').setDepth(5).setScale(1.2);
+        for (let i = 0; i < 3; i++) {
+            const angle = (i / 3) * Math.PI * 2;
+            const sx = boss.x + Math.cos(angle) * 50;
+            const sy = boss.y + Math.sin(angle) * 40;
+            const shard = s.add.sprite(sx, sy, 'ice_shard').setDepth(5);
             s.physics.add.existing(shard, false);
-            shard.body.setSize(16, 16);
-            const shardHp = 20;
-            shard.stats = { key: 'ice_shard', hp: shardHp, maxHp: shardHp, damage: 0, exp: 2, bw: 16, bh: 16 };
-            shard.hpBg = s.add.rectangle(sx, sy - 14, 16, 2, 0x333333).setOrigin(0.5).setDepth(6);
-            shard.hpFill = s.add.rectangle(sx, sy - 14, 16, 2, 0x3498db).setOrigin(0.5).setDepth(6);
+            shard.body.setSize(10, 12);
+            shard.body.setCollideWorldBounds(true);
+            const dm = s.diffMulti || { hp: 1, dmg: 1 };
+            shard.stats = { hp: Math.floor(80 * dm.hp), maxHp: Math.floor(80 * dm.hp), damage: Math.floor(15 * dm.dmg), bh: 12 };
+            shard.hpBg = s.add.rectangle(sx, sy - 12, 14, 3, 0x333333).setOrigin(0.5).setDepth(11);
+            shard.hpFill = s.add.rectangle(sx, sy - 12, 14, 3, 0x3498db).setOrigin(0.5).setDepth(11);
             s.snowyIceShards.add(shard);
         }
     }
 
     iceSpiritDied() {
         const s = this.scene;
-        if (s.zones.village.bossDefeated) return;
-        s.zones.village.bossDefeated = true;
+        if (s.zones.village.snowyBossDefeated) return;
+        s.zones.village.snowyBossDefeated = true;
         playBossDeath();
         const ox = s.villageOffsetX;
         if (s.snowyIceSpirit) {

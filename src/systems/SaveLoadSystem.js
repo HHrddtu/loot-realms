@@ -1,5 +1,5 @@
 import { EMPTY_ACCOUNT_EQUIPMENT } from '../config/index.js';
-import { saveGame, loadGame, saveAccount, loadAccount } from '../save.js';
+import { saveGame, loadGame, saveAccount, loadAccount, GAME_SAVE_VERSION } from '../save.js';
 import { getClassStats } from '../classes.js';
 import { getTalentEffects } from '../talents.js';
 import { getAccountTalentEffects } from '../accountTalents.js';
@@ -16,6 +16,7 @@ export class SaveLoadSystem {
     collectSaveData() {
         const s = this.scene;
         return {
+            version: GAME_SAVE_VERSION,
             classKey: s.classKey,
             difficulty: s.difficulty,
             playerHP: s.playerHP,
@@ -34,24 +35,24 @@ export class SaveLoadSystem {
             kills: s.kills,
             stumpsBroken: s.stumpsBroken,
             corruption: s.corruption,
-            mineUnlocked: s.mineUnlocked,
-            mineBossDefeated: s.mineBossDefeated,
-            hasSecretKey: s.hasSecretKey,
-            caveBossDefeated: s.caveBossDefeated,
-            bossDefeated: s.bossDefeated,
+            mineUnlocked: s.zones.mine.isUnlocked,
+            mineBossDefeated: s.zones.mine.bossDefeated,
+            hasSecretKey: s.zones.mine.hasSecretKey,
+            caveBossDefeated: s.zones.cave.bossDefeated,
+            bossDefeated: s.zones.arena.bossDefeated,
             unlockedTalents: s.unlockedTalents,
             talentPoints: s.talentPoints,
-            villageFrozen: s.villageFrozen,
-            villageRestored: s.villageRestored,
-            villageAllCleared: s.villageAllCleared || false,
-            villageBossDefeated: s.villageBossDefeated || false,
-            hellBossDefeated: s.hellBossDefeated || false,
-            villageThriving: s.villageThriving || false,
-            castleQuestDone: s.castleQuestDone || false,
-            castleRoom: s.castleRoom || 0,
-            castleBossDefeated: s.castleBossDefeated || false,
-            castleKeyObtained: s.castleKeyObtained || false,
-            castleRescued: s.castleRescued || false,
+            villageFrozen: s.zones.village.isFrozen,
+            villageRestored: s.zones.village.isRestored,
+            villageAllCleared: s.zones.village.allCleared || false,
+            villageBossDefeated: s.zones.village.bossDefeated || false,
+            hellBossDefeated: s.zones.hell.bossDefeated || false,
+            villageThriving: s.zones.village.isThriving || false,
+            castleQuestDone: s.zones.castle.questDone || false,
+            castleRoom: s.zones.castle.currentRoom || 0,
+            castleBossDefeated: s.zones.castle.bossDefeated || false,
+            castleKeyObtained: s.zones.castle.keyObtained || false,
+            castleRescued: s.zones.castle.rescued || false,
             innUsed: s.innUsed || false
         };
     }
@@ -122,22 +123,22 @@ export class SaveLoadSystem {
         s.kills = data.kills || 0;
         s.stumpsBroken = data.stumpsBroken || 0;
         s.corruption = data.corruption || 0;
-        s.mineUnlocked = data.mineUnlocked || false;
-        s.mineBossDefeated = data.mineBossDefeated || false;
-        s.hasSecretKey = data.hasSecretKey || false;
-        s.caveBossDefeated = data.caveBossDefeated || false;
-        s.bossDefeated = data.bossDefeated || false;
-        s.villageFrozen = data.villageFrozen || false;
-        s.villageRestored = data.villageRestored || false;
-        s.villageAllCleared = data.villageAllCleared || false;
-        s.villageBossDefeated = data.villageBossDefeated || false;
-        s.hellBossDefeated = data.hellBossDefeated || false;
-        s.villageThriving = data.villageThriving || false;
-        s.castleQuestDone = data.castleQuestDone || false;
-        s.castleRoom = data.castleRoom || 0;
-        s.castleBossDefeated = data.castleBossDefeated || false;
-        s.castleKeyObtained = data.castleKeyObtained || false;
-        s.castleRescued = data.castleRescued || false;
+        s.zones.mine.isUnlocked = data.mineUnlocked || false;
+        s.zones.mine.bossDefeated = data.mineBossDefeated || false;
+        s.zones.mine.hasSecretKey = data.hasSecretKey || false;
+        s.zones.cave.bossDefeated = data.caveBossDefeated || false;
+        s.zones.arena.bossDefeated = data.bossDefeated || false;
+        s.zones.village.isFrozen = data.villageFrozen || false;
+        s.zones.village.isRestored = data.villageRestored || false;
+        s.zones.village.allCleared = data.villageAllCleared || false;
+        s.zones.village.bossDefeated = data.villageBossDefeated || false;
+        s.zones.hell.bossDefeated = data.hellBossDefeated || false;
+        s.zones.village.isThriving = data.villageThriving || false;
+        s.zones.castle.questDone = data.castleQuestDone || false;
+        s.zones.castle.currentRoom = data.castleRoom || 0;
+        s.zones.castle.bossDefeated = data.castleBossDefeated || false;
+        s.zones.castle.keyObtained = data.castleKeyObtained || false;
+        s.zones.castle.rescued = data.castleRescued || false;
         s._savedZone = data.zone || 'forest';
         this.loadAccountTalents();
         const acc = loadAccount() || {};

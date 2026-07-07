@@ -49,6 +49,34 @@ export default class LoginScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         this.time.delayedCall(100, () => this._injectDOMInputs());
+        this._resizeHandler = () => { if (this._domInputs.length) this._repositionDOMInputs(); };
+        window.addEventListener('resize', this._resizeHandler);
+    }
+
+    _repositionDOMInputs() {
+        const canvas = this.game.canvas;
+        const parent = canvas.parentNode;
+        const canvasRect = canvas.getBoundingClientRect();
+        const parentRect = parent.getBoundingClientRect();
+        const offsetX = canvasRect.left - parentRect.left;
+        const offsetY = canvasRect.top - parentRect.top;
+        const scaleX = canvasRect.width / 800;
+        const scaleY = canvasRect.height / 600;
+
+        this._fields.forEach(f => {
+            const wrapper = this['_' + f.key + 'Wrapper'];
+            if (!wrapper) return;
+            const px = offsetX + 400 * scaleX;
+            const py = offsetY + f.y * scaleY;
+            const w = 300 * scaleX;
+            const h = 34 * scaleY;
+            wrapper.style.left = (px - w / 2) + 'px';
+            wrapper.style.top = (py - h / 2) + 'px';
+            wrapper.style.width = w + 'px';
+            wrapper.style.height = h + 'px';
+            const input = this['_' + f.key + 'Input'];
+            if (input) input.style.fontSize = (14 * scaleY) + 'px';
+        });
     }
 
     _injectDOMInputs() {
@@ -192,6 +220,7 @@ export default class LoginScene extends Phaser.Scene {
     _cleanup() {
         this._domInputs.forEach(el => { if (el.parentNode) el.parentNode.removeChild(el); });
         this._domInputs = [];
+        if (this._resizeHandler) { window.removeEventListener('resize', this._resizeHandler); this._resizeHandler = null; }
     }
 
     shutdown() { this._cleanup(); }
