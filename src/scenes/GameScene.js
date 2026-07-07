@@ -33,7 +33,7 @@ import { SnowyZone } from '../zones/SnowyZone.js';
 import { CastleZone } from '../zones/CastleZone.js';
 import { MeadowZone } from '../zones/MeadowZone.js';
 import { isHost, getMyId, getPlayers, getPlayerNames, onStateUpdate, onLoot, onKey, sendInput, sendGameState, sendLootPickup, sendKeyPickup } from '../network.js';
-import { MultiplayerSync } from '../multiplayer.js';
+import { MultiplayerManager } from '../systems/MultiplayerManager.js';
 import { CRYSTAL_RUN_CAPS, canGetCrystals } from '../config/pets.js';
 import { getKeybinds, parseKeyCode } from '../keybinds.js';
 import { createAllAnimations } from '../config/animations.js';
@@ -179,6 +179,7 @@ export default class GameScene extends Phaser.Scene {
         this._mpLootHandler = null;
         this._mpKeyHandler = null;
         this.mpSync = null;
+        this.mpManager = null;
 
         const acc = loadAccount() || {};
         this.accountLevel = acc.accountLevel || 1;
@@ -226,7 +227,9 @@ export default class GameScene extends Phaser.Scene {
         }
 
         if (this.multiplayer) {
-            this._setupMultiplayer();
+            this.mpManager = new MultiplayerManager(this);
+            this.mpManager.setup();
+            this.mpSync = this.mpManager.mpSync;
         }
 
         this.events.on('shutdown', () => {
@@ -287,154 +290,11 @@ export default class GameScene extends Phaser.Scene {
 
     /* ===== MULTIPLAYER ===== */
 
-    _setupMultiplayer() {
-        const names = getPlayerNames();
-        const players = getPlayers();
-        const ids = Object.keys(names);
-        ids.forEach(id => {
-            if (id === getMyId()) return;
-            this._spawnRemotePlayer(id, names[id], players[id]?.classKey);
-        });
-
-        this.mpSync = new MultiplayerSync(this);
-
-        this._mpStateHandler = (data) => {
-            if (!data || !data.players) return;
-            const seen = {};
-            Object.keys(data.players).forEach(id => {
-                if (id === getMyId()) return;
-                seen[id] = true;
-                const p = data.players[id];
-                if (this._remotePlayers[id]) {
-                    this._remotePlayers[id].sprite.x = p.x;
-                    this._remotePlayers[id].sprite.y = p.y;
-                    if (p.flipX !== undefined) this._remotePlayers[id].sprite.setFlipX(p.flipX);
-                } else {
-                    this._spawnRemotePlayer(id, data.names?.[id] || '???', p.classKey);
-                    if (this._remotePlayers[id]) {
-                        this._remotePlayers[id].sprite.x = p.x;
-                        this._remotePlayers[id].sprite.y = p.y;
-                    }
-                }
-            });
-            Object.keys(this._remotePlayers).forEach(id => {
-                if (!seen[id]) this._despawnRemotePlayer(id);
-            });
-        };
-
-        this._mpLootHandler = (data) => {
-            if (!data) return;
-            if (data.type === 'heal') {
-                this.playerHP = Math.min(this.playerMaxHP, this.playerHP + data.amount);
-            }
-        };
-
-        this._mpKeyHandler = (data) => {
-            if (!data) return;
-            if (data.key === 'secret') this.zones.mine.hasSecretKey = true;
-            if (data.key === 'mine') this.zones.mine.isUnlocked = true;
-            if (data.key === 'cave') this.zones.cave.bossDefeated = true;
-        };
-
-        onStateUpdate(this._mpStateHandler);
-        onLoot(this._mpLootHandler);
-        onKey(this._mpKeyHandler);
-
-        if (isHost() && this.mpSync) {
-            this.mpSync.startHostSync();
-        }
-
-        if (this.mpSync) {
-            this.mpSync.broadcastZoneChange(this.zone);
-        }
-    }
-
-    _spawnRemotePlayer(id, name, remoteClassKey) {
-        if (id === getMyId()) return;
-        if (this._remotePlayers[id]) return;
-        const cls = getClassData(remoteClassKey || this.classKey);
-        const walkKey = cls.walkTexKey || 'player_sage_walk';
-        const sprite = this.add.sprite(400, 400, walkKey).setDepth(9);
-        this.physics.add.existing(sprite, false);
-        sprite.body.setSize(18, 38);
-        sprite.body.setOffset(7, 8);
-        sprite.body.setCollideWorldBounds(true);
-        sprite.setAlpha(0.7);
-        const nameText = this.add.text(0, 0, name || '...', {
-            fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(11);
-        this._remotePlayers[id] = { sprite, nameText };
-    }
-
-    _despawnRemotePlayer(id) {
-        if (!this._remotePlayers[id]) return;
-        this._remotePlayers[id].sprite.destroy();
-        this._remotePlayers[id].nameText.destroy();
-        delete this._remotePlayers[id];
-    }
-
-    _broadcastState() {
-        if (!isHost()) return;
-        const players = {};
-        players[getMyId()] = {
-            x: this.player.x,
-            y: this.player.y,
-            flipX: this.player.flipX
-        };
-        const netPlayers = getPlayers();
-        Object.keys(netPlayers).forEach(id => {
-            if (id !== getMyId()) {
-                players[id] = {
-                    x: netPlayers[id].x,
-                    y: netPlayers[id].y,
-                    flipX: netPlayers[id].facing === 'left'
-                };
-            }
-        });
-        sendGameState({ players, names: getPlayerNames() });
-    }
-
-    _sendInputToHost() {
-        if (isHost()) return;
-        sendInput({
-            x: this.player.x,
-            y: this.player.y,
-            facing: this.facing,
-            attacking: this.playerAttacking,
-            hp: this.playerHP,
-            maxHp: this.playerMaxHP
-        });
-    }
-
-    _detectMobKills() {
-        if (!this.mpSync) return;
-        if (!this._prevMobIds) this._prevMobIds = new Set();
-        const currentIds = new Set();
-        const checkGroup = (group) => {
-            if (!group || !group.getLength) return;
-            group.getChildren().forEach(e => {
-                if (e.active && e.mpId) currentIds.add(e.mpId);
-            });
-        };
-        checkGroup(this.enemies);
-        checkGroup(this.villageZombies);
-        checkGroup(this.caveSmallBats);
-        checkGroup(this.hellImps);
-        this._prevMobIds.forEach(id => {
-            if (!currentIds.has(id)) {
-                delete this.mpSync.mobSyncData[id];
-            }
-        });
-        this._prevMobIds = currentIds;
-    }
-
     _cleanupMultiplayer() {
-        if (this.mpSync) {
-            this.mpSync.cleanup();
-            this.mpSync = null;
+        if (this.mpManager) {
+            this.mpManager.cleanup();
+            this.mpManager = null;
         }
-        Object.keys(this._remotePlayers).forEach(id => this._despawnRemotePlayer(id));
         this._remotePlayers = {};
     }
 
@@ -852,49 +712,8 @@ export default class GameScene extends Phaser.Scene {
         this.updateUI();
         this._checkNpcProximity();
 
-        if (this.multiplayer) {
-            this._mpSendTimer += delta;
-            if (this._mpSendTimer >= 50) {
-                this._mpSendTimer = 0;
-                if (isHost()) {
-                    this._broadcastState();
-                } else {
-                    this._sendInputToHost();
-                }
-            }
-            this._mpMobTimer += delta;
-            if (this._mpMobTimer >= 100) {
-                this._mpMobTimer = 0;
-                if (this.mpSync) {
-                    if (!isHost()) {
-                        this.mpSync.broadcastPlayerUpdate();
-                    }
-                }
-            }
-            if (this.mpSync && isHost()) {
-                this._detectMobKills();
-            }
-            if (isHost()) {
-                const netPlayers = getPlayers();
-                Object.keys(this._remotePlayers).forEach(id => {
-                    if (netPlayers[id] && this._remotePlayers[id]) {
-                        this._remotePlayers[id].sprite.x = netPlayers[id].x;
-                        this._remotePlayers[id].sprite.y = netPlayers[id].y;
-                        if (netPlayers[id].facing) {
-                            this._remotePlayers[id].sprite.setFlipX(netPlayers[id].facing === 'left');
-                        }
-                    }
-                });
-            }
-            Object.values(this._remotePlayers).forEach(rp => {
-                if (rp.nameText) {
-                    rp.nameText.x = rp.sprite.x;
-                    rp.nameText.y = rp.sprite.y - 28;
-                }
-            });
-            if (this.mpSync) {
-                this.mpSync.update(delta);
-            }
+        if (this.multiplayer && this.mpManager) {
+            this.mpManager.update(delta);
         }
     }
 
