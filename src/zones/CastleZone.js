@@ -103,6 +103,7 @@ export class CastleZone extends BaseZone {
         }
         if (s.castleElder) { if (s.castleElder.destroy) s.castleElder.destroy(); s.castleElder = null; }
         if (s.castleElderHint) { if (s.castleElderHint.destroy) s.castleElderHint.destroy(); s.castleElderHint = null; }
+        if (this._castleBoy) { if (this._castleBoy.destroy) this._castleBoy.destroy(); this._castleBoy = null; }
         this._destroyDefeatedUI();
     }
 
@@ -259,9 +260,9 @@ export class CastleZone extends BaseZone {
             this.scene.time.delayedCall(thankTexts.length * 1500 + 500, () => {
                 const boyX = cx - 60;
                 const boyY = 280;
-                const boy = this.scene.add.sprite(boyX, boyY, 'child_npc_boy').setDepth(6);
+                this._castleBoy = this.scene.add.sprite(boyX, boyY, 'child_npc_boy').setDepth(6);
                 this.scene.tweens.add({
-                    targets: boy, y: boyY - 20, duration: 1200, ease: 'Power2',
+                    targets: this._castleBoy, y: boyY - 20, duration: 1200, ease: 'Power2',
                     onComplete: () => {
                         const boyMsg = this.scene.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40,
                             '"You... you saved everyone! You are amazing!\nI want to be just like you when I grow up!"', {
@@ -277,8 +278,8 @@ export class CastleZone extends BaseZone {
                             boyBox.destroy();
                             this.scene.floatingText(boyX, boyY - 30, '*waves goodbye*', '#f1c40f');
                             this.scene.tweens.add({
-                                targets: boy, x: ox + VILLAGE_WIDTH + 50, duration: 2000, ease: 'Power1',
-                                onComplete: () => { boy.destroy(); }
+                                targets: this._castleBoy, x: ox + VILLAGE_WIDTH + 50, duration: 2000, ease: 'Power1',
+                                onComplete: () => { if (this._castleBoy) { this._castleBoy.destroy(); this._castleBoy = null; } }
                             });
 
                             this.scene.time.delayedCall(2500, () => {

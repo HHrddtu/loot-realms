@@ -637,6 +637,16 @@ export function drawExpansionTextures(mk, textures) {
         c.fillRect(35, 0, 3, 12);
     });
 
+    mk('village_road', 200, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#8b7355';
+        c.fillRect(0, 0, 200, 20);
+        c.fillStyle = '#9a8265';
+        c.fillRect(10, 4, 180, 12);
+        c.fillStyle = '#a89070';
+        c.fillRect(20, 7, 160, 6);
+    });
+
     mk('child_npc', 10, 14, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#ffcc88';

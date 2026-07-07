@@ -72,7 +72,7 @@ export class VillageSpawner {
         this.scene.villageDecor.forEach(d => d.destroy());
         this.scene.villageDecor = [];
         VILLAGE_HOUSE_POSITIONS.forEach(hp => {
-            const house = this.scene.add.sprite(ox + hp.x, hp.y, 'village_house').setDepth(2).setTint(0xaaeeaa);
+            const house = this.scene.add.sprite(ox + hp.x, hp.y, 'village_house').setDepth(2);
             this.scene.villageDecor.push(house);
         });
         const roadY = 80;
@@ -114,8 +114,8 @@ export class VillageSpawner {
 
     spawnChildNPC() {
         const ox = this.scene.villageOffsetX;
-        this.scene.villageChildNPC = this.scene.add.sprite(ox + VILLAGE_CHILD_HOUSE.x, VILLAGE_CHILD_HOUSE.y + 40, 'child_npc').setDepth(8);
-        this.scene.villageChildHint = this.scene.add.text(ox + VILLAGE_CHILD_HOUSE.x, VILLAGE_CHILD_HOUSE.y + 70, '', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setDepth(12);
+        this.scene.villageChildNPC = this.scene.add.sprite(ox + VILLAGE_CHILD_HOUSE.x + 30, VILLAGE_CHILD_HOUSE.y + 25, 'child_npc').setDepth(8);
+        this.scene.villageChildHint = this.scene.add.text(ox + VILLAGE_CHILD_HOUSE.x + 30, VILLAGE_CHILD_HOUSE.y + 50, '', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setDepth(12);
     }
 
     spawnCastleChild() {
