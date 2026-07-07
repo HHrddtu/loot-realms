@@ -56,7 +56,7 @@ export class BaseZone {
 
     _destroyEnemies() {
         const s = this.scene;
-        if (s.enemies && s.enemies.getLength && s.enemies.getLength() > 0) {
+        if (s.enemies && s.enemies.scene && s.enemies.getLength && s.enemies.getLength() > 0) {
             s.enemies.getChildren().forEach(e => {
                 if (e.hpBg) e.hpBg.destroy();
                 if (e.hpFill) e.hpFill.destroy();
@@ -90,7 +90,7 @@ export class BaseZone {
 
     _destroyStumps() {
         const s = this.scene;
-        if (s.stumps && s.stumps.getLength && s.stumps.getLength() > 0) {
+        if (s.stumps && s.stumps.scene && s.stumps.getLength && s.stumps.getLength() > 0) {
             s.stumps.getChildren().forEach(st => {
                 if (st.hpBg) st.hpBg.destroy();
                 if (st.hpFill) st.hpFill.destroy();
