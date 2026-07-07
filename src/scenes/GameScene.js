@@ -180,19 +180,7 @@ export default class GameScene extends Phaser.Scene {
         this.mpSync = null;
         this.mpManager = null;
 
-        const acc = loadAccount() || {};
-        this.accountLevel = acc.accountLevel || 1;
-        this.accountExp = acc.accountExp || 0;
-        this.accountTalentPoints = acc.accountTalentPoints || 0;
-        this.unlockedAccountTalents = acc.unlockedAccountTalents || [];
-        const accEquipPerClass = acc.accountEquipment || {};
-        const accBagPerClass = acc.accountEquipBag || {};
-        this.accountEquipment = accEquipPerClass[this.classKey] || { ...EMPTY_ACCOUNT_EQUIPMENT };
-        this.accountEquipBag = accBagPerClass[this.classKey] || [];
-        this.accountEffects = getAccountTalentEffects(this.unlockedAccountTalents);
-        this.spellAssignments = acc.spellAssignments || {};
-        this.gold = acc.gold || 0;
-        this.crystals = acc.crystals || 0;
+        // Account data already loaded in _initStats()
         this.recalcStats();
 
         if (this.loadOnStart) this.doLoad();
@@ -326,6 +314,13 @@ export default class GameScene extends Phaser.Scene {
         this.accountEffects = getAccountTalentEffects(this.unlockedAccountTalents);
         this.upgradeLevels = acc.upgradeLevels || {};
         this.activeBoosts = acc.activeBoosts || {};
+
+        // Load account equipment per class
+        const accEquipPerClass = acc.accountEquipment || {};
+        const accBagPerClass = acc.accountEquipBag || {};
+        this.accountEquipment = accEquipPerClass[this.classKey] || { ...EMPTY_ACCOUNT_EQUIPMENT };
+        this.accountEquipBag = accBagPerClass[this.classKey] || [];
+        this.spellAssignments = acc.spellAssignments || {};
 
         this.recalcStats();
     }
