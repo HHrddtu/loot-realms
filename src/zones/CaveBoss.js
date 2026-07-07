@@ -5,6 +5,7 @@ import {
 } from '../config/index.js';
 import { playBossAoE } from '../sound.js';
 import { BaseBossAI } from '../systems/BaseBossAI.js';
+import { BossAI } from '../systems/BossAI.js';
 
 export class CaveBoss extends BaseBossAI {
     constructor(scene, zone) {
