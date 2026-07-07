@@ -11,18 +11,12 @@ import {
     BOSS_DROP_CHANCE, GAME_WIDTH, GAME_HEIGHT, RARITY_COLORS, DIFF_COLORS
 } from '../config/index.js';
 import { rollBossCrystals } from '../config/pets.js';
-import { loadAccount, saveAccount } from '../save.js';
-import { rollZoneEquip, rollEquip, rollVillageAccountEquip, rollAccountEquip } from '../utils.js';
-import {
-    playLoot, playBossAoE, playBossDeath, playPortal, playBreak, startZoneMusic
-} from '../sound.js';
-import { recordKill } from '../bestiary.js';
-import { onKill } from '../quests.js';
-import { recordSoulCollect } from '../soulBook.js';
-import { VillageShop } from './village/VillageShop.js';
+import { playPortal, startZoneMusic } from '../sound.js';
+import { BaseZone } from '../systems/BaseZone.js';
 import { VillageSpawner } from './VillageSpawner.js';
 import { VillageBoss } from './VillageBoss.js';
-import { BaseZone } from '../systems/BaseZone.js';
+import { VillageShop } from './village/VillageShop.js';
+import { VillageProjectiles } from './VillageProjectiles.js';
 
 export class VillageZone extends BaseZone {
     constructor(scene) {
@@ -30,6 +24,7 @@ export class VillageZone extends BaseZone {
         this.shop = new VillageShop(scene);
         this.spawner = new VillageSpawner(scene, this);
         this.boss = new VillageBoss(scene, this);
+        this.projectiles = new VillageProjectiles(scene);
         this.isFrozen = false;
         this.isRestored = false;
         this.isThriving = false;
@@ -473,36 +468,11 @@ export class VillageZone extends BaseZone {
     }
 
     _fireEnemyProjectile(e, dx, dy, type) {
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const speed = type === 'arrow' ? 180 : type === 'heal' ? 120 : 150;
-        const texKey = type === 'arrow' ? 'enemy_arrow' : type === 'heal' ? 'enemy_heal' : 'enemy_magic';
-
-        const proj = this.scene.add.sprite(e.x, e.y, texKey).setDepth(15);
-        this.scene.physics.add.existing(proj);
-        proj.body.setVelocity((dx / dist) * speed, (dy / dist) * speed);
-        proj.damage = e.stats.damage;
-        proj.lifespan = 2000;
-        proj.isHeal = (type === 'heal');
-        this.scene.enemyProjectiles.push(proj);
+        this.projectiles.fireProjectile(e, dx, dy, type);
     }
 
     _updateEnemyProjectiles() {
-        for (let i = this.scene.enemyProjectiles.length - 1; i >= 0; i--) {
-            const p = this.scene.enemyProjectiles[i];
-            if (!p.active) { this.scene.enemyProjectiles.splice(i, 1); continue; }
-
-            p.lifespan -= this.scene.game.loop.delta;
-            if (p.lifespan <= 0) { p.destroy(); this.scene.enemyProjectiles.splice(i, 1); continue; }
-
-            if (!p.isHeal) {
-                const dist = Phaser.Math.Distance.Between(p.x, p.y, this.scene.player.x, this.scene.player.y);
-                if (dist < 16) {
-                    this.scene.combat.takeDamage(p.damage);
-                    p.destroy();
-                    this.scene.enemyProjectiles.splice(i, 1);
-                }
-            }
-        }
+        this.projectiles.update();
     }
 
     _checkVillageProgress() {
