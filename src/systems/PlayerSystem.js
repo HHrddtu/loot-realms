@@ -115,44 +115,16 @@ export class PlayerSystem {
         const moveSpeedBonus = (ae.moveSpeedPercent || 0) + (te.moveSpeedPercent || 0) + ((this.scene._consumableBonusSpd || 0) * 100);
         const spdMult = 1 + accSpdPercent / 100 + moveSpeedBonus / 100;
 
-        // DEBUG: dmgMult breakdown
-        console.log('[DEBUG] dmgMult breakdown:', {
-            te_damagePercent: te.damagePercent,
-            accDmgPercent: accDmgPercent,
-            boostDmgPct: boostDmgPct,
-            divineDmgBuff: divineDmgBuff,
-            finalDmgMult: dmgMult
-        });
-
         // Account level flat bonus: +2 HP, +1 DMG, +1 SPD per account level
         const accLvl = this.scene.accountLevel || 1;
         const accFlatHp = accLvl * 2;
         const accFlatDmg = accLvl * 1;
         const accFlatSpd = accLvl * 1;
 
-        // DEBUG: detailed damage breakdown
-        const finalBaseDmg = cls.stats.damage + (lvl - 1) * growth.dmgPerLevel + bonusDmg + accFlatDmg;
-        console.log('[DEBUG] Damage breakdown:', {
-            classBase: cls.stats.damage,
-            levelBonus: (lvl - 1) * growth.dmgPerLevel,
-            equipBonus: bonusDmg,
-            accLevelBonus: accFlatDmg,
-            finalBase: finalBaseDmg,
-            dmgMult: dmgMult,
-            result: Math.floor(finalBaseDmg * dmgMult),
-            equipped: {
-                weapon: this.scene.equipment.weapon?.name,
-                armor: this.scene.equipment.armor?.name,
-                accessory: this.scene.equipment.accessory?.name
-            }
-        });
-
         this.scene.playerMaxHP = Math.floor((cls.stats.hp + (lvl - 1) * growth.hpPerLevel + bonusHP + accFlatHp) * hpMult);
         this.scene.playerDamage = Math.floor((cls.stats.damage + (lvl - 1) * growth.dmgPerLevel + bonusDmg + accFlatDmg) * dmgMult);
         this.scene.playerSpeed = Math.floor((cls.stats.speed + (lvl - 1) * growth.speedPerLevel + bonusSpeed + accFlatSpd) * spdMult);
-        
-        // DEBUG: actual assigned damage
-        console.log('[DEBUG] Assigned:', this.scene.playerDamage, 'calc:', Math.floor(finalBaseDmg * dmgMult));
+
         this.scene.corruptionMax = cls.stats.corruptionMax + (te.corruptionMax || 0) + accCorruptionMax;
 
         this.scene.bestiaryBonuses = getAllBestiaryBonuses(this.scene.difficulty);
@@ -236,7 +208,6 @@ export class PlayerSystem {
             copy.locked = (copy.rarity === 'legendary' || copy.rarity === 'epic' || copy.locked);
         }
         this.scene.equipBag.push(copy);
-        console.log('[DEBUG] equip added:', item.name, item.rarity, item.stats);
         return true;
     }
 
@@ -446,10 +417,7 @@ export class PlayerSystem {
             this.scene.playerLevel++;
             this.scene.talentPoints++;
             this.scene.classStats = getClassStats(this.scene.classKey, this.scene.playerLevel);
-            const oldDmg = this.scene.playerDamage;
             this.recalcStats();
-            const newDmg = this.scene.playerDamage;
-            console.log('[DEBUG] Level up:', this.scene.playerLevel, 'damage:', oldDmg, '->', newDmg);
             this.scene.playerHP = this.scene.playerMaxHP;
             playLevelUp();
             this.scene.cameras.main.flash(300, 241, 196, 15);
