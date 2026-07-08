@@ -29,6 +29,11 @@ export default class PetScene extends Phaser.Scene {
         this._drawPetList();
         this._drawCases();
         this._drawBottomBar();
+
+        // Cleanup on scene shutdown
+        this.events.on('shutdown', () => {
+            this.tweens.killAll();
+        });
     }
 
     _add(el) { this.elements.push(el); return el; }

@@ -73,6 +73,9 @@ export default class BestiaryScene extends Phaser.Scene {
                 }
             }
         });
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _createGrid() {
@@ -130,6 +133,9 @@ export default class BestiaryScene extends Phaser.Scene {
         });
 
         this._updateGridScroll();
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _updateGridScroll() {
@@ -154,6 +160,9 @@ export default class BestiaryScene extends Phaser.Scene {
             item.lvlT.setPosition(x + 42, y + 56);
             item.lvlT.setVisible(visible);
         });
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _createDetailPanel() {
@@ -200,6 +209,9 @@ export default class BestiaryScene extends Phaser.Scene {
             fontSize: '11px', fill: '#666', fontFamily: 'Georgia', fontStyle: 'italic',
             wordWrap: { width: pw - 30 }, lineSpacing: 4
         }).setVisible(false).setDepth(6);
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _deselectAll() {
@@ -208,6 +220,9 @@ export default class BestiaryScene extends Phaser.Scene {
             item.bg.setStrokeStyle(1, 0x334466);
         });
         this._clearDetail();
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _clearDetail() {
@@ -225,6 +240,9 @@ export default class BestiaryScene extends Phaser.Scene {
         this.detailAbilities.setVisible(false);
         this.detailLore.setVisible(false);
         this.detailEmptyText.setVisible(true);
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _selectEntry(index) {
@@ -338,6 +356,9 @@ export default class BestiaryScene extends Phaser.Scene {
             this.detailLore.setText(entry.lore || '').setVisible((entry.lore || '').length > 0);
             this.detailLore.setPosition(px + 15, curY);
         }
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _close() {

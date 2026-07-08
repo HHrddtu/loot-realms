@@ -58,6 +58,9 @@ export default class TalentScene extends Phaser.Scene {
         // lockBtn и respecBtn создаются в _drawCurrentBranch
         this.menuBtn(440, 572, 'CLOSE', 0x34495e, () => this._close());
         this.menuBtn(580, 572, 'BACK', 0x2980b9, () => this._close());
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _createTabs() {
@@ -81,6 +84,9 @@ export default class TalentScene extends Phaser.Scene {
 
         this.tabClass.on('pointerdown', () => this._switchTab('class'));
         this.tabAccount.on('pointerdown', () => this._switchTab('account'));
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _clearBranchTabs() {
@@ -88,6 +94,9 @@ export default class TalentScene extends Phaser.Scene {
         this.branchLabels.forEach(t => t.destroy());
         this.branchTabs = [];
         this.branchLabels = [];
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _buildBranchTabs() {
@@ -123,6 +132,9 @@ export default class TalentScene extends Phaser.Scene {
             this.branchTabs.push(tab);
             this.branchLabels.push(label);
         });
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _switchTab(tab) {
@@ -148,6 +160,9 @@ export default class TalentScene extends Phaser.Scene {
 
         this._buildBranchTabs();
         this._drawCurrentBranch();
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _getCurrentTalents() {
@@ -160,10 +175,16 @@ export default class TalentScene extends Phaser.Scene {
             if (!branch) return ACCOUNT_TALENTS;
             return getAccountTalentsByBranch(branch.key);
         }
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _getCurrentUnlocked() {
         return this.activeTab === 'class' ? this.unlockedTalents : this.unlockedAccountTalents;
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _getAccentColor() {
@@ -174,6 +195,9 @@ export default class TalentScene extends Phaser.Scene {
             const branch = ACCOUNT_BRANCHES[this.activeBranch];
             return branch ? branch.color : 0xe67e22;
         }
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _getVisibleTalents(talents, unlocked) {
@@ -206,6 +230,9 @@ export default class TalentScene extends Phaser.Scene {
         }
 
         return talents.filter(t => visibleIds.has(t.id));
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _drawCurrentBranch() {
@@ -323,6 +350,9 @@ export default class TalentScene extends Phaser.Scene {
 
             this.nodeSprites.push({ node, label, talent });
         });
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _getNodePos(talent) {
@@ -331,6 +361,9 @@ export default class TalentScene extends Phaser.Scene {
         const x = centerX + (talent.col - 0.5) * NODESpacingX;
         const y = startY + talent.row * NODESpacingY;
         return { x, y };
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _setupScroll() {
@@ -376,6 +409,9 @@ export default class TalentScene extends Phaser.Scene {
         });
 
         this.input.on('pointerup', () => { dragging = false; });
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _clearNodes() {
@@ -386,6 +422,9 @@ export default class TalentScene extends Phaser.Scene {
         this.nodeSprites = [];
         this.lineGfx.clear();
         this._hideTooltip();
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _showTooltip(x, y, talent, cost) {
@@ -414,11 +453,17 @@ export default class TalentScene extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(200);
 
         this.tooltipGroup.push(bg, name, costLabel, desc, scope);
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _hideTooltip() {
         this.tooltipGroup.forEach(e => e.destroy());
         this.tooltipGroup = [];
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _unlockTalent(talent) {
@@ -438,6 +483,9 @@ export default class TalentScene extends Phaser.Scene {
 
         this.cameras.main.flash(200, 155, 89, 182);
         this._drawCurrentBranch();
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _calcRespecCost() {
@@ -452,6 +500,9 @@ export default class TalentScene extends Phaser.Scene {
         });
         const levelMult = 1 + (this.accountLevel - 1) * 0.1;
         return Math.ceil(totalSpent * levelMult * 5);
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _respec() {
@@ -482,6 +533,9 @@ export default class TalentScene extends Phaser.Scene {
 
         this.cameras.main.flash(200, 192, 57, 43);
         this._drawCurrentBranch();
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _lockBranch() {
@@ -506,6 +560,9 @@ export default class TalentScene extends Phaser.Scene {
 
         this.cameras.main.flash(200, 230, 126, 34);
         this._drawCurrentBranch();
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _unlockBranch() {
@@ -519,6 +576,9 @@ export default class TalentScene extends Phaser.Scene {
         // Визуальный эффект
         this.cameras.main.flash(200, 34, 126, 230);
         this._drawCurrentBranch();
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _close() {

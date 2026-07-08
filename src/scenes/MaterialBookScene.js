@@ -64,6 +64,9 @@ export default class MaterialBookScene extends Phaser.Scene {
                 if (!inGrid && !inDetail) this._deselectAll();
             }
         });
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _createGrid() {
@@ -109,6 +112,9 @@ export default class MaterialBookScene extends Phaser.Scene {
             bg.on('pointerdown', () => this._selectEntry(i));
             this.listItems.push({ bg, entry });
         });
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _createDetailPanel() {
@@ -156,12 +162,18 @@ export default class MaterialBookScene extends Phaser.Scene {
             fontSize: '11px', fill: '#666', fontFamily: 'Georgia', fontStyle: 'italic',
             wordWrap: { width: pw - 30 }, lineSpacing: 4
         }).setVisible(false).setDepth(6);
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _deselectAll() {
         this.selectedIndex = -1;
         this.listItems.forEach(item => { item.bg.setStrokeStyle(1, 0x664422); });
         this._clearDetail();
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _clearDetail() {
@@ -176,6 +188,9 @@ export default class MaterialBookScene extends Phaser.Scene {
         this.detailRecipe.setVisible(false);
         this.detailLore.setVisible(false);
         this.detailEmptyText.setVisible(true);
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _selectEntry(index) {
@@ -269,6 +284,9 @@ export default class MaterialBookScene extends Phaser.Scene {
             this.detailLore.setText(entry.lore).setVisible(true);
             this.detailLore.setPosition(px + 15, py + 450);
         }
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _close() {

@@ -64,6 +64,9 @@ export default class CraftScene extends Phaser.Scene {
         closeBtn.on('pointerdown', () => this._close());
         closeBtn.on('pointerover', () => closeBtn.setFillStyle(0xc0392b));
         closeBtn.on('pointerout', () => closeBtn.setFillStyle(0x34495e));
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _createHeader() {
@@ -76,6 +79,9 @@ export default class CraftScene extends Phaser.Scene {
                 fontSize: '12px', fill: '#27ae60', fontFamily: 'Arial'
             }).setOrigin(0.5);
         }
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _createCategoryTabs() {
@@ -115,6 +121,9 @@ export default class CraftScene extends Phaser.Scene {
 
             this.tabButtons.push({ bg, txt, key });
         });
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _refreshTabs() {
@@ -124,6 +133,9 @@ export default class CraftScene extends Phaser.Scene {
             tab.bg.setStrokeStyle(1, isActive ? 0xf1c40f : 0x334466);
             tab.txt.setStyle({ fill: isActive ? '#f1c40f' : '#aaa' });
         });
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _updateRecipeList() {
@@ -203,11 +215,17 @@ export default class CraftScene extends Phaser.Scene {
                 fontSize: '16px', fill: '#555', fontFamily: 'Arial'
             }).setOrigin(0.5);
         }
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _getFilteredRecipes() {
         const lang = getLang();
         return CRAFTING_RECIPES.filter(r => r.category === this.selectedCategory);
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _createDetailPanel() {
@@ -259,6 +277,9 @@ export default class CraftScene extends Phaser.Scene {
         this.craftBtnBg.on('pointerdown', () => this._doCraft());
         this.craftBtnBg.on('pointerover', () => { if (this.craftBtnBg.visible) this.craftBtnBg.setFillStyle(0x2ecc71); });
         this.craftBtnBg.on('pointerout', () => { if (this.craftBtnBg.visible) this.craftBtnBg.setFillStyle(0x27ae60); });
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _showDetail(recipe) {
@@ -316,6 +337,9 @@ export default class CraftScene extends Phaser.Scene {
         }
 
         this.currentRecipe = recipe;
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _clearDetail() {
@@ -332,11 +356,17 @@ export default class CraftScene extends Phaser.Scene {
         this.craftBtnBg.setVisible(false);
         this.craftBtnText.setVisible(false);
         this.detailEmptyText.setVisible(true);
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _createMaterialBar() {
         this.matBarElements = [];
         this._refreshMaterialBar();
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _refreshMaterialBar() {
@@ -365,6 +395,9 @@ export default class CraftScene extends Phaser.Scene {
             fontSize: '11px', fill: '#555', fontFamily: 'Arial'
         }).setOrigin(0.5).setDepth(10);
         this.matBarElements.push(closeHint);
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _doCraft() {
@@ -418,6 +451,9 @@ export default class CraftScene extends Phaser.Scene {
             this._clearDetail();
             this.selectedIndex = -1;
         });
+    
+        this.events.on('shutdown', () => { this.tweens.killAll(); });
+
     }
 
     _close() {
