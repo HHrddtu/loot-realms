@@ -166,14 +166,14 @@ export class HUD {
     }
 
     showSaveIndicator() {
-        if (!this.scene.saveIndicator || !this.scene.time) return;
+        if (!this.scene.saveIndicator || !this.scene.time || !this.scene.sys.isActive()) return;
         this.scene.saveIndicator.setText('Saving...');
         this.scene.saveIndicator.setColor('#27ae60');
         this.scene.time.delayedCall(1500, () => {
-            if (this.scene.saveIndicator) {
+            if (this.scene.saveIndicator && this.scene.sys.isActive()) {
                 this.scene.saveIndicator.setText('Saved!');
                 this.scene.time.delayedCall(1000, () => {
-                    if (this.scene.saveIndicator) this.scene.saveIndicator.setText('');
+                    if (this.scene.saveIndicator && this.scene.sys.isActive()) this.scene.saveIndicator.setText('');
                 });
             }
         });
