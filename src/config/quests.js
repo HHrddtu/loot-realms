@@ -9,7 +9,7 @@ export const NPC_DB = {
         greeting: 'Brave adventurer, our village needs your help!',
         greetingRu: 'Храбрый странник, нашей деревне нужна твоя помощь!',
         greetingDe: 'Mutiger Abenteuerer, unser Dorf braucht deine Hilfe!',
-        quests: ['kill_goblins', 'kill_rats', 'treant_boss']
+        quests: ['kill_goblins', 'kill_rats', 'treant_boss', 'cave_spiders', 'giant_bat_boss']
     },
     miner: {
         name: 'Old Miner',
@@ -22,6 +22,19 @@ export const NPC_DB = {
         greetingRu: 'Шахты хранят сокровища... и опасность.',
         greetingDe: 'Die Minen bergen Schätze... und Gefahren.',
         quests: ['kill_skeletons', 'mine_chests', 'skeleton_lord_boss'],
+        hideName: true
+    },
+    villager: {
+        name: 'Village Guard',
+        nameRu: 'Стражник Деревни',
+        nameDe: 'Dorfwache',
+        texKey: 'npc_elder',
+        biome: 'village',
+        x: 400, y: 200,
+        greeting: 'The village is overrun! Help us clear the camps!',
+        greetingRu: 'Деревня захвачена! Помогите очистить лагеря!',
+        greetingDe: 'Das Dorf ist überrennt! Hilf uns, die Lager zu säubern!',
+        quests: ['clear_village_camps', 'defeat_village_boss'],
         hideName: true
     }
 };
@@ -72,6 +85,36 @@ export const QUEST_DB = {
         rewardItems: ['flame_blade'],
         prerequisite: null
     },
+    cave_spiders: {
+        name: 'Spider Nest',
+        nameRu: 'Паучье Гнездо',
+        nameDe: 'Spinnennest',
+        type: 'kill',
+        target: 'cave_spider',
+        count: 12,
+        biome: 'cave',
+        description: 'Massive spiders infest the cave. Clear their nest before they spread.',
+        descriptionRu: 'Огромные пауки заполонили пещеру. Очистите их гнездо, прежде чем они расплодятся.',
+        descriptionDe: 'Riesige Spinnen bevölkern die Höhle. Räume ihr Nest bevor sie sich ausbreiten.',
+        rewards: { exp: 150, accountExp: 60 },
+        rewardItems: ['sapphire_ring'],
+        prerequisite: 'treant_boss'
+    },
+    giant_bat_boss: {
+        name: 'The Swarm Lord',
+        nameRu: 'Повелитель Стай',
+        nameDe: 'Der Schwarmherr',
+        type: 'kill',
+        target: 'giant_bat',
+        count: 1,
+        biome: 'cave',
+        description: 'The Giant Bat commands the cave creatures. End its reign.',
+        descriptionRu: 'Гигантская Летучая Мыши командует обитателями пещеры. Положите конец её правлению.',
+        descriptionDe: 'Die Riesen-Fledermaus kommandiert die Höhlenbewohner. Beende ihre Herrschaft.',
+        rewards: { exp: 400, accountExp: 150, talentPoints: 2 },
+        rewardItems: ['flame_blade'],
+        prerequisite: 'treant_boss'
+    },
     kill_skeletons: {
         name: 'Bone Patrol',
         nameRu: 'Костяной Патруль',
@@ -116,6 +159,36 @@ export const QUEST_DB = {
         rewards: { exp: 500, accountExp: 200, talentPoints: 2 },
         rewardItems: ['crown'],
         prerequisite: 'treant_boss'
+    },
+    clear_village_camps: {
+        name: 'Purge the Corruption',
+        nameRu: 'Очистить Заражение',
+        nameDe: 'Die Verunreinigung beseitigen',
+        type: 'kill',
+        target: 'village_brute',
+        count: 8,
+        biome: 'village',
+        description: 'Clear all infected camps in the village to restore peace.',
+        descriptionRu: 'Очистите все заражённые лагеря в деревне, чтобы вернуть мир.',
+        descriptionDe: 'Säubere alle infizierten Lager im Dorf, um den Frieden wiederherzustellen.',
+        rewards: { exp: 200, accountExp: 80, talentPoints: 1 },
+        rewardItems: ['iron_armor'],
+        prerequisite: 'skeleton_lord_boss'
+    },
+    defeat_village_boss: {
+        name: 'The Demon Within',
+        nameRu: 'Демон Внутри',
+        nameDe: 'Der Dämon in Dir',
+        type: 'kill',
+        target: 'purple_demon',
+        count: 1,
+        biome: 'village',
+        description: 'The Purple Demon controls the village. Defeat it to free the souls.',
+        descriptionRu: 'Фиолетовый Демон контролирует деревню. Победите его, чтобы освободить души.',
+        descriptionDe: 'Der Lila Dämon kontrolliert das Dorf. Besiege ihn, um die Seelen zu befreien.',
+        rewards: { exp: 600, accountExp: 250, talentPoints: 2 },
+        rewardItems: ['flame_blade'],
+        prerequisite: 'clear_village_camps'
     }
 };
 
