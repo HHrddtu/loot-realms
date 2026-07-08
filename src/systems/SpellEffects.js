@@ -14,6 +14,11 @@ export class SpellEffects {
         this.scene.tweens.add({
             targets: this.scene.shieldVfx, alpha: 0.4, duration: 500, yoyo: true, repeat: -1
         });
+        // Shield glow ring
+        this.scene.shieldGlow = this.scene.add.circle(this.scene.player.x, this.scene.player.y, 30, 0x3498db, 0.2).setDepth(14);
+        this.scene.tweens.add({
+            targets: this.scene.shieldGlow, scaleX: 1.3, scaleY: 1.3, alpha: 0.1, duration: 800, yoyo: true, repeat: -1
+        });
         if (this.scene.particles) this.scene.particles.spawnShieldEffect(this.scene.player.x, this.scene.player.y);
         this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, 'SHIELD!', '#3498db');
     }

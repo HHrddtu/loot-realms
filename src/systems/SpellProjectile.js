@@ -61,6 +61,10 @@ export class SpellProjectile {
             targets: fb, scaleX: 1.3, scaleY: 1.3, duration: 100,
             yoyo: true, repeat: -1
         });
+
+        // Trail effect
+        fb._trail = [];
+        fb._trailTimer = 0;
     }
 
     _castSoulStrike(spell) {
@@ -184,6 +188,7 @@ export class SpellProjectile {
                     onComplete: () => impact.destroy()
                 });
                 if (this.scene.particles) this.scene.particles.spawnHitSpark(targetX, targetY);
+                this.scene.cameras.main.shake(150, 0.005);
 
                 const spellDmgMult = 1 + (this.scene.computedSpellDamage || 0) / 100;
                 const baseDmg = Math.floor((spell.damage + this.scene.playerDamage * 0.3) * spellDmgMult);
@@ -223,6 +228,20 @@ export class SpellProjectile {
         for (let i = this.scene.fireballs.length - 1; i >= 0; i--) {
             const fb = this.scene.fireballs[i];
             if (fb.glow) { fb.glow.x = fb.x; fb.glow.y = fb.y; }
+            
+            // Trail effect
+            if (fb._trail !== undefined) {
+                fb._trailTimer = (fb._trailTimer || 0) + dt;
+                if (fb._trailTimer > 30) {
+                    fb._trailTimer = 0;
+                    const trail = this.scene.add.circle(fb.x, fb.y, 4, fb.glow ? 0xffffff : 0xaaaaaa, 0.6).setDepth(14);
+                    this.scene.tweens.add({
+                        targets: trail, alpha: 0, scaleX: 0.3, scaleY: 0.3, duration: 200,
+                        onComplete: () => trail.destroy()
+                    });
+                }
+            }
+            
             let hit = false;
             fb.lifespan -= dt;
             if (fb.lifespan <= 0) {
