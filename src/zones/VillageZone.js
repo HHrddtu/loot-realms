@@ -95,10 +95,13 @@ export class VillageZone extends BaseZone {
                     this.spawner.spawnChildNPC();
                 }
             }
-                if (!this.scene.zones.village.isThriving && !this.scene.zones.castle.questDone) {
-                this.scene.time.delayedCall(1500, () => {
-                    this.spawner.spawnCastleChild();
-                });
+            // Respawn castle child if village restored and castle quest not done
+            if (!this.scene.zones.village.isThriving && !this.scene.zones.castle.questDone) {
+                if (!this.scene.castleChildNPC) {
+                    this.scene.time.delayedCall(1500, () => {
+                        this.spawner.spawnCastleChild();
+                    });
+                }
             }
             this.shop.spawnShop();
             this.shop.spawnInn();
@@ -317,8 +320,6 @@ export class VillageZone extends BaseZone {
         if (dist >= 50) return;
 
         this.scene.castleChildHint.setText('');
-        if (this.scene.castleChildNPC) { this.scene.castleChildNPC.destroy(); this.scene.castleChildNPC = null; }
-        if (this.scene.castleChildHint) { this.scene.castleChildHint.destroy(); this.scene.castleChildHint = null; }
 
         const msgText = this.scene.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 80,
             'They took everyone! Bandits from the east castle!\nPlease, you have to save them!', {
