@@ -36,12 +36,16 @@ export default class CraftScene extends Phaser.Scene {
     }
 
     create() {
-        this.cameras.main.setBackgroundColor('#0a0a1a');
+        this.cameras.main.setBackgroundColor('#1a1408');
         this.selectedCategory = 'weapon';
         this.selectedIndex = -1;
         this.listItems = [];
         this.detailElements = [];
         this.craftResultElements = [];
+
+        // Parchment background
+        this.add.image(400, 300, 'parchment_bg');
+        this.add.image(400, 300, 'ornate_border');
 
         this._createHeader();
         this._createCategoryTabs();

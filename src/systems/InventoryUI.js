@@ -30,13 +30,15 @@ export class InventoryUI {
 
         const mkInv = (el) => this.ui._mkEl(el);
 
-        this.scene.invGroup.push(mkInv(this.scene.add.rectangle(400, 300, 620, 500, 0x0a0a1a, 0.95)
-            .setStrokeStyle(2, 0xf1c40f).setInteractive()));
+        // Parchment background
+        this.scene.invGroup.push(mkInv(this.scene.add.image(400, 300, 'parchment_bg').setInteractive()));
+        this.scene.invGroup.push(mkInv(this.scene.add.image(400, 300, 'ornate_border')));
+        
         this.scene.invGroup.push(mkInv(this.scene.add.text(400, 55, 'INVENTORY', {
-            fontSize: '22px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '22px', fill: '#5c3a1e', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5)));
         this.scene.invGroup.push(mkInv(this.scene.add.text(equipX, 85, 'EQUIPPED', {
-            fontSize: '13px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '13px', fill: '#8b4513', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5)));
 
         const slots = [

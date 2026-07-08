@@ -78,4 +78,74 @@ export function drawEffectTextures(mk) {
         c.arc(4, 4, 2, 0, Math.PI * 2);
         c.fill();
     });
+
+    // Parchment background for UI
+    mk('parchment_bg', 600, 500, (c) => {
+        c.imageSmoothingEnabled = false;
+        // Base parchment color
+        c.fillStyle = '#f4e4c1';
+        c.fillRect(0, 0, 600, 500);
+        // Texture noise
+        c.fillStyle = '#e8d5a3';
+        for (let i = 0; i < 200; i++) {
+            c.fillRect(Math.random() * 600, Math.random() * 500, 2 + Math.random() * 3, 1 + Math.random() * 2);
+        }
+        c.fillStyle = '#dcc89a';
+        for (let i = 0; i < 100; i++) {
+            c.fillRect(Math.random() * 600, Math.random() * 500, 3 + Math.random() * 4, 1);
+        }
+        // Dark edges (vignette)
+        const grd = c.createRadialGradient(300, 250, 200, 300, 250, 350);
+        grd.addColorStop(0, 'rgba(0,0,0,0)');
+        grd.addColorStop(1, 'rgba(0,0,0,0.3)');
+        c.fillStyle = grd;
+        c.fillRect(0, 0, 600, 500);
+        // Border burn marks
+        c.fillStyle = 'rgba(139,69,19,0.4)';
+        c.fillRect(0, 0, 600, 8);
+        c.fillRect(0, 492, 600, 8);
+        c.fillRect(0, 0, 8, 500);
+        c.fillRect(592, 0, 8, 500);
+    });
+
+    // Ornate border for panels
+    mk('ornate_border', 600, 500, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.strokeStyle = '#8b4513';
+        c.lineWidth = 3;
+        c.strokeRect(5, 5, 590, 490);
+        c.strokeStyle = '#a0522d';
+        c.lineWidth = 1;
+        c.strokeRect(10, 10, 580, 480);
+        // Corner ornaments
+        c.fillStyle = '#8b4513';
+        c.fillRect(5, 5, 20, 20);
+        c.fillRect(575, 5, 20, 20);
+        c.fillRect(5, 475, 20, 20);
+        c.fillRect(575, 475, 20, 20);
+        c.fillStyle = '#a0522d';
+        c.fillRect(10, 10, 12, 12);
+        c.fillRect(578, 10, 12, 12);
+        c.fillRect(10, 478, 12, 12);
+        c.fillRect(578, 478, 12, 12);
+    });
+
+    // Scroll vertical
+    mk('scroll_v', 40, 600, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#d4a574';
+        c.fillRect(10, 0, 20, 600);
+        c.fillStyle = '#c49464';
+        c.fillRect(12, 0, 16, 600);
+        // Top roll
+        c.fillStyle = '#8b4513';
+        c.fillRect(5, 0, 30, 15);
+        c.fillStyle = '#a0522d';
+        c.fillRect(8, 2, 24, 11);
+        // Bottom roll
+        c.fillStyle = '#8b4513';
+        c.fillRect(5, 585, 30, 15);
+        c.fillStyle = '#a0522d';
+        c.fillRect(8, 587, 24, 11);
+    });
 }

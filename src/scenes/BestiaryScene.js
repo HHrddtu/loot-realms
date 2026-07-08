@@ -28,12 +28,16 @@ export default class BestiaryScene extends Phaser.Scene {
         this.entries.forEach(e => { progress.current += e.level; });
         progress.total = this.entries.length * 5;
 
-        this.add.text(200, 22, t('bestiary.title'), {
-            fontSize: '28px', fill: '#f1c40f', fontFamily: 'Georgia', fontStyle: 'bold'
+        // Parchment background
+        this.add.image(400, 300, 'parchment_bg');
+        this.add.image(400, 300, 'ornate_border');
+
+        this.add.text(400, 40, t('bestiary.title'), {
+            fontSize: '28px', fill: '#5c3a1e', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        this.add.text(200, 52, `Progress: ${progress.current}/${progress.total}`, {
-            fontSize: '14px', fill: '#aaa', fontFamily: 'Arial'
+        this.add.text(400, 70, `Progress: ${progress.current}/${progress.total}`, {
+            fontSize: '14px', fill: '#8b4513', fontFamily: 'Georgia, serif'
         }).setOrigin(0.5);
 
         this._createGrid();

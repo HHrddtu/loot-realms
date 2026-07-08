@@ -21,12 +21,16 @@ export class PauseMenu {
         } catch (e) {}
         this.scene.pauseGroup = [];
         const mk = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
-        this.scene.pauseGroup.push(mk(this.scene.add.rectangle(400, 300, 420, 300, 0x000000, 0.92).setStrokeStyle(2, 0xf1c40f)));
-        this.scene.pauseGroup.push(mk(this.scene.add.text(400, 185, t('pause.title'), { fontSize: '28px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5)));
-        this.scene.pauseGroup.push(mk(this.scene.add.text(400, 215, this.scene.difficulty, { fontSize: '14px', fill: DIFF_COLORS[this.scene.difficulty] || '#f39c12', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5)));
+        
+        // Parchment background
+        this.scene.pauseGroup.push(mk(this.scene.add.image(400, 300, 'parchment_bg')));
+        this.scene.pauseGroup.push(mk(this.scene.add.image(400, 300, 'ornate_border')));
+        
+        this.scene.pauseGroup.push(mk(this.scene.add.text(400, 185, t('pause.title'), { fontSize: '28px', fill: '#5c3a1e', fontFamily: 'Georgia, serif', fontStyle: 'bold' }).setOrigin(0.5)));
+        this.scene.pauseGroup.push(mk(this.scene.add.text(400, 215, this.scene.difficulty, { fontSize: '14px', fill: '#8b4513', fontFamily: 'Georgia, serif', fontStyle: 'bold' }).setOrigin(0.5)));
 
         const resumeBg = mk(this.scene.add.rectangle(400, 235, 220, 38, 0x27ae60).setStrokeStyle(2, lighten(0x27ae60, 0.3)).setInteractive({ useHandCursor: true }));
-        const resumeLbl = mk(this.scene.add.text(400, 235, t('pause.resume'), { fontSize: '18px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5));
+        const resumeLbl = mk(this.scene.add.text(400, 235, t('pause.resume'), { fontSize: '18px', fill: '#fff', fontFamily: 'Georgia, serif', fontStyle: 'bold' }).setOrigin(0.5));
         resumeBg.on('pointerdown', () => this.closePause());
         resumeBg.on('pointerover', () => { resumeBg.setFillStyle(lighten(0x27ae60, 0.2)); resumeBg.setScale(1.05); resumeLbl.setScale(1.05); });
         resumeBg.on('pointerout', () => { resumeBg.setFillStyle(0x27ae60); resumeBg.setScale(1); resumeLbl.setScale(1); });
@@ -34,7 +38,7 @@ export class PauseMenu {
 
         const makeSmallBtn = (x, y, text, color, cb) => {
             const bg = mk(this.scene.add.rectangle(x, y, 130, 28, color).setStrokeStyle(1, lighten(color, 0.3)).setInteractive({ useHandCursor: true }));
-            const lbl = mk(this.scene.add.text(x, y, text, { fontSize: '11px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5));
+            const lbl = mk(this.scene.add.text(x, y, text, { fontSize: '11px', fill: '#fff', fontFamily: 'Georgia, serif', fontStyle: 'bold' }).setOrigin(0.5));
             bg.on('pointerdown', cb);
             bg.on('pointerover', () => bg.setFillStyle(lighten(color, 0.2)));
             bg.on('pointerout', () => bg.setFillStyle(color));
@@ -57,10 +61,10 @@ export class PauseMenu {
         this.scene.pauseGroup = [];
         const mk = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
         this.scene.pauseGroup.push(mk(this.scene.add.rectangle(400, 300, 420, 340, 0x000000, 0.92).setStrokeStyle(2, 0x555577)));
-        this.scene.pauseGroup.push(mk(this.scene.add.text(400, 165, t('adv.title'), { fontSize: '22px', fill: '#aaa', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5)));
+        this.scene.pauseGroup.push(mk(this.scene.add.text(400, 165, t('adv.title'), { fontSize: '22px', fill: '#aaa', fontFamily: 'Georgia, serif', fontStyle: 'bold' }).setOrigin(0.5)));
         const makeSmallBtn = (x, y, text, color, cb) => {
             const bg = mk(this.scene.add.rectangle(x, y, 130, 28, color).setStrokeStyle(1, lighten(color, 0.3)).setInteractive({ useHandCursor: true }));
-            const lbl = mk(this.scene.add.text(x, y, text, { fontSize: '11px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5));
+            const lbl = mk(this.scene.add.text(x, y, text, { fontSize: '11px', fill: '#fff', fontFamily: 'Georgia, serif', fontStyle: 'bold' }).setOrigin(0.5));
             bg.on('pointerdown', cb); bg.on('pointerover', () => bg.setFillStyle(lighten(color, 0.2))); bg.on('pointerout', () => bg.setFillStyle(color));
             this.scene.pauseGroup.push(bg, lbl);
         };
