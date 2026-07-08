@@ -156,5 +156,5 @@ export function initAccount() {
 }
 
 export function getAccountLevelUpReq(level) {
-    return Math.floor(200 * Math.pow(level, 1.8));
+    return Math.floor(300 * Math.pow(level, 1.9));
 }

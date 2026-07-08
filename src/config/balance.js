@@ -76,8 +76,8 @@ export const HEAL_ZONE_HEAL_PER_SEC = 0.04;
 // ── Player ──
 export const BASE_CRIT_DAMAGE_MULT = 1.5;
 export const DEFAULT_CORRUPTION_DECAY = 0.08;
-export const LEVEL_UP_XP_BASE = 200;
-export const LEVEL_UP_XP_EXPONENT = 1.5;
+export const LEVEL_UP_XP_BASE = 300;
+export const LEVEL_UP_XP_EXPONENT = 1.6;
 
 export const UPGRADE_HP_PER_LVL = 5;
 export const UPGRADE_DMG_PER_LVL = 5;
