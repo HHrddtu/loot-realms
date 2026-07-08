@@ -89,6 +89,10 @@ export class VillageZone extends BaseZone {
         } else {
             this.spawner.spawnVillageDecor(false);
             this.spawner.showVillageClearedDecor();
+            // Respawn child NPC if village is cleared but not yet restored
+            if (this.scene.zones.village.allCleared && !this.scene.zones.village.isRestored) {
+                this.spawner.spawnChildNPC();
+            }
                 if (!this.scene.zones.village.isThriving && !this.scene.zones.castle.questDone) {
                 this.scene.time.delayedCall(1500, () => {
                     this.spawner.spawnCastleChild();
