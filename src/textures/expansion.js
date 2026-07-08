@@ -647,15 +647,35 @@ export function drawExpansionTextures(mk, textures) {
         c.fillRect(20, 7, 160, 6);
     });
 
-    mk('child_npc', 10, 14, (c) => {
+    mk('child_npc', 24, 28, (c) => {
         c.imageSmoothingEnabled = false;
+        // Head
         c.fillStyle = '#ffcc88';
-        c.fillRect(3, 0, 4, 4);
+        c.fillRect(8, 2, 8, 8);
+        c.fillRect(6, 4, 12, 4);
+        // Eyes
+        c.fillStyle = '#2c3e50';
+        c.fillRect(9, 5, 2, 2);
+        c.fillRect(13, 5, 2, 2);
+        // Mouth
+        c.fillStyle = '#c0392b';
+        c.fillRect(10, 8, 4, 1);
+        // Body (shirt)
         c.fillStyle = '#e74c3c';
-        c.fillRect(2, 5, 6, 6);
+        c.fillRect(7, 10, 10, 10);
+        c.fillRect(5, 12, 14, 6);
+        // Arms
+        c.fillStyle = '#ffcc88';
+        c.fillRect(4, 11, 3, 6);
+        c.fillRect(17, 11, 3, 6);
+        // Legs
         c.fillStyle = '#2980b9';
-        c.fillRect(2, 11, 3, 3);
-        c.fillRect(5, 11, 3, 3);
+        c.fillRect(7, 20, 4, 6);
+        c.fillRect(13, 20, 4, 6);
+        // Shoes
+        c.fillStyle = '#2c3e50';
+        c.fillRect(6, 24, 5, 3);
+        c.fillRect(13, 24, 5, 3);
     });
 
     // Village enemy spritesheets
