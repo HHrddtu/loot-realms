@@ -91,7 +91,9 @@ export class VillageZone extends BaseZone {
             this.spawner.showVillageClearedDecor();
             // Respawn child NPC if village is cleared but not yet restored
             if (this.scene.zones.village.allCleared && !this.scene.zones.village.isRestored) {
-                this.spawner.spawnChildNPC();
+                if (!this.scene.villageChildNPC) {
+                    this.spawner.spawnChildNPC();
+                }
             }
                 if (!this.scene.zones.village.isThriving && !this.scene.zones.castle.questDone) {
                 this.scene.time.delayedCall(1500, () => {
@@ -510,17 +512,6 @@ export class VillageZone extends BaseZone {
         this.scene.time.delayedCall(3500, () => {
             if (msgText) msgText.destroy();
             if (box) box.destroy();
-        });
-
-        this.scene.time.delayedCall(4000, () => {
-            if (this.scene.villageChildNPC && this.scene.villageChildNPC.active) {
-                this.scene.villageChildNPC.destroy();
-                this.scene.villageChildNPC = null;
-            }
-            if (this.scene.villageChildHint && this.scene.villageChildHint.active) {
-                this.scene.villageChildHint.destroy();
-                this.scene.villageChildHint = null;
-            }
         });
     }
 
