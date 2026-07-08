@@ -12,7 +12,7 @@ export default class MenuScene extends Phaser.Scene {
     }
 
     create() {
-        this.cameras.main.setBackgroundColor('#0a0a1a');
+        this.cameras.main.setBackgroundColor('#1a1408');
         this.diffIdx = 0;
         this.overlayEls = [];
 
@@ -20,21 +20,33 @@ export default class MenuScene extends Phaser.Scene {
             syncAccountFromCloud();
         }
 
+        // Parchment background
+        this.add.image(400, 300, 'parchment_bg');
+        this.add.image(400, 300, 'ornate_border');
+
+        // User info
         const userName = getDisplayName();
         const userTag = isAnonymous() ? ' (Guest)' : '';
-        this.add.text(400, 20, '\u{1F464} ' + userName + userTag, {
-            fontSize: '13px', fill: isAnonymous() ? '#555' : '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
+        this.add.text(400, 40, '\u{1F464} ' + userName + userTag, {
+            fontSize: '13px', fill: isAnonymous() ? '#888' : '#5c3a1e', fontFamily: 'Georgia, serif', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 1
         }).setOrigin(0.5);
 
-        this.titleText = this.add.text(400, 80, t('menu.title'), {
-            fontSize: '48px', fill: '#f1c40f', fontFamily: 'Georgia', fontStyle: 'bold'
+        // Title
+        this.titleText = this.add.text(400, 90, t('menu.title'), {
+            fontSize: '48px', fill: '#5c3a1e', fontFamily: 'Georgia, serif', fontStyle: 'bold',
+            stroke: '#3d2a14', strokeThickness: 2
         }).setOrigin(0.5);
 
-        this.subtitleText = this.add.text(400, 130, t('menu.subtitle'), {
-            fontSize: '18px', fill: '#7f8c8d', fontFamily: 'Arial'
+        // Subtitle
+        this.subtitleText = this.add.text(400, 135, t('menu.subtitle'), {
+            fontSize: '18px', fill: '#8b4513', fontFamily: 'Georgia, serif'
         }).setOrigin(0.5);
 
+        // Decorative line
+        this.add.rectangle(400, 160, 300, 2, 0x8b4513);
+
+        // Main buttons
         this.menuBtn(400, 210, t('menu.start'), 0x27ae60, () => {
             if (hasAccount()) {
                 const acc = loadAccount();
@@ -45,52 +57,55 @@ export default class MenuScene extends Phaser.Scene {
             } else {
                 this.scene.start('ClassSelect');
             }
-        }, 280, 46, '24px');
+        }, 280, 50, '24px');
 
         this.menuBtn(400, 280, t('menu.multiplayer'), 0x8e44ad, () => {
             this.scene.start('Lobby');
-        }, 150, 34, '14px');
+        }, 200, 40, '18px');
 
-        this.menuBtn(310, 330, t('menu.account'), 0x2980b9, () => this.showAccount(), 150, 30, '12px');
-        this.menuBtn(490, 330, t('menu.advanced'), 0x555577, () => this.showAdvanced(), 150, 30, '12px');
+        // Secondary buttons
+        this.menuBtn(300, 340, t('menu.account'), 0x2980b9, () => this.showAccount(), 160, 35, '14px');
+        this.menuBtn(500, 340, t('menu.advanced'), 0x555577, () => this.showAdvanced(), 160, 35, '14px');
 
-        this.menuBtn(400, 395, t('menu.logout'), 0xc0392b, async () => {
+        // Logout
+        this.menuBtn(400, 400, t('menu.logout'), 0xc0392b, async () => {
             await logout();
             this.scene.start('Login');
-        }, 140, 28, '12px');
+        }, 140, 30, '14px');
 
-        this.versionText = this.add.text(400, 610, t('menu.version'), {
-            fontSize: '12px', fill: '#444', fontFamily: 'Arial'
+        // Version
+        this.versionText = this.add.text(400, 460, t('menu.version'), {
+            fontSize: '11px', fill: '#8b4513', fontFamily: 'Georgia, serif'
         }).setOrigin(0.5);
     }
 
     showAdvanced() {
         this.openOvl();
         this.ovlText(400, 70, t('adv.title'), {
-            fontSize: '28px', fill: '#aaa', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '28px', fill: '#aaa', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         });
 
         const acc = hasAccount();
 
         this.ovlText(400, 110, t('adv.difficulty'), {
-            fontSize: '14px', fill: '#ecf0f1', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '14px', fill: '#ecf0f1', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         });
 
         const diffLabel = this.ovlText(400, 135, DIFFICULTIES[this.diffIdx], {
-            fontSize: '18px', fill: '#f1c40f', fontFamily: 'Arial'
+            fontSize: '18px', fill: '#f1c40f', fontFamily: 'Georgia, serif'
         });
 
         const leftBtn = this.add.rectangle(310, 135, 30, 28, 0x34495e)
             .setStrokeStyle(1, 0x556677).setInteractive({ useHandCursor: true });
         const leftLbl = this.add.text(310, 135, '<', {
-            fontSize: '16px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '16px', fill: '#fff', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5);
         this.overlayEls.push(leftBtn, leftLbl);
 
         const rightBtn = this.add.rectangle(490, 135, 30, 28, 0x34495e)
             .setStrokeStyle(1, 0x556677).setInteractive({ useHandCursor: true });
         const rightLbl = this.add.text(490, 135, '>', {
-            fontSize: '16px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '16px', fill: '#fff', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5);
         this.overlayEls.push(rightBtn, rightLbl);
 
@@ -109,24 +124,24 @@ export default class MenuScene extends Phaser.Scene {
         if (langIdx < 0) langIdx = 0;
 
         this.ovlText(400, 175, t('adv.language'), {
-            fontSize: '14px', fill: '#ecf0f1', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '14px', fill: '#ecf0f1', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         });
 
         const langLabel = this.ovlText(400, 200, langNames[langs[langIdx]], {
-            fontSize: '18px', fill: '#3498db', fontFamily: 'Arial'
+            fontSize: '18px', fill: '#3498db', fontFamily: 'Georgia, serif'
         });
 
         const langLeft = this.add.rectangle(310, 200, 30, 28, 0x34495e)
             .setStrokeStyle(1, 0x556677).setInteractive({ useHandCursor: true });
         const langLeftLbl = this.add.text(310, 200, '<', {
-            fontSize: '16px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '16px', fill: '#fff', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5);
         this.overlayEls.push(langLeft, langLeftLbl);
 
         const langRight = this.add.rectangle(490, 200, 30, 28, 0x34495e)
             .setStrokeStyle(1, 0x556677).setInteractive({ useHandCursor: true });
         const langRightLbl = this.add.text(490, 200, '>', {
-            fontSize: '16px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '16px', fill: '#fff', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5);
         this.overlayEls.push(langRight, langRightLbl);
 
@@ -184,7 +199,7 @@ export default class MenuScene extends Phaser.Scene {
                 .setStrokeStyle(1, lighten(b.c, 0.3))
                 .setInteractive({ useHandCursor: true });
             const lbl = this.add.text(400, btnY, b.t, {
-                fontSize: '14px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+                fontSize: '14px', fill: '#fff', fontFamily: 'Georgia, serif', fontStyle: 'bold'
             }).setOrigin(0.5);
             bg.on('pointerdown', b.cb);
             bg.on('pointerover', () => bg.setFillStyle(lighten(b.c, 0.2)));
@@ -205,7 +220,7 @@ export default class MenuScene extends Phaser.Scene {
             .setInteractive({ useHandCursor: true });
 
         const lbl = this.add.text(x, y, text, {
-            fontSize: fontSize, fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: fontSize, fill: '#fff', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5);
 
         btn.on('pointerover', () => {
@@ -237,7 +252,7 @@ export default class MenuScene extends Phaser.Scene {
             .setStrokeStyle(1, lighten(color, 0.3))
             .setInteractive({ useHandCursor: true });
         const lbl = this.add.text(x, y, text, {
-            fontSize: '16px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '16px', fill: '#fff', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5);
         bg.on('pointerdown', cb);
         this.overlayEls.push(bg, lbl);
@@ -245,16 +260,19 @@ export default class MenuScene extends Phaser.Scene {
 
     openOvl() {
         this.closeOverlay();
+        // Parchment overlay
         this.overlayEls.push(
-            this.add.rectangle(400, 300, 700, 500, 0x000000, 0.85)
-                .setStrokeStyle(2, 0xf1c40f)
+            this.add.image(400, 300, 'parchment_bg')
+        );
+        this.overlayEls.push(
+            this.add.image(400, 300, 'ornate_border')
         );
     }
 
     showAccount() {
         this.openOvl();
         this.ovlText(400, 70, t('acc.title'), {
-            fontSize: '28px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '28px', fill: '#f1c40f', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         });
 
         const acc = loadAccount() || {};
@@ -269,7 +287,7 @@ export default class MenuScene extends Phaser.Scene {
         const mins = Math.floor(playTime / 60);
 
         this.ovlText(400, 110, t('acc.level') + ': ' + accLevel + '  (' + accExp + '/' + accReq + ' EXP)', {
-            fontSize: '18px', fill: '#e67e22', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '18px', fill: '#e67e22', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         });
 
         const hi = acc.highestClassLevel || {};
@@ -277,12 +295,12 @@ export default class MenuScene extends Phaser.Scene {
             ? Object.entries(hi).map(([k, v]) => k.charAt(0).toUpperCase() + k.slice(1) + ': Lv.' + v).join('  |  ')
             : t('acc.noClasses');
         this.ovlText(400, 140, classInfo, {
-            fontSize: '14px', fill: '#9b59b6', fontFamily: 'Arial'
+            fontSize: '14px', fill: '#9b59b6', fontFamily: 'Georgia, serif'
         });
 
-        this.ovlText(400, 175, '---', { fontSize: '14px', fill: '#444', fontFamily: 'Arial' });
+        this.ovlText(400, 175, '---', { fontSize: '14px', fill: '#444', fontFamily: 'Georgia, serif' });
         this.ovlText(400, 200, t('acc.stats'), {
-            fontSize: '16px', fill: '#ecf0f1', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '16px', fill: '#ecf0f1', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         });
 
         const stats = [
@@ -292,14 +310,14 @@ export default class MenuScene extends Phaser.Scene {
         ];
         stats.forEach((l, i) => {
             this.ovlText(400, 230 + i * 26, l, {
-                fontSize: '15px', fill: '#bdc3c7', fontFamily: 'Arial'
+                fontSize: '15px', fill: '#bdc3c7', fontFamily: 'Georgia, serif'
             });
         });
 
         if (save.classKey) {
-            this.ovlText(400, 320, '---', { fontSize: '14px', fill: '#444', fontFamily: 'Arial' });
+            this.ovlText(400, 320, '---', { fontSize: '14px', fill: '#444', fontFamily: 'Georgia, serif' });
             this.ovlText(400, 345, t('acc.lastSave'), {
-                fontSize: '16px', fill: '#ecf0f1', fontFamily: 'Arial', fontStyle: 'bold'
+                fontSize: '16px', fill: '#ecf0f1', fontFamily: 'Georgia, serif', fontStyle: 'bold'
             });
             const saveInfo = [
                 t('acc.class') + ': ' + (save.classKey || 'none'),
@@ -309,7 +327,7 @@ export default class MenuScene extends Phaser.Scene {
             ];
             saveInfo.forEach((l, i) => {
                 this.ovlText(400, 375 + i * 24, l, {
-                    fontSize: '14px', fill: '#95a5a6', fontFamily: 'Arial'
+                    fontSize: '14px', fill: '#95a5a6', fontFamily: 'Georgia, serif'
                 });
             });
         }
@@ -324,7 +342,7 @@ export default class MenuScene extends Phaser.Scene {
         }
         this.openOvl();
         this.ovlText(400, 55, t('accEquip.title'), {
-            fontSize: '24px', fill: '#f39c12', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '24px', fill: '#f39c12', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         });
 
         const acc = loadAccount() || {};
@@ -338,7 +356,7 @@ export default class MenuScene extends Phaser.Scene {
         let baseY = 85;
         classes.forEach(cls => {
             this.ovlText(400, baseY, classNames[cls], {
-                fontSize: '15px', fill: classColors[cls], fontFamily: 'Arial', fontStyle: 'bold'
+                fontSize: '15px', fill: classColors[cls], fontFamily: 'Georgia, serif', fontStyle: 'bold'
             });
             baseY += 20;
 
@@ -348,13 +366,13 @@ export default class MenuScene extends Phaser.Scene {
                 const item = ae[slot];
                 row += slotLabels[i] + ': ' + (item ? item.name : '---') + '  ';
                 if (i < slots.length - 1 && (i + 1) % 3 === 0) {
-                    this.ovlText(400, baseY, row, { fontSize: '12px', fill: '#bbb', fontFamily: 'Arial' });
+                    this.ovlText(400, baseY, row, { fontSize: '12px', fill: '#bbb', fontFamily: 'Georgia, serif' });
                     baseY += 18;
                     row = '';
                 }
             });
             if (row) {
-                this.ovlText(400, baseY, row, { fontSize: '12px', fill: '#bbb', fontFamily: 'Arial' });
+                this.ovlText(400, baseY, row, { fontSize: '12px', fill: '#bbb', fontFamily: 'Georgia, serif' });
                 baseY += 18;
             }
             baseY += 8;
@@ -383,7 +401,7 @@ export default class MenuScene extends Phaser.Scene {
     showInstructions() {
         this.openOvl();
         this.ovlText(400, 90, t('instr.title'), {
-            fontSize: '28px', fill: '#8e44ad', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '28px', fill: '#8e44ad', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         });
 
         const lines = [
@@ -403,7 +421,7 @@ export default class MenuScene extends Phaser.Scene {
 
         lines.forEach((l, i) => {
             this.ovlText(400, 140 + i * 26, l, {
-                fontSize: '15px', fill: '#bdc3c7', fontFamily: 'Arial'
+                fontSize: '15px', fill: '#bdc3c7', fontFamily: 'Georgia, serif'
             });
         });
 
@@ -413,12 +431,12 @@ export default class MenuScene extends Phaser.Scene {
     showExit() {
         this.openOvl();
         this.ovlText(400, 220, t('exit.title'), {
-            fontSize: '28px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '28px', fill: '#e74c3c', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         });
         this.ovlBtn(340, 330, t('exit.yes'), 0xc0392b, () => {
             this.closeOverlay();
             this.ovlText(400, 400, t('exit.msg'), {
-                fontSize: '14px', fill: '#e74c3c', fontFamily: 'Arial'
+                fontSize: '14px', fill: '#e74c3c', fontFamily: 'Georgia, serif'
             });
         });
         this.ovlBtn(460, 330, t('exit.no'), 0x27ae60, () => this.closeOverlay());
@@ -427,10 +445,10 @@ export default class MenuScene extends Phaser.Scene {
     showNoClass() {
         this.openOvl();
         this.ovlText(400, 220, t('err.noClass'), {
-            fontSize: '24px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '24px', fill: '#e74c3c', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         });
         this.ovlText(400, 270, t('err.noClassMsg'), {
-            fontSize: '14px', fill: '#bdc3c7', fontFamily: 'Arial'
+            fontSize: '14px', fill: '#bdc3c7', fontFamily: 'Georgia, serif'
         });
         this.ovlBtn(400, 350, t('adv.close'), 0x34495e, () => this.closeOverlay());
     }
