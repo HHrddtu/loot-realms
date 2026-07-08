@@ -5,13 +5,13 @@ export const SPELLS = {
         nameRu: 'Огненный Шар',
         nameDe: 'Feuerball',
         slot: 'Q',
-        corruptionCost: 15,
-        cooldown: 2.0,
-        damage: 40,
-        speed: 350,
-        range: 400,
+        corruptionCost: 12,
+        cooldown: 1.5,
+        damage: 55,
+        speed: 400,
+        range: 450,
         color: 0xe74c3c,
-        description: 'Hurls a fireball dealing spell damage'
+        description: 'Hurls a blazing fireball dealing spell damage'
     },
     shield: {
         key: 'shield',
@@ -32,11 +32,11 @@ export const SPELLS = {
         nameRu: 'Исцеление',
         nameDe: 'Heilung',
         slot: 'E',
-        corruptionCost: 25,
-        cooldown: 10.0,
-        healPercent: 0.30,
+        corruptionCost: 20,
+        cooldown: 8.0,
+        healPercent: 0.40,
         color: 0x2ecc71,
-        description: 'Restores 30% of max HP'
+        description: 'Restores 40% of max HP with holy light'
     },
     acid_flask: {
         key: 'acid_flask',
@@ -173,15 +173,15 @@ export const SPELLS = {
         nameRu: 'Метеор',
         nameDe: 'Meteor',
         slot: 'R',
-        corruptionCost: 30,
-        cooldown: 20.0,
-        damage: 80,
-        dot: 5,
-        dotDuration: 3.0,
-        radius: 100,
-        range: 300,
+        corruptionCost: 35,
+        cooldown: 18.0,
+        damage: 150,
+        dot: 10,
+        dotDuration: 4.0,
+        radius: 130,
+        range: 350,
         color: 0xe74c3c,
-        description: 'Calls down a meteor dealing AoE fire damage'
+        description: 'Calls down a devastating meteor dealing massive AoE fire damage'
     },
     chemical_cloud: {
         key: 'chemical_cloud',
@@ -189,16 +189,16 @@ export const SPELLS = {
         nameRu: 'Химическое Облако',
         nameDe: 'Chemische Wolke',
         slot: 'R',
-        corruptionCost: 25,
-        cooldown: 25.0,
-        damagePerSec: 6,
-        duration: 5.0,
-        radius: 90,
-        range: 200,
-        armorReduction: 15,
-        slowPercent: 30,
+        corruptionCost: 30,
+        cooldown: 22.0,
+        damagePerSec: 12,
+        duration: 6.0,
+        radius: 110,
+        range: 250,
+        armorReduction: 25,
+        slowPercent: 40,
         color: 0x27ae60,
-        description: 'Creates a toxic cloud dealing DoT and reducing armor'
+        description: 'Creates a massive toxic cloud dealing heavy DoT and reducing armor'
     },
     divine_blessing: {
         key: 'divine_blessing',
@@ -207,12 +207,12 @@ export const SPELLS = {
         nameDe: 'Gesegnet',
         slot: 'R',
         corruptionCost: 0,
-        cooldown: 30.0,
-        healPercent: 0.25,
-        buffDuration: 5.0,
-        damageBuff: 15,
-        defenseBuff: 10,
+        cooldown: 25.0,
+        healPercent: 0.50,
+        buffDuration: 8.0,
+        damageBuff: 25,
+        defenseBuff: 20,
         color: 0xf1c40f,
-        description: 'Heals 25% HP and grants +15% DMG, +10% DEF for 5s'
+        description: 'Heals 50% HP and grants +25% DMG, +20% DEF for 8s'
     }
 };
