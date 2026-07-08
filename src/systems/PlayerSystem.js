@@ -8,6 +8,7 @@ import { getAccountTalentEffects } from '../accountTalents.js';
 import { getAllBestiaryBonuses } from '../bestiary.js';
 import { getMaterialBonuses } from '../materialBook.js';
 import { getSoulBonuses } from '../soulBook.js';
+import { getSetBonuses } from '../config/sets.js';
 import { recordMaterialCollect } from '../materialBook.js';
 import { onCollect } from '../quests.js';
 import { playLevelUp } from '../sound.js';
@@ -91,6 +92,19 @@ export class PlayerSystem {
         if (petStats.spellPercent) accSpellPercent += petStats.spellPercent;
         if (petStats.critPercent) accCritPercent += petStats.critPercent;
 
+        // Apply equipment set bonuses
+        const setBonuses = getSetBonuses(this.scene.equipment, this.scene.accountEquipment);
+        if (setBonuses.hpPercent) accHpPercent += setBonuses.hpPercent;
+        if (setBonuses.damagePercent) accDmgPercent += setBonuses.damagePercent;
+        if (setBonuses.speedPercent) accSpdPercent += setBonuses.speedPercent;
+        if (setBonuses.spellPercent) accSpellPercent += setBonuses.spellPercent;
+        if (setBonuses.critPercent) accCritPercent += setBonuses.critPercent;
+        if (setBonuses.dodgePercent) accDodgePercent += setBonuses.dodgePercent;
+        if (setBonuses.damageReduction) accDmgPercent += setBonuses.damageReduction;
+        if (setBonuses.regenFlat) { /* handled below */ }
+        if (setBonuses.regenPercent) { /* handled below */ }
+        if (setBonuses.corruptionMax) accCorruptionMax += setBonuses.corruptionMax;
+
         const upgradeLevels = this.scene.upgradeLevels || {};
         const upgHp = (upgradeLevels.upg_hp || 0) * 5;
         const upgDmg = (upgradeLevels.upg_dmg || 0) * 5;
@@ -147,7 +161,7 @@ export class PlayerSystem {
         this.scene.computedAreaDamage = (te.areaDamage || 0) + (ae.areaDamage || 0);
         this.scene.computedBossDamage = (te.bossDamagePercent || 0) + (ae.bossDamagePercent || 0);
         this.scene.computedSpellDamage = (te.spellDamage || 0) + accSpellPercent;
-        this.scene.computedRegenFlat = (te.regenFlat || 0) + boostRegenFlat + upgRegen;
+        this.scene.computedRegenFlat = (te.regenFlat || 0) + boostRegenFlat + upgRegen + (setBonuses.regenFlat || 0);
 
         this.scene.relicEffects = {};
         Object.values(this.scene.accountEquipment).forEach(item => {
@@ -156,7 +170,7 @@ export class PlayerSystem {
             }
         });
         this.scene.computedHealPower = (te.healPower || 0) + (ae.healPower || 0);
-        this.scene.computedRegenPercent = (te.regenPercent || 0) + (ae.regenPercent || 0) + (petStats.regenPercent || 0);
+        this.scene.computedRegenPercent = (te.regenPercent || 0) + (ae.regenPercent || 0) + (petStats.regenPercent || 0) + (setBonuses.regenPercent || 0);
         this.scene.computedDotPower = te.dotPower || 0;
         this.scene.computedDotDuration = te.dotDuration || 0;
         this.scene.computedShieldPercent = te.shieldPercent || 0;

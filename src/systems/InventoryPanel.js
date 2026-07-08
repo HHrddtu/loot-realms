@@ -1,4 +1,5 @@
 import { RARITY_COLORS } from '../config/index.js';
+import { getSetInfo } from '../config/sets.js';
 
 export class InventoryPanel {
     constructor(scene, ui) {
@@ -74,6 +75,23 @@ export class InventoryPanel {
         }
         
         if (item.effect) lines.push({ text: 'Effect: ' + item.effect, color: '#f39c12', size: '10px' });
+        
+        // Set info
+        if (item.id) {
+            const setInfo = getSetInfo(this.scene.equipment, this.scene.accountEquipment);
+            setInfo.forEach(set => {
+                if (set.equipped > 0) {
+                    const progress = set.equipped + '/' + set.total;
+                    lines.push({ text: set.name + ' (' + progress + ')', color: '#9b59b6', size: '10px', bold: true });
+                    set.bonuses.forEach(bonus => {
+                        const status = bonus.active ? '[ACTIVE]' : '[need ' + bonus.needed + ']';
+                        const statusColor = bonus.active ? '#2ecc71' : '#555';
+                        lines.push({ text: '  ' + bonus.name + ' ' + status, color: statusColor, size: '9px' });
+                    });
+                }
+            });
+        }
+        
         lines.push({ text: 'Click=equip | RMB=lock', color: '#555', size: '9px' });
         const maxW = 180, lineH = 16, padX = 10, padY = 8;
         const totalH = lines.length * lineH + padY * 2;
