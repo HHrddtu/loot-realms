@@ -1,8 +1,8 @@
 import {
     sendMobSync, sendBossUpdate, sendChestOpened, sendLootCollected,
-    sendMobUpdate, sendPlayerUpdate, sendZoneChange,
+    sendMobUpdate, sendPlayerUpdate, sendZoneChange, sendBossKilled,
     onMobSync, onBossUpdate, onChestOpened, onLootCollected,
-    onMobUpdate, onPlayerUpdate, onZoneChange,
+    onMobUpdate, onPlayerUpdate, onZoneChange, onBossKilled,
     isHost, getMyId, getPlayers
 } from './network.js';
 
@@ -25,6 +25,7 @@ export class MultiplayerSync {
         onMobUpdate((data) => this._handleMobUpdate(data));
         onPlayerUpdate((data) => this._handlePlayerUpdate(data));
         onZoneChange((data) => this._handleZoneChange(data));
+        onBossKilled((data) => this._handleBossKilled(data));
     }
 
     cleanup() {
@@ -160,6 +161,36 @@ export class MultiplayerSync {
         this.remoteZones[data.peerId] = data.zone;
     }
 
+    _handleBossKilled(data) {
+        if (!data || !data.bossType) return;
+        const s = this.scene;
+        
+        // Find the boss on client side
+        const bossKey = data.bossType;
+        const boss = s[bossKey];
+        
+        if (boss && boss.active) {
+            // Trigger boss death logic
+            if (bossKey === 'boss') s.killBoss();
+            else if (bossKey === 'mineBoss') s.killMineBoss();
+            else if (bossKey === 'caveBoss') s.killCaveBoss();
+            else if (bossKey === 'villageBoss') s.zones.village.boss.iceSpiritDied();
+            else if (bossKey === 'hellBoss') s.zones.hell.victoryHellBoss();
+            else if (bossKey === 'snowyIceSpirit') s.zones.village.boss.iceSpiritDied();
+        }
+        
+        // Sync loot from host
+        if (data.loot && Array.isArray(data.loot)) {
+            data.loot.forEach(item => {
+                if (item.type === 'equip') s.addEquip(item);
+                else if (item.type === 'accountEquip') s.addAccountEquip(item);
+            });
+        }
+        
+        // Show floating text
+        s.floatingText(s.player.x, s.player.y - 50, 'Boss defeated!', '#f1c40f');
+    }
+
     _createClientMob(mobData) {
         const s = this.scene;
         let texKey = mobData.texKey || 'goblin_walk';
@@ -250,6 +281,10 @@ export class MultiplayerSync {
 
     broadcastMobKilled(mobId) {
         sendMobSync({ type: 'mob_killed', mobId });
+    }
+
+    broadcastBossKilled(bossType, loot) {
+        sendBossKilled(bossType, loot);
     }
 
     broadcastChestOpened(chestId) {

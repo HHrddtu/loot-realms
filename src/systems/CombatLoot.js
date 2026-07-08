@@ -184,6 +184,11 @@ export class CombatLoot {
             s.tweens.add({ targets: noLoot, alpha: 0, duration: 5000, onComplete: () => { if (noLoot.active) noLoot.destroy(); } });
         }
         s.checkLevelUp(); s._checkAccountLevelUp(); s.updateUI();
+        
+        // Broadcast boss killed to multiplayer guests
+        if (s.multiplayer && s.mpSync) {
+            s.mpSync.broadcastBossKilled(cfg.bossRef, lootItems);
+        }
     }
 
     breakChest(ch) {

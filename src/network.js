@@ -24,6 +24,7 @@ let _onLootCollected = null;
 let _onMobUpdate = null;
 let _onPlayerUpdate = null;
 let _onZoneChange = null;
+let _onBossKilled = null;
 let _hostName = '';
 let _playerNames = {};
 
@@ -78,6 +79,7 @@ export function onLootCollected(cb) { _onLootCollected = cb; }
 export function onMobUpdate(cb) { _onMobUpdate = cb; }
 export function onPlayerUpdate(cb) { _onPlayerUpdate = cb; }
 export function onZoneChange(cb) { _onZoneChange = cb; }
+export function onBossKilled(cb) { _onBossKilled = cb; }
 
 function _getHostPlayerNames() {
     const out = {};
@@ -238,6 +240,11 @@ function _handleGuestData(peerId, data) {
             _broadcastToGuests(data);
             if (_onZoneChange) _onZoneChange(data);
             break;
+
+        case 'boss_killed':
+            _broadcastToGuests(data);
+            if (_onBossKilled) _onBossKilled(data);
+            break;
     }
 }
 
@@ -392,6 +399,10 @@ function _handleHostData(data) {
         case 'zone_change':
             if (_onZoneChange) _onZoneChange(data);
             break;
+
+        case 'boss_killed':
+            if (_onBossKilled) _onBossKilled(data);
+            break;
     }
 }
 
@@ -499,6 +510,16 @@ export function sendZoneChange(data) {
     }
 }
 
+export function sendBossKilled(bossType, loot) {
+    const msg = { type: 'boss_killed', bossType, loot };
+    if (_isHost) {
+        _broadcastToGuests(msg);
+        if (_onBossKilled) _onBossKilled(msg);
+    } else {
+        _sendToHost(msg);
+    }
+}
+
 export function kickPlayer(peerId) {
     if (!_isHost) return;
     const conn = _guestConns[peerId];
@@ -549,4 +570,5 @@ export function disconnect() {
     _onMobUpdate = null;
     _onPlayerUpdate = null;
     _onZoneChange = null;
+    _onBossKilled = null;
 }
