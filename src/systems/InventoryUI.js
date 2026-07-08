@@ -1,4 +1,5 @@
 import { RARITY_COLORS } from '../config/index.js';
+import { getSetInfo } from '../config/sets.js';
 
 export class InventoryUI {
     constructor(scene, ui) {
@@ -119,6 +120,28 @@ export class InventoryUI {
         this.scene.invGroup.push(mkInv(this.scene.add.text(350, consY - 8, 'Gold: ' + (this.scene.gold || 0), {
             fontSize: '13px', fill: '#f1c40f', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5)));
+
+        // Set bonuses display
+        const setInfo = getSetInfo(this.scene.equipment, this.scene.accountEquipment);
+        if (setInfo.length > 0) {
+            const setY = 380;
+            this.scene.invGroup.push(mkInv(this.scene.add.text(equipX - 55, setY, 'ACTIVE SETS:', {
+                fontSize: '11px', fill: '#9b59b6', fontFamily: 'Georgia, serif', fontStyle: 'bold'
+            })));
+            setInfo.forEach((set, i) => {
+                const sy = setY + 16 + i * 30;
+                this.scene.invGroup.push(mkInv(this.scene.add.text(equipX - 55, sy, set.name + ' (' + set.equipped + '/' + set.total + ')', {
+                    fontSize: '11px', fill: '#9b59b6', fontFamily: 'Georgia, serif'
+                })));
+                set.bonuses.forEach((bonus, j) => {
+                    if (bonus.active) {
+                        this.scene.invGroup.push(mkInv(this.scene.add.text(equipX - 45, sy + 12 + j * 12, '+ ' + bonus.name, {
+                            fontSize: '10px', fill: '#2ecc71', fontFamily: 'Georgia, serif'
+                        })));
+                    }
+                });
+            });
+        }
     }
 
     _drawMaterialsPanel() {
