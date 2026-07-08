@@ -87,6 +87,12 @@ export class MultiplayerSync {
             boss.stats.hp = data.hp;
             boss.stats.maxHp = data.maxHp;
             if (data.phase) boss.stats.phase = data.phase;
+            if (data.x !== undefined) boss.x = data.x;
+            if (data.y !== undefined) boss.y = data.y;
+            // Update HP bar
+            if (boss.hpFill) {
+                boss.hpFill.width = (boss.hpBg ? boss.hpBg.width : 80) * (data.hp / data.maxHp);
+            }
         }
     }
 
@@ -274,7 +280,9 @@ export class MultiplayerSync {
                 bossType: activeBoss,
                 hp: b.stats.hp,
                 maxHp: b.stats.maxHp,
-                phase: b.stats.phase || 1
+                phase: b.stats.phase || 1,
+                x: Math.round(b.x),
+                y: Math.round(b.y)
             });
         }
     }

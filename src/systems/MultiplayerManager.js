@@ -1,5 +1,5 @@
 import { getClassData } from '../classes.js';
-import { isHost, getMyId, getPlayers, getPlayerNames, onStateUpdate, onLoot, onKey } from '../network.js';
+import { isHost, getMyId, getPlayers, getPlayerNames, onStateUpdate, onLoot, onKey, onZoneChange } from '../network.js';
 import { MultiplayerSync } from '../multiplayer.js';
 
 /**
@@ -16,6 +16,7 @@ export class MultiplayerManager {
         this._stateHandler = null;
         this._lootHandler = null;
         this._keyHandler = null;
+        this._zoneHandler = null;
     }
 
     setup() {
@@ -68,9 +69,19 @@ export class MultiplayerManager {
             if (data.key === 'cave') s.zones.cave.bossDefeated = true;
         };
 
+        this._zoneHandler = (data) => {
+            if (!data || !data.peerId) return;
+            if (data.peerId === getMyId()) return;
+            // Store remote player's zone for visibility filtering
+            if (this.remotePlayers[data.peerId]) {
+                this.remotePlayers[data.peerId].zone = data.zone;
+            }
+        };
+
         onStateUpdate(this._stateHandler);
         onLoot(this._lootHandler);
         onKey(this._keyHandler);
+        onZoneChange(this._zoneHandler);
 
         if (isHost() && this.mpSync) {
             this.mpSync.startHostSync();
@@ -161,12 +172,16 @@ export class MultiplayerManager {
             });
         }
 
-        // Update name tags
+        // Update name tags and zone visibility
         Object.values(this.remotePlayers).forEach(rp => {
             if (rp.nameText) {
                 rp.nameText.x = rp.sprite.x;
                 rp.nameText.y = rp.sprite.y - 28;
             }
+            // Show/hide based on zone
+            const sameZone = !rp.zone || rp.zone === s.zone;
+            rp.sprite.setVisible(sameZone);
+            if (rp.nameText) rp.nameText.setVisible(sameZone);
         });
 
         // Send/receive state
