@@ -94,6 +94,7 @@ export class SpellCast {
                 this.scene.shieldHP = 0;
                 this.scene.lifeLinkActive = false;
                 if (this.scene.shieldVfx) { this.scene.shieldVfx.destroy(); this.scene.shieldVfx = null; }
+                if (this.scene.shieldGlow) { this.scene.shieldGlow.destroy(); this.scene.shieldGlow = null; }
             }
         }
 

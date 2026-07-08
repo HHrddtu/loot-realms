@@ -35,7 +35,8 @@ export const NPC_DB = {
         greetingRu: 'Деревня захвачена! Помогите очистить лагеря!',
         greetingDe: 'Das Dorf ist überrennt! Hilf uns, die Lager zu säubern!',
         quests: ['clear_village_camps', 'defeat_village_boss'],
-        hideName: true
+        hideName: true,
+        condition: '!isRestored' // Only show when village is NOT restored
     }
 };
 

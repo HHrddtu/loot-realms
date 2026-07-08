@@ -21,6 +21,12 @@ export class NpcSystem {
 
         Object.entries(NPC_DB).forEach(([key, npc]) => {
             if (npc.biome !== s.zone) return;
+            // Check condition for NPC appearance
+            if (npc.condition) {
+                const cond = npc.condition;
+                if (cond === '!isRestored' && s.zones.village && s.zones.village.isRestored) return;
+                if (cond === '!isThriving' && s.zones.village && s.zones.village.isThriving) return;
+            }
             const spr = s.add.sprite(npc.x, npc.y, npc.texKey).setDepth(8);
             s.physics.add.existing(spr, true);
             spr.body.setSize(24, 24);
