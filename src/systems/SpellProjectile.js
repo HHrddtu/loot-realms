@@ -103,56 +103,95 @@ export class SpellProjectile {
         const targetY = dist > maxRange
             ? this.scene.player.y + (worldPoint.y - this.scene.player.y) / dist * maxRange : worldPoint.y;
 
+        // Warning indicator - pulsing red circle
         const indicator = this.scene.add.circle(targetX, targetY, spell.radius || 100, 0xe74c3c, 0.15).setDepth(10);
         this.scene.tweens.add({
-            targets: indicator, alpha: 0.3, duration: 400, yoyo: true, repeat: 3,
+            targets: indicator, alpha: 0.35, duration: 300, yoyo: true, repeat: 5,
             onComplete: () => indicator.destroy()
         });
 
-        const meteorTex = this.scene.add.circle(targetX, targetY - 200, 20, 0xe74c3c, 1).setDepth(16);
-        this.scene.tweens.add({
-            targets: meteorTex, y: targetY, scaleX: 2, scaleY: 2, duration: 800, ease: 'Power2',
-            onComplete: () => {
-                meteorTex.destroy();
-                const impact = this.scene.add.circle(targetX, targetY, spell.radius || 100, 0xe74c3c, 0.4).setDepth(15);
-                this.scene.tweens.add({
-                    targets: impact, alpha: 0, scaleX: 1.5, scaleY: 1.5, duration: 400,
-                    onComplete: () => impact.destroy()
-                });
-                if (this.scene.particles) this.scene.particles.spawnHitSpark(targetX, targetY);
-                this.scene.cameras.main.shake(200, 0.008);
+        // Meteor trail - multiple falling rocks
+        const meteorGroup = this.scene.add.group();
+        for (let i = 0; i < 5; i++) {
+            const offsetX = Phaser.Math.Between(-30, 30);
+            const offsetY = Phaser.Math.Between(-30, 30);
+            const size = Phaser.Math.Between(8, 16);
+            const rock = this.scene.add.circle(targetX + offsetX, targetY - 300 - (i * 40), size, 0x8B4513, 1).setDepth(16);
+            // Fire glow around rock
+            const glow = this.scene.add.circle(targetX + offsetX, targetY - 300 - (i * 40), size + 6, 0xff6600, 0.5).setDepth(15);
+            meteorGroup.addMultiple([rock, glow]);
+            
+            this.scene.tweens.add({
+                targets: [rock, glow],
+                y: targetY + Phaser.Math.Between(-10, 10),
+                x: targetX + offsetX + Phaser.Math.Between(-20, 20),
+                duration: 600 + (i * 100),
+                delay: i * 80,
+                ease: 'Power2',
+                onComplete: () => { rock.destroy(); glow.destroy(); }
+            });
+        }
 
-                const spellDmgMult = 1 + (this.scene.computedSpellDamage || 0) / 100;
-                const baseDmg = Math.floor((spell.damage + this.scene.playerDamage * 0.5) * spellDmgMult);
-                const dot = (spell.dot || 0) + (this.scene.computedDotPower || 0);
-                const dotDur = (spell.dotDuration || 0) + (this.scene.computedDotDuration || 0);
-                const radius = spell.radius || 100;
+        // Main impact after delay
+        this.scene.time.delayedCall(700, () => {
+            // Screen shake
+            this.scene.cameras.main.shake(300, 0.015);
+            
+            // Flash
+            const flash = this.scene.add.rectangle(targetX, targetY, spell.radius * 2, spell.radius * 2, 0xff6600, 0.6).setDepth(20);
+            this.scene.tweens.add({
+                targets: flash, alpha: 0, duration: 300,
+                onComplete: () => flash.destroy()
+            });
 
-                this.scene.enemies.getChildren().forEach(e => {
-                    if (!e.active || !e.stats) return;
-                    if (Phaser.Math.Distance.Between(targetX, targetY, e.x, e.y) < radius) {
-                        const totalDmg = baseDmg + dot * dotDur;
-                        e.stats.hp -= totalDmg;
-                        this.scene.floatingText(e.x, e.y - 20, '-' + totalDmg, '#e74c3c');
-                        if (e.stats.hp <= 0) this.scene.killEnemy(e);
+            // Explosion ring
+            const ring = this.scene.add.circle(targetX, targetY, 10, 0xff4400, 0.9).setDepth(15);
+            this.scene.tweens.add({
+                targets: ring, scaleX: (spell.radius || 100) / 10, scaleY: (spell.radius || 100) / 10, alpha: 0, duration: 500,
+                onComplete: () => ring.destroy()
+            });
+
+            // Second ring
+            const ring2 = this.scene.add.circle(targetX, targetY, 5, 0xffcc00, 0.7).setDepth(15);
+            this.scene.tweens.add({
+                targets: ring2, scaleX: (spell.radius || 100) / 5 * 0.7, scaleY: (spell.radius || 100) / 5 * 0.7, alpha: 0, duration: 400, delay: 100,
+                onComplete: () => ring2.destroy()
+            });
+
+            // Fire particles
+            if (this.scene.particles) this.scene.particles.spawnHitSpark(targetX, targetY);
+
+            // Damage
+            const spellDmgMult = 1 + (this.scene.computedSpellDamage || 0) / 100;
+            const baseDmg = Math.floor((spell.damage + this.scene.playerDamage * 0.5) * spellDmgMult);
+            const dot = (spell.dot || 0) + (this.scene.computedDotPower || 0);
+            const dotDur = (spell.dotDuration || 0) + (this.scene.computedDotDuration || 0);
+            const radius = spell.radius || 100;
+
+            this.scene.enemies.getChildren().forEach(e => {
+                if (!e.active || !e.stats) return;
+                if (Phaser.Math.Distance.Between(targetX, targetY, e.x, e.y) < radius) {
+                    const totalDmg = baseDmg + dot * dotDur;
+                    e.stats.hp -= totalDmg;
+                    this.scene.floatingText(e.x, e.y - 20, '-' + totalDmg, '#e74c3c');
+                    if (e.stats.hp <= 0) this.scene.killEnemy(e);
+                }
+            });
+            ['boss', 'mineBoss', 'caveBoss', 'villageBoss', 'hellBoss', 'snowyIceSpirit', 'castleBoss'].forEach(bossKey => {
+                const boss = this.scene[bossKey];
+                if (boss && boss.active && boss.stats && Phaser.Math.Distance.Between(targetX, targetY, boss.x, boss.y) < radius) {
+                    let totalDmg = baseDmg + dot * dotDur;
+                    if (this.scene.computedBossDamage) totalDmg = Math.floor(totalDmg * (1 + this.scene.computedBossDamage / 100));
+                    boss.stats.hp -= totalDmg;
+                    this.scene.floatingText(boss.x, boss.y - 20, '-' + totalDmg, '#e74c3c');
+                    if (boss.hpFill) boss.hpFill.width = boss.hpBg.width * (boss.stats.hp / boss.stats.maxHp);
+                    if (boss.stats.hp <= 0) {
+                        if (bossKey === 'boss') this.scene.killBoss();
+                        else if (bossKey === 'mineBoss') this.scene.killMineBoss();
+                        else if (bossKey === 'caveBoss') this.scene.killCaveBoss();
                     }
-                });
-                ['boss', 'mineBoss', 'caveBoss', 'villageBoss', 'hellBoss', 'snowyIceSpirit', 'castleBoss'].forEach(bossKey => {
-                    const boss = this.scene[bossKey];
-                    if (boss && boss.active && boss.stats && Phaser.Math.Distance.Between(targetX, targetY, boss.x, boss.y) < radius) {
-                        let totalDmg = baseDmg + dot * dotDur;
-                        if (this.scene.computedBossDamage) totalDmg = Math.floor(totalDmg * (1 + this.scene.computedBossDamage / 100));
-                        boss.stats.hp -= totalDmg;
-                        this.scene.floatingText(boss.x, boss.y - 20, '-' + totalDmg, '#e74c3c');
-                        if (boss.hpFill) boss.hpFill.width = boss.hpBg.width * (boss.stats.hp / boss.stats.maxHp);
-                        if (boss.stats.hp <= 0) {
-                            if (bossKey === 'boss') this.scene.killBoss();
-                            else if (bossKey === 'mineBoss') this.scene.killMineBoss();
-                            else if (bossKey === 'caveBoss') this.scene.killCaveBoss();
-                        }
-                    }
-                });
-            }
+                }
+            });
         });
     }
 
@@ -166,29 +205,44 @@ export class SpellProjectile {
         const targetY = dist > maxRange
             ? this.scene.player.y + (worldPoint.y - this.scene.player.y) / dist * maxRange : worldPoint.y;
 
+        // Arc throw with trail
         const jar = this.scene.add.sprite(this.scene.player.x, this.scene.player.y - 10, 'acid_flask').setDepth(16).setScale(0.8);
+        const jarGlow = this.scene.add.circle(this.scene.player.x, this.scene.player.y - 10, 8, 0x27ae60, 0.4).setDepth(15);
         this.scene.tweens.add({
-            targets: jar, x: targetX, y: targetY, duration: 250, ease: 'Power1',
+            targets: [jar, jarGlow], x: targetX, y: targetY, duration: 250, ease: 'Power1',
             onComplete: () => {
                 jar.destroy();
-                for (let a = 0; a < 6; a++) {
-                    const angle = (Math.PI * 2 / 6) * a;
+                jarGlow.destroy();
+                
+                // Impact splash - larger splats
+                for (let a = 0; a < 8; a++) {
+                    const angle = (Math.PI * 2 / 8) * a;
+                    const splatDist = 10 + Math.random() * 15;
                     const splat = this.scene.add.circle(
-                        targetX + Math.cos(angle) * 15, targetY + Math.sin(angle) * 15,
-                        4 + Math.random() * 4, 0x27ae60, 0.8
+                        targetX + Math.cos(angle) * splatDist, targetY + Math.sin(angle) * splatDist,
+                        5 + Math.random() * 5, 0x27ae60, 0.9
                     ).setDepth(15);
                     this.scene.tweens.add({
-                        targets: splat, alpha: 0, scaleX: 2, scaleY: 2, duration: 300,
+                        targets: splat, alpha: 0, scaleX: 2.5, scaleY: 2.5, duration: 400,
                         onComplete: () => splat.destroy()
                     });
                 }
-                const impact = this.scene.add.circle(targetX, targetY, spell.radius || 50, 0x27ae60, 0.5).setDepth(15);
+                
+                // Acid pool effect
+                const pool = this.scene.add.circle(targetX, targetY, spell.radius || 50, 0x1a5e1a, 0.6).setDepth(14);
                 this.scene.tweens.add({
-                    targets: impact, alpha: 0, scaleX: 1.5, scaleY: 1.5, duration: 250,
-                    onComplete: () => impact.destroy()
+                    targets: pool, alpha: 0.3, scaleX: 1.2, scaleY: 1.2, duration: 300,
+                    onComplete: () => {
+                        this.scene.tweens.add({
+                            targets: pool, alpha: { from: 0.3, to: 0.15 }, duration: 500, yoyo: true, repeat: -1
+                        });
+                    }
                 });
+                
+                // Corrosion particles
                 if (this.scene.particles) this.scene.particles.spawnHitSpark(targetX, targetY);
                 this.scene.cameras.main.shake(150, 0.005);
+                this.scene.floatingText(targetX, targetY - 30, 'ACID!', '#27ae60');
 
                 const spellDmgMult = 1 + (this.scene.computedSpellDamage || 0) / 100;
                 const baseDmg = Math.floor((spell.damage + this.scene.playerDamage * 0.3) * spellDmgMult);

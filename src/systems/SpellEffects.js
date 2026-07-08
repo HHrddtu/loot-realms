@@ -26,11 +26,22 @@ export class SpellEffects {
     _castHeal(spell) {
         const healAmt = Math.floor(this.scene.playerMaxHP * spell.healPercent);
         this.scene.playerHP = Math.min(this.scene.playerMaxHP, this.scene.playerHP + healAmt);
+        
+        // Heal VFX - expanding light burst
         const healVfx = this.scene.add.sprite(this.scene.player.x, this.scene.player.y, 'heal_vfx').setDepth(15);
         this.scene.tweens.add({
-            targets: healVfx, scaleX: 2, scaleY: 2, alpha: 0, duration: 600,
+            targets: healVfx, scaleX: 2.5, scaleY: 2.5, alpha: 0, duration: 700,
             onComplete: () => healVfx.destroy()
         });
+        
+        // Healing ring
+        const ring = this.scene.add.circle(this.scene.player.x, this.scene.player.y, 5, 0x2ecc71, 0.8).setDepth(14);
+        this.scene.tweens.add({
+            targets: ring, scaleX: 3, scaleY: 3, alpha: 0, duration: 500,
+            onComplete: () => ring.destroy()
+        });
+        
+        // Green particles rising
         if (this.scene.particles) this.scene.particles.spawnHealEffect(this.scene.player.x, this.scene.player.y);
         this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, '+' + healAmt + ' HP', '#2ecc71');
         this.scene.updateUI();
@@ -121,11 +132,23 @@ export class SpellEffects {
         this.scene.playerHP = Math.min(this.scene.playerMaxHP, this.scene.playerHP + healAmt);
         this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, '+' + healAmt + ' HP', '#f1c40f');
         this.scene.floatingText(this.scene.player.x, this.scene.player.y - 50, 'DIVINE BLESSING!', '#f1c40f');
+        
+        // Holy light VFX
         const vfx = this.scene.add.sprite(this.scene.player.x, this.scene.player.y, 'heal_vfx').setDepth(15).setTint(0xf1c40f);
         this.scene.tweens.add({
             targets: vfx, scaleX: 3, scaleY: 3, alpha: 0, duration: 800,
             onComplete: () => vfx.destroy()
         });
+        
+        // Expanding holy rings
+        for (let i = 0; i < 3; i++) {
+            const ring = this.scene.add.circle(this.scene.player.x, this.scene.player.y, 10 + (i * 15), 0xf1c40f, 0.6).setDepth(14);
+            this.scene.tweens.add({
+                targets: ring, scaleX: 2 + i * 0.5, scaleY: 2 + i * 0.5, alpha: 0, duration: 600, delay: i * 150,
+                onComplete: () => ring.destroy()
+            });
+        }
+        
         if (this.scene.particles) this.scene.particles.spawnHealEffect(this.scene.player.x, this.scene.player.y);
         this.scene._divineBlessingDmgBuff = spell.damageBuff;
         this.scene._divineBlessingDefBuff = spell.defenseBuff;
@@ -162,13 +185,50 @@ export class SpellEffects {
         const targetY = dist > maxRange
             ? this.scene.player.y + (worldPoint.y - this.scene.player.y) / dist * maxRange : worldPoint.y;
 
-        const cloud = this.scene.add.circle(targetX, targetY, spell.radius || 90, 0x27ae60, 0.3).setDepth(10);
-        const cloudBorder = this.scene.add.circle(targetX, targetY, spell.radius || 90).setDepth(10)
-            .setStrokeStyle(2, 0x27ae60).setFillStyle(0x27ae60, 0.05);
+        // Cloud formation effect
+        const cloudRadius = spell.radius || 90;
+        
+        // Outer toxic ring
+        const outerRing = this.scene.add.circle(targetX, targetY, cloudRadius, 0x27ae60, 0).setDepth(10);
         this.scene.tweens.add({
-            targets: [cloud, cloudBorder], alpha: { from: 0.3, to: 0.15 },
+            targets: outerRing, alpha: 0.4, scaleX: 1.2, scaleY: 1.2, duration: 400,
+            onComplete: () => {
+                this.scene.tweens.add({
+                    targets: outerRing, alpha: { from: 0.3, to: 0.15 }, duration: 600, yoyo: true, repeat: -1
+                });
+            }
+        });
+
+        // Inner cloud core
+        const cloud = this.scene.add.circle(targetX, targetY, cloudRadius * 0.6, 0x27ae60, 0.4).setDepth(11);
+        this.scene.tweens.add({
+            targets: cloud, alpha: { from: 0.4, to: 0.2 }, scaleX: { from: 1, to: 1.1 }, scaleY: { from: 1, to: 1.1 },
+            duration: 1000, yoyo: true, repeat: -1
+        });
+
+        // Toxic bubbles
+        const bubbles = [];
+        for (let i = 0; i < 8; i++) {
+            const angle = (i / 8) * Math.PI * 2;
+            const bx = targetX + Math.cos(angle) * cloudRadius * 0.5;
+            const by = targetY + Math.sin(angle) * cloudRadius * 0.5;
+            const bubble = this.scene.add.circle(bx, by, 4, 0x3ddc3d, 0.7).setDepth(12);
+            bubbles.push(bubble);
+            this.scene.tweens.add({
+                targets: bubble, y: by - 15, alpha: 0, scaleX: 1.5, scaleY: 1.5,
+                duration: 1200 + Math.random() * 800, repeat: -1, delay: Math.random() * 1000
+            });
+        }
+
+        // Toxic puddle border
+        const cloudBorder = this.scene.add.circle(targetX, targetY, cloudRadius).setDepth(10)
+            .setStrokeStyle(3, 0x1a5e1a).setFillStyle(0x27ae60, 0.05);
+        this.scene.tweens.add({
+            targets: cloudBorder, alpha: { from: 0.5, to: 0.2 },
             duration: 800, yoyo: true, repeat: -1
         });
+
+        this.scene.floatingText(targetX, targetY - 30, 'TOXIC CLOUD!', '#27ae60');
 
         const durationMs = spell.duration * 1000;
         let elapsed = 0;
@@ -176,7 +236,10 @@ export class SpellEffects {
         const radius = spell.radius || 90;
         const cleanup = () => {
             this.scene.tweens.killTweensOf(cloud); this.scene.tweens.killTweensOf(cloudBorder);
+            this.scene.tweens.killTweensOf(outerRing);
+            bubbles.forEach(b => { this.scene.tweens.killTweensOf(b); if (b.active) b.destroy(); });
             if (cloud.active) cloud.destroy(); if (cloudBorder.active) cloudBorder.destroy();
+            if (outerRing.active) outerRing.destroy();
         };
         this.scene.time.addEvent({
             delay: tickInterval,
