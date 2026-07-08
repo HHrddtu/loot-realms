@@ -483,16 +483,30 @@ export function drawMineTextures(mk) {
         }
     });
 
-    mk('fireball', 14, 14, (c) => {
+    mk('fireball', 20, 20, (c) => {
         c.imageSmoothingEnabled = false;
-        const grd = c.createRadialGradient(7, 7, 0, 7, 7, 7);
-        grd.addColorStop(0, '#fff8e1');
-        grd.addColorStop(0.2, '#ff9800');
-        grd.addColorStop(0.5, '#f44336');
-        grd.addColorStop(0.8, '#b71c1c');
-        grd.addColorStop(1, 'rgba(100,0,0,0)');
-        c.fillStyle = grd;
-        c.fillRect(0, 0, 14, 14);
+        // Outer glow
+        const grd1 = c.createRadialGradient(10, 10, 0, 10, 10, 10);
+        grd1.addColorStop(0, 'rgba(255,255,200,0.3)');
+        grd1.addColorStop(0.5, 'rgba(255,150,50,0.15)');
+        grd1.addColorStop(1, 'rgba(255,100,0,0)');
+        c.fillStyle = grd1;
+        c.fillRect(0, 0, 20, 20);
+        // Inner fire
+        const grd2 = c.createRadialGradient(10, 10, 0, 10, 10, 8);
+        grd2.addColorStop(0, '#ffffff');
+        grd2.addColorStop(0.3, '#ffcc00');
+        grd2.addColorStop(0.6, '#ff6600');
+        grd2.addColorStop(0.8, '#cc0000');
+        grd2.addColorStop(1, 'rgba(100,0,0,0)');
+        c.fillStyle = grd2;
+        c.fillRect(2, 2, 16, 16);
+        // Flame tips
+        c.fillStyle = '#ff9900';
+        c.fillRect(6, 0, 2, 4);
+        c.fillRect(12, 1, 2, 3);
+        c.fillStyle = '#ffcc00';
+        c.fillRect(9, 0, 3, 5);
     });
 
     mk('enemy_arrow', 12, 6, (c) => {
@@ -552,28 +566,67 @@ export function drawMineTextures(mk) {
         c.fillRect(0, 0, 12, 12);
     });
 
-    mk('shield_vfx', 48, 48, (c) => {
+    mk('shield_vfx', 56, 56, (c) => {
         c.imageSmoothingEnabled = false;
-        c.strokeStyle = 'rgba(52,152,219,0.8)';
+        // Outer glow ring
+        c.strokeStyle = 'rgba(52,152,219,0.3)';
+        c.lineWidth = 8;
+        c.beginPath();
+        c.arc(28, 28, 26, 0, Math.PI * 2);
+        c.stroke();
+        // Main ring
+        c.strokeStyle = 'rgba(52,152,219,0.9)';
         c.lineWidth = 3;
         c.beginPath();
-        c.arc(24, 24, 20, 0, Math.PI * 2);
+        c.arc(28, 28, 22, 0, Math.PI * 2);
         c.stroke();
-        c.strokeStyle = 'rgba(100,180,255,0.4)';
+        // Inner ring
+        c.strokeStyle = 'rgba(100,200,255,0.6)';
         c.lineWidth = 2;
         c.beginPath();
-        c.arc(24, 24, 16, 0, Math.PI * 2);
+        c.arc(28, 28, 18, 0, Math.PI * 2);
         c.stroke();
+        // Rune marks
+        c.fillStyle = 'rgba(100,200,255,0.8)';
+        c.fillRect(26, 2, 4, 6);
+        c.fillRect(26, 48, 4, 6);
+        c.fillRect(2, 26, 6, 4);
+        c.fillRect(48, 26, 6, 4);
+        // Center glow
+        const grd = c.createRadialGradient(28, 28, 0, 28, 28, 12);
+        grd.addColorStop(0, 'rgba(100,200,255,0.4)');
+        grd.addColorStop(1, 'rgba(52,152,219,0)');
+        c.fillStyle = grd;
+        c.fillRect(16, 16, 24, 24);
     });
 
-    mk('heal_vfx', 32, 32, (c) => {
+    mk('heal_vfx', 40, 40, (c) => {
         c.imageSmoothingEnabled = false;
-        const grd = c.createRadialGradient(16, 16, 0, 16, 16, 16);
-        grd.addColorStop(0, 'rgba(46,204,113,0.7)');
-        grd.addColorStop(0.5, 'rgba(46,204,113,0.3)');
-        grd.addColorStop(1, 'rgba(46,204,113,0)');
-        c.fillStyle = grd;
-        c.fillRect(0, 0, 32, 32);
+        // Outer glow
+        const grd1 = c.createRadialGradient(20, 20, 0, 20, 20, 20);
+        grd1.addColorStop(0, 'rgba(46,204,113,0.2)');
+        grd1.addColorStop(0.5, 'rgba(46,204,113,0.1)');
+        grd1.addColorStop(1, 'rgba(46,204,113,0)');
+        c.fillStyle = grd1;
+        c.fillRect(0, 0, 40, 40);
+        // Inner glow
+        const grd2 = c.createRadialGradient(20, 20, 0, 20, 20, 14);
+        grd2.addColorStop(0, 'rgba(200,255,200,0.8)');
+        grd2.addColorStop(0.4, 'rgba(46,204,113,0.6)');
+        grd2.addColorStop(0.7, 'rgba(46,204,113,0.3)');
+        grd2.addColorStop(1, 'rgba(46,204,113,0)');
+        c.fillStyle = grd2;
+        c.fillRect(6, 6, 28, 28);
+        // Cross symbol
+        c.fillStyle = 'rgba(255,255,255,0.9)';
+        c.fillRect(18, 12, 4, 16);
+        c.fillRect(12, 18, 16, 4);
+        // Sparkles
+        c.fillStyle = 'rgba(255,255,200,0.8)';
+        c.fillRect(8, 8, 2, 2);
+        c.fillRect(30, 10, 2, 2);
+        c.fillRect(10, 30, 2, 2);
+        c.fillRect(28, 28, 2, 2);
     });
 
     mk('mine_barrel', 20, 24, (c) => {

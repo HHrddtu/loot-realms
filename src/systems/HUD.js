@@ -166,7 +166,7 @@ export class HUD {
     }
 
     showSaveIndicator() {
-        if (!this.scene.saveIndicator) return;
+        if (!this.scene.saveIndicator || !this.scene.time) return;
         this.scene.saveIndicator.setText('Saving...');
         this.scene.saveIndicator.setColor('#27ae60');
         this.scene.time.delayedCall(1500, () => {
