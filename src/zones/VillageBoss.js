@@ -289,6 +289,7 @@ export class VillageBoss {
         const s = this.scene;
         if (s.zones.village.snowyBossDefeated) return;
         s.zones.village.snowyBossDefeated = true;
+        s.zones.village.isThriving = true; // Village is now thriving after defeating Ice Spirit
         playBossDeath();
         const ox = s.villageOffsetX;
         if (s.snowyIceSpirit) {

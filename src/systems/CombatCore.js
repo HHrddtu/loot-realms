@@ -207,6 +207,11 @@ export class CombatCore {
         s.tweens.add({ targets: enemy, scaleX: 1.2, scaleY: 1.2, duration: 60, yoyo: true, onComplete: () => { if (enemy.active) { enemy.clearTint(); enemy.setScale(1); } } });
         s.floatingText(enemy.x, enemy.y - 20, '-' + finalDamage, '#e74c3c');
 
+        // Send damage to host in multiplayer
+        if (s.multiplayer && s.mpSync && enemy.mpId) {
+            s.mpSync.broadcastMobDamage(enemy.mpId, finalDamage);
+        }
+
         const totalLifeSteal = s.computedLifeSteal + ((s._consumableBonusLifesteal || 0) * 100);
         if (totalLifeSteal > 0) {
             const healAmount = Math.floor(finalDamage * totalLifeSteal / 100);

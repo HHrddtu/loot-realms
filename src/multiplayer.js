@@ -1,8 +1,8 @@
 import {
     sendMobSync, sendBossUpdate, sendChestOpened, sendLootCollected,
-    sendMobUpdate, sendPlayerUpdate, sendZoneChange, sendBossKilled,
+    sendMobUpdate, sendPlayerUpdate, sendZoneChange, sendBossKilled, sendMobDamage,
     onMobSync, onBossUpdate, onChestOpened, onLootCollected,
-    onMobUpdate, onPlayerUpdate, onZoneChange, onBossKilled,
+    onMobUpdate, onPlayerUpdate, onZoneChange, onBossKilled, onMobDamage,
     isHost, getMyId, getPlayers
 } from './network.js';
 
@@ -26,6 +26,7 @@ export class MultiplayerSync {
         onPlayerUpdate((data) => this._handlePlayerUpdate(data));
         onZoneChange((data) => this._handleZoneChange(data));
         onBossKilled((data) => this._handleBossKilled(data));
+        onMobDamage((data) => this._handleMobDamage(data));
     }
 
     cleanup() {
@@ -197,6 +198,29 @@ export class MultiplayerSync {
         s.floatingText(s.player.x, s.player.y - 50, 'Boss defeated!', '#f1c40f');
     }
 
+    _handleMobDamage(data) {
+        if (!data || !data.mobId) return;
+        const s = this.scene;
+        
+        // Find the mob on host side
+        const groups = [s.enemies, s.villageZombies, s.caveSmallBats, s.hellImps];
+        for (const group of groups) {
+            if (!group || !group.scene) continue;
+            group.getChildren().forEach(e => {
+                if (e.active && e.mpId === data.mobId && e.stats) {
+                    e.stats.hp -= data.damage;
+                    s.floatingText(e.x, e.y - 20, '-' + data.damage, '#e74c3c');
+                    if (e.hpFill) {
+                        e.hpFill.width = e.hpBg.width * (e.stats.hp / e.stats.maxHp);
+                    }
+                    if (e.stats.hp <= 0) {
+                        s.killEnemy(e);
+                    }
+                }
+            });
+        }
+    }
+
     _createClientMob(mobData) {
         const s = this.scene;
         let texKey = mobData.texKey || 'goblin_walk';
@@ -289,6 +313,10 @@ export class MultiplayerSync {
 
     broadcastMobKilled(mobId) {
         sendMobSync({ type: 'mob_killed', mobId });
+    }
+
+    broadcastMobDamage(mobId, damage) {
+        sendMobDamage(mobId, damage);
     }
 
     broadcastBossKilled(bossType, loot) {
