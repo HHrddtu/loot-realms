@@ -52,6 +52,7 @@ export class BaseZone {
             s.shieldHP = 0;
             if (s.shieldVfx) { s.shieldVfx.destroy(); s.shieldVfx = null; }
         }
+        if (s.shieldGlow) { s.shieldGlow.destroy(); s.shieldGlow = null; }
     }
 
     _destroyEnemies() {
