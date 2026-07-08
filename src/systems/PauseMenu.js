@@ -13,8 +13,12 @@ export class PauseMenu {
     openPause() {
         this.scene.menuOpen = true;
         this.scene.physics.pause();
-        if (this.scene.enemies) this.scene.enemies.getChildren().forEach(e => { if (e.body) e.body.setVelocity(0); });
-        if (this.scene.stumps) this.scene.stumps.getChildren().forEach(s => { if (s.body) s.body.setVelocity(0); });
+        try {
+            if (this.scene.enemies && this.scene.enemies.scene) this.scene.enemies.getChildren().forEach(e => { if (e.body) e.body.setVelocity(0); });
+        } catch (e) {}
+        try {
+            if (this.scene.stumps && this.scene.stumps.scene) this.scene.stumps.getChildren().forEach(s => { if (s.body) s.body.setVelocity(0); });
+        } catch (e) {}
         this.scene.pauseGroup = [];
         const mk = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
         this.scene.pauseGroup.push(mk(this.scene.add.rectangle(400, 300, 420, 300, 0x000000, 0.92).setStrokeStyle(2, 0xf1c40f)));
@@ -44,8 +48,12 @@ export class PauseMenu {
     _openPauseAdvanced() {
         this.scene.menuOpen = true;
         this.scene.physics.pause();
-        if (this.scene.enemies) this.scene.enemies.getChildren().forEach(e => { if (e.body) e.body.setVelocity(0); });
-        if (this.scene.stumps) this.scene.stumps.getChildren().forEach(s => { if (s.body) s.body.setVelocity(0); });
+        try {
+            if (this.scene.enemies && this.scene.enemies.scene) this.scene.enemies.getChildren().forEach(e => { if (e.body) e.body.setVelocity(0); });
+        } catch (e) {}
+        try {
+            if (this.scene.stumps && this.scene.stumps.scene) this.scene.stumps.getChildren().forEach(s => { if (s.body) s.body.setVelocity(0); });
+        } catch (e) {}
         this.scene.pauseGroup = [];
         const mk = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
         this.scene.pauseGroup.push(mk(this.scene.add.rectangle(400, 300, 420, 340, 0x000000, 0.92).setStrokeStyle(2, 0x555577)));
