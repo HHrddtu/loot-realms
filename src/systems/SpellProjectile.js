@@ -435,7 +435,7 @@ export class SpellProjectile {
     }
 
     _checkGroupHit(fb, group, method) {
-        if (!group) return false;
+        if (!group || !group.scene) return false;
         let hit = false;
         group.getChildren().forEach(ch => {
             if (ch.active && !ch.broken && Phaser.Math.Distance.Between(fb.x, fb.y, ch.x, ch.y) < 20) {
@@ -461,7 +461,7 @@ export class SpellProjectile {
     }
 
     _checkExtraGroupHit(fb, group, threshold) {
-        if (!group) return false;
+        if (!group || !group.scene) return false;
         let hit = false;
         group.getChildren().forEach(e => {
             if (!e.active) return;
@@ -485,7 +485,7 @@ export class SpellProjectile {
     }
 
     _checkStumpHit(fb) {
-        if (!this.scene.stumps) return false;
+        if (!this.scene.stumps || !this.scene.stumps.scene) return false;
         let hit = false;
         this.scene.stumps.getChildren().forEach(s => {
             if (s.active && Phaser.Math.Distance.Between(fb.x, fb.y, s.x, s.y) < 18) {
