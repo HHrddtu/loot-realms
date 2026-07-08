@@ -49,7 +49,7 @@ export class InventoryUI {
 
         slots.forEach(sl => {
             this.scene.invGroup.push(mkInv(this.scene.add.text(equipX - 55, sl.y - 8, sl.label + ':', {
-                fontSize: '11px', fill: '#95a5a6', fontFamily: 'Arial'
+                fontSize: '11px', fill: '#95a5a6', fontFamily: 'Georgia, serif'
             })));
 
             const bg = mkInv(this.scene.add.rectangle(equipX + 20, sl.y + 10, 44, 44, 0x1a1a2e)
@@ -61,7 +61,7 @@ export class InventoryUI {
                 this.scene.invGroup.push(mkInv(this.scene.add.sprite(equipX + 20, sl.y + 10, item.texKey)));
                 const rc = '#' + RARITY_COLORS[item.rarity].toString(16).padStart(6, '0');
                 this.scene.invGroup.push(mkInv(this.scene.add.text(equipX - 55, sl.y + 18, item.name, {
-                    fontSize: '10px', fill: rc, fontFamily: 'Arial'
+                    fontSize: '12px', fill: rc, fontFamily: 'Georgia, serif'
                 })));
                 bg.setStrokeStyle(2, RARITY_COLORS[item.rarity]);
                 bg.setInteractive({ useHandCursor: true });
@@ -79,14 +79,14 @@ export class InventoryUI {
                 });
             } else {
                 this.scene.invGroup.push(mkInv(this.scene.add.text(equipX + 20, sl.y + 10, 'Empty', {
-                    fontSize: '9px', fill: '#555', fontFamily: 'Arial'
+                    fontSize: '11px', fill: '#555', fontFamily: 'Georgia, serif'
                 }).setOrigin(0.5)));
             }
         });
 
         const consY = 340;
         this.scene.invGroup.push(mkInv(this.scene.add.text(equipX - 55, consY - 8, 'Potion:', {
-            fontSize: '11px', fill: '#2ecc71', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '11px', fill: '#2ecc71', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         })));
         const consBg = mkInv(this.scene.add.rectangle(equipX + 20, consY + 10, 44, 44, 0x1a1a2e)
             .setStrokeStyle(1, 0x2ecc71));
@@ -96,7 +96,7 @@ export class InventoryUI {
             this.scene.invGroup.push(mkInv(this.scene.add.sprite(equipX + 20, consY + 10, item.texKey)));
             const rc = '#' + (RARITY_COLORS[item.rarity] || 0xaaaaaa).toString(16).padStart(6, '0');
             this.scene.invGroup.push(mkInv(this.scene.add.text(equipX - 55, consY + 18, item.name, {
-                fontSize: '10px', fill: rc, fontFamily: 'Arial'
+                fontSize: '12px', fill: rc, fontFamily: 'Georgia, serif'
             })));
             consBg.setStrokeStyle(2, RARITY_COLORS[item.rarity] || 0xaaaaaa);
             consBg.setInteractive({ useHandCursor: true });
@@ -108,16 +108,16 @@ export class InventoryUI {
                 this.closeInventory();
             });
             this.scene.invGroup.push(mkInv(this.scene.add.text(equipX + 44, consY + 10, '[F]', {
-                fontSize: '9px', fill: '#2ecc71', fontFamily: 'Arial'
+                fontSize: '11px', fill: '#2ecc71', fontFamily: 'Georgia, serif'
             })));
         } else {
             this.scene.invGroup.push(mkInv(this.scene.add.text(equipX + 20, consY + 10, 'Empty', {
-                fontSize: '9px', fill: '#555', fontFamily: 'Arial'
+                fontSize: '11px', fill: '#555', fontFamily: 'Georgia, serif'
             }).setOrigin(0.5)));
         }
 
         this.scene.invGroup.push(mkInv(this.scene.add.text(350, consY - 8, 'Gold: ' + (this.scene.gold || 0), {
-            fontSize: '13px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '13px', fill: '#f1c40f', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5)));
     }
 
@@ -126,14 +126,14 @@ export class InventoryUI {
         const mkInv = (el) => this.ui._mkEl(el);
 
         this.scene.invGroup.push(mkInv(this.scene.add.text(matX, matY, 'MATERIALS (session)', {
-            fontSize: '12px', fill: '#27ae60', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '12px', fill: '#27ae60', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5)));
         this.scene.invGroup.push(mkInv(this.scene.add.text(matX, matY + 16,
             this.scene.materials.length + '/' + this.scene.maxMaterials, {
-            fontSize: '10px', fill: '#555', fontFamily: 'Arial'
+            fontSize: '12px', fill: '#555', fontFamily: 'Georgia, serif'
         }).setOrigin(0.5)));
         this.scene.invGroup.push(mkInv(this.scene.add.text(matX, matY + 30, this.scene.getMaterialStatsText(), {
-            fontSize: '10px', fill: '#27ae60', fontFamily: 'Arial'
+            fontSize: '12px', fill: '#27ae60', fontFamily: 'Georgia, serif'
         }).setOrigin(0.5)));
 
         const cols = 5, slotSize = 36, gap = 4;
@@ -154,7 +154,7 @@ export class InventoryUI {
 
                 if (item.locked) {
                     const lockIcon = mkInv(this.scene.add.text(sx - slotSize / 2 + 3, sy - slotSize / 2 + 2, '\u{1F512}', {
-                        fontSize: '8px', fill: '#e74c3c', fontFamily: 'Arial'
+                        fontSize: '8px', fill: '#e74c3c', fontFamily: 'Georgia, serif'
                     }));
                     this.scene.invGroup.push(lockIcon);
                 }
@@ -189,13 +189,13 @@ export class InventoryUI {
                 }
                 if (statParts.length > 0) {
                     this.scene.invGroup.push(mkInv(this.scene.add.text(sx, sy + slotSize / 2 + 6, statParts.join(' '), {
-                        fontSize: '7px', fill: '#27ae60', fontFamily: 'Arial'
+                        fontSize: '7px', fill: '#27ae60', fontFamily: 'Georgia, serif'
                     }).setOrigin(0.5)));
                 }
 
                 if (!item.locked) {
                     this.scene.invGroup.push(mkInv(this.scene.add.text(sx + slotSize / 2 - 2, sy - slotSize / 2 + 2, 'x', {
-                        fontSize: '8px', fill: '#c0392b', fontFamily: 'Arial', fontStyle: 'bold'
+                        fontSize: '8px', fill: '#c0392b', fontFamily: 'Georgia, serif', fontStyle: 'bold'
                     }).setOrigin(1, 0)));
                 }
             }
@@ -207,11 +207,11 @@ export class InventoryUI {
         const mkInv = (el) => this.ui._mkEl(el);
 
         this.scene.invGroup.push(mkInv(this.scene.add.text(eqX, eqY, 'EQUIPMENT BAG', {
-            fontSize: '12px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '12px', fill: '#3498db', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5)));
         this.scene.invGroup.push(mkInv(this.scene.add.text(eqX, eqY + 16,
             this.scene.equipBag.length + '/' + this.scene.maxEquipBag + '  click=equip  shift+click=sell  RMB=lock', {
-            fontSize: '9px', fill: '#555', fontFamily: 'Arial'
+            fontSize: '11px', fill: '#555', fontFamily: 'Georgia, serif'
         }).setOrigin(0.5)));
 
         const cols = 4, slotSize = 40, gap = 4;
@@ -232,7 +232,7 @@ export class InventoryUI {
 
                 if (item.locked) {
                     const lockIcon = mkInv(this.scene.add.text(sx - slotSize / 2 + 3, sy - slotSize / 2 + 2, '\u{1F512}', {
-                        fontSize: '8px', fill: '#e74c3c', fontFamily: 'Arial'
+                        fontSize: '8px', fill: '#e74c3c', fontFamily: 'Georgia, serif'
                     }));
                     this.scene.invGroup.push(lockIcon);
                 }
@@ -266,7 +266,7 @@ export class InventoryUI {
 
                 if (!item.locked) {
                     this.scene.invGroup.push(mkInv(this.scene.add.text(sx + slotSize / 2 - 2, sy - slotSize / 2 + 2, 'x', {
-                        fontSize: '8px', fill: '#c0392b', fontFamily: 'Arial', fontStyle: 'bold'
+                        fontSize: '8px', fill: '#c0392b', fontFamily: 'Georgia, serif', fontStyle: 'bold'
                     }).setOrigin(1, 0)));
                 }
             }
@@ -279,7 +279,7 @@ export class InventoryUI {
             .setStrokeStyle(1, 0x5a6c7d)
             .setInteractive({ useHandCursor: true }));
         const lbl = mkInv(this.scene.add.text(400, 520, 'CLOSE', {
-            fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '12px', fill: '#fff', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5));
         bg.on('pointerdown', () => this.closeInventory());
         this.scene.invGroup.push(bg, lbl);

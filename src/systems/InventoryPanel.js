@@ -100,7 +100,7 @@ export class InventoryPanel {
         if (ty < 10) ty = 10;
         if (ty + totalH > 590) ty = 590 - totalH;
         ttGroup.push(mk(this.scene.add.rectangle(tx + maxW / 2, ty + totalH / 2, maxW, totalH, 0x0a0a1a, 0.95).setStrokeStyle(1, rc)));
-        lines.forEach((l, i) => { const t = mk(this.scene.add.text(tx + padX, ty + padY + i * lineH, l.text, { fontSize: l.size, fill: l.color, fontFamily: 'Arial' + (l.bold ? ', fontStyle: bold' : '') })); ttGroup.push(t); });
+        lines.forEach((l, i) => { const t = mk(this.scene.add.text(tx + padX, ty + padY + i * lineH, l.text, { fontSize: l.size, fill: l.color, fontFamily: 'Georgia, serif' + (l.bold ? ', fontStyle: bold' : '') })); ttGroup.push(t); });
         this.scene._tooltipGroup = ttGroup;
     }
 
