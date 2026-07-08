@@ -65,6 +65,7 @@ export class VillageZone extends BaseZone {
         this.scene.villageCampsCleared = 0;
         this.scene.childSpawned = false;
         this.scene.villageBossAlive = false;
+        this.scene.zones.village.childSpokenTo = false;
         this.scene.snowyIceSpirit = null;
         this.scene.snowyIceSpiritNameText = null;
         this.scene.snowyIceSpiritAbilities = null;
@@ -96,7 +97,7 @@ export class VillageZone extends BaseZone {
                 }
             }
             // Respawn castle child if village restored and castle quest not done
-            if (!this.scene.zones.village.isThriving && !this.scene.zones.castle.questDone) {
+            if (!this.scene.zones.village.isThriving && !this.scene.zones.castle.questDone && !this.scene.zones.village.childSpokenTo) {
                 if (!this.scene.castleChildNPC) {
                     this.scene.time.delayedCall(1500, () => {
                         this.spawner.spawnCastleChild();
@@ -320,6 +321,7 @@ export class VillageZone extends BaseZone {
         if (dist >= 50) return;
 
         this.scene.castleChildHint.setText('');
+        this.scene.zones.village.childSpokenTo = true; // Mark that child has spoken
 
         const msgText = this.scene.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 80,
             'They took everyone! Bandits from the east castle!\nPlease, you have to save them!', {
@@ -335,8 +337,30 @@ export class VillageZone extends BaseZone {
             if (box) box.destroy();
         });
 
+        // Child runs away to the left after dialog
         this.scene.time.delayedCall(4500, () => {
-            this._startCastleSkip();
+            if (this.scene.castleChildNPC && this.scene.castleChildNPC.active) {
+                this.scene.floatingText(this.scene.castleChildNPC.x, this.scene.castleChildNPC.y - 20, '*runs away*', '#f1c40f');
+                this.scene.tweens.add({
+                    targets: this.scene.castleChildNPC,
+                    x: this.scene.castleChildNPC.x - 300,
+                    duration: 2000,
+                    ease: 'Power1',
+                    onComplete: () => {
+                        if (this.scene.castleChildNPC) {
+                            this.scene.castleChildNPC.destroy();
+                            this.scene.castleChildNPC = null;
+                        }
+                        if (this.scene.castleChildHint) {
+                            this.scene.castleChildHint.destroy();
+                            this.scene.castleChildHint = null;
+                        }
+                    }
+                });
+            }
+            this.scene.time.delayedCall(2500, () => {
+                this._startCastleSkip();
+            });
         });
     }
 
