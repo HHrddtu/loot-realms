@@ -37,7 +37,7 @@ export default class CraftScene extends Phaser.Scene {
 
     create() {
         
-        this.cameras.main.setBackgroundColor('#1a1408');
+        this.cameras.main.setBackgroundColor('#0a0a1a');
         this.selectedCategory = 'weapon';
         this.selectedIndex = -1;
         this.listItems = [];

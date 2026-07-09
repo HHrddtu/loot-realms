@@ -15,7 +15,7 @@ export default class MaterialBookScene extends Phaser.Scene {
     }
 
     create() {
-        this.cameras.main.setBackgroundColor('#1a1408');
+        this.cameras.main.setBackgroundColor('#0a0a1a');
         this.entries = getAllMaterialEntries();
         this.selectedIndex = -1;
         this.listItems = [];
