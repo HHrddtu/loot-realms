@@ -53,11 +53,230 @@ export class VillageSpawner {
             const hx = ox + hp.x, hy = hp.y;
             const houseKey = frozen ? 'snow_house' : 'village_house';
             this.scene.villageDecor.push(this.scene.add.sprite(hx, hy, houseKey).setDepth(2));
+            // Window glow effect on each house
+            const glowL = this.scene.add.image(hx - 16, hy - 3, 'glow_window').setDepth(1).setAlpha(0.6);
+            const glowR = this.scene.add.image(hx + 16, hy - 3, 'glow_window').setDepth(1).setAlpha(0.6);
+            this.scene.villageDecor.push(glowL, glowR);
+            // Gentle pulsing tween for window glow
+            this.scene.tweens.add({
+                targets: [glowL, glowR],
+                alpha: { from: 0.4, to: 0.8 },
+                duration: 2000 + Math.random() * 1000,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
             if (hp.garden) {
                 VILLAGE_GARDEN_POSITIONS.forEach(gp => {
                     this.scene.villageDecor.push(this.scene.add.sprite(ox + gp.x, gp.y, 'village_garden').setDepth(1));
                 });
             }
+        });
+    }
+
+    spawnDeadVillageDecor() {
+        const ox = this.scene.villageOffsetX;
+        this.scene.villageDecor = [];
+
+        // Broken houses instead of normal ones
+        const deadHouseKeys = ['village_house_dead', 'village_house_dead', 'village_house_dead'];
+        VILLAGE_HOUSE_POSITIONS.forEach((hp, i) => {
+            const hx = ox + hp.x, hy = hp.y;
+            const houseKey = deadHouseKeys[i % deadHouseKeys.length];
+            this.scene.villageDecor.push(this.scene.add.sprite(hx, hy, houseKey).setDepth(2));
+            // Dead gardens (withered)
+            if (hp.garden) {
+                VILLAGE_GARDEN_POSITIONS.forEach(gp => {
+                    this.scene.villageDecor.push(this.scene.add.sprite(ox + gp.x, gp.y, 'village_garden_dead').setDepth(1));
+                });
+            }
+        });
+
+        // Dead trees scattered around
+        const deadTreePositions = [
+            { x: 60, y: 150 }, { x: 700, y: 250 }, { x: 50, y: 650 },
+            { x: 720, y: 900 }, { x: 30, y: 1350 }, { x: 740, y: 1600 },
+            { x: 650, y: 400 }, { x: 100, y: 1750 }
+        ];
+        deadTreePositions.forEach(tp => {
+            this.scene.villageDecor.push(this.scene.add.sprite(ox + tp.x, tp.y, 'dead_tree').setDepth(2).setAlpha(0.8));
+        });
+
+        // Broken fences along edges
+        for (let y = 50; y < 1950; y += 120) {
+            const f1 = this.scene.add.sprite(ox + 15, y, 'broken_fence').setDepth(1).setAlpha(0.6);
+            const f2 = this.scene.add.sprite(ox + VILLAGE_WIDTH - 15, y, 'broken_fence').setDepth(1).setAlpha(0.6).setFlipX(true);
+            this.scene.villageDecor.push(f1, f2);
+        }
+
+        // Corpses at VILLAGE_CORPSE_POSITIONS
+        const corpsePositions = [
+            { x: 150, y: 180 }, { x: 450, y: 350 }, { x: 300, y: 600 },
+            { x: 550, y: 850 }, { x: 130, y: 1050 }, { x: 400, y: 1300 },
+            { x: 250, y: 1600 }, { x: 500, y: 1750 }, { x: 180, y: 1850 },
+            { x: 480, y: 1950 }
+        ];
+        corpsePositions.forEach(cp => {
+            this.scene.villageDecor.push(this.scene.add.sprite(ox + cp.x, cp.y, 'village_corpse').setDepth(3));
+        });
+
+        // Dark tombstones scattered
+        for (let i = 0; i < 6; i++) {
+            const tx = ox + 80 + Math.random() * (VILLAGE_WIDTH - 160);
+            const ty = 100 + Math.random() * 1800;
+            const tomb = this.scene.add.rectangle(tx, ty, 6, 10, 0x444444).setDepth(3);
+            this.scene.villageDecor.push(tomb);
+        }
+    }
+
+    spawnRestoredVillageDecor() {
+        const ox = this.scene.villageOffsetX;
+        this.scene.villageDecor = [];
+
+        // Normal houses with warm window glow (simple restored village)
+        VILLAGE_HOUSE_POSITIONS.forEach(hp => {
+            const hx = ox + hp.x, hy = hp.y;
+            this.scene.villageDecor.push(this.scene.add.sprite(hx, hy, 'village_house').setDepth(2));
+            const glowL = this.scene.add.image(hx - 16, hy - 3, 'glow_window').setDepth(1).setAlpha(0.6);
+            const glowR = this.scene.add.image(hx + 16, hy - 3, 'glow_window').setDepth(1).setAlpha(0.6);
+            this.scene.villageDecor.push(glowL, glowR);
+            this.scene.tweens.add({
+                targets: [glowL, glowR],
+                alpha: { from: 0.4, to: 0.8 },
+                duration: 2000 + Math.random() * 1000,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+            if (hp.garden) {
+                VILLAGE_GARDEN_POSITIONS.forEach(gp => {
+                    this.scene.villageDecor.push(this.scene.add.sprite(ox + gp.x, gp.y, 'village_garden').setDepth(1));
+                });
+            }
+        });
+    }
+
+    spawnThrivingVillageDecor() {
+        const ox = this.scene.villageOffsetX;
+        this.scene.villageDecor = [];
+
+        // Colorful houses
+        const houseKeys = ['village_house_red', 'village_house_green', 'village_house_blue', 'village_house_red', 'village_house_green', 'village_house_blue'];
+        VILLAGE_HOUSE_POSITIONS.forEach((hp, i) => {
+            const hx = ox + hp.x, hy = hp.y;
+            const houseKey = houseKeys[i % houseKeys.length];
+            this.scene.villageDecor.push(this.scene.add.sprite(hx, hy, houseKey).setDepth(2));
+            // Bright window glow
+            const glowL = this.scene.add.image(hx - 16, hy - 3, 'glow_window').setDepth(1).setAlpha(0.8);
+            const glowR = this.scene.add.image(hx + 16, hy - 3, 'glow_window').setDepth(1).setAlpha(0.8);
+            this.scene.villageDecor.push(glowL, glowR);
+            this.scene.tweens.add({
+                targets: [glowL, glowR],
+                alpha: { from: 0.6, to: 1 },
+                duration: 1500 + Math.random() * 1000,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+        });
+
+        // Lush gardens with crops
+        VILLAGE_GARDEN_POSITIONS.forEach(gp => {
+            const garden = this.scene.add.sprite(ox + gp.x, gp.y, 'village_garden').setDepth(1);
+            this.scene.villageDecor.push(garden);
+            const crop = this.scene.add.sprite(ox + gp.x, gp.y + 14, 'village_crop').setDepth(2);
+            this.scene.villageDecor.push(crop);
+        });
+
+        // Central fountain
+        const fountain = this.scene.add.sprite(ox + VILLAGE_WIDTH / 2, 1000, 'village_fountain').setDepth(4);
+        this.scene.villageDecor.push(fountain);
+        this.scene.tweens.add({
+            targets: fountain,
+            alpha: { from: 0.9, to: 1 },
+            duration: 800,
+            yoyo: true,
+            repeat: -1
+        });
+
+        // Lanterns
+        const lanternPositions = [
+            { x: 150, y: 300 }, { x: 650, y: 300 },
+            { x: 150, y: 700 }, { x: 650, y: 700 },
+            { x: 150, y: 1100 }, { x: 650, y: 1100 },
+            { x: 150, y: 1500 }, { x: 650, y: 1500 }
+        ];
+        lanternPositions.forEach(lp => {
+            const lantern = this.scene.add.sprite(ox + lp.x, lp.y, 'village_lantern').setDepth(3);
+            this.scene.villageDecor.push(lantern);
+            const glow = this.scene.add.image(ox + lp.x, lp.y - 2, 'glow_window').setDepth(2).setAlpha(0.5).setScale(1.5);
+            this.scene.villageDecor.push(glow);
+            this.scene.tweens.add({
+                targets: glow,
+                alpha: { from: 0.3, to: 0.7 },
+                duration: 1200 + Math.random() * 800,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+        });
+
+        // Dancing villagers around fountain
+        const dancerPositions = [
+            { x: 300, y: 950 }, { x: 500, y: 950 },
+            { x: 350, y: 1050 }, { x: 450, y: 1050 }
+        ];
+        dancerPositions.forEach(dp => {
+            const dancer = this.scene.add.sprite(ox + dp.x, dp.y, 'villager_dancer').setDepth(7);
+            this.scene.villageDecor.push(dancer);
+            this.scene.tweens.add({
+                targets: dancer,
+                y: dp.y - 4,
+                duration: 400 + Math.random() * 200,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+            this.scene.tweens.add({
+                targets: dancer,
+                x: ox + dp.x + 3,
+                duration: 600 + Math.random() * 300,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+        });
+
+        // Walking rescued villagers
+        const villagerTextures = ['villager_rescued_0', 'villager_rescued_1', 'villager_rescued_2', 'villager_rescued_3', 'villager_rescued_4'];
+        const walkerPositions = [
+            { x: 200, y: 400 }, { x: 600, y: 600 },
+            { x: 100, y: 1200 }, { x: 700, y: 1400 }
+        ];
+        walkerPositions.forEach((wp, i) => {
+            const tex = villagerTextures[i % villagerTextures.length];
+            const walker = this.scene.add.sprite(ox + wp.x, wp.y, tex).setDepth(7);
+            this.scene.villageDecor.push(walker);
+            this.scene.tweens.add({
+                targets: walker,
+                y: wp.y - 2,
+                duration: 500,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+        });
+
+        // Elder near fountain
+        const elder = this.scene.add.sprite(ox + VILLAGE_WIDTH / 2 + 30, 1000, 'villager_elder').setDepth(8);
+        this.scene.villageDecor.push(elder);
+        this.scene.tweens.add({
+            targets: elder,
+            y: 998,
+            duration: 1500,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
         });
     }
 
@@ -69,7 +288,8 @@ export class VillageSpawner {
             const house = this.scene.add.sprite(ox + hp.x, hp.y, 'village_house').setDepth(2);
             this.scene.villageDecor.push(house);
         });
-        if (!this.scene.villageCemeteryGate) {
+        // Don't create cemetery gate if castle quest is done
+        if (!this.scene.villageCemeteryGate && !this.scene.zones.castle.questDone) {
             const gx = ox + VILLAGE_WIDTH / 2, gy = 2000;
             this.scene.villageCemeteryGate = this.scene.add.rectangle(gx, gy, 40, 20, 0x666666).setDepth(5);
             this.scene.physics.add.existing(this.scene.villageCemeteryGate, true);
@@ -166,6 +386,16 @@ export class VillageSpawner {
         const cfx = ox + VILLAGE_WIDTH / 2, cfy = 180;
         this.scene.campfire = this.scene.add.sprite(cfx, cfy, 'campfire').setDepth(5).setScale(1.5);
         this.scene.campfireHint = this.scene.add.text(cfx, cfy - 40, '', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setDepth(12);
+    }
+
+    spawnRestoredCampfire() {
+        const ox = this.scene.villageOffsetX;
+        const cfx = ox + VILLAGE_WIDTH / 2, cfy = 180;
+        this.scene.campfire = this.scene.add.sprite(cfx, cfy, 'campfire_active').setDepth(5).setScale(1.5);
+        this.scene.campfireHint = this.scene.add.text(cfx, cfy - 40, '', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setDepth(12);
+        if (this.scene.particles) {
+            this.scene.particles.startCampfireSparks(cfx, cfy);
+        }
     }
 
     spawnSnowyVillageBoss() {

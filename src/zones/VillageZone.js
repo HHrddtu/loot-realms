@@ -42,6 +42,8 @@ export class VillageZone extends BaseZone {
         this.isFrozen = frozen;
         if (frozen) {
             this.scene.cameras.main.setBackgroundColor('#1a2438');
+        } else if (!this.scene.zones.village.isRestored) {
+            this.scene.cameras.main.setBackgroundColor('#0e0a04');
         } else {
             this.scene.cameras.main.setBackgroundColor('#1a1408');
         }
@@ -65,7 +67,7 @@ export class VillageZone extends BaseZone {
         this.scene.villageCampsCleared = 0;
         this.scene.childSpawned = false;
         this.scene.villageBossAlive = false;
-        this.scene.zones.village.childSpokenTo = false;
+        // Don't reset childSpokenTo - persists across zone transitions
         this.scene.snowyIceSpirit = null;
         this.scene.snowyIceSpiritNameText = null;
         this.scene.snowyIceSpiritAbilities = null;
@@ -76,6 +78,7 @@ export class VillageZone extends BaseZone {
         this.scene.castleChildHint = null;
 
         if (frozen) {
+            this.spawner.spawnVillageDecor(true);
             this.spawner.spawnSnowyVillageCamps();
             this.spawner.spawnSnowyVillageChests();
             this.spawner.spawnSnowyCampfire();
@@ -85,24 +88,35 @@ export class VillageZone extends BaseZone {
             });
         } else if (!this.scene.zones.village.isRestored) {
             this.spawner.spawnVillageCamps();
-            this.spawner.spawnVillageDecor(false);
+            this.spawner.spawnDeadVillageDecor();
             this.spawner.spawnVillageChests();
-        } else {
-            this.spawner.spawnVillageDecor(false);
-            this.spawner.showVillageClearedDecor();
-            // Respawn child NPC if village is cleared but not yet restored
-            if (this.scene.zones.village.allCleared && !this.scene.zones.village.isRestored) {
-                if (!this.scene.villageChildNPC) {
-                    this.spawner.spawnChildNPC();
-                }
+        } else if (!this.scene.zones.village.isThriving) {
+            // Restored but not thriving — simple village with shop/inn
+            this.spawner.spawnRestoredVillageDecor();
+            this.spawner.spawnRestoredCampfire();
+            if (!this.scene.villageCemeteryGate) {
+                const gx = ox + VILLAGE_WIDTH / 2, gy = 2000;
+                this.scene.villageCemeteryGate = this.scene.add.rectangle(gx, gy, 40, 20, 0x666666).setDepth(5);
+                this.scene.physics.add.existing(this.scene.villageCemeteryGate, true);
             }
-            // Respawn castle child if village restored and castle quest not done
             if (!this.scene.zones.village.isThriving && !this.scene.zones.castle.questDone && !this.scene.zones.village.childSpokenTo) {
                 if (!this.scene.castleChildNPC) {
                     this.scene.time.delayedCall(1500, () => {
                         this.spawner.spawnCastleChild();
                     });
                 }
+            }
+            this.shop.spawnShop();
+            this.shop.spawnInn();
+        } else {
+            // Thriving village — full life
+            this.spawner.spawnThrivingVillageDecor();
+            this.spawner.spawnRestoredCampfire();
+            // Cemetery gate only if castle quest not done
+            if (!this.scene.villageCemeteryGate && !this.scene.zones.castle.questDone) {
+                const gx = ox + VILLAGE_WIDTH / 2, gy = 2000;
+                this.scene.villageCemeteryGate = this.scene.add.rectangle(gx, gy, 40, 20, 0x666666).setDepth(5);
+                this.scene.physics.add.existing(this.scene.villageCemeteryGate, true);
             }
             this.shop.spawnShop();
             this.shop.spawnInn();
@@ -130,8 +144,17 @@ export class VillageZone extends BaseZone {
         }
         if (frozen && this.scene.particles) {
             this.scene.particles.startSnowfall(VILLAGE_WIDTH, VILLAGE_TOTAL_HEIGHT);
-        }
-        if (!frozen && this.scene.particles) {
+            this.scene.particles.startWinterMist(VILLAGE_WIDTH, VILLAGE_TOTAL_HEIGHT);
+        } else if (!this.scene.zones.village.isRestored && this.scene.particles) {
+            // Dead village — dark mist
+            this.scene.particles.startDarkMist(VILLAGE_WIDTH, VILLAGE_TOTAL_HEIGHT);
+        } else if (!this.scene.zones.village.isThriving && this.scene.particles) {
+            // Restored but simple — warm fireflies
+            this.scene.particles.startFirefly(VILLAGE_WIDTH, VILLAGE_HEIGHT);
+        } else if (this.scene.particles) {
+            // Thriving — sun, butterflies, fireflies
+            this.scene.particles.startSunRays(VILLAGE_WIDTH, VILLAGE_TOTAL_HEIGHT);
+            this.scene.particles.startButterflies(VILLAGE_WIDTH, VILLAGE_TOTAL_HEIGHT);
             this.scene.particles.startFirefly(VILLAGE_WIDTH, VILLAGE_HEIGHT);
         }
     }
