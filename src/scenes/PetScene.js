@@ -437,7 +437,7 @@ export default class PetScene extends Phaser.Scene {
         backBtn.on('pointerdown', () => {
             this.tweens.killAll();
             const gs = this.scene.get(this.returnScene);
-            if (gs) gs.menuOpen = false;
+            if (gs) { gs.menuOpen = false; gs.physics.resume(); }
             this.scene.stop(this.scene.key);
             this.scene.wake(this.returnScene);
         });

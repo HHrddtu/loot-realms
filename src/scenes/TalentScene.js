@@ -590,7 +590,8 @@ export default class TalentScene extends Phaser.Scene {
             accountTalentPoints: this.accountTalentPoints,
             lockedBranches: this.lockedBranches
         });
-        this.scene.stop('TalentTree');
+        const gs2 = this.scene.get(this.returnScene);1
+        if (gs2) { gs2.menuOpen = false; gs2.physics.resume(); }
         this.scene.wake(this.returnScene);
     }
 

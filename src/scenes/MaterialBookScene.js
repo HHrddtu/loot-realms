@@ -294,6 +294,7 @@ export default class MaterialBookScene extends Phaser.Scene {
         if (gameScene && gameScene.receiveBestiaryData) {
             gameScene.receiveBestiaryData();
         }
-        this.scene.stop();
+        this.scene.stop(this.scene.key);
+        this.scene.wake(this.returnScene);
     }
 }
