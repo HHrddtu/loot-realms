@@ -29,7 +29,7 @@ export default class TalentScene extends Phaser.Scene {
     }
 
     create() {
-        console.log('[DEBUG] TalentScene.create() called');
+        
         this.cameras.main.setBackgroundColor('#0a0a1a');
         this.nodeSprites = [];
         this.lineGfx = this.add.graphics();
@@ -591,7 +591,7 @@ export default class TalentScene extends Phaser.Scene {
             lockedBranches: this.lockedBranches
         });
         this.scene.stop('TalentTree');
-        this.scene.resume(this.returnScene);
+        this.scene.wake(this.returnScene);
     }
 
     menuBtn(x, y, text, color, cb) {

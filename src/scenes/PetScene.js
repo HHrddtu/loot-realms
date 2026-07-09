@@ -14,9 +14,13 @@ export default class PetScene extends Phaser.Scene {
     }
 
     create() {
-        console.log('[DEBUG] PetScene.create() called');
-        this.cameras.main.setBackgroundColor('#0a0a1a');
+        this.cameras.main.setBackgroundColor('#1a1408');
+        this.cameras.main.setBounds(0, 0, 800, 600);
         this.elements = [];
+
+        // Debug: bright background to confirm visibility
+        this.add.rectangle(400, 300, 800, 600, 0x1a1408).setDepth(0);
+        this.add.text(400, 300, 'PET SCENE', { fontSize: '48px', fill: '#f1c40f' }).setOrigin(0.5).setDepth(1000);
         this._panel = null;
         this._panelEls = [];
 
@@ -26,18 +30,24 @@ export default class PetScene extends Phaser.Scene {
         this.equippedPet = acc.equippedPet || null;
         this.petLevels = acc.petLevels || {};
 
+        
         this._drawHeader();
+        
         this._drawPetList();
+        
         this._drawCases();
+        
         this._drawBottomBar();
 
+        
         // Cleanup on scene shutdown
         this.events.on('shutdown', () => {
             this.tweens.killAll();
         });
+        
     }
 
-    _add(el) { this.elements.push(el); return el; }
+    _add(el) { el.setScrollFactor(0).setDepth(100); this.elements.push(el); return el; }
 
     _drawHeader() {
         this._add(this.add.text(400, 30, '\u{1F43E} PETS', {
@@ -426,9 +436,10 @@ export default class PetScene extends Phaser.Scene {
         }).setOrigin(0.5));
         backBtn.on('pointerdown', () => {
             this.tweens.killAll();
-            this.tweens.killAll();
+            const gs = this.scene.get(this.returnScene);
+            if (gs) gs.menuOpen = false;
             this.scene.stop(this.scene.key);
-            this.scene.resume(this.returnScene);
+            this.scene.wake(this.returnScene);
         });
         backBtn.on('pointerover', () => backBtn.setFillStyle(0x4a6a8e));
         backBtn.on('pointerout', () => backBtn.setFillStyle(0x34495e));

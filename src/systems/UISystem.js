@@ -33,11 +33,8 @@ export class UISystem {
             this.scene.menuOpen = true; this.scene.physics.pause();
             try { if (this.scene.enemies && this.scene.enemies.scene) this.scene.enemies.getChildren().forEach(e => { if (e.body) e.body.setVelocity(0); }); } catch (e) {}
             try { if (this.scene.stumps && this.scene.stumps.scene) this.scene.stumps.getChildren().forEach(s => { if (s.body) s.body.setVelocity(0); }); } catch (e) {}
-            console.log('[DEBUG] Launching scene:', sceneName);
             this.scene.scene.launch(sceneName, { ...data, returnScene: 'Game' });
-            console.log('[DEBUG] Scene launched, pausing GameScene');
-            this.scene.scene.pause();
-            console.log('[DEBUG] GameScene paused');
+            this.scene.scene.sleep(this.scene.scene.key);
         } catch (e) {
             console.error('Error in _pauseAndLaunch:', e);
         }

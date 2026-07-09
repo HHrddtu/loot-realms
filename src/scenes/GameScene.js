@@ -545,7 +545,7 @@ export default class GameScene extends Phaser.Scene {
     receiveBestiaryData() {
         this.menuOpen = false;
         this.physics.resume();
-        this.scene.resume();
+        this.scene.wake();
         this.recalcStats();
     }
 
@@ -553,7 +553,7 @@ export default class GameScene extends Phaser.Scene {
         this.materials = materials || this.materials;
         this.menuOpen = false;
         this.physics.resume();
-        this.scene.resume();
+        this.scene.wake();
         this.recalcStats();
     }
 
@@ -687,6 +687,7 @@ export default class GameScene extends Phaser.Scene {
     /* ===== GAME LOOP ===== */
 
     update(time, delta) {
+        if (this.menuOpen) return; // Skip update when menu is open
         if (this.playerSys) this.playerSys.resetStatsRecalcFlag();
         this._handleInput();
         this._updateEnemies();
