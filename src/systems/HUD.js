@@ -90,20 +90,25 @@ export class HUD {
 
     _showSpellTooltip(key, sx2, sy) {
         if (!this.scene.tooltipText) {
-            this.scene.tooltipText = this.scene.add.text(0, 0, '', { fontSize: '9px', fill: '#fff', fontFamily: 'Arial', backgroundColor: '#1a1a2e', padding: { x: 6, y: 4 }, stroke: '#000', strokeThickness: 1, wordWrap: { width: 180 } }).setScrollFactor(0).setDepth(100).setAlpha(0.95);
+            this.scene.tooltipText = this.scene.add.text(0, 0, '', {
+                fontSize: '10px', fill: '#5c3a1e', fontFamily: 'Georgia, serif',
+                backgroundColor: '#f4e4c1', padding: { x: 8, y: 6 },
+                stroke: '#8b4513', strokeThickness: 1,
+                wordWrap: { width: 200 }
+            }).setScrollFactor(0).setDepth(100).setAlpha(0.95);
         }
         const spellDef = SPELLS[key];
         if (spellDef) {
             const name = spellDef.nameRu || spellDef.name;
             const desc = spellDef.description || '';
-            const cdStr = spellDef.cooldown ? spellDef.cooldown + 's CD' : '';
-            const dmg = spellDef.damage ? spellDef.damage + ' DMG' : '';
-            const heal = spellDef.healPercent ? 'Heal ' + Math.floor(spellDef.healPercent * 100) + '%' : '';
+            const cdStr = spellDef.cooldown ? spellDef.cooldown + 's cooldown' : '';
+            const dmg = spellDef.damage ? spellDef.damage + ' damage' : '';
+            const heal = spellDef.healPercent ? 'Heals ' + Math.floor(spellDef.healPercent * 100) + '%' : '';
             const lines = [name]; if (cdStr) lines.push(cdStr); if (dmg) lines.push(dmg); if (heal) lines.push(heal); if (desc) lines.push(desc);
             this.scene.tooltipText.setText(lines.join('\n'));
         } else { this.scene.tooltipText.setText(key); }
-        const tx = Math.min(sx2 - 90, 600);
-        const ty = sy - 60;
+        const tx = Math.min(sx2 - 100, 580);
+        const ty = sy - 80;
         this.scene.tooltipText.setPosition(tx, ty).setVisible(true);
     }
 
@@ -116,6 +121,26 @@ export class HUD {
         this.scene.consumableSlot = { bg: consBg, lbl: consLbl, icon: consIcon, name: consName };
         consBg.setInteractive({ useHandCursor: true });
         consBg.on('pointerdown', () => { if (this.scene.playerSys) this.scene.playerSys.useConsumable(); });
+        consBg.on('pointerover', () => { this._showConsumableTooltip(fx, fy); });
+        consBg.on('pointerout', () => { if (this.scene.tooltipText) this.scene.tooltipText.setVisible(false); });
+    }
+
+    _showConsumableTooltip(x, y) {
+        const c = this.scene.consumable;
+        if (!c) return;
+        if (!this.scene.tooltipText) {
+            this.scene.tooltipText = this.scene.add.text(0, 0, '', {
+                fontSize: '10px', fill: '#5c3a1e', fontFamily: 'Georgia, serif',
+                backgroundColor: '#f4e4c1', padding: { x: 8, y: 6 },
+                stroke: '#8b4513', strokeThickness: 1,
+                wordWrap: { width: 200 }
+            }).setScrollFactor(0).setDepth(100).setAlpha(0.95);
+        }
+        const name = c.nameRu || c.name;
+        const desc = c.description || c.effectDesc || '';
+        const lines = [name, desc];
+        this.scene.tooltipText.setText(lines.join('\n'));
+        this.scene.tooltipText.setPosition(Math.min(x - 100, 580), y - 80).setVisible(true);
     }
 
     _createNavPanel() {
