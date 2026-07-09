@@ -163,7 +163,7 @@ export default class CraftScene extends Phaser.Scene {
 
             const canMake = canCraft(recipe, this.materials, this.isAlchemist);
             const rarityColor = RARITY_COLORS[recipe.rarity] || 0xaaaaaa;
-            const bgColor = canMake ? 0x1a2a4a : 0x151520;
+            const bgColor = canMake ? 0xe8d5a3 : 0xdcc89a;
 
             const bg = this.add.rectangle(startX + itemW / 2, y + itemH / 2, itemW, itemH, bgColor)
                 .setStrokeStyle(1, 0x334466)

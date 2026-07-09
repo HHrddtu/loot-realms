@@ -101,8 +101,8 @@ export default class BestiaryScene extends Phaser.Scene {
 
             const isSeen = entry.encounters > 0;
 
-            const bg = this.add.rectangle(x + itemW / 2, y + itemH / 2, itemW, itemH, isSeen ? 0x1a2a4a : 0x111118)
-                .setStrokeStyle(1, isSeen ? 0x334466 : 0x222233)
+            const bg = this.add.rectangle(x + itemW / 2, y + itemH / 2, itemW, itemH, isSeen ? 0xe8d5a3 : 0xdcc89a)
+                .setStrokeStyle(1, isSeen ? 0x8b4513 : 0xaa9977)
                 .setInteractive({ useHandCursor: true });
 
             let sprite = null;
