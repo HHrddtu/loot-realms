@@ -76,7 +76,7 @@ export default class BestiaryScene extends Phaser.Scene {
         });
     
         this.events.on('shutdown', () => { this.tweens.killAll(); });
-
+        console.log('[DEBUG] BestiaryScene.create() complete');
     }
 
     _createGrid() {

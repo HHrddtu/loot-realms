@@ -28,12 +28,19 @@ export class UISystem {
     _mkEl(el) { return el.setScrollFactor(0).setDepth(200); }
 
     _pauseAndLaunch(sceneName, data) {
-        if (this.scene.menuOpen || this.scene.transitioning) return;
-        this.scene.menuOpen = true; this.scene.physics.pause();
-        if (this.scene.enemies) this.scene.enemies.getChildren().forEach(e => { if (e.body) e.body.setVelocity(0); });
-        if (this.scene.stumps) this.scene.stumps.getChildren().forEach(s => { if (s.body) s.body.setVelocity(0); });
-        this.scene.scene.launch(sceneName, { ...data, returnScene: 'Game' });
-        this.scene.scene.pause();
+        try {
+            if (this.scene.menuOpen || this.scene.transitioning) return;
+            this.scene.menuOpen = true; this.scene.physics.pause();
+            try { if (this.scene.enemies && this.scene.enemies.scene) this.scene.enemies.getChildren().forEach(e => { if (e.body) e.body.setVelocity(0); }); } catch (e) {}
+            try { if (this.scene.stumps && this.scene.stumps.scene) this.scene.stumps.getChildren().forEach(s => { if (s.body) s.body.setVelocity(0); }); } catch (e) {}
+            console.log('[DEBUG] Launching scene:', sceneName);
+            this.scene.scene.launch(sceneName, { ...data, returnScene: 'Game' });
+            console.log('[DEBUG] Scene launched, pausing GameScene');
+            this.scene.scene.pause();
+            console.log('[DEBUG] GameScene paused');
+        } catch (e) {
+            console.error('Error in _pauseAndLaunch:', e);
+        }
     }
 
     _openTalentTree() {
