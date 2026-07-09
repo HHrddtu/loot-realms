@@ -197,6 +197,7 @@ export class VillageZone extends BaseZone {
         this.bossClones = null;
         if (s.villageCemeteryGate) { s.villageCemeteryGate.destroy(); s.villageCemeteryGate = null; }
         if (s.hellPortal) { if (s.hellPortal.destroy) s.hellPortal.destroy(); s.hellPortal = null; }
+        if (s.hellPortalGlow) { if (s.hellPortalGlow.destroy) s.hellPortalGlow.destroy(); s.hellPortalGlow = null; }
         if (s.hellPortalHint) { if (s.hellPortalHint.destroy) s.hellPortalHint.destroy(); s.hellPortalHint = null; }
         if (s.campfire) { if (s.campfire.destroy) s.campfire.destroy(); s.campfire = null; }
         if (s.campfireHint) { if (s.campfireHint.destroy) s.campfireHint.destroy(); s.campfireHint = null; }

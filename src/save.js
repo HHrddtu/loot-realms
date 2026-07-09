@@ -50,6 +50,7 @@ let _accountCache = null;
 
 const DEFAULT_ACCOUNT = {
     version: 3,
+    classKey: 'sage',
     accountLevel: 1,
     accountExp: 0,
     accountTalentPoints: 0,

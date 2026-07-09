@@ -424,26 +424,63 @@ export function drawMineTextures(mk) {
         c.fillRect(6, 14, 4, 6);
     });
 
-    mk('mine_boss_portal', 48, 64, (c) => {
+    mk('mine_boss_portal', 56, 72, (c) => {
         c.imageSmoothingEnabled = false;
-        c.fillStyle = '#2a2a2a';
-        c.fillRect(4, 0, 40, 64);
-        c.fillStyle = '#3a3a3a';
-        c.fillRect(8, 0, 32, 64);
+        // Dark stone frame
         c.fillStyle = '#1a1a1a';
-        c.fillRect(12, 20, 24, 36);
-        c.fillStyle = '#2d1b4e';
-        c.fillRect(14, 22, 20, 32);
-        c.fillStyle = '#4a2080';
-        c.fillRect(16, 26, 16, 24);
-        c.fillStyle = '#7a30aa';
-        c.fillRect(20, 30, 8, 16);
-        c.fillStyle = '#3a3a3a';
-        c.fillRect(0, 0, 8, 10);
-        c.fillRect(40, 0, 8, 10);
-        c.fillStyle = '#4a4a4a';
-        c.fillRect(2, 2, 4, 6);
-        c.fillRect(42, 2, 4, 6);
+        c.fillRect(0, 0, 56, 72);
+        c.fillStyle = '#2a2a2a';
+        c.fillRect(2, 2, 52, 68);
+        c.fillStyle = '#222';
+        c.fillRect(4, 4, 48, 64);
+        // Stone texture details
+        c.fillStyle = '#333';
+        c.fillRect(4, 6, 14, 5);
+        c.fillRect(38, 6, 14, 5);
+        c.fillRect(4, 32, 10, 4);
+        c.fillRect(42, 32, 10, 4);
+        c.fillRect(4, 60, 12, 4);
+        c.fillRect(40, 60, 12, 4);
+        // Deep void
+        c.fillStyle = '#0a0505';
+        c.fillRect(8, 14, 40, 48);
+        c.fillStyle = '#10001a';
+        c.fillRect(12, 18, 32, 40);
+        // Purple depth layers
+        c.fillStyle = '#1a0030';
+        c.fillRect(14, 20, 28, 36);
+        c.fillStyle = '#2a0048';
+        c.fillRect(16, 22, 24, 32);
+        c.fillStyle = '#3a0060';
+        c.fillRect(18, 24, 20, 28);
+        c.fillStyle = '#4a0878';
+        c.fillRect(20, 26, 16, 24);
+        c.fillStyle = '#5a1090';
+        c.fillRect(22, 28, 12, 20);
+        c.fillStyle = '#6a18a8';
+        c.fillRect(24, 30, 8, 16);
+        // Glowing runes on stone frame
+        c.fillStyle = '#8b44cc';
+        c.fillRect(6, 10, 3, 3);
+        c.fillRect(47, 10, 3, 3);
+        c.fillRect(6, 54, 3, 3);
+        c.fillRect(47, 54, 3, 3);
+        c.fillStyle = '#aa66ee';
+        c.fillRect(12, 16, 2, 2);
+        c.fillRect(42, 16, 2, 2);
+        c.fillRect(12, 50, 2, 2);
+        c.fillRect(42, 50, 2, 2);
+        // Rune lines
+        c.fillStyle = '#9955cc';
+        c.fillRect(8, 22, 2, 10);
+        c.fillRect(46, 22, 2, 10);
+        c.fillRect(8, 44, 2, 8);
+        c.fillRect(46, 44, 2, 8);
+        // Bottom base
+        c.fillStyle = '#2a2a2a';
+        c.fillRect(4, 66, 12, 6);
+        c.fillRect(40, 66, 12, 6);
+        c.fillRect(20, 68, 16, 4);
     });
 
     mk('torch', 12, 24, (c) => {

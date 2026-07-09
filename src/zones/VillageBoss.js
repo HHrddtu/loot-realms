@@ -186,7 +186,19 @@ export class VillageBoss {
             s.tweens.add({ targets: lt, alpha: 0, duration: 5000, onComplete: () => { if (lt.active) lt.destroy(); } });
         });
         s.hellPortal = s.add.sprite(ox + VILLAGE_WIDTH / 2, 380, 'hell_portal').setDepth(1);
-        s.hellPortalHint = s.add.text(ox + VILLAGE_WIDTH / 2, 420, '', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setDepth(12);
+        s.hellPortalGlow = s.add.image(ox + VILLAGE_WIDTH / 2, 380, 'portal_glow').setDepth(0).setScale(2).setTint(0xff4400).setAlpha(0.7);
+        s.tweens.add({
+            targets: s.hellPortalGlow,
+            alpha: { from: 0.4, to: 0.9 },
+            duration: 1500,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+        s.hellPortalHint = s.add.text(ox + VILLAGE_WIDTH / 2, 410, '', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setDepth(12);
+        if (s.particles) {
+            s.particles.startPortalParticles(ox + VILLAGE_WIDTH / 2, 380, [0xff4400, 0xff6600, 0xff8800]);
+        }
         s.time.delayedCall(3000, () => { s.floatingText(ox + VILLAGE_WIDTH / 2, 360, 'Hell portal appeared!', '#e74c3c'); });
         s.checkLevelUp(); s._checkAccountLevelUp(); s.ui.updateUI();
         const hc = rollBossCrystals('village', s.difficulty);

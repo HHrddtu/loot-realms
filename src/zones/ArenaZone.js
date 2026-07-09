@@ -23,7 +23,24 @@ export class ArenaZone extends BaseZone {
         s.add.image(400, 300, 'boss_ground').setDepth(0);
 
         s.exitPortal = s.add.sprite(ARENA_EXIT_POS.x, ARENA_EXIT_POS.y, s.zones.mine.isUnlocked ? 'mine_ladder' : 'boss_portal').setDepth(1);
-        s.exitHint = s.add.text(ARENA_EXIT_POS.x, ARENA_EXIT_POS.y + 50, '', {
+        s.exitPortalGlow = s.add.image(ARENA_EXIT_POS.x, ARENA_EXIT_POS.y, 'portal_glow').setDepth(0).setScale(2);
+        if (s.zones.mine.isUnlocked) {
+            s.exitPortalGlow.setTint(0xf1c40f).setAlpha(0.5);
+        } else {
+            s.exitPortalGlow.setTint(0x9b59b6).setAlpha(0.6);
+        }
+        s.tweens.add({
+            targets: s.exitPortalGlow,
+            alpha: { from: 0.3, to: 0.7 },
+            duration: 1800,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+        if (!s.zones.mine.isUnlocked && s.particles) {
+            s.particles.startPortalParticles(ARENA_EXIT_POS.x, ARENA_EXIT_POS.y, [0x9b59b6, 0xaa66cc, 0xbb77dd]);
+        }
+        s.exitHint = s.add.text(ARENA_EXIT_POS.x, ARENA_EXIT_POS.y + 55, '', {
             fontSize: '11px', fill: '#aa50ee', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5).setDepth(12);
@@ -66,6 +83,7 @@ export class ArenaZone extends BaseZone {
         this._destroyDefeatedUI();
         this._destroyStumps();
         if (s.exitPortal) { s.exitPortal.destroy(); s.exitPortal = null; }
+        if (s.exitPortalGlow) { s.exitPortalGlow.destroy(); s.exitPortalGlow = null; }
         if (s.exitHint) { s.exitHint.destroy(); s.exitHint = null; }
         this.bossAlive = false;
     }

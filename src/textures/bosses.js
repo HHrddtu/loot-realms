@@ -70,36 +70,63 @@ export function drawBossTextures(mk) {
         c.fillRect(34, 24, 2, 2);
     });
 
-    mk('tree_hole', 64, 80, (c) => {
+    mk('tree_hole', 72, 90, (c) => {
         c.imageSmoothingEnabled = false;
-        c.fillStyle = '#5c3a1e';
-        c.fillRect(0, 0, 64, 80);
-        c.fillStyle = '#4a2e16';
-        c.fillRect(4, 0, 56, 80);
-        c.fillStyle = '#6b4423';
-        c.fillRect(8, 5, 3, 12);
-        c.fillRect(50, 10, 3, 8);
-        c.fillRect(10, 30, 2, 10);
-        c.fillRect(52, 40, 2, 12);
-        c.fillRect(14, 55, 3, 8);
-        c.fillRect(46, 60, 3, 10);
-        c.fillStyle = '#1a5c2a';
-        c.fillRect(0, 0, 64, 16);
-        c.fillStyle = '#1e6b31';
-        c.fillRect(4, 0, 56, 10);
-        c.fillStyle = '#155723';
-        c.fillRect(10, 0, 44, 6);
-        c.fillStyle = '#0a0500';
-        c.fillRect(18, 28, 28, 36);
-        c.fillStyle = '#120a02';
-        c.fillRect(20, 30, 24, 32);
-        c.fillStyle = '#1a0e05';
-        c.fillRect(22, 34, 20, 24);
+        // Bark frame with depth
+        c.fillStyle = '#2a1a0a';
+        c.fillRect(0, 0, 72, 90);
+        // Outer bark ring
         c.fillStyle = '#3d2b1f';
-        c.fillRect(4, 72, 12, 8);
-        c.fillRect(48, 72, 12, 8);
-        c.fillRect(22, 74, 8, 6);
-        c.fillRect(34, 74, 8, 6);
+        c.fillRect(2, 2, 68, 86);
+        c.fillStyle = '#4a3520';
+        c.fillRect(4, 4, 64, 82);
+        c.fillStyle = '#2c1e14';
+        c.fillRect(6, 6, 60, 78);
+        // Inner bark
+        c.fillStyle = '#1a0e05';
+        c.fillRect(10, 10, 52, 70);
+        // Deep void (radial gradient simulated with solid layers)
+        c.fillStyle = '#0a1200';
+        c.fillRect(14, 16, 44, 58);
+        c.fillStyle = '#081a06';
+        c.fillRect(18, 20, 36, 50);
+        c.fillStyle = '#062008';
+        c.fillRect(22, 24, 28, 42);
+        c.fillStyle = '#042a0a';
+        c.fillRect(26, 28, 20, 34);
+        c.fillStyle = '#02300c';
+        c.fillRect(28, 30, 16, 30);
+        // Roots wrapping around
+        c.fillStyle = '#3d2b1f';
+        c.fillRect(0, 80, 14, 10);
+        c.fillRect(58, 82, 14, 8);
+        c.fillRect(6, 84, 10, 6);
+        c.fillRect(56, 84, 12, 6);
+        c.fillRect(2, 60, 6, 4);
+        c.fillRect(64, 55, 6, 5);
+        // Moss and leaves
+        c.fillStyle = '#1a5c2a';
+        c.fillRect(2, 0, 20, 6);
+        c.fillRect(50, 0, 20, 6);
+        c.fillStyle = '#1e6b31';
+        c.fillRect(4, 0, 14, 4);
+        c.fillRect(52, 0, 14, 4);
+        c.fillStyle = '#155723';
+        c.fillRect(30, 0, 12, 8);
+        // Root protrusions
+        c.fillStyle = '#4a3520';
+        c.fillRect(0, 20, 6, 3);
+        c.fillRect(0, 40, 5, 4);
+        c.fillRect(66, 30, 6, 3);
+        c.fillRect(67, 50, 5, 4);
+        // Glowing edge hint
+        c.fillStyle = '#2a8a3a';
+        c.fillRect(10, 12, 2, 2);
+        c.fillRect(60, 14, 2, 2);
+        c.fillRect(14, 68, 2, 2);
+        c.fillRect(56, 66, 2, 2);
+        c.fillStyle = '#44cc55';
+        c.fillRect(34, 26, 4, 4);
     });
 
     mk('boss_ground', 800, 600, (c) => {
@@ -190,29 +217,65 @@ export function drawBossTextures(mk) {
         c.setLineDash([]);
     });
 
-    mk('boss_portal', 64, 80, (c) => {
+    mk('boss_portal', 72, 90, (c) => {
         c.imageSmoothingEnabled = false;
+        // Outer stone frame
+        c.fillStyle = '#2a1a0a';
+        c.fillRect(0, 0, 72, 90);
         c.fillStyle = '#3d2b1f';
-        c.fillRect(0, 0, 64, 80);
+        c.fillRect(2, 2, 68, 86);
         c.fillStyle = '#2c1e14';
-        c.fillRect(4, 0, 56, 80);
-        c.fillStyle = '#4a2e16';
-        c.fillRect(8, 0, 48, 10);
-        c.fillStyle = '#1a5c2a';
-        c.fillRect(0, 0, 64, 8);
-        c.fillStyle = '#1e6b31';
-        c.fillRect(4, 0, 56, 4);
-        c.fillStyle = '#3a1050';
-        c.fillRect(18, 28, 28, 36);
-        c.fillStyle = '#5a2080';
-        c.fillRect(20, 30, 24, 32);
-        c.fillStyle = '#7a30aa';
-        c.fillRect(24, 36, 16, 20);
-        c.fillStyle = '#aa50ee';
-        c.fillRect(28, 40, 8, 12);
+        c.fillRect(4, 4, 64, 82);
+        // Stone details on frame
+        c.fillStyle = '#4a3520';
+        c.fillRect(4, 6, 18, 6);
+        c.fillRect(50, 6, 18, 6);
+        c.fillRect(4, 36, 14, 5);
+        c.fillRect(54, 36, 14, 5);
+        c.fillRect(6, 70, 16, 4);
+        c.fillRect(50, 70, 16, 4);
+        // Dark void
+        c.fillStyle = '#0a0015';
+        c.fillRect(10, 12, 52, 68);
+        c.fillStyle = '#100020';
+        c.fillRect(14, 16, 44, 58);
+        // Purple magic depth layers
+        c.fillStyle = '#1a0035';
+        c.fillRect(18, 20, 36, 50);
+        c.fillStyle = '#2a0050';
+        c.fillRect(22, 24, 28, 42);
+        c.fillStyle = '#3a0068';
+        c.fillRect(24, 28, 24, 34);
+        c.fillStyle = '#4a1080';
+        c.fillRect(26, 30, 20, 30);
+        c.fillStyle = '#5a2098';
+        c.fillRect(28, 32, 16, 26);
+        c.fillStyle = '#6a30b0';
+        c.fillRect(30, 34, 12, 22);
+        c.fillStyle = '#7a40c8';
+        c.fillRect(32, 36, 8, 18);
+        c.fillStyle = '#8a50e0';
+        c.fillRect(34, 38, 4, 14);
+        // Magical runes/glow on frame
+        c.fillStyle = '#9b59b6';
+        c.fillRect(8, 8, 3, 3);
+        c.fillRect(61, 8, 3, 3);
+        c.fillRect(8, 78, 3, 3);
+        c.fillRect(61, 78, 3, 3);
+        c.fillStyle = '#aa66cc';
+        c.fillRect(10, 14, 2, 2);
+        c.fillRect(60, 14, 2, 2);
+        c.fillRect(10, 74, 2, 2);
+        c.fillRect(60, 74, 2, 2);
+        c.fillStyle = '#bb77dd';
+        c.fillRect(28, 32, 2, 2);
+        c.fillRect(42, 34, 2, 2);
+        c.fillRect(34, 52, 2, 2);
+        // Bottom stone base
         c.fillStyle = '#3d2b1f';
-        c.fillRect(4, 72, 12, 8);
-        c.fillRect(48, 72, 12, 8);
+        c.fillRect(4, 82, 12, 8);
+        c.fillRect(56, 82, 12, 8);
+        c.fillRect(26, 84, 20, 6);
     });
 
     mk('root_add', 24, 28, (c) => {

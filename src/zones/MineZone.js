@@ -35,6 +35,15 @@ export class MineZone extends BaseZone {
         }).setOrigin(0.5).setDepth(12);
 
         s.mineBossPortal = s.add.sprite(MINE_BOSS_PORTAL_POS.x, MINE_BOSS_PORTAL_POS.y, 'mine_boss_portal').setDepth(2);
+        s.mineBossPortalGlow = s.add.image(MINE_BOSS_PORTAL_POS.x, MINE_BOSS_PORTAL_POS.y, 'portal_glow').setDepth(1).setScale(1.6).setTint(0x9b59b6).setAlpha(0.5);
+        s.tweens.add({
+            targets: s.mineBossPortalGlow,
+            alpha: { from: 0.3, to: 0.7 },
+            duration: 2000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
         s.mineBossPortalHint = s.add.text(MINE_BOSS_PORTAL_POS.x, MINE_BOSS_PORTAL_POS.y + 44, '', {
             fontSize: '11px', fill: '#bf77f6', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 2
@@ -73,6 +82,7 @@ export class MineZone extends BaseZone {
             s.particles.startCandleGlow(200, 300);
             s.particles.startCandleGlow(600, 500);
             s.particles.startCandleGlow(400, 800);
+            s.particles.startPortalParticles(MINE_BOSS_PORTAL_POS.x, MINE_BOSS_PORTAL_POS.y, [0x9b59b6, 0xaa66cc, 0xbb77dd]);
         }
         this.bossDefeated = false;
         this.bossAlive = false;
@@ -108,6 +118,7 @@ export class MineZone extends BaseZone {
         if (s.exitLadder) { s.exitLadder.destroy(); s.exitLadder = null; }
         if (s.exitHint) { s.exitHint.destroy(); s.exitHint = null; }
         if (s.mineBossPortal) { s.mineBossPortal.destroy(); s.mineBossPortal = null; }
+        if (s.mineBossPortalGlow) { s.mineBossPortalGlow.destroy(); s.mineBossPortalGlow = null; }
         if (s.mineBossPortalHint) { s.mineBossPortalHint.destroy(); s.mineBossPortalHint = null; }
         if (s.mineTorches) {
             s.mineTorches.forEach(t => {

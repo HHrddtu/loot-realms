@@ -895,17 +895,53 @@ export function drawExpansionTextures(mk, textures) {
         c.fill();
     });
 
-    // Hell portal (red)
-    mk('hell_portal', 60, 16, (c) => {
+    // Hell portal (fiery rift)
+    mk('hell_portal', 60, 28, (c) => {
         c.imageSmoothingEnabled = false;
+        // Outer dark burned edges
+        c.fillStyle = '#1a0a0a';
+        c.fillRect(0, 0, 60, 28);
+        c.fillStyle = '#2a0a00';
+        c.fillRect(2, 2, 56, 24);
+        // Cracked stone rim
+        c.fillStyle = '#3a1500';
+        c.fillRect(4, 3, 8, 4);
+        c.fillRect(48, 3, 8, 4);
+        c.fillRect(3, 10, 4, 8);
+        c.fillRect(53, 10, 4, 8);
+        c.fillRect(6, 20, 8, 4);
+        c.fillRect(46, 20, 8, 4);
+        // Deep fiery void
         c.fillStyle = '#ff2200';
-        c.fillRect(0, 0, 60, 16);
+        c.fillRect(8, 6, 44, 16);
+        c.fillStyle = '#ff4400';
+        c.fillRect(10, 7, 40, 14);
         c.fillStyle = '#ff6600';
-        c.fillRect(4, 2, 52, 12);
+        c.fillRect(12, 8, 36, 12);
+        c.fillStyle = '#ff8800';
+        c.fillRect(14, 9, 32, 10);
         c.fillStyle = '#ffaa00';
-        c.fillRect(8, 4, 44, 8);
+        c.fillRect(16, 10, 28, 8);
+        c.fillStyle = '#ffcc00';
+        c.fillRect(18, 11, 24, 6);
+        c.fillStyle = '#ffdd44';
+        c.fillRect(20, 12, 20, 4);
+        c.fillStyle = '#ffee88';
+        c.fillRect(22, 13, 16, 2);
         c.fillStyle = '#ffffff';
-        c.fillRect(14, 6, 32, 4);
+        c.fillRect(24, 13, 12, 2);
+        // Lava drip effect
+        c.fillStyle = '#ff4400';
+        c.fillRect(14, 18, 3, 4);
+        c.fillRect(42, 19, 3, 3);
+        c.fillStyle = '#ff6600';
+        c.fillRect(30, 20, 4, 3);
+        // Outer glow hints
+        c.fillStyle = '#ff3300';
+        c.fillRect(2, 6, 2, 2);
+        c.fillRect(56, 6, 2, 2);
+        c.fillRect(2, 18, 2, 2);
+        c.fillRect(56, 18, 2, 2);
     });
 
     // Hell enemy spritesheets
@@ -1161,5 +1197,307 @@ export function drawExpansionTextures(mk, textures) {
         c.fillRect(16, 17, 4, 3);
         c.fillStyle = '#555';
         c.fillRect(11, 5, 2, 4);
+    });
+
+    // ===== DEAD VILLAGE TEXTURES =====
+
+    mk('village_house_dead', 60, 50, (c) => {
+        c.imageSmoothingEnabled = false;
+        // Broken walls
+        c.fillStyle = '#3a2510';
+        c.fillRect(5, 18, 50, 30);
+        c.fillStyle = '#4a3018';
+        c.fillRect(8, 20, 44, 26);
+        // Damaged roof with hole
+        c.fillStyle = '#5a3520';
+        c.beginPath();
+        c.moveTo(0, 18);
+        c.lineTo(30, 0);
+        c.lineTo(60, 18);
+        c.fill();
+        c.fillStyle = '#2a1a0a';
+        c.fillRect(22, 6, 16, 12); // hole in roof
+        // Broken door
+        c.fillStyle = '#2a1a0a';
+        c.fillRect(24, 32, 12, 16);
+        c.fillRect(28, 34, 4, 12); // crack
+        // Dark windows (no glow)
+        c.fillStyle = '#1a1020';
+        c.fillRect(10, 24, 10, 10);
+        c.fillRect(40, 24, 10, 10);
+        // Cracks
+        c.fillStyle = '#2a1508';
+        c.fillRect(15, 22, 2, 18);
+        c.fillRect(42, 28, 2, 14);
+        // Cobwebs
+        c.fillStyle = 'rgba(200,200,200,0.3)';
+        c.fillRect(6, 18, 8, 6);
+        c.fillRect(46, 18, 8, 6);
+    });
+
+    mk('dead_tree', 20, 40, (c) => {
+        c.imageSmoothingEnabled = false;
+        // Trunk
+        c.fillStyle = '#3a2a1a';
+        c.fillRect(8, 10, 4, 30);
+        c.fillStyle = '#4a3a2a';
+        c.fillRect(9, 12, 2, 26);
+        // Bare branches
+        c.fillStyle = '#3a2a1a';
+        c.fillRect(2, 8, 8, 2);
+        c.fillRect(10, 6, 8, 2);
+        c.fillRect(4, 4, 4, 2);
+        c.fillRect(12, 2, 6, 2);
+        c.fillRect(0, 12, 6, 2);
+        c.fillRect(14, 10, 6, 2);
+        // Broken branch
+        c.fillRect(6, 0, 2, 4);
+        c.fillRect(16, 0, 2, 3);
+    });
+
+    mk('village_corpse', 16, 10, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#5a3a1a';
+        c.fillRect(2, 2, 12, 6);
+        c.fillStyle = '#4a2a10';
+        c.fillRect(4, 0, 4, 4);
+        c.fillStyle = '#6a1a1a';
+        c.fillRect(2, 6, 12, 4);
+        c.fillStyle = '#4a0a0a';
+        c.fillRect(4, 7, 8, 3);
+    });
+
+    mk('broken_fence', 40, 12, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#4a3a2a';
+        c.fillRect(2, 4, 36, 3);
+        c.fillStyle = '#5a4a3a';
+        c.fillRect(4, 2, 2, 10);
+        c.fillRect(18, 3, 2, 9);
+        c.fillRect(32, 1, 2, 11);
+        // Broken parts
+        c.fillStyle = '#3a2a1a';
+        c.fillRect(10, 0, 2, 5);
+        c.fillRect(26, 0, 2, 4);
+        c.fillRect(36, 2, 4, 3);
+    });
+
+    mk('village_garden_dead', 30, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#2a1a10';
+        c.fillRect(0, 0, 30, 20);
+        c.fillStyle = '#3a2a18';
+        c.fillRect(2, 2, 26, 16);
+        // Dead withered crops
+        c.fillStyle = '#4a3a20';
+        c.fillRect(4, 6, 2, 10);
+        c.fillRect(10, 4, 2, 12);
+        c.fillRect(16, 8, 2, 8);
+        c.fillRect(22, 5, 2, 11);
+        c.fillRect(28, 7, 2, 9);
+    });
+
+    // ===== RESTORED VILLAGE TEXTURES =====
+
+    mk('village_house_red', 60, 50, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#6b3a2a';
+        c.fillRect(5, 18, 50, 30);
+        c.fillStyle = '#8b5a3a';
+        c.fillRect(8, 20, 44, 26);
+        // Red roof
+        c.fillStyle = '#c0392b';
+        c.beginPath();
+        c.moveTo(0, 18);
+        c.lineTo(30, 0);
+        c.lineTo(60, 18);
+        c.fill();
+        c.fillStyle = '#e74c3c';
+        c.fillRect(10, 12, 40, 4);
+        c.fillRect(18, 6, 24, 4);
+        // Door
+        c.fillStyle = '#4a2a10';
+        c.fillRect(24, 32, 12, 16);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(33, 40, 2, 2); // doorknob
+        // Windows with warm glow
+        c.fillStyle = '#f39c12';
+        c.fillRect(10, 24, 10, 10);
+        c.fillRect(40, 24, 10, 10);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(12, 26, 6, 6);
+        c.fillRect(42, 26, 6, 6);
+    });
+
+    mk('village_house_green', 60, 50, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#2a4a2a';
+        c.fillRect(5, 18, 50, 30);
+        c.fillStyle = '#3a5a3a';
+        c.fillRect(8, 20, 44, 26);
+        // Green roof
+        c.fillStyle = '#27ae60';
+        c.beginPath();
+        c.moveTo(0, 18);
+        c.lineTo(30, 0);
+        c.lineTo(60, 18);
+        c.fill();
+        c.fillStyle = '#2ecc71';
+        c.fillRect(10, 12, 40, 4);
+        c.fillRect(18, 6, 24, 4);
+        // Door
+        c.fillStyle = '#3a2a10';
+        c.fillRect(24, 32, 12, 16);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(33, 40, 2, 2);
+        // Windows
+        c.fillStyle = '#f39c12';
+        c.fillRect(10, 24, 10, 10);
+        c.fillRect(40, 24, 10, 10);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(12, 26, 6, 6);
+        c.fillRect(42, 26, 6, 6);
+    });
+
+    mk('village_house_blue', 60, 50, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#2a3a5a';
+        c.fillRect(5, 18, 50, 30);
+        c.fillStyle = '#3a4a6a';
+        c.fillRect(8, 20, 44, 26);
+        // Blue roof
+        c.fillStyle = '#2980b9';
+        c.beginPath();
+        c.moveTo(0, 18);
+        c.lineTo(30, 0);
+        c.lineTo(60, 18);
+        c.fill();
+        c.fillStyle = '#3498db';
+        c.fillRect(10, 12, 40, 4);
+        c.fillRect(18, 6, 24, 4);
+        // Door
+        c.fillStyle = '#2a2a3a';
+        c.fillRect(24, 32, 12, 16);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(33, 40, 2, 2);
+        // Windows
+        c.fillStyle = '#f39c12';
+        c.fillRect(10, 24, 10, 10);
+        c.fillRect(40, 24, 10, 10);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(12, 26, 6, 6);
+        c.fillRect(42, 26, 6, 6);
+    });
+
+    mk('village_fountain', 40, 36, (c) => {
+        c.imageSmoothingEnabled = false;
+        // Base pool
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(2, 26, 36, 10);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(4, 28, 32, 6);
+        // Water
+        c.fillStyle = '#3498db';
+        c.fillRect(6, 28, 28, 4);
+        c.fillStyle = '#5dade2';
+        c.fillRect(8, 29, 24, 2);
+        // Pillar
+        c.fillStyle = '#bdc3c7';
+        c.fillRect(17, 8, 6, 20);
+        c.fillStyle = '#d5dbdb';
+        c.fillRect(18, 10, 4, 16);
+        // Top bowl
+        c.fillStyle = '#95a5a6';
+        c.fillRect(12, 6, 16, 4);
+        c.fillStyle = '#bdc3c7';
+        c.fillRect(14, 4, 12, 4);
+        // Water spout
+        c.fillStyle = '#85c1e9';
+        c.fillRect(18, 0, 4, 6);
+        c.fillStyle = '#aed6f1';
+        c.fillRect(19, 1, 2, 4);
+    });
+
+    mk('village_path', 200, 24, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#8b7355';
+        c.fillRect(0, 2, 200, 20);
+        c.fillStyle = '#9a8265';
+        c.fillRect(0, 4, 200, 16);
+        c.fillStyle = '#a89070';
+        c.fillRect(0, 6, 200, 12);
+        // Stones
+        c.fillStyle = '#7a6a55';
+        for (let i = 0; i < 8; i++) {
+            c.fillRect(10 + i * 24, 10 + Math.random() * 6, 4, 3);
+        }
+    });
+
+    mk('village_lantern', 10, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        // Post
+        c.fillStyle = '#5a4a3a';
+        c.fillRect(4, 8, 2, 12);
+        // Lamp housing
+        c.fillStyle = '#4a3a2a';
+        c.fillRect(1, 4, 8, 6);
+        c.fillStyle = '#5a4a3a';
+        c.fillRect(2, 2, 6, 2);
+        // Light
+        c.fillStyle = '#f39c12';
+        c.fillRect(3, 5, 4, 4);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(4, 6, 2, 2);
+    });
+
+    mk('village_crop', 20, 16, (c) => {
+        c.imageSmoothingEnabled = false;
+        // Soil
+        c.fillStyle = '#5a4a30';
+        c.fillRect(0, 10, 20, 6);
+        c.fillStyle = '#6a5a40';
+        c.fillRect(1, 11, 18, 4);
+        // Carrots
+        c.fillStyle = '#e67e22';
+        c.fillRect(3, 6, 3, 8);
+        c.fillRect(10, 4, 3, 10);
+        c.fillRect(17, 7, 3, 7);
+        // Green tops
+        c.fillStyle = '#27ae60';
+        c.fillRect(2, 2, 5, 5);
+        c.fillRect(9, 0, 5, 5);
+        c.fillRect(16, 3, 5, 5);
+        c.fillStyle = '#2ecc71';
+        c.fillRect(3, 1, 3, 4);
+        c.fillRect(10, 0, 3, 3);
+        c.fillRect(17, 2, 3, 4);
+    });
+
+    mk('villager_dancer', 14, 18, (c) => {
+        c.imageSmoothingEnabled = false;
+        // Head
+        c.fillStyle = '#f5cba7';
+        c.fillRect(4, 0, 6, 6);
+        c.fillStyle = '#5d4037';
+        c.fillRect(4, 0, 6, 2); // hair
+        c.fillStyle = '#2c3e50';
+        c.fillRect(5, 2, 2, 2); // eyes
+        c.fillRect(7, 2, 2, 2);
+        // Body
+        c.fillStyle = '#e74c3c';
+        c.fillRect(3, 6, 8, 6);
+        c.fillStyle = '#c0392b';
+        c.fillRect(4, 7, 6, 4);
+        // Arms (dancing pose)
+        c.fillStyle = '#f5cba7';
+        c.fillRect(0, 5, 3, 2);
+        c.fillRect(11, 5, 3, 2);
+        // Legs
+        c.fillStyle = '#2980b9';
+        c.fillRect(4, 12, 3, 6);
+        c.fillRect(8, 12, 3, 6);
+        c.fillStyle = '#2c3e50';
+        c.fillRect(4, 16, 3, 2);
+        c.fillRect(8, 16, 3, 2);
     });
 }

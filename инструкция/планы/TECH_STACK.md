@@ -1,5 +1,13 @@
 # TECH STACK
 
+#tech #design
+
+> [!INFO] Связанные заметки
+> - [[TECHNICAL_DESIGN]] — архитектура проекта
+> - [[PROJECT_STATE]] — текущее состояние
+> - [[docs/web/module-bundling|Module Bundling]] — сборка модулей
+> - [[README]] — карта содержимого
+
 ## Выбор технологии
 
 ### Движок/Библиотека: **Phaser 3**

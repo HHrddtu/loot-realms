@@ -1,0 +1,81 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "username": "pvova",
+  "default_agent": "lead",
+  "logLevel": "INFO",
+  "share": "manual",
+  "snapshot": true,
+  "instructions": ["AGENTS.md"],
+
+  "skills": {
+    "paths": [".opencode/skills"]
+  },
+
+  "agent": {
+    "lead": {
+      "mode": "primary",
+      "description": "Lead architect for Loot Realms. Handles complex decisions, code architecture, and delegates to the right specialist subagent.",
+      "steps": 50,
+      "permission": {
+        "edit": "ask",
+        "bash": { "npm *": "allow", "git *": "ask", "vite*": "allow", "*": "ask" },
+        "task": "allow",
+        "external_directory": { "*": "deny" }
+      }
+    },
+    "build": {
+      "mode": "subagent",
+      "description": "General builder for everyday edits in Loot Realms."
+    },
+    "plan": {
+      "mode": "subagent",
+      "description": "Planning specialist for breaking down large features into steps."
+    }
+  },
+
+  "command": {
+    "team": {
+      "description": "Run a full-team analysis on a task",
+      "template": "As the lead architect, analyze the following request, then delegate focused subtasks to the appropriate specialist agents (@code, @review, @ui, @game-design, @multiplayer, @perf, @analyst, @creative). Synthesize their outputs into a single actionable plan. Request: {{args}}"
+    },
+    "review": {
+      "description": "Get a code review from the review agent",
+      "template": "@review please review the current changes/files for code quality, bugs, and architecture issues. Focus on: {{args}}"
+    },
+    "debug": {
+      "description": "Debug a specific issue",
+      "template": "@debug investigate and fix this issue: {{args}}"
+    },
+    "design": {
+      "description": "Design a game feature",
+      "template": "@game-design design the following feature with mechanics, balance, and integration notes for Loot Realms: {{args}}"
+    },
+    "optimize": {
+      "description": "Optimize performance of a component",
+      "template": "@perf analyze and optimize the performance of: {{args}}"
+    }
+  },
+
+  "permission": {
+    "edit": "ask",
+    "bash": { "npm *": "allow", "npx *": "allow", "git *": "ask", "vite*": "allow", "node *": "allow", "*": "ask" },
+    "task": "allow",
+    "external_directory": { "*": "deny" }
+  },
+
+  "compaction": {
+    "auto": true,
+    "tail_turns": 5,
+    "reserved": 4000
+  },
+
+  "experimental": {
+    "batch_tool": true,
+    "primary_tools": ["edit", "bash", "task", "todowrite"]
+  },
+
+  "tool_output": {
+    "max_lines": 300,
+    "max_bytes": 65536
+  }
+}

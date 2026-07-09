@@ -121,6 +121,67 @@ export class ParticleSystem {
             ctx.ellipse(3, 4, 2, 3.5, 0, 0, Math.PI * 2);
             ctx.fill();
         });
+        this._mk('particle_mist', 32, 32, (ctx, w, h) => {
+            const g = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+            g.addColorStop(0, 'rgba(200,220,240,0.15)');
+            g.addColorStop(0.4, 'rgba(180,210,230,0.08)');
+            g.addColorStop(1, 'rgba(160,200,220,0)');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, w, h);
+        });
+        this._mk('glow_window', 16, 16, (ctx, w, h) => {
+            const g = ctx.createRadialGradient(8, 8, 0, 8, 8, 8);
+            g.addColorStop(0, 'rgba(255,220,100,0.35)');
+            g.addColorStop(0.3, 'rgba(255,200,80,0.2)');
+            g.addColorStop(0.6, 'rgba(255,180,60,0.08)');
+            g.addColorStop(1, 'rgba(255,160,40,0)');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, w, h);
+        });
+        this._mk('particle_warm', 10, 10, (ctx, w, h) => {
+            const g = ctx.createRadialGradient(5, 5, 0, 5, 5, 5);
+            g.addColorStop(0, 'rgba(255,200,80,0.9)');
+            g.addColorStop(0.5, 'rgba(255,160,40,0.5)');
+            g.addColorStop(1, 'rgba(255,100,20,0)');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, w, h);
+        });
+        this._mk('particle_dark_mist', 40, 40, (ctx, w, h) => {
+            const g = ctx.createRadialGradient(20, 20, 0, 20, 20, 20);
+            g.addColorStop(0, 'rgba(80,60,40,0.12)');
+            g.addColorStop(0.4, 'rgba(60,50,30,0.06)');
+            g.addColorStop(1, 'rgba(40,30,20,0)');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, w, h);
+        });
+        this._mk('particle_sun', 16, 16, (ctx, w, h) => {
+            const g = ctx.createRadialGradient(8, 8, 0, 8, 8, 8);
+            g.addColorStop(0, 'rgba(255,240,150,0.6)');
+            g.addColorStop(0.3, 'rgba(255,220,100,0.3)');
+            g.addColorStop(0.6, 'rgba(255,200,80,0.1)');
+            g.addColorStop(1, 'rgba(255,180,60,0)');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, w, h);
+        });
+        this._mk('particle_butterfly', 8, 6, (ctx, w, h) => {
+            ctx.fillStyle = '#ff88cc';
+            ctx.fillRect(0, 1, 3, 4);
+            ctx.fillRect(5, 1, 3, 4);
+            ctx.fillStyle = '#ffaaee';
+            ctx.fillRect(1, 2, 2, 2);
+            ctx.fillRect(5, 2, 2, 2);
+            ctx.fillStyle = '#cc4488';
+            ctx.fillRect(3, 2, 2, 2);
+        });
+        this._mk('portal_glow', 80, 80, (ctx, w, h) => {
+            const g = ctx.createRadialGradient(40, 40, 0, 40, 40, 40);
+            g.addColorStop(0, 'rgba(255,255,255,0.2)');
+            g.addColorStop(0.2, 'rgba(255,200,100,0.12)');
+            g.addColorStop(0.5, 'rgba(150,80,255,0.06)');
+            g.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, w, h);
+        });
     }
 
     destroy() {
@@ -373,6 +434,115 @@ export class ParticleSystem {
             alpha: { start: 0.9, end: 0.2 }
         });
         emitter.setDepth(100);
+        this.activeEmitters.push(emitter);
+        return emitter;
+    }
+
+    startWinterMist(worldW, worldH) {
+        const emitter = this.scene.add.particles(0, 0, 'particle_mist', {
+            x: { min: 0, max: worldW },
+            y: { min: worldH * 0.7, max: worldH },
+            speedX: { min: -8, max: 8 },
+            speedY: { min: -5, max: -1 },
+            scale: { start: 3, end: 5 },
+            lifespan: { min: 4000, max: 8000 },
+            quantity: 1,
+            frequency: 400,
+            alpha: { start: 0.6, end: 0 },
+            blendMode: 'ADD',
+            tint: [0xc0d8f0, 0xd0e4f8, 0xb8d0e8]
+        });
+        emitter.setDepth(1);
+        this.activeEmitters.push(emitter);
+        return emitter;
+    }
+
+    startCampfireSparks(worldX, worldY) {
+        const emitter = this.scene.add.particles(worldX, worldY, 'particle_warm', {
+            speedX: { min: -10, max: 10 },
+            speedY: { min: -20, max: -50 },
+            scale: { start: 1.2, end: 0 },
+            lifespan: { min: 600, max: 1200 },
+            quantity: 1,
+            frequency: 80,
+            alpha: { start: 0.9, end: 0 },
+            blendMode: 'ADD'
+        });
+        emitter.setDepth(8);
+        this.activeEmitters.push(emitter);
+        return emitter;
+    }
+
+    startDarkMist(worldW, worldH) {
+        const emitter = this.scene.add.particles(0, 0, 'particle_dark_mist', {
+            x: { min: 0, max: worldW },
+            y: { min: worldH * 0.6, max: worldH },
+            speedX: { min: -6, max: 6 },
+            speedY: { min: -3, max: -1 },
+            scale: { start: 4, end: 6 },
+            lifespan: { min: 5000, max: 10000 },
+            quantity: 1,
+            frequency: 500,
+            alpha: { start: 0.8, end: 0 },
+            tint: [0x605030, 0x504020, 0x706040]
+        });
+        emitter.setDepth(1);
+        this.activeEmitters.push(emitter);
+        return emitter;
+    }
+
+    startSunRays(worldW, worldH) {
+        const emitter = this.scene.add.particles(0, 0, 'particle_sun', {
+            x: { min: 0, max: worldW },
+            y: -20,
+            speedX: { min: -5, max: 5 },
+            speedY: { min: 15, max: 40 },
+            scale: { start: 2, end: 3 },
+            lifespan: { min: 4000, max: 8000 },
+            quantity: 1,
+            frequency: 300,
+            alpha: { start: 0.7, end: 0 },
+            blendMode: 'ADD',
+            tint: [0xfff0a0, 0xffe080, 0xffd060]
+        });
+        emitter.setDepth(100);
+        this.activeEmitters.push(emitter);
+        return emitter;
+    }
+
+    startButterflies(worldW, worldH) {
+        const emitter = this.scene.add.particles(0, 0, 'particle_butterfly', {
+            x: { min: 50, max: worldW - 50 },
+            y: { min: 100, max: worldH * 0.8 },
+            speedX: { min: -15, max: 15 },
+            speedY: { min: -10, max: 10 },
+            scale: { start: 0.8, end: 1.2 },
+            lifespan: { min: 6000, max: 12000 },
+            quantity: 1,
+            frequency: 800,
+            alpha: { start: 0.6, end: 0.3 },
+            tint: [0xff88cc, 0xffaaff, 0xcc66aa, 0xee88bb],
+            rotate: { min: -20, max: 20 }
+        });
+        emitter.setDepth(100);
+        this.activeEmitters.push(emitter);
+        return emitter;
+    }
+
+    startPortalParticles(worldX, worldY, tintColor, count = 2) {
+        const emitter = this.scene.add.particles(worldX, worldY, 'particle_spark', {
+            speedX: { min: -20, max: 20 },
+            speedY: { min: -30, max: -10 },
+            scale: { start: 0.6, end: 0 },
+            lifespan: { min: 600, max: 1200 },
+            quantity: 1,
+            frequency: 120,
+            alpha: { start: 0.8, end: 0 },
+            blendMode: 'ADD',
+            tint: tintColor || [0x9b59b6, 0xaa66cc, 0xbb77dd],
+            angle: { min: 0, max: 360 }
+        });
+        emitter.setDepth(8);
         this.activeEmitters.push(emitter);
         return emitter;
     }

@@ -1,8 +1,31 @@
 # ORIENTATION — Loot Realms v0.16.0+
 
+#orientation #tech #design
+
+> [!INFO] Связанные заметки
+> - [[index|MOC]] — карта навигации по всем разделам
+> - [[01-tech/TECH_STACK|Tech Stack]] — технологический стек
+> - [[01-tech/ARCHITECTURE|Architecture]] — архитектура проекта
+> - [[12-plans/PROJECT_STATE|PROJECT STATE]] — текущее состояние
+> - [[01-tech/FILE_TREE|File Tree]] — структура файлов
+> - [[инструкция/инструкция|Правила разработки]]
+> - [[AGENTS]] — руководство по AI-агентам
+
 ## What is this
 PvE Adventure Loot Game. Phaser 3, Vite, JS ES6, Firebase auth, PeerJS multiplayer.
 No TypeScript. No external assets — all procedural (Canvas 2D).
+
+## Quick links
+| Раздел | Ссылка |
+|--------|--------|
+| **Зоны** | [[02-zones/_zones_index\|Все зоны]] (10 файлов) |
+| **Боссы** | [[03-bosses/_bosses_index\|Все боссы]] (7 файлов) |
+| **Системы** | [[04-systems/_systems_index\|Все системы]] (8 файлов) |
+| **Классы** | [[05-classes/_classes_index\|Все классы]] (3 файла) |
+| **Механики** | [[06-mechanics/_mechanics_index\|Все механики]] (12 файлов) |
+| **Сцены** | [[07-scenes/_scenes_index\|Все сцены]] (12 файлов) |
+| **Архитектура** | [[01-tech/ARCHITECTURE\|Architecture]] |
+| **Планы** | [[12-plans/_plans_index\|Все планы]] |
 
 ## Stack
 - Engine: Phaser 3 (physics, scenes, tweens)
@@ -20,15 +43,14 @@ Account version: v3 (migration from v2 built-in)
 ## Key directories
 ```
 src/
-  config/        — items.js, pets.js, gold.js, classes.js, spells.js (data only)
-  scenes/        — BootScene, MenuScene, GameScene, PetScene, etc.
-  systems/       — PlayerSystem, CombatSystem, UISystem, SpellSystem, ParticleSystem
-  zones/         — ForestZone, MineZone, CaveZone, VillageZone, HellZone, SnowyZone, CastleZone
-  textures/      — all procedural draw functions (no PNG files)
-  sound.js       — Web Audio oscillator sounds
-  save.js        — localStorage + account management
-  i18n.js        — 3 languages
-  utils.js       — loot roll functions
+  config/     — items, pets, gold, classes, spells (data only)
+  scenes/     — Boot, Login, Menu, Game, Talent, Bestiary, etc.
+  systems/    — PlayerSystem, CombatSystem, UISystem, SpellSystem, ParticleSystem
+  zones/      — ForestZone, MineZone, CaveZone, VillageZone, HellZone, SnowyZone, CastleZone
+  textures/   — all procedural draw functions (no PNG files)
+  sound.js    — Web Audio oscillator sounds
+  save.js     — localStorage + account management
+  i18n.js     — 3 languages (700+ keys)
 ```
 
 ## Build & push
@@ -57,44 +79,23 @@ git add -A && git commit -m "..." && git push
 ```
 
 ## Zones (progression order)
-1. Forest → 2. Mine → 3. Cave → 4. Village → 5. Cemetery → 6. Hell → 7. Snowy → 8. Castle
+Подробно: [[02-zones/_zones_index|Все зоны]]
 
-Each zone has: mobs, boss, chests, portal/door, shop (some).
-Zone files handle: spawning, enemy AI, boss mechanics, room transitions.
-
-## Pets (pets.js)
-12 pets, 4 rarities (common/uncommon/rare/legendary), 4 types:
-- **companion**: stat boost only
-- **attacker**: auto-attacks nearest enemy (1.5s cooldown)
-- **tank**: draws mob aggro (enemies chase pet instead of player within 150px)
-- **collector**: +gold bonus, +equip drop chance (from lootPercent stat)
-
-3 cases: Wooden (30cr), Iron (80cr), Golden (200cr). Each has unique pet pool.
-Pet combat: `_updatePetCombat()` in GameScene. Follow: `_updatePetFollow()`.
-Pet sounds: `playPetAttack()`, `playPetPickup()` in sound.js.
+## Pets
+12 pets, 4 rarities, 4 types. Подробно: [[06-mechanics/Pets|Pets]] и [[04-systems/PetSystem|PetSystem]]
 
 ## Combat flow
-CombatSystem.hitEnemy() → applies damage, crit, armor reduction, DOT
-CombatSystem.killEnemy() → exp, gold, crystals (boss only), equip drops, quest triggers
-PlayerSystem.recalcStats() → recomputes all stats from class + level + talents + account + equipment + pets
+CombatSystem.hitEnemy() → damage, crit → killEnemy() → exp, gold, loot
+PlayerSystem.recalcStats() → all stats from class + level + talents + equipment + pets
 
 ## Spell system
-Each class has 4 spells. Spells defined in spells.js. Cast via `SpellSystem.castSpell(slot)`.
-Cooldowns, mana, spell damage scaling.
+Each class has 4 spells. Подробно: [[04-systems/SpellSystem|SpellSystem]]
 
 ## Key patterns
 - Procedural textures: draw in `src/textures/*.js`, registered in BootScene
 - Floating text: `scene.floatingText(x, y, text, color)`
-- Enemy HP bars: created per-enemy, updated in zone update loops
 - Zone transitions: `scene._saveGame()` → `scene.scene.restart()`
 - Account save: `_saveAccount()` calls `saveGame()` + Firebase write
-- Mute: `toggleMute()` in sound.js, stored in localStorage
-
-## Known performance notes
-- Pet level cached in `_createPet()`, no per-frame loadAccount()
-- Account loaded at scene start, not per-frame
-- Particle systems use Phaser particle manager
-- BootScene has 8s timeout for texture generation
 
 ## What NOT to do
 - Don't create new files without updating FILE_TREE.md

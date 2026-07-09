@@ -24,7 +24,16 @@ export class ForestZone extends BaseZone {
             .setOrigin(0, 0).setScale(1, FOREST_HEIGHT / 200).setDepth(0);
 
         s.portalSprite = s.add.sprite(PORTAL_POS.x, PORTAL_POS.y, 'tree_hole').setDepth(1);
-        s.portalHint = s.add.text(PORTAL_POS.x, PORTAL_POS.y + 50, '', {
+        s.portalGlow = s.add.image(PORTAL_POS.x, PORTAL_POS.y, 'portal_glow').setDepth(0).setScale(1.8).setTint(0x44aa55).setAlpha(0.6);
+        s.tweens.add({
+            targets: s.portalGlow,
+            alpha: { from: 0.4, to: 0.8 },
+            duration: 2000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+        s.portalHint = s.add.text(PORTAL_POS.x, PORTAL_POS.y + 55, '', {
             fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5).setDepth(12);
@@ -83,6 +92,7 @@ export class ForestZone extends BaseZone {
         if (s.particles) {
             s.particles.startForestLeaves(800, FOREST_HEIGHT);
             s.particles.startFirefly(800, FOREST_HEIGHT);
+            s.particles.startPortalParticles(PORTAL_POS.x, PORTAL_POS.y, [0x44cc55, 0x66ee77, 0x88ff99]);
         }
     }
 
@@ -106,6 +116,7 @@ export class ForestZone extends BaseZone {
         }
         if (s.forestBg) { s.forestBg.destroy(); s.forestBg = null; }
         if (s.portalSprite) { s.portalSprite.destroy(); s.portalSprite = null; }
+        if (s.portalGlow) { s.portalGlow.destroy(); s.portalGlow = null; }
         if (s.portalHint) { s.portalHint.destroy(); s.portalHint = null; }
     }
 

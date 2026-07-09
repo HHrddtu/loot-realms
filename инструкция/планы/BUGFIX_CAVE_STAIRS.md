@@ -1,5 +1,12 @@
 # BUGFIX: v0.9.8 — Cave Stairs Ghost + Account Equipment Save
 
+#bugfix #tech
+
+> [!INFO] Связанные заметки
+> - [[PROJECT_STATE]] — история версий
+> - [[TECHNICAL_DESIGN]] — архитектура зон
+> - [[README]] — карта содержимого
+
 ## Билд: v0.9.8
 
 ---

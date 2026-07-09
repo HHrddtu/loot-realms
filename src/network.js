@@ -1,4 +1,5 @@
 import Peer from 'peerjs';
+import { loadAccount } from './save.js';
 
 let _peer = null;
 let _isHost = false;
@@ -287,7 +288,7 @@ export function joinRoom(code, playerName) {
                     _handleHostData(data);
                 });
 
-                conn.send({ type: 'join', name: playerName || 'Guest', classKey: 'sage', x: 400, y: 300, hp: 100, maxHp: 100 });
+                conn.send({ type: 'join', name: playerName || 'Guest', classKey: (loadAccount && loadAccount().classKey) || 'sage', x: 400, y: 300, hp: 100, maxHp: 100 });
 
                 if (!settled) {
                     settled = true;

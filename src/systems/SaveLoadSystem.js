@@ -68,6 +68,7 @@ export class SaveLoadSystem {
         lockedPerClass[s.classKey] = s.lockedBranches || [];
         return {
             ...acc,
+            classKey: s.classKey,
             accountLevel: s.accountLevel,
             accountExp: s.accountExp,
             accountTalentPoints: s.accountTalentPoints,
