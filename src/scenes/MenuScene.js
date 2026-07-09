@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { DIFFICULTIES, RARITY_COLORS, EMPTY_ACCOUNT_EQUIPMENT } from '../config/index.js';
+import { RARITY_COLORS, EMPTY_ACCOUNT_EQUIPMENT } from '../config/index.js';
 import { lighten } from '../utils.js';
 import { hasSave, loadGame, deleteSave, hasAccount, loadAccount, getAccountLevelUpReq } from '../save.js';
 import { t, getLang, setLang } from '../i18n.js';
@@ -13,7 +13,6 @@ export default class MenuScene extends Phaser.Scene {
 
     create() {
         this.cameras.main.setBackgroundColor('#1a1408');
-        this.diffIdx = 0;
         this.overlayEls = [];
 
         if (getCurrentUser() && !isAnonymous()) {
@@ -50,9 +49,10 @@ export default class MenuScene extends Phaser.Scene {
         this.menuBtn(400, 210, t('menu.start'), 0x27ae60, () => {
             if (hasAccount()) {
                 const acc = loadAccount();
+                const sv = loadGame();
                 this.scene.start('Game', {
-                    difficulty: DIFFICULTIES[this.diffIdx],
-                    classKey: acc ? acc.classKey || 'sage' : 'sage'
+                    difficulty: 'Normal',
+                    classKey: (acc && acc.classKey) || (sv && sv.classKey) || 'sage'
                 });
             } else {
                 this.scene.start('ClassSelect');
@@ -87,35 +87,8 @@ export default class MenuScene extends Phaser.Scene {
 
         const acc = hasAccount();
 
-        this.ovlText(400, 110, t('adv.difficulty'), {
-            fontSize: '14px', fill: '#ecf0f1', fontFamily: 'Georgia, serif', fontStyle: 'bold'
-        });
-
-        const diffLabel = this.ovlText(400, 135, DIFFICULTIES[this.diffIdx], {
-            fontSize: '18px', fill: '#f1c40f', fontFamily: 'Georgia, serif'
-        });
-
-        const leftBtn = this.add.rectangle(310, 135, 30, 28, 0x34495e)
-            .setStrokeStyle(1, 0x556677).setInteractive({ useHandCursor: true });
-        const leftLbl = this.add.text(310, 135, '<', {
-            fontSize: '16px', fill: '#fff', fontFamily: 'Georgia, serif', fontStyle: 'bold'
-        }).setOrigin(0.5);
-        this.overlayEls.push(leftBtn, leftLbl);
-
-        const rightBtn = this.add.rectangle(490, 135, 30, 28, 0x34495e)
-            .setStrokeStyle(1, 0x556677).setInteractive({ useHandCursor: true });
-        const rightLbl = this.add.text(490, 135, '>', {
-            fontSize: '16px', fill: '#fff', fontFamily: 'Georgia, serif', fontStyle: 'bold'
-        }).setOrigin(0.5);
-        this.overlayEls.push(rightBtn, rightLbl);
-
-        leftBtn.on('pointerdown', () => {
-            this.diffIdx = (this.diffIdx + DIFFICULTIES.length - 1) % DIFFICULTIES.length;
-            diffLabel.setText(DIFFICULTIES[this.diffIdx]);
-        });
-        rightBtn.on('pointerdown', () => {
-            this.diffIdx = (this.diffIdx + 1) % DIFFICULTIES.length;
-            diffLabel.setText(DIFFICULTIES[this.diffIdx]);
+        this.ovlText(400, 110, t('adv.difficulty') + ': Story', {
+            fontSize: '14px', fill: '#27ae60', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         });
 
         const langs = ['en', 'ru', 'de'];
@@ -160,7 +133,7 @@ export default class MenuScene extends Phaser.Scene {
             { t: t('adv.load'), c: 0x8e44ad, show: hasSave(), cb: () => {
                 const sv = loadGame();
                 this.scene.start('Game', {
-                    difficulty: sv ? sv.difficulty : 'Normal',
+                    difficulty: 'Normal',
                     classKey: sv ? sv.classKey || 'sage' : 'sage',
                     load: true
                 });

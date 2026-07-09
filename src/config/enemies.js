@@ -1,8 +1,8 @@
 // Forest enemies
 export const ENEMY_TYPES = [
-    { key: 'goblin', name: 'Goblin', nameRu: 'Гоблин', nameDe: 'Goblin', hp: 40, dmg: 5, exp: 10, bw: 18, bh: 20 },
-    { key: 'slime',  name: 'Slime',  nameRu: 'Слайм',  nameDe: 'Schleim', hp: 30, dmg: 3, exp: 8,  bw: 16, bh: 14 },
-    { key: 'rat',    name: 'Rat',    nameRu: 'Крыса',   nameDe: 'Ratte',   hp: 20, dmg: 2, exp: 5,  bw: 16, bh: 12 }
+    { key: 'goblin', name: 'Goblin', nameRu: 'Гоблин', nameDe: 'Goblin', hp: 80, dmg: 10, exp: 15, bw: 18, bh: 20 },
+    { key: 'slime',  name: 'Slime',  nameRu: 'Слайм',  nameDe: 'Schleim', hp: 60, dmg: 7, exp: 12, bw: 16, bh: 14 },
+    { key: 'rat',    name: 'Rat',    nameRu: 'Крыса',   nameDe: 'Ratte',   hp: 40, dmg: 5, exp: 8,  bw: 16, bh: 12 }
 ];
 export const ENEMY_COUNT = 3;
 export const EQUIP_DROP_CHANCE = 0.05;
@@ -25,9 +25,9 @@ export const BOSS_TYPE = {
 
 // Mine enemies
 export const MINE_ENEMY_TYPES = [
-    { key: 'skeleton_warrior', name: 'Skeleton Warrior', nameRu: 'Скелет-Воин', nameDe: 'Skelettkrieger', hp: 80, dmg: 12, exp: 30, bw: 18, bh: 24 },
-    { key: 'skeleton_archer',  name: 'Skeleton Archer',  nameRu: 'Скелет-Лучник', nameDe: 'Skelettbogenschütze', hp: 50, dmg: 8,  exp: 25, bw: 18, bh: 24 },
-    { key: 'skeleton_shaman',  name: 'Skeleton Shaman',  nameRu: 'Скелет-Шаман', nameDe: 'Skelett-Schamane', hp: 60, dmg: 10, exp: 35, bw: 18, bh: 26 }
+    { key: 'skeleton_warrior', name: 'Skeleton Warrior', nameRu: 'Скелет-Воин', nameDe: 'Skelettkrieger', hp: 160, dmg: 18, exp: 40, bw: 18, bh: 24 },
+    { key: 'skeleton_archer',  name: 'Skeleton Archer',  nameRu: 'Скелет-Лучник', nameDe: 'Skelettbogenschütze', hp: 100, dmg: 14, exp: 35, bw: 18, bh: 24 },
+    { key: 'skeleton_shaman',  name: 'Skeleton Shaman',  nameRu: 'Скелет-Шаман', nameDe: 'Skelett-Schamane', hp: 120, dmg: 16, exp: 45, bw: 18, bh: 26 }
 ];
 export const MINE_ENEMY_COUNT = 4;
 export const MINE_EQUIP_DROP_CHANCE = 0.12;
@@ -48,10 +48,10 @@ export const MINE_BOSS_TYPE = {
 
 // Cave enemies
 export const CAVE_ENEMY_TYPES = [
-    { key: 'cave_spider', name: 'Cave Spider', nameRu: 'Пещерный Паук', nameDe: 'Höhlenspinne', hp: 120, dmg: 14, exp: 40, bw: 16, bh: 14, role: 'dps' },
-    { key: 'cave_bat',    name: 'Cave Bat',    nameRu: 'Пещерная Летучая', nameDe: 'Höhlenfledermaus', hp: 80, dmg: 10, exp: 35, bw: 14, bh: 12, role: 'dps' },
-    { key: 'stone_golem', name: 'Stone Golem',  nameRu: 'Каменный Голем',  nameDe: 'Steingolem',     hp: 200, dmg: 18, exp: 55, bw: 22, bh: 26, role: 'tank' },
-    { key: 'earth_worm',  name: 'Earth Worm',   nameRu: 'Земляной Червь',  nameDe: 'Erdwurm',        hp: 180, dmg: 15, exp: 50, bw: 24, bh: 18, role: 'tank' }
+    { key: 'cave_spider', name: 'Cave Spider', nameRu: 'Пещерный Паук', nameDe: 'Höhlenspinne', hp: 240, dmg: 24, exp: 55, bw: 16, bh: 14, role: 'dps' },
+    { key: 'cave_bat',    name: 'Cave Bat',    nameRu: 'Пещерная Летучая', nameDe: 'Höhlenfledermaus', hp: 160, dmg: 18, exp: 45, bw: 14, bh: 12, role: 'dps' },
+    { key: 'stone_golem', name: 'Stone Golem',  nameRu: 'Каменный Голем',  nameDe: 'Steingolem',     hp: 400, dmg: 30, exp: 70, bw: 22, bh: 26, role: 'tank' },
+    { key: 'earth_worm',  name: 'Earth Worm',   nameRu: 'Земляной Червь',  nameDe: 'Erdwurm',        hp: 350, dmg: 26, exp: 65, bw: 24, bh: 18, role: 'tank' }
 ];
 export const CAVE_ENEMY_COUNT = 20;
 export const CAVE_EQUIP_DROP_CHANCE = 0.15;
@@ -86,10 +86,10 @@ export const CAVE_BOSS_TYPE = {
 export const VILLAGE_CAMP_COUNT = 8;
 export const VILLAGE_MOBS_PER_CAMP = 4;
 export const VILLAGE_ENEMY_TYPES = {
-    tank:     { key: 'village_brute',  name: 'Infected Brute',  nameRu: 'Заражённый Брута',   nameDe: 'Infizierter Brutalo', texKey: 'village_brute',  hp: 280, dmg: 22, exp: 70,  bw: 20, bh: 22, role: 'tank' },
-    assassin: { key: 'village_stalker', name: 'Infected Stalker', nameRu: 'Заражённый Сталкер', nameDe: 'Infizierter Schleicher', texKey: 'village_stalker', hp: 120, dmg: 30, exp: 60,  bw: 14, bh: 14, role: 'assassin' },
-    archer:   { key: 'village_spitter', name: 'Infected Spitter', nameRu: 'Заражённый Плевок',  nameDe: 'Infizierter Spucker', texKey: 'village_spitter', hp: 150, dmg: 20, exp: 55,  bw: 16, bh: 16, role: 'archer' },
-    healer:   { key: 'village_curser', name: 'Infected Curser',  nameRu: 'Заражённый Проклятый', nameDe: 'Infizierter Flucher', texKey: 'village_curser', hp: 130, dmg: 14, exp: 65,  bw: 14, bh: 18, role: 'healer' }
+    tank:     { key: 'village_brute',  name: 'Infected Brute',  nameRu: 'Заражённый Брута',   nameDe: 'Infizierter Brutalo', texKey: 'village_brute',  hp: 500, dmg: 35, exp: 90,  bw: 20, bh: 22, role: 'tank' },
+    assassin: { key: 'village_stalker', name: 'Infected Stalker', nameRu: 'Заражённый Сталкер', nameDe: 'Infizierter Schleicher', texKey: 'village_stalker', hp: 220, dmg: 45, exp: 80,  bw: 14, bh: 14, role: 'assassin' },
+    archer:   { key: 'village_spitter', name: 'Infected Spitter', nameRu: 'Заражённый Плевок',  nameDe: 'Infizierter Spucker', texKey: 'village_spitter', hp: 280, dmg: 30, exp: 75,  bw: 16, bh: 16, role: 'archer' },
+    healer:   { key: 'village_curser', name: 'Infected Curser',  nameRu: 'Заражённый Проклятый', nameDe: 'Infizierter Flucher', texKey: 'village_curser', hp: 240, dmg: 22, exp: 85,  bw: 14, bh: 18, role: 'healer' }
 };
 
 // Village boss
@@ -119,11 +119,11 @@ export const VILLAGE_CORPSE_MINION = {
 export const HELL_CAMP_COUNT = 10;
 export const HELL_MOBS_PER_CAMP = 5;
 export const HELL_ENEMY_TYPES = {
-    tank:     { key: 'hell_guard',   name: 'Hell Guard',   nameRu: 'Адская Стража',   nameDe: 'Höllengarde',   hp: 350, dmg: 25, exp: 80,  bw: 22, bh: 24, role: 'tank' },
-    assassin: { key: 'hell_stalker', name: 'Hell Stalker', nameRu: 'Адский Сталкер',  nameDe: 'Höllenschleicher', hp: 150, dmg: 35, exp: 70,  bw: 14, bh: 14, role: 'assassin' },
-    archer:   { key: 'hell_archer',  name: 'Hell Archer',  nameRu: 'Адский Лучник',   nameDe: 'Höllenbogenschütze', hp: 180, dmg: 22, exp: 65,  bw: 16, bh: 16, role: 'archer' },
-    mage:     { key: 'hell_mage',    name: 'Hell Mage',    nameRu: 'Адский Маг',      nameDe: 'Höllenmagier',  hp: 140, dmg: 40, exp: 75,  bw: 14, bh: 18, role: 'mage' },
-    healer:   { key: 'hell_priest',  name: 'Hell Priest',  nameRu: 'Адский Жрец',     nameDe: 'Höllenpriester', hp: 160, dmg: 15, exp: 70,  bw: 14, bh: 18, role: 'healer' }
+    tank:     { key: 'hell_guard',   name: 'Hell Guard',   nameRu: 'Адская Стража',   nameDe: 'Höllengarde',   hp: 650, dmg: 40, exp: 100, bw: 22, bh: 24, role: 'tank' },
+    assassin: { key: 'hell_stalker', name: 'Hell Stalker', nameRu: 'Адский Сталкер',  nameDe: 'Höllenschleicher', hp: 280, dmg: 55, exp: 85,  bw: 14, bh: 14, role: 'assassin' },
+    archer:   { key: 'hell_archer',  name: 'Hell Archer',  nameRu: 'Адский Лучник',   nameDe: 'Höllenbogenschütze', hp: 350, dmg: 35, exp: 80,  bw: 16, bh: 16, role: 'archer' },
+    mage:     { key: 'hell_mage',    name: 'Hell Mage',    nameRu: 'Адский Маг',      nameDe: 'Höllenmagier',  hp: 260, dmg: 60, exp: 90,  bw: 14, bh: 18, role: 'mage' },
+    healer:   { key: 'hell_priest',  name: 'Hell Priest',  nameRu: 'Адский Жрец',     nameDe: 'Höllenpriester', hp: 300, dmg: 25, exp: 85,  bw: 14, bh: 18, role: 'healer' }
 };
 
 // Hell boss

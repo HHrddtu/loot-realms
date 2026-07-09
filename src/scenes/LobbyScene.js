@@ -8,6 +8,7 @@ import {
 } from '../network.js';
 import { DIFFICULTIES } from '../config/index.js';
 import { t } from '../i18n.js';
+import { loadAccount, loadGame } from '../save.js';
 
 export default class LobbyScene extends Phaser.Scene {
     constructor() {
@@ -57,35 +58,9 @@ export default class LobbyScene extends Phaser.Scene {
             fontSize: '13px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5));
 
-        this._add(this.add.text(400, 260, t('adv.difficulty'), {
-            fontSize: '14px', fill: '#ecf0f1', fontFamily: 'Arial', fontStyle: 'bold'
+        this._add(this.add.text(400, 260, t('adv.difficulty') + ': Story', {
+            fontSize: '14px', fill: '#27ae60', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5));
-
-        this._diffLabel = this._add(this.add.text(400, 285, this._difficulty, {
-            fontSize: '18px', fill: '#f1c40f', fontFamily: 'Arial'
-        }).setOrigin(0.5));
-
-        const leftArrow = this._add(this.add.rectangle(330, 285, 28, 24, 0x34495e)
-            .setStrokeStyle(1, 0x556677).setInteractive({ useHandCursor: true }));
-        const leftLbl = this._add(this.add.text(330, 285, '<', {
-            fontSize: '14px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
-        }).setOrigin(0.5));
-        const rightArrow = this._add(this.add.rectangle(470, 285, 28, 24, 0x34495e)
-            .setStrokeStyle(1, 0x556677).setInteractive({ useHandCursor: true }));
-        const rightLbl = this._add(this.add.text(470, 285, '>', {
-            fontSize: '14px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
-        }).setOrigin(0.5));
-
-        leftArrow.on('pointerdown', () => {
-            const cur = DIFFICULTIES.indexOf(this._difficulty);
-            this._difficulty = DIFFICULTIES[(cur + DIFFICULTIES.length - 1) % DIFFICULTIES.length];
-            this._diffLabel.setText(this._difficulty);
-        });
-        rightArrow.on('pointerdown', () => {
-            const cur = DIFFICULTIES.indexOf(this._difficulty);
-            this._difficulty = DIFFICULTIES[(cur + 1) % DIFFICULTIES.length];
-            this._diffLabel.setText(this._difficulty);
-        });
 
         this._createBtn(400, 330, t('mp.create'), 0x27ae60, () => this._doCreate());
         this._createBtn(400, 380, t('mp.join'), 0x2980b9, () => this._showJoinUI());
@@ -139,8 +114,8 @@ export default class LobbyScene extends Phaser.Scene {
             }).setOrigin(0.5));
         }
 
-        this._add(this.add.text(400, 150, t('adv.difficulty') + ': ' + this._difficulty, {
-            fontSize: '14px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+        this._add(this.add.text(400, 150, t('adv.difficulty') + ': Story', {
+            fontSize: '14px', fill: '#27ae60', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5));
 
         this._add(this.add.text(400, 185, t('mp.players') + ':', {
@@ -296,9 +271,11 @@ export default class LobbyScene extends Phaser.Scene {
             sendDifficulty(this._difficulty);
             broadcastStartGame();
         }
+        const acc = loadAccount();
+        const sv = loadGame();
         this.scene.start('Game', {
             difficulty: this._difficulty,
-            classKey: 'sage',
+            classKey: (acc && acc.classKey) || (sv && sv.classKey) || 'sage',
             multiplayer: true
         });
     }

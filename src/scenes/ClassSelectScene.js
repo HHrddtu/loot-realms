@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { CLASS_DB } from '../classes.js';
 import { lighten } from '../utils.js';
 import { DIFFICULTIES, DIFF_COLORS } from '../config/index.js';
-import { initAccount } from '../save.js';
+import { initAccount, loadAccount, loadGame } from '../save.js';
 import { t, getLang } from '../i18n.js';
 
 export default class ClassSelectScene extends Phaser.Scene {
@@ -13,7 +13,10 @@ export default class ClassSelectScene extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor('#0a0a1a');
         initAccount();
-        this.selectedClass = 'sage';
+        // Restore previous class from account or game save
+        const acc = loadAccount();
+        const sv = loadGame();
+        this.selectedClass = (acc && acc.classKey) || (sv && sv.classKey) || 'sage';
         this.diffIdx = 0;
 
         this.add.text(400, 50, t('class.title'), {
@@ -40,25 +43,13 @@ export default class ClassSelectScene extends Phaser.Scene {
             this._drawClassCard(x, y, cls, i);
         });
 
-        this.diffLabel = this.add.text(400, 490, t('class.difficulty') + ': ' + DIFFICULTIES[this.diffIdx], {
-            fontSize: '20px', fill: DIFF_COLORS[DIFFICULTIES[this.diffIdx]] || '#ecf0f1', fontFamily: 'Arial'
+        this.add.text(400, 490, t('class.difficulty') + ': Story', {
+            fontSize: '18px', fill: '#27ae60', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5);
-
-        this.menuBtn(320, 520, '<', 0x34495e, () => {
-            this.diffIdx = (this.diffIdx + DIFFICULTIES.length - 1) % DIFFICULTIES.length;
-            this.diffLabel.setText(t('class.difficulty') + ': ' + DIFFICULTIES[this.diffIdx]);
-            this.diffLabel.setColor(DIFF_COLORS[DIFFICULTIES[this.diffIdx]] || '#ecf0f1');
-        });
-
-        this.menuBtn(480, 520, '>', 0x34495e, () => {
-            this.diffIdx = (this.diffIdx + 1) % DIFFICULTIES.length;
-            this.diffLabel.setText(t('class.difficulty') + ': ' + DIFFICULTIES[this.diffIdx]);
-            this.diffLabel.setColor(DIFF_COLORS[DIFFICULTIES[this.diffIdx]] || '#ecf0f1');
-        });
 
         this.menuBtn(400, 570, t('class.begin'), 0x27ae60, () => {
             this.scene.start('Game', {
-                difficulty: DIFFICULTIES[this.diffIdx],
+                difficulty: 'Normal',
                 classKey: this.selectedClass
             });
         });
@@ -129,7 +120,8 @@ export default class ClassSelectScene extends Phaser.Scene {
             border.setStrokeStyle(2, 0xf1c40f);
         });
 
-        if (index === 0) {
+        // Highlight the currently selected class card
+        if (cls.key === this.selectedClass) {
             border.setFillStyle(0x1a1a3e);
             border.setStrokeStyle(2, 0xf1c40f);
         }
