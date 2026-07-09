@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "sync": "node bin/git-sync.js",
     "build": "vite build",
     "test": "vitest run"
   },
