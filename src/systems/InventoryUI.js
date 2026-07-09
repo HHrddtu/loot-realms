@@ -302,7 +302,7 @@ export class InventoryUI {
             .setStrokeStyle(1, 0x5a6c7d)
             .setInteractive({ useHandCursor: true }));
         const lbl = mkInv(this.scene.add.text(400, 520, 'CLOSE', {
-            fontSize: '12px', fill: '#fff', fontFamily: 'Georgia, serif', fontStyle: 'bold'
+            fontSize: '12px', fill: '#3d2a14', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5));
         bg.on('pointerdown', () => this.closeInventory());
         this.scene.invGroup.push(bg, lbl);

@@ -15,12 +15,16 @@ export default class MaterialBookScene extends Phaser.Scene {
     }
 
     create() {
-        this.cameras.main.setBackgroundColor('#0a0a1a');
+        this.cameras.main.setBackgroundColor('#1a1408');
         this.entries = getAllMaterialEntries();
         this.selectedIndex = -1;
         this.listItems = [];
         this.detailElements = [];
         this.previewSprite = null;
+
+        // Parchment background - smaller scroll style
+        this.add.image(400, 300, 'parchment_bg').setScale(0.85);
+        this.add.image(400, 300, 'ornate_border').setScale(0.85);
 
         const progress = { current: 0, total: 0 };
         this.entries.forEach(e => { progress.current += e.level; });

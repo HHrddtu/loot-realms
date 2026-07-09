@@ -44,9 +44,9 @@ export default class CraftScene extends Phaser.Scene {
         this.detailElements = [];
         this.craftResultElements = [];
 
-        // Parchment background
-        this.add.image(400, 300, 'parchment_bg');
-        this.add.image(400, 300, 'ornate_border');
+        // Parchment background - smaller scroll style
+        this.add.image(400, 300, 'parchment_bg').setScale(0.85);
+        this.add.image(400, 300, 'ornate_border').setScale(0.85);
 
         this._createHeader();
         this._createCategoryTabs();

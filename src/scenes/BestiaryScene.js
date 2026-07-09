@@ -29,9 +29,9 @@ export default class BestiaryScene extends Phaser.Scene {
         this.entries.forEach(e => { progress.current += e.level; });
         progress.total = this.entries.length * 5;
 
-        // Parchment background
-        this.add.image(400, 300, 'parchment_bg');
-        this.add.image(400, 300, 'ornate_border');
+        // Parchment background - smaller scroll style
+        this.add.image(400, 300, 'parchment_bg').setScale(0.85);
+        this.add.image(400, 300, 'ornate_border').setScale(0.85);
 
         this.add.text(400, 40, t('bestiary.title'), {
             fontSize: '28px', fill: '#5c3a1e', fontFamily: 'Georgia, serif', fontStyle: 'bold'
