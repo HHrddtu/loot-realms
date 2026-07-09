@@ -36,6 +36,7 @@ export default class CraftScene extends Phaser.Scene {
     }
 
     create() {
+        console.log('[DEBUG] CraftScene.create() called');
         this.cameras.main.setBackgroundColor('#1a1408');
         this.selectedCategory = 'weapon';
         this.selectedIndex = -1;

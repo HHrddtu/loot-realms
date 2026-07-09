@@ -14,6 +14,7 @@ export default class PetScene extends Phaser.Scene {
     }
 
     create() {
+        console.log('[DEBUG] PetScene.create() called');
         this.cameras.main.setBackgroundColor('#0a0a1a');
         this.elements = [];
         this._panel = null;
@@ -425,7 +426,8 @@ export default class PetScene extends Phaser.Scene {
         }).setOrigin(0.5));
         backBtn.on('pointerdown', () => {
             this.tweens.killAll();
-            this.scene.stop();
+            this.tweens.killAll();
+            this.scene.stop(this.scene.key);
             this.scene.resume(this.returnScene);
         });
         backBtn.on('pointerover', () => backBtn.setFillStyle(0x4a6a8e));

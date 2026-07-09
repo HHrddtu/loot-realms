@@ -29,6 +29,7 @@ export default class TalentScene extends Phaser.Scene {
     }
 
     create() {
+        console.log('[DEBUG] TalentScene.create() called');
         this.cameras.main.setBackgroundColor('#0a0a1a');
         this.nodeSprites = [];
         this.lineGfx = this.add.graphics();

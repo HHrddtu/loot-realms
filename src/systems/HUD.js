@@ -42,7 +42,7 @@ export class HUD {
         this.scene.goldText = sx(this.scene.add.text(185, 86, '', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0));
         this.scene.crystalText = sx(this.scene.add.text(185, 98, '', { fontSize: '11px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0));
         this.scene.petBtnText = sx(this.scene.add.text(185, 114, '', { fontSize: '11px', fill: '#e67e22', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0).setInteractive({ useHandCursor: true }));
-        this.scene.petBtnText.on('pointerdown', () => { this.scene.scene.launch('Pet', { returnScene: 'Game' }); this.scene.scene.pause(); });
+        this.scene.petBtnText.on('pointerdown', () => { this.ui._openPets(); });
         this.scene.petBtnText.on('pointerover', () => this.scene.petBtnText.setStyle({ fill: '#f39c12' }));
         this.scene.petBtnText.on('pointerout', () => this.scene.petBtnText.setStyle({ fill: '#e67e22' }));
 
@@ -126,7 +126,7 @@ export class HUD {
             { icon: 'nav_book', label: 'B', cb: () => this.ui._openBestiary() },
             { icon: 'nav_hammer', label: 'C', cb: () => this.ui._openCrafting() },
             { icon: 'nav_star', label: 'T', cb: () => this.ui._openTalentTree() },
-            { icon: 'nav_paw', label: 'P', cb: () => { this.scene.scene.launch('Pet', { returnScene: 'Game' }); this.scene.scene.pause(); } },
+            { icon: 'nav_paw', label: 'P', cb: () => this.ui._openPets() },
             { icon: 'nav_sound', label: 'M', cb: () => this._toggleMute() },
         ];
         const bg = s(this.scene.add.rectangle(startX + 10, startY + (navItems.length * gap) / 2 - gap / 2 + 4, 24, navItems.length * gap + 4, 0x0a0a1a, 0.75).setStrokeStyle(1, 0x333333));

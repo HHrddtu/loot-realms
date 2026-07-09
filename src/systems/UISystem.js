@@ -50,6 +50,10 @@ export class UISystem {
         this._pauseAndLaunch('Craft', { materials: this.scene.materials, equipBag: this.scene.equipBag, maxEquipBag: this.scene.maxEquipBag, isAlchemist: this.scene.classKey === 'alchemist', classKey: this.scene.classKey, difficulty: this.scene.difficulty, materialBookData: getMaterialBookData(), hasRelicCraftBonus: !!(this.scene.relicEffects && this.scene.relicEffects.craft_bonus), onCraftResult: (result) => { if (result.items) result.items.forEach(item => { if (this.scene.addEquip(item)) this.hud.floatingText(this.scene.player.x, this.scene.player.y - 40, '+' + item.name, '#2ecc71'); }); this.scene.materials = result.materials || this.scene.materials; } });
     }
 
+    _openPets() {
+        this._pauseAndLaunch('Pet', { returnScene: 'Game' });
+    }
+
     _openSpellAssign() {
         if (this.scene.menuOpen || this.scene.transitioning) return;
         this.scene.menuOpen = true;

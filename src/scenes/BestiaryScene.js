@@ -15,6 +15,7 @@ export default class BestiaryScene extends Phaser.Scene {
     }
 
     create() {
+        console.log('[DEBUG] BestiaryScene.create() called');
         this.cameras.main.setBackgroundColor('#0a0a1a');
         this.entries = getAllEntries();
         this.selectedIndex = -1;
@@ -366,6 +367,7 @@ export default class BestiaryScene extends Phaser.Scene {
         if (gameScene && gameScene.receiveBestiaryData) {
             gameScene.receiveBestiaryData();
         }
-        this.scene.stop();
+        this.scene.stop(this.scene.key);
+        this.scene.resume(this.returnScene);
     }
 }
