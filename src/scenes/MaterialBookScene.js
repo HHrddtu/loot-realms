@@ -48,7 +48,7 @@ export default class MaterialBookScene extends Phaser.Scene {
         const closeBtn = this.add.rectangle(GAME_WIDTH - 28, 22, 26, 26, 0x34495e)
             .setStrokeStyle(1, 0x556677).setInteractive({ useHandCursor: true }).setDepth(50);
         this.add.text(GAME_WIDTH - 28, 22, 'X', {
-            fontSize: '16px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '16px', fill: '#3d2a14', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(50);
         closeBtn.on('pointerdown', () => this._close());
         closeBtn.on('pointerover', () => closeBtn.setFillStyle(0xc0392b));
@@ -249,7 +249,7 @@ export default class MaterialBookScene extends Phaser.Scene {
                 .setStrokeStyle(1, 0x444466).setDepth(7);
             const barFill = this.add.rectangle(barX + 1 + (barW - 2) * progress / 2, barY + barH / 2, Math.max((barW - 2) * progress, 1), barH - 2, 0xe67e22).setDepth(7);
             const barText = this.add.text(barX + barW / 2, barY + barH / 2, `${nextInfo.currentCount}/${nextInfo.requiredCount} collected → Lv.${nextInfo.nextLevel}`, {
-                fontSize: '10px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+                fontSize: '10px', fill: '#3d2a14', fontFamily: 'Arial', fontStyle: 'bold'
             }).setOrigin(0.5).setDepth(8);
             this.detailElements.push(barBg, barFill, barText);
         } else {

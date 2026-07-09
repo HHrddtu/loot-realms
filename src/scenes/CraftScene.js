@@ -60,7 +60,7 @@ export default class CraftScene extends Phaser.Scene {
         const closeBtn = this.add.rectangle(GAME_WIDTH - 28, 22, 26, 26, 0x34495e)
             .setStrokeStyle(1, 0x556677).setInteractive({ useHandCursor: true }).setDepth(50);
         this.add.text(GAME_WIDTH - 28, 22, 'X', {
-            fontSize: '16px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '16px', fill: '#3d2a14', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(50);
         closeBtn.on('pointerdown', () => this._close());
         closeBtn.on('pointerover', () => closeBtn.setFillStyle(0xc0392b));
@@ -235,8 +235,8 @@ export default class CraftScene extends Phaser.Scene {
         const pw = 400;
         const ph = 430;
 
-        this.detailBg = this.add.rectangle(px + pw / 2, py + ph / 2, pw, ph, 0x0f1520)
-            .setStrokeStyle(1, 0x334466).setDepth(5);
+        this.detailBg = this.add.rectangle(px + pw / 2, py + ph / 2, pw, ph, 0xf4e4c1)
+            .setStrokeStyle(2, 0x8b4513).setDepth(5);
 
         this.detailEmptyText = this.add.text(px + pw / 2, py + ph / 2, 'Select a recipe', {
             fontSize: '16px', fill: '#444', fontFamily: 'Arial'
@@ -272,7 +272,7 @@ export default class CraftScene extends Phaser.Scene {
         this.craftBtnBg = this.add.rectangle(craftBtnX, craftBtnY, 180, 36, 0x27ae60)
             .setStrokeStyle(2, 0x2ecc71).setInteractive({ useHandCursor: true }).setDepth(7).setVisible(false);
         this.craftBtnText = this.add.text(craftBtnX, craftBtnY, 'CRAFT', {
-            fontSize: '16px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '16px', fill: '#3d2a14', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(8).setVisible(false);
 
         this.craftBtnBg.on('pointerdown', () => this._doCraft());

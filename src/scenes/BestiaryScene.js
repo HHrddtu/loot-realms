@@ -52,7 +52,7 @@ export default class BestiaryScene extends Phaser.Scene {
         const closeBtn = this.add.rectangle(GAME_WIDTH - 28, 22, 26, 26, 0x34495e)
             .setStrokeStyle(1, 0x556677).setInteractive({ useHandCursor: true }).setDepth(50);
         this.add.text(GAME_WIDTH - 28, 22, 'X', {
-            fontSize: '16px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '16px', fill: '#3d2a14', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(50);
         closeBtn.on('pointerdown', () => this._close());
         closeBtn.on('pointerover', () => closeBtn.setFillStyle(0xc0392b));
@@ -172,7 +172,7 @@ export default class BestiaryScene extends Phaser.Scene {
         const pw = 390;
         const ph = 490;
 
-        this.detailBg = this.add.rectangle(px + pw / 2, py + ph / 2, pw, ph, 0x0f1520)
+        this.detailBg = this.add.rectangle(px + pw / 2, py + ph / 2, pw, ph, 0xf4e4c1)
             .setStrokeStyle(1, 0x334466).setDepth(5);
 
         this.detailEmptyText = this.add.text(px + pw / 2, py + ph / 2, 'Select a creature to view details', {
@@ -304,7 +304,7 @@ export default class BestiaryScene extends Phaser.Scene {
                 .setStrokeStyle(1, 0x444466).setDepth(7);
             const barFill = this.add.rectangle(barX + 1 + (barW - 2) * progress / 2, barY + barH / 2, Math.max((barW - 2) * progress, 1), barH - 2, 0x3498db).setDepth(7);
             const barText = this.add.text(barX + barW / 2, barY + barH / 2, `${nextInfo.currentKills}/${nextInfo.requiredKills} ${t('bestiary.kills2')} → Lv.${nextInfo.nextLevel}`, {
-                fontSize: '10px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+                fontSize: '10px', fill: '#3d2a14', fontFamily: 'Arial', fontStyle: 'bold'
             }).setOrigin(0.5).setDepth(8);
             this.detailElements.push(barBg, barFill, barText);
         } else {
