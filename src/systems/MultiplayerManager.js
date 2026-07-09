@@ -1,5 +1,5 @@
 import { getClassData } from '../classes.js';
-import { isHost, getMyId, getPlayers, getPlayerNames, onStateUpdate, onLoot, onKey, onZoneChange } from '../network.js';
+import { isHost, getMyId, getPlayers, getPlayerNames, onStateUpdate, onLoot, onKey, onZoneChange, sendGameState, sendInput } from '../network.js';
 import { MultiplayerSync } from '../multiplayer.js';
 
 /**
@@ -137,14 +137,12 @@ export class MultiplayerManager {
                 };
             }
         });
-        const { sendGameState } = require('../network.js');
         sendGameState({ players, names: getPlayerNames() });
     }
 
     sendInput() {
         if (isHost()) return;
         const s = this.scene;
-        const { sendInput } = require('../network.js');
         sendInput({
             x: s.player.x,
             y: s.player.y,
