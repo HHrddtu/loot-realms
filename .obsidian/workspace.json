@@ -178,18 +178,19 @@
   },
   "active": "021c18f08c774ddc",
   "lastOpenFiles": [
+    "check_db.py",
+    "dist/assets/soulBook-CNhibtIt.js",
+    "dist/assets/save-Bybs1lSq.js",
+    "dist/assets/rolldown-runtime-QTnfLwEv.js",
+    "dist/assets/phaser-BGf9WekP.js",
+    "dist/assets/peerjs-DW-fpQKQ.js",
+    "dist/assets/network-CV7f1mAY.js",
+    "dist/assets/materialBook-B_PrhRuf.js",
+    "dist/assets/keybinds-CW37x1yH.js",
+    "dist/assets/firebase-BMnn-QYx.js",
+    "dist/assets/bestiary-C4IrpwVx.js",
     "инструкция/index.md",
     "инструкция/04-systems/CombatSystem.md",
-    "dist/assets/TalentScene-BuD-hcaa.js",
-    "dist/assets/SoulBookScene-B9SVeUl6.js",
-    "dist/assets/soulBook-CCV8Y32j.js",
-    "dist/assets/save-DA6JbXzo.js",
-    "dist/assets/rolldown-runtime-Cyuzqnbw.js",
-    "dist/assets/phaser-BBpSCA8D.js",
-    "dist/assets/PetScene-xr7veyW4.js",
-    "dist/assets/pets-F5vdzS92.js",
-    "dist/assets/peerjs-Dmv4eL-p.js",
-    "dist/assets/network-3ILKjW1H.js",
     "node_modules/undici/docs/docs/api/EnvHttpProxyAgent.md",
     "инструкция/07-scenes/PetScene.md",
     "инструкция/06-mechanics/Pets.md",
@@ -212,7 +213,6 @@
     "инструкция/12-plans/ROADMAP.md",
     "инструкция/12-plans/_plans_index.md",
     "инструкция/11-bugs/_bugs_index.md",
-    "инструкция/10-economy/Crystals.md",
-    "инструкция/10-economy/Gold.md"
+    "инструкция/10-economy/Crystals.md"
   ]
 }
