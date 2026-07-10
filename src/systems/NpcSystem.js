@@ -353,23 +353,23 @@ export class NpcSystem {
         s.questLogGroup = [];
         const mk = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
 
-        s.questLogGroup.push(mk(s.add.rectangle(400, 300, 800, 600, 0x000000, 0.97)
-            .setStrokeStyle(2, 0xf1c40f).setInteractive()));
+        s.questLogGroup.push(mk(s.add.rectangle(400, 300, 800, 600, 0x0a0a1a, 0.97)
+            .setStrokeStyle(2, 0x8b4513).setInteractive()));
 
         s.questLogGroup.push(mk(s.add.text(400, 35, t('quest.title'), {
-            fontSize: '26px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '26px', fill: '#f1c40f', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5)));
 
         const active = getActiveQuests();
         if (active.length === 0) {
             s.questLogGroup.push(mk(s.add.text(400, 300, t('quest.noQuests'), {
-                fontSize: '16px', fill: '#666', fontFamily: 'Arial', align: 'center'
+                fontSize: '16px', fill: '#8b4513', fontFamily: 'Georgia, serif', align: 'center'
             }).setOrigin(0.5)));
         } else {
             active.forEach((q, i) => {
                 const y = 75 + i * 95;
                 const complete = isQuestComplete(q.key);
-                const color = complete ? '#2ecc71' : '#ecf0f1';
+                const color = complete ? '#2ecc71' : '#f1c40f';
 
                 const npc = getQuestNpc(q.key);
                 if (npc && npc.texKey) {
@@ -379,11 +379,11 @@ export class NpcSystem {
                 }
 
                 s.questLogGroup.push(mk(s.add.text(60, y, q.name, {
-                    fontSize: '15px', fill: color, fontFamily: 'Arial', fontStyle: 'bold'
+                    fontSize: '15px', fill: color, fontFamily: 'Georgia, serif', fontStyle: 'bold'
                 })));
 
                 s.questLogGroup.push(mk(s.add.text(60, y + 20, q.description, {
-                    fontSize: '12px', fill: '#95a5a6', fontFamily: 'Arial',
+                    fontSize: '12px', fill: '#bdc3c7', fontFamily: 'Georgia, serif',
                     wordWrap: { width: 520 }
                 })));
 
@@ -419,7 +419,7 @@ export class NpcSystem {
             .setStrokeStyle(1, 0x555).setInteractive({ useHandCursor: true }));
         s.questLogGroup.push(closeBtn);
         s.questLogGroup.push(mk(s.add.text(400, 560, t('quest.close'), {
-            fontSize: '16px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+            fontSize: '16px', fill: '#fff', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5)));
         closeBtn.on('pointerdown', () => this.closeQuestLog());
         s.input.keyboard.on('keydown-N', () => this.closeQuestLog());
