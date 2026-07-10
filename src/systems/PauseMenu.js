@@ -27,7 +27,7 @@ export class PauseMenu {
         this.scene.pauseGroup.push(mk(this.scene.add.image(400, 300, 'ornate_border')));
         
         this.scene.pauseGroup.push(mk(this.scene.add.text(400, 185, t('pause.title'), { fontSize: '28px', fill: '#5c3a1e', fontFamily: 'Georgia, serif', fontStyle: 'bold' }).setOrigin(0.5)));
-        this.scene.pauseGroup.push(mk(this.scene.add.text(400, 215, this.scene.difficulty, { fontSize: '14px', fill: '#8b4513', fontFamily: 'Georgia, serif', fontStyle: 'bold' }).setOrigin(0.5)));
+        this.scene.pauseGroup.push(mk(this.scene.add.text(400, 215, 'Story Mode', { fontSize: '14px', fill: '#27ae60', fontFamily: 'Georgia, serif', fontStyle: 'bold' }).setOrigin(0.5)));
 
         const resumeBg = mk(this.scene.add.rectangle(400, 235, 220, 38, 0x27ae60).setStrokeStyle(2, lighten(0x27ae60, 0.3)).setInteractive({ useHandCursor: true }));
         const resumeLbl = mk(this.scene.add.text(400, 235, t('pause.resume'), { fontSize: '18px', fill: '#fff', fontFamily: 'Georgia, serif', fontStyle: 'bold' }).setOrigin(0.5));

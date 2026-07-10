@@ -80,7 +80,7 @@ export class InventoryUI {
                 });
             } else {
                 this.scene.invGroup.push(mkInv(this.scene.add.text(equipX + 20, sl.y + 10, 'Empty', {
-                    fontSize: '11px', fill: '#555', fontFamily: 'Georgia, serif'
+                    fontSize: '11px', fill: '#95a5a6', fontFamily: 'Georgia, serif'
                 }).setOrigin(0.5)));
             }
         });
@@ -113,7 +113,7 @@ export class InventoryUI {
             })));
         } else {
             this.scene.invGroup.push(mkInv(this.scene.add.text(equipX + 20, consY + 10, 'Empty', {
-                fontSize: '11px', fill: '#555', fontFamily: 'Georgia, serif'
+                fontSize: '11px', fill: '#95a5a6', fontFamily: 'Georgia, serif'
             }).setOrigin(0.5)));
         }
 
@@ -153,7 +153,7 @@ export class InventoryUI {
         }).setOrigin(0.5)));
         this.scene.invGroup.push(mkInv(this.scene.add.text(matX, matY + 16,
             this.scene.materials.length + '/' + this.scene.maxMaterials, {
-            fontSize: '12px', fill: '#555', fontFamily: 'Georgia, serif'
+            fontSize: '12px', fill: '#95a5a6', fontFamily: 'Georgia, serif'
         }).setOrigin(0.5)));
         this.scene.invGroup.push(mkInv(this.scene.add.text(matX, matY + 30, this.scene.getMaterialStatsText(), {
             fontSize: '12px', fill: '#27ae60', fontFamily: 'Georgia, serif'
@@ -234,7 +234,7 @@ export class InventoryUI {
         }).setOrigin(0.5)));
         this.scene.invGroup.push(mkInv(this.scene.add.text(eqX, eqY + 16,
             this.scene.equipBag.length + '/' + this.scene.maxEquipBag + '  click=equip  shift+click=sell  RMB=lock', {
-            fontSize: '11px', fill: '#555', fontFamily: 'Georgia, serif'
+            fontSize: '11px', fill: '#95a5a6', fontFamily: 'Georgia, serif'
         }).setOrigin(0.5)));
 
         const cols = 4, slotSize = 40, gap = 4;
