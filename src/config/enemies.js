@@ -201,6 +201,163 @@ export const BANDIT_LEADER_BOSS = {
     summonCount: 3
 };
 
+// Depths enemies
+export const DEPTHS_CAMP_COUNT = 10;
+export const DEPTHS_MOBS_PER_CAMP = 5;
+export const DEPTHS_ENEMY_TYPES = {
+    tank:     { key: 'crypt_soldier',  name: 'Crypt Soldier',  nameRu: 'Криптовый Солдат',  nameDe: 'Kryptsoldat',     texKey: 'shadow_stalker',  hp: 700, dmg: 42, exp: 110, bw: 22, bh: 24, role: 'tank' },
+    assassin: { key: 'shadow_assassin', name: 'Shadow Assassin', nameRu: 'Теневой Убийца',   nameDe: 'Schattenmeuchler', texKey: 'dark_reflection', hp: 340, dmg: 58, exp: 105, bw: 14, bh: 14, role: 'assassin' },
+    archer:   { key: 'bone_archer',    name: 'Bone Archer',    nameRu: 'Костяной Лучник',   nameDe: 'Knochenbogenschütze', texKey: 'dark_counselor', hp: 370, dmg: 38, exp: 95,  bw: 16, bh: 16, role: 'archer' },
+    mage:     { key: 'necro_mage',     name: 'Necro Mage',     nameRu: 'Некромаг',          nameDe: 'Nekromagier',     texKey: 'shadow_advisor',     hp: 280, dmg: 65, exp: 110, bw: 14, bh: 18, role: 'mage' },
+    healer:   { key: 'dark_priest',    name: 'Dark Priest',    nameRu: 'Тёмный Жрец',       nameDe: 'Dunkelpriester',  texKey: 'shadow_mimic',    hp: 320, dmg: 30, exp: 98,  bw: 14, bh: 18, role: 'healer' }
+};
+
+// Depths boss
+export const DEPTHS_BOSS_TYPE = {
+    key: 'lich_king', name: 'Lich King', nameRu: 'Король Лич', nameDe: 'Lichkönig',
+    texKey: 'lich_king',
+    bw: 44, bh: 52,
+    speeds: { Normal: 60, Hard: 68, Expert: 78, Nightmare: 95, Hell: 115, Abyss: 135 },
+    hp:  { Normal: 6000, Hard: 9000, Expert: 15000, Nightmare: 24000, Hell: 42000, Abyss: 72000 },
+    dmg: { Normal: 50,   Hard: 68,   Expert: 105,   Nightmare: 165,  Hell: 275,  Abyss: 440 },
+    exp: { Normal: 1800, Hard: 2700, Expert: 4500,  Nightmare: 7200, Hell: 12600, Abyss: 21600 },
+    deathWaveInterval: 4500, deathWaveRadius: 100, deathWaveDmgMul: 1.7,
+    soulStormInterval: 7000, soulStormRadius: 120, soulStormDmgMul: 1.3,
+    summonInterval: 9000, summonCount: 4,
+    phaseThresholds: [0.66, 0.33]
+};
+export const DEPTHS_BOSS_MINION = {
+    key: 'skeleton_minion', name: 'Skeleton Minion', nameRu: 'Скелет Миньон', nameDe: 'Skelett-Minion',
+    texKey: 'skeleton',
+    bw: 14, bh: 18, hp: 100, dmg: 20, exp: 30
+};
+
+// Cursed Lands enemies
+export const CURSED_CAMP_COUNT = 15;
+export const CURSED_MOBS_PER_CAMP = 5;
+export const CURSED_ENEMY_TYPES = {
+    tank:     { key: 'swamp_thug',       name: 'Swamp Thug',       nameRu: 'Болотный Головорез',  nameDe: 'Sumpf-Schläger',      texKey: 'swamp_sludge',       hp: 750, dmg: 45, exp: 115, bw: 22, bh: 24, role: 'tank' },
+    assassin: { key: 'venom_spider',     name: 'Venom Spider',     nameRu: 'Ядовитый Паук',       nameDe: 'Giftspinne',          texKey: 'venom_spider',     hp: 320, dmg: 60, exp: 100, bw: 16, bh: 14, role: 'assassin' },
+    archer:   { key: 'thorn_walker',     name: 'Thorn Walker',     nameRu: 'Терновый Странник',   nameDe: 'Dornenwanderer',      texKey: 'cursed_treant',     hp: 380, dmg: 40, exp: 92,  bw: 18, bh: 20, role: 'archer' },
+    mage:     { key: 'necro_mage',       name: 'Necro Mage',       nameRu: 'Некромаг',            nameDe: 'Nekromagier',        texKey: 'corrupted_druid',     hp: 280, dmg: 65, exp: 105, bw: 14, bh: 18, role: 'mage' },
+    healer:   { key: 'dark_priest',      name: 'Dark Priest',      nameRu: 'Тёмный Жрец',         nameDe: 'Dunkelpriester',     texKey: 'bog_witch',     hp: 320, dmg: 30, exp: 98,  bw: 14, bh: 18, role: 'healer' }
+};
+
+// Cursed Lands boss
+export const CURSED_BOSS_TYPE = {
+    key: 'ancient_evil', name: 'Ancient Evil', nameRu: 'Древнее Зло', nameDe: 'Uraltes Übel',
+    texKey: 'ancient_evil',
+    bw: 48, bh: 56,
+    speeds: { Normal: 55, Hard: 63, Expert: 73, Nightmare: 90, Hell: 110, Abyss: 130 },
+    hp:  { Normal: 7000, Hard: 10500, Expert: 17500, Nightmare: 28000, Hell: 49000, Abyss: 84000 },
+    dmg: { Normal: 55,   Hard: 75,   Expert: 115,   Nightmare: 180,  Hell: 300,  Abyss: 480 },
+    exp: { Normal: 2200, Hard: 3300, Expert: 5500,  Nightmare: 8800, Hell: 15400, Abyss: 26400 },
+    poisonAuraInterval: 3000, poisonAuraRadius: 100, poisonAuraDmgMul: 0.8,
+    deathWaveInterval: 5000, deathWaveRadius: 110, deathWaveDmgMul: 1.6,
+    summonInterval: 8000, summonCount: 4,
+    phaseThresholds: [0.66, 0.33]
+};
+export const CURSED_BOSS_MINION = {
+    key: 'death_zombie', name: 'Death Zombie', nameRu: 'Мёртвый Зомби', nameDe: 'Totes Zombie',
+    texKey: 'zombie',
+    bw: 14, bh: 18, hp: 120, dmg: 22, exp: 35
+};
+
+// Shadow Dimension enemies
+export const SHADOW_CAMP_COUNT = 12;
+export const SHADOW_MOBS_PER_CAMP = 5;
+export const SHADOW_ENEMY_TYPES = {
+    tank:     { key: 'abyss_watcher',    name: 'Abyss Watcher',    nameRu: 'Страж Бездны',      nameDe: 'Abgrundwächter',     texKey: 'void_knight',    hp: 800, dmg: 48, exp: 120, bw: 22, bh: 24, role: 'tank' },
+    assassin: { key: 'shadow_stalker',    name: 'Shadow Stalker',   nameRu: 'Тень-Следопыт',     nameDe: 'Schattenpirscher',   texKey: 'shadow_hound',    hp: 340, dmg: 58, exp: 105, bw: 14, bh: 14, role: 'assassin' },
+    archer:   { key: 'rift_walker',       name: 'Rift Walker',      nameRu: 'Скиталец Разлома',  nameDe: 'Risswanderer',       texKey: 'rift_crawler',     hp: 400, dmg: 42, exp: 95,  bw: 16, bh: 18, role: 'archer' },
+    mage:     { key: 'shadow_mage',       name: 'Shadow Mage',      nameRu: 'Теневой Маг',       nameDe: 'Schattenmagier',     texKey: 'phantom_knight',     hp: 280, dmg: 65, exp: 110, bw: 14, bh: 18, role: 'mage' },
+    healer:   { key: 'reality_breaker',   name: 'Reality Breaker',  nameRu: 'Разрушитель Реальности', nameDe: 'Realitätsbrecher', texKey: 'shadow_mimic', hp: 350, dmg: 32, exp: 100, bw: 14, bh: 18, role: 'healer' }
+};
+
+// Shadow Dimension boss
+export const SHADOW_BOSS_TYPE = {
+    key: 'shadow_king', name: 'Shadow King', nameRu: 'Король Теней', nameDe: 'Schattenkönig',
+    texKey: 'shadow_king',
+    bw: 48, bh: 56,
+    speeds: { Normal: 60, Hard: 68, Expert: 78, Nightmare: 95, Hell: 115, Abyss: 135 },
+    hp:  { Normal: 8000, Hard: 12000, Expert: 20000, Nightmare: 32000, Hell: 56000, Abyss: 96000 },
+    dmg: { Normal: 60,   Hard: 82,   Expert: 125,   Nightmare: 200,  Hell: 330,  Abyss: 530 },
+    exp: { Normal: 2800, Hard: 4200, Expert: 7000,  Nightmare: 11200, Hell: 19600, Abyss: 33600 },
+    teleportInterval: 4000, teleportDmgMul: 1.5,
+    darkBoltInterval: 3000, darkBoltCount: 5, darkBoltDmgMul: 1.2,
+    cloneInterval: 10000, cloneCount: 3,
+    auraInterval: 2000, auraRadius: 120, auraDmgMul: 0.5,
+    phaseThresholds: [0.66, 0.33]
+};
+export const SHADOW_BOSS_MINION = {
+    key: 'shadow_spawn', name: 'Shadow Spawn', nameRu: 'Порождение Тени', nameDe: 'Schattenspinner',
+    texKey: 'shade',
+    bw: 14, bh: 16, hp: 100, dmg: 18, exp: 25
+};
+
+// Tower of the Fallen King enemies
+export const TOWER_CAMP_COUNT = 14;
+export const TOWER_MOBS_PER_CAMP = 3;
+export const TOWER_ENEMY_TYPES = {
+    tank:     { key: 'tower_knight',    name: 'Tower Knight',    nameRu: 'Башенный Рыцарь',    nameDe: 'Turmritter',       texKey: 'tower_knight',    hp: 500, dmg: 25, exp: 130, bw: 22, bh: 28, role: 'tank' },
+    assassin: { key: 'tower_assassin',  name: 'Tower Assassin',  nameRu: 'Башенный Ассассин',  nameDe: 'Turmmeuchler',     texKey: 'tower_assassin',  hp: 280, dmg: 40, exp: 115, bw: 16, bh: 24, role: 'assassin' },
+    archer:   { key: 'tower_archer',    name: 'Tower Archer',    nameRu: 'Башенный Лучник',    nameDe: 'Turmbogenschütze', texKey: 'tower_archer',    hp: 250, dmg: 32, exp: 105, bw: 18, bh: 26, role: 'archer' },
+    mage:     { key: 'tower_mage',      name: 'Tower Mage',      nameRu: 'Башенный Маг',       nameDe: 'Turmmagier',       texKey: 'tower_mage',      hp: 220, dmg: 45, exp: 110, bw: 16, bh: 26, role: 'mage' },
+    healer:   { key: 'tower_healer',    name: 'Tower Healer',    nameRu: 'Башенный Жрец',      nameDe: 'Turmheiler',       texKey: 'tower_healer',    hp: 200, dmg: 18, exp: 100, bw: 16, bh: 26, role: 'healer' }
+};
+
+// Tower of the Fallen King boss
+export const TOWER_BOSS_TYPE = {
+    key: 'fallen_king', name: 'Fallen King', nameRu: 'Павший Король', nameDe: 'Gefallener König',
+    texKey: 'fallen_king',
+    bw: 48, bh: 56,
+    speeds: { Normal: 55, Hard: 63, Expert: 73, Nightmare: 90, Hell: 110, Abyss: 130 },
+    hp:  { Normal: 10000, Hard: 15000, Expert: 25000, Nightmare: 40000, Hell: 70000, Abyss: 120000 },
+    dmg: { Normal: 65,   Hard: 88,   Expert: 135,   Nightmare: 215,  Hell: 360,  Abyss: 580 },
+    exp: { Normal: 3500, Hard: 5250, Expert: 8750,  Nightmare: 14000, Hell: 24500, Abyss: 42000 },
+    shieldInterval: 12000, shieldDuration: 3000,
+    bloodlustThreshold: 0.50, bloodlustDmgMul: 1.5,
+    berserkThreshold: 0.25, berserkSpeedMul: 1.5, berserkDmgMul: 2.0,
+    summonInterval: 8000, summonCount: 2,
+    phaseThresholds: [0.66, 0.33]
+};
+export const TOWER_BOSS_MINION = {
+    key: 'tower_guardian', name: 'Tower Guardian', nameRu: 'Башенный Страж', nameDe: 'Turmwächter',
+    texKey: 'tower_guardian',
+    bw: 20, bh: 28, hp: 100, dmg: 12, exp: 30
+};
+
+// Throne of Eternity boss
+export const THRONE_BOSS_TYPE = {
+    key: 'eternity_lord', name: 'Eternity Lord', nameRu: 'Повелитель Вечности', nameDe: 'Herr der Ewigkeit',
+    texKey: 'eternity_lord',
+    bw: 50, bh: 64,
+    speeds: { Normal: 50, Hard: 58, Expert: 68, Nightmare: 85, Hell: 105, Abyss: 125 },
+    hp:  { Normal: 12000, Hard: 18000, Expert: 30000, Nightmare: 48000, Hell: 84000, Abyss: 144000 },
+    dmg: { Normal: 70,   Hard: 95,   Expert: 145,   Nightmare: 230,  Hell: 385,  Abyss: 620 },
+    exp: { Normal: 5000, Hard: 7500, Expert: 12500, Nightmare: 20000, Hell: 35000, Abyss: 60000 },
+    healThreshold: 0.50, healAmount: 0.50,
+    auraInterval: 2000, auraRadius: 120, auraDmgMul: 0.6,
+    summonPhase2: { tank: 3, mage: 3 },
+    summonPhase4: { assassin: 3 },
+    phaseThresholds: [0.75, 0.50, 0.25]
+};
+export const THRONE_BOSS_MINION_TANK = {
+    key: 'eternity_spawn_1', name: 'Eternity Guardian', nameRu: 'Страж Вечности', nameDe: 'Ewigkeitswächter',
+    texKey: 'eternity_spawn_1',
+    bw: 20, bh: 28, hp: 120, dmg: 15, exp: 40
+};
+export const THRONE_BOSS_MINION_MAGE = {
+    key: 'eternity_spawn_2', name: 'Eternity Caster', nameRu: 'Заклинатель Вечности', nameDe: 'Ewigkeitszauberer',
+    texKey: 'eternity_spawn_2',
+    bw: 16, bh: 24, hp: 80, dmg: 20, exp: 35
+};
+export const THRONE_BOSS_MINION_ASSASSIN = {
+    key: 'eternity_spawn_3', name: 'Eternity Shadow', nameRu: 'Тень Вечности', nameDe: 'Ewigkeitsschatten',
+    texKey: 'eternity_spawn_3',
+    bw: 14, bh: 22, hp: 90, dmg: 25, exp: 38
+};
+
 // Bestiary
 export const BESTIARY_LEVELS = [
     { level: 0, killsRequired: 0,   dmgBonus: 0,   expBonus: 0,   info: 'description' },
@@ -442,6 +599,144 @@ export const BESTIARY_ENEMIES = {
         weaknesses: ['holy'], resistances: ['physical'], abilities: ['Machete windup', 'Fast strike', 'Whirlwind', 'Summon guards'],
         description: 'A towering bandit warlord wielding a massive machete. His slow windup hides a devastatingly fast strike.',
         lore: 'The Bandit Leader was once a general who lost his kingdom. He rebuilt it in the castle — a kingdom of fear, iron, and blood.'
+    },
+    crypt_soldier: {
+        name: 'Crypt Soldier', nameRu: 'Криптовый Солдат', nameDe: 'Kryptsoldat', texKey: 'crypt_soldier', biome: 'depths',
+        weaknesses: ['holy'], resistances: ['physical'], abilities: ['Shield bash', 'Undead resilience', 'Death grip'],
+        description: 'An ancient guardian bound to eternal service in the catacombs. Its corroded armor still deflects blows meant for the living.',
+        lore: 'These soldiers were once the king\'s elite guard, sworn to protect the royal tombs. The Lich King reanimated them — their oath now serves a darker master.'
+    },
+    shadow_assassin: {
+        name: 'Shadow Assassin', nameRu: 'Теневой Убийца', nameDe: 'Schattenmeuchler', texKey: 'shadow_assassin', biome: 'depths',
+        weaknesses: ['light'], resistances: ['dark'], abilities: ['Shadow step', 'Backstab', 'Vanish'],
+        description: 'A phantom that melts into the darkness between tombstones. It strikes from behind and vanishes before retaliation.',
+        lore: 'Shadow Assassins were court spies who bargained with the Lich King for eternal life. They got it — along with an eternity of servitude in the dark.'
+    },
+    bone_archer: {
+        name: 'Bone Archer', nameRu: 'Костяной Лучник', nameDe: 'Knochenbogenschütze', texKey: 'bone_archer', biome: 'depths',
+        weaknesses: ['melee'], resistances: [], abilities: ['Spectral arrows', 'Volley', 'Piercing shot'],
+        description: 'A skeletal marksman that rains arrows of cursed bone from the shadows. Its bolts pierce armor and soul alike.',
+        lore: 'The archers were the first line of defense in the old catacombs. They still fire blindly, haunted by muscle memory and an oath they cannot forget.'
+    },
+    necro_mage: {
+        name: 'Necro Mage', nameRu: 'Некромаг', nameDe: 'Nekromagier', texKey: 'necro_mage', biome: 'depths',
+        weaknesses: ['physical'], resistances: ['magic'], abilities: ['Necrotic bolt', 'Raise dead', 'Soul drain'],
+        description: 'A twisted spellcaster that hurls bolts of necrotic energy. It raises fallen allies and drains the life force of the living.',
+        lore: 'Necro Mages were scholars who sought to understand death itself. They succeeded — and became it. Their knowledge remains, buried in hollow skulls.'
+    },
+    dark_priest: {
+        name: 'Dark Priest', nameRu: 'Тёмный Жрец', nameDe: 'Dunkelpriester', texKey: 'dark_priest', biome: 'depths',
+        weaknesses: ['fire'], resistances: ['holy'], abilities: ['Dark heal', 'Curse', 'Soul siphon'],
+        description: 'A corrupted healer that sustains undead with dark energy. It curses the living and siphons their vitality.',
+        lore: 'Dark Priests were once devout healers who lost faith in the light. The Lich King offered them purpose — and a congregation of the dead to tend.'
+    },
+    lich_king: {
+        name: 'Lich King', nameRu: 'Король Лич', nameDe: 'Lichkönig', texKey: 'lich_king', biome: 'depths_boss',
+        weaknesses: ['holy'], resistances: ['dark', 'magic'], abilities: ['Death wave', 'Soul storm', 'Summon skeletons', 'Phylactery shield'],
+        description: 'The undead sovereign of the depths, clad in cursed armor and wielding a staff of pure darkness. He commands legions of bones and drains the light from all who oppose him.',
+        lore: 'The Lich King was once a mortal king who sought immortality through dark rituals. He achieved his goal — but at the cost of his soul. Now he rules a kingdom of dust and silence, surrounded by subjects who hate him.'
+    },
+    swamp_thug: {
+        name: 'Swamp Thug', nameRu: 'Болотный Головорез', nameDe: 'Sumpf-Schläger', texKey: 'swamp_thug', biome: 'cursed',
+        weaknesses: ['fire'], resistances: ['poison'], abilities: ['Charge', 'Mud shield', 'Crushing blow'],
+        description: 'A hulking brute corrupted by the swamp\'s dark magic. Its thick hide shrugs off blades, and its charges shatter bone.',
+        lore: 'Swamp Thugs were once lumberjacks who ventured too deep into the cursed marsh. The corruption twisted their bodies and minds, leaving only rage and hunger.'
+    },
+    venom_spider: {
+        name: 'Venom Spider', nameRu: 'Ядовитый Паук', nameDe: 'Giftspinne', texKey: 'venom_spider', biome: 'cursed',
+        weaknesses: ['fire'], resistances: ['poison'], abilities: ['Venom bite', 'Web trap', 'Acid spray'],
+        description: 'A massive arachnid that lurks in the swamp\'s dark corners. Its venom paralyzes prey within seconds.',
+        lore: 'Venom Spiders grew to unnatural sizes feeding on the swamp\'s corrupted minerals. Their silk is stronger than rope and dissolves metal over time.'
+    },
+    thorn_walker: {
+        name: 'Thorn Walker', nameRu: 'Терновый Странник', nameDe: 'Dornenwanderer', texKey: 'thorn_walker', biome: 'cursed',
+        weaknesses: ['fire'], resistances: ['physical'], abilities: ['Thorn volley', 'Root grasp', 'Poison cloud'],
+        description: 'A twisted plant creature that fires thorns of corrupted wood. Its roots grasp and hold intruders in place.',
+        lore: 'Thorn Walkers were once ancient trees, corrupted by the swamp\'s dark heart. They now serve as living turrets, defending the cursed lands.'
+    },
+    death_mage: {
+        name: 'Death Mage', nameRu: 'Маг Смерти', nameDe: 'Todesmagier', texKey: 'death_mage', biome: 'cursed',
+        weaknesses: ['physical'], resistances: ['magic'], abilities: ['Death bolt', 'Raise dead', 'Soul drain'],
+        description: 'A twisted spellcaster that hurls bolts of necrotic energy. It raises fallen allies and drains the life force of the living.',
+        lore: 'Death Mages were scholars who sought to understand death itself. They succeeded — and became it. Their knowledge remains, buried in hollow skulls.'
+    },
+    corrupted_priest: {
+        name: 'Corrupted Priest', nameRu: 'Проклятый Жрец', nameDe: 'Verfluchter Priester', texKey: 'corrupted_priest', biome: 'cursed',
+        weaknesses: ['fire'], resistances: ['holy'], abilities: ['Dark heal', 'Curse', 'Soul siphon'],
+        description: 'A corrupted healer that sustains the undead with dark energy. It curses the living and siphons their vitality.',
+        lore: 'Corrupted Priests were once devout healers who lost faith in the light. The ancient evil offered them purpose — and a congregation of the dead to tend.'
+    },
+    ancient_evil: {
+        name: 'Ancient Evil', nameRu: 'Древнее Зло', nameDe: 'Uraltes Übel', texKey: 'ancient_evil', biome: 'cursed_boss',
+        weaknesses: ['holy'], resistances: ['dark', 'poison'], abilities: ['Poison aura', 'Death wave', 'Summon zombies', 'Dark transformation'],
+        description: 'An ancient entity of pure corruption that has haunted the cursed lands for millennia. It commands the dead and poisons the living.',
+        lore: 'The Ancient Evil predates all recorded history. It was sealed away by the first heroes, but the seal has weakened. Now it reclaims what was always its own.'
+    },
+    shadow_stalker: {
+        name: 'Shadow Stalker', nameRu: 'Тень-Следопыт', nameDe: 'Schattenpirscher', texKey: 'shadow_stalker', biome: 'shadow',
+        weaknesses: ['light'], resistances: ['dark'], abilities: ['Shadow step', 'Backstab', 'Phase shift'],
+        description: 'A living shadow that hunts between dimensions. It strikes from the void and vanishes before retaliation.',
+        lore: 'Shadow Stalkers were once explorers who ventured too deep into the shadow realm. The darkness consumed them, leaving only hunger and purpose.'
+    },
+    rift_walker: {
+        name: 'Rift Walker', nameRu: 'Скиталец Разлома', nameDe: 'Risswanderer', texKey: 'rift_walker', biome: 'shadow',
+        weaknesses: ['holy'], resistances: ['void'], abilities: ['Rift shot', 'Dimensional dodge', 'Portal trap'],
+        description: 'A being that walks between realities. It fires bolts of void energy and creates traps between dimensions.',
+        lore: 'Rift Walkers are beings native to the space between worlds. They feed on the energy of dimensional tears.'
+    },
+    shadow_mage: {
+        name: 'Shadow Mage', nameRu: 'Теневой Маг', nameDe: 'Schattenmagier', texKey: 'shadow_mage', biome: 'shadow',
+        weaknesses: ['physical'], resistances: ['magic', 'dark'], abilities: ['Shadow bolt', 'Mirror image', 'Void drain'],
+        description: 'A spellcaster who commands the power of shadows. It creates mirror images and drains life force.',
+        lore: 'Shadow Mages were once archmages who sought forbidden knowledge in the shadow realm. The darkness twisted their minds and powers.'
+    },
+    reality_breaker: {
+        name: 'Reality Breaker', nameRu: 'Разрушитель Реальности', nameDe: 'Realitätsbrecher', texKey: 'reality_breaker', biome: 'shadow',
+        weaknesses: ['fire'], resistances: ['void', 'dark'], abilities: ['Reality warp', 'Heal shadows', 'Dimensional tear'],
+        description: 'A twisted entity that distorts reality around it. It heals allies and creates tears in the fabric of space.',
+        lore: 'Reality Breakers are the shadow realm\'s immune system — they destroy anything that doesn\'t belong, including the living.'
+    },
+    shadow_king: {
+        name: 'Shadow King', nameRu: 'Король Теней', nameDe: 'Schattenkönig', texKey: 'shadow_king', biome: 'shadow_boss',
+        weaknesses: ['holy'], resistances: ['dark', 'void'], abilities: ['Teleport', 'Dark bolt', 'Clone', 'Shadow aura'],
+        description: 'The sovereign of the shadow dimension. It commands all shadows and can teleport through dimensions at will.',
+        lore: 'The Shadow King was once a mortal ruler who discovered the shadow realm. He conquered it — but the realm conquered him in return.'
+    },
+    tower_knight: {
+        name: 'Tower Knight', nameRu: 'Башенный Рыцарь', nameDe: 'Turmritter', texKey: 'tower_knight', biome: 'tower',
+        weaknesses: ['magic'], resistances: ['physical'], abilities: ['Shield bash', 'Charge', 'Heavy armor'],
+        description: 'An armored warrior bound to eternal service in the tower. Its rusted armor still deflects blows.',
+        lore: 'Tower Knights were the king\'s elite guard, sworn to protect the tower. The curse bound them to their posts forever.'
+    },
+    tower_mage: {
+        name: 'Tower Mage', nameRu: 'Башенный Маг', nameDe: 'Turmmagier', texKey: 'tower_mage', biome: 'tower',
+        weaknesses: ['physical'], resistances: ['magic'], abilities: ['Arcane bolt', 'Barrier', 'Mana drain'],
+        description: 'A corrupted spellcaster that hurls bolts of arcane energy. It creates barriers and drains mana.',
+        lore: 'Tower Mages were court wizards who sought forbidden knowledge. The tower\'s curse twisted their minds and powers.'
+    },
+    tower_archer: {
+        name: 'Tower Archer', nameRu: 'Башенный Лучник', nameDe: 'Turmbogenschütze', texKey: 'tower_archer', biome: 'tower',
+        weaknesses: ['melee'], resistances: [], abilities: ['Aimed shot', 'Volley', 'Piercing arrow'],
+        description: 'A skeletal marksman that rains arrows from the tower walls. Its bolts pierce armor and soul alike.',
+        lore: 'Tower Archers were royal guards who swore to protect the tower. Even in death, they refuse to abandon their posts.'
+    },
+    tower_healer: {
+        name: 'Tower Healer', nameRu: 'Башенный Жрец', nameDe: 'Turmheiler', texKey: 'tower_healer', biome: 'tower',
+        weaknesses: ['fire'], resistances: ['holy'], abilities: ['Holy heal', 'Purify', 'Divine shield'],
+        description: 'A corrupted healer that sustains the tower\'s defenders. It heals allies and shields them from harm.',
+        lore: 'Tower Healers were once devout priests who lost faith. The tower offered them purpose — and a congregation of the dead.'
+    },
+    tower_assassin: {
+        name: 'Tower Assassin', nameRu: 'Башенный Ассассин', nameDe: 'Turmmeuchler', texKey: 'tower_assassin', biome: 'tower',
+        weaknesses: ['light'], resistances: ['dark'], abilities: ['Backstab', 'Shadow step', 'Poison blade'],
+        description: 'A swift predator that strikes from the shadows. Its blade is coated in deadly poison.',
+        lore: 'Tower Assassins were court spies who bargained with the tower for eternal life. They got it — along with eternal servitude.'
+    },
+    fallen_king: {
+        name: 'Fallen King', nameRu: 'Павший Король', nameDe: 'Gefallener König', texKey: 'fallen_king', biome: 'tower_boss',
+        weaknesses: ['holy'], resistances: ['dark', 'physical'], abilities: ['Royal command', 'Shield', 'Berserk', 'Summon guardians'],
+        description: 'The undead sovereign of the tower, clad in cursed armor. He commands his eternal guard and seeks to reclaim his kingdom.',
+        lore: 'The Fallen King ruled wisely for 200 years. Then the curse came. Now he rules a kingdom of dust and silence, waiting for someone worthy to free him.'
     }
 };
 
@@ -670,5 +965,143 @@ export const SOUL_BOOK_ENTRIES = {
         weakness: 'Holy power disrupts his command. His overconfidence is his greatest flaw.',
         essence: 'Command energy. The Leader\'s soul radiates authority — lesser bandits obey involuntarily.',
         purification: 'Purifying the Bandit Leader releases a cascade of stolen lives. Dozens of voices cry out, then fall silent. The leader himself smiles as he burns — he finally respects his opponent.',
-        lore: 'The Bandit Leader was once a general who lost his kingdom in a losing war. He rebuilt it in the castle — a kingdom of fear, iron, and blood. He rules not through loyalty, but through terror.' }
+        lore: 'The Bandit Leader was once a general who lost his kingdom in a losing war. He rebuilt it in the castle — a kingdom of fear, iron, and blood. He rules not through loyalty, but through terror.' },
+    crypt_soldier:      { name: 'Crypt Soldier', nameRu: 'Криптовый Солдат', nameDe: 'Kryptsoldat', texKey: 'crypt_soldier', biome: 'depths',
+        description: 'A bound soul, fused to corroded armor by ancient oath. It knows only duty and defiance.',
+        weakness: 'Holy power shatters the binding. The soul escapes, confused and grateful.',
+        essence: 'Warden energy. Crypt Soldier souls enhance physical defense and damage absorption.',
+        purification: 'Purifying a crypt soldier soul releases the binding oath. The armor crumbles, revealing a faint, fading light.',
+        lore: 'These soldiers swore to protect the royal tombs for eternity. The Lich King gave them eternity, but forgot to give them peace.' },
+    shadow_assassin:    { name: 'Shadow Assassin', nameRu: 'Теневой Убийца', nameDe: 'Schattenmeuchler', texKey: 'shadow_assassin', biome: 'depths',
+        description: 'A restless soul that craves the kill. It moves between shadows like a knife through silk.',
+        weakness: 'Light exposes the assassin. In illumination, it cannot hide — and panics.',
+        essence: 'Shadow energy. Assassin souls enhance evasion and critical strike capability.',
+        purification: 'Purifying a shadow assassin soul releases a burst of tactical knowledge. Centuries of assassination, compressed into a moment.',
+        lore: 'Shadow Assassins were court spies who sold their souls for eternal life. The Lich King collected — and kept them working for eternity.' },
+    bone_archer:        { name: 'Bone Archer', nameRu: 'Костяной Лучник', nameDe: 'Knochenbogenschütze', texKey: 'bone_archer', biome: 'depths',
+        description: 'A focused soul, honed by endless combat. It fires with lethal precision from the back lines.',
+        weakness: 'Melee attacks disrupt their aim. Their soul falters when the distance closes.',
+        essence: 'Precision energy. Archer souls enhance ranged damage and accuracy.',
+        purification: 'Purifying a bone archer soul releases a volley of spectral arrows. They arc upward and dissolve into light.',
+        lore: 'Bone Archers were the first line of defense in the catacombs. They still fire blindly, haunted by muscle memory.' },
+    necro_mage:         { name: 'Necro Mage', nameRu: 'Некромаг', nameDe: 'Nekromagier', texKey: 'necro_mage', biome: 'depths',
+        description: 'A consumed soul, hollowed out and filled with necrotic energy. It burns from the inside out.',
+        weakness: 'Physical attacks disrupt their casting. They are fragile without their magic.',
+        essence: 'Arcane death energy. Necro Mage souls amplify spell power but destabilize the mind.',
+        purification: 'Purifying a necro mage soul releases a wave of forbidden knowledge. Most of it is useless. Some of it is terrifying.',
+        lore: 'Necro Mages sought to understand death itself. They succeeded — and became it. Their knowledge remains, buried in hollow skulls.' },
+    dark_priest:        { name: 'Dark Priest', nameRu: 'Тёмный Жрец', nameDe: 'Dunkelpriester', texKey: 'dark_priest', biome: 'depths',
+        description: 'A hollowed soul, inverted from healer to harvester. It sustains undead and drains the living.',
+        weakness: 'Fire purges the corruption. Without it, the soul is empty — neither good nor evil.',
+        essence: 'Drain energy. Dark Priest souls enhance life-stealing and debuffing capabilities.',
+        purification: 'Purifying a dark priest soul releases a wave of healing energy — the inverse of its curse. It remembers what it was meant to do.',
+        lore: 'Dark Priests were healers who lost faith. The Lich King offered them a new congregation — and a purpose twisted beyond recognition.' },
+    lich_king:          { name: 'Lich King', nameRu: 'Король Лич', nameDe: 'Lichkönig', texKey: 'lich_king', biome: 'depths_boss',
+        description: 'A king\'s soul, twisted by ambition and preserved by dark magic. It commands and corrupts all it touches.',
+        weakness: 'Holy power disrupts his control. Without his phylactery, he is merely a bitter old king.',
+        essence: 'Dominion energy. The Lich King\'s soul radiates authority — those nearby feel compelled to obey.',
+        purification: 'Purifying the Lich King releases the souls of all he enslaved. A cascade of light fills the catacombs.',
+        lore: 'He wanted to rule forever. He got his wish. Now he rules nothing but dust and silence, surrounded by subjects who hate him.' },
+    swamp_thug:        { name: 'Swamp Thug', nameRu: 'Болотный Головорез', nameDe: 'Sumpf-Schläger', texKey: 'swamp_thug', biome: 'cursed',
+        description: 'A massive soul, crushed under its own corruption. It knows only strength and obedience.',
+        weakness: 'Fire burns away the corruption that binds it. The soul struggles free, confused and afraid.',
+        essence: 'Raw physical power. Thug souls enhance strength and endurance but cloud the mind.',
+        purification: 'Purifying a swamp thug soul releases decades of suppressed rage. Then silence — a simple soul, finally at rest.',
+        lore: 'Swamp Thugs were lumberjacks who ventured too deep. The corruption twisted their bodies and minds, leaving only rage and hunger.' },
+    venom_spider:      { name: 'Venom Spider', nameRu: 'Ядовитый Паук', nameDe: 'Giftspinne', texKey: 'venom_spider', biome: 'cursed',
+        description: 'A cunning predator soul, sharp and patient. It weaves death in darkness.',
+        weakness: 'Fire burns away the web-soul. Without it, the spider is blind and confused.',
+        essence: 'Web energy. Spider souls enhance trap-setting and ambush capabilities.',
+        purification: 'Purifying a venom spider soul releases a cascade of sticky web. It hardens into silk.',
+        lore: 'The venom spiders grew to unnatural sizes feeding on the swamp\'s corrupted minerals. Their silk is stronger than rope.' },
+    thorn_walker:      { name: 'Thorn Walker', nameRu: 'Терновый Странник', nameDe: 'Dornenwanderer', texKey: 'thorn_walker', biome: 'cursed',
+        description: 'A rooted soul, bound to the earth by ancient corruption. It fires thorns and grasps with roots.',
+        weakness: 'Fire severs the connection to the earth. Without roots, the walker crumbles.',
+        essence: 'Nature energy twisted. Thorn Walker souls enhance ranged attacks and area denial.',
+        purification: 'Purifying a thorn walker soul releases a burst of natural growth. The corruption recedes, and for a moment, flowers bloom.',
+        lore: 'Thorn Walkers were ancient trees, corrupted by the swamp\'s dark heart. They now serve as living turrets.' },
+    death_mage:        { name: 'Death Mage', nameRu: 'Маг Смерти', nameDe: 'Todesmagier', texKey: 'death_mage', biome: 'cursed',
+        description: 'A consumed soul, hollowed out and filled with death energy. It burns from the inside out.',
+        weakness: 'Physical attacks disrupt their casting. They are fragile without their magic.',
+        essence: 'Arcane death energy. Death Mage souls amplify spell power but destabilize the mind.',
+        purification: 'Purifying a death mage soul releases a wave of forbidden knowledge. Most of it is useless. Some of it is terrifying.',
+        lore: 'Death Mages sought to understand death itself. They succeeded — and became it.' },
+    corrupted_priest:   { name: 'Corrupted Priest', nameRu: 'Проклятый Жрец', nameDe: 'Verfluchter Priester', texKey: 'corrupted_priest', biome: 'cursed',
+        description: 'A hollowed soul, inverted from healer to harvester. It sustains undead and drains the living.',
+        weakness: 'Fire purges the corruption. Without it, the soul is empty — neither good nor evil.',
+        essence: 'Drain energy. Corrupted Priest souls enhance life-stealing and debuffing capabilities.',
+        purification: 'Purifying a corrupted priest soul releases a wave of healing energy — the inverse of its curse. It remembers what it was meant to do.',
+        lore: 'Corrupted Priests were healers who lost faith. The ancient evil offered them purpose — and a congregation of the dead to tend.' },
+    ancient_evil:       { name: 'Ancient Evil', nameRu: 'Древнее Зло', nameDe: 'Uraltes Übel', texKey: 'ancient_evil', biome: 'cursed_boss',
+        description: 'An ancient soul of pure corruption, older than memory. It commands the dead and poisons the living.',
+        weakness: 'Holy power disrupts its control. Without its heart, it is merely a shadow of its former self.',
+        essence: 'Primordial corruption energy. The Ancient Evil\'s soul radiates decay — everything near it withers.',
+        purification: 'Purifying the Ancient Evil releases a wave of cleansed energy across the cursed lands. The corruption recedes. The swamp breathes again.',
+        lore: 'The Ancient Evil predates all recorded history. It was sealed away by the first heroes, but the seal has weakened. Now it reclaims what was always its own.' },
+    shadow_stalker:    { name: 'Shadow Stalker', nameRu: 'Тень-Следопыт', nameDe: 'Schattenpirscher', texKey: 'shadow_stalker', biome: 'shadow',
+        description: 'A living shadow soul, bound to the void between dimensions. It hunts relentlessly.',
+        weakness: 'Light exposes the stalker. In illumination, it cannot exist — and dissipates.',
+        essence: 'Shadow energy. Stalker souls enhance evasion and critical strike capability.',
+        purification: 'Purifying a shadow stalker soul releases a burst of dimensional knowledge. The shadow dissipates into light.',
+        lore: 'Shadow Stalkers were explorers who ventured too deep. The shadow realm consumed them, leaving only hunger.' },
+    rift_walker:       { name: 'Rift Walker', nameRu: 'Скиталец Разлома', nameDe: 'Risswanderer', texKey: 'rift_walker', biome: 'shadow',
+        description: 'A dimensional soul, existing between realities. It walks the spaces others cannot see.',
+        weakness: 'Holy power seals the rift. Without it, the walker is trapped between worlds.',
+        essence: 'Dimensional energy. Rift Walker souls enhance spatial awareness and teleportation.',
+        purification: 'Purifying a rift walker soul seals the dimensional tear. The walker finally finds peace.',
+        lore: 'Rift Walkers are native to the space between worlds. They feed on dimensional tears.' },
+    shadow_mage:       { name: 'Shadow Mage', nameRu: 'Теневой Маг', nameDe: 'Schattenmagier', texKey: 'shadow_mage', biome: 'shadow',
+        description: 'A consumed soul, hollowed out and filled with shadow magic. It commands darkness itself.',
+        weakness: 'Physical attacks disrupt their casting. They are fragile without their magic.',
+        essence: 'Arcane shadow energy. Shadow Mage souls amplify spell power but destabilize the mind.',
+        purification: 'Purifying a shadow mage soul releases a wave of forbidden knowledge. Most of it is terrifying.',
+        lore: 'Shadow Mages were archmages who sought forbidden knowledge. The shadow realm claimed their souls.' },
+    reality_breaker:   { name: 'Reality Breaker', nameRu: 'Разрушитель Реальности', nameDe: 'Realitätsbrecher', texKey: 'reality_breaker', biome: 'shadow',
+        description: 'A twisted soul that distorts reality. It exists in a state between being and unbeing.',
+        weakness: 'Fire purges the distortion. Without it, the breaker is merely a confused fragment.',
+        essence: 'Warp energy. Reality Breaker souls enhance area control and debuffing.',
+        purification: 'Purifying a reality breaker soul restores a fragment of normalcy. The distortion recedes.',
+        lore: 'Reality Breakers are the shadow realm\'s immune system — they destroy anything that doesn\'t belong.' },
+    shadow_king:       { name: 'Shadow King', nameRu: 'Король Теней', nameDe: 'Schattenkönig', texKey: 'shadow_king', biome: 'shadow_boss',
+        description: 'A sovereign soul, commanding all shadows. It teleports through dimensions at will.',
+        weakness: 'Holy power disrupts its command. Without the shadow crown, it is merely a bitter king.',
+        essence: 'Dominion energy. The Shadow King\'s soul radiates authority — shadows obey involuntarily.',
+        purification: 'Purifying the Shadow King releases all the souls he consumed. A cascade of light fills the shadow dimension.',
+        lore: 'The Shadow King was once a mortal ruler who discovered the shadow realm. He conquered it — but it conquered him.' },
+    tower_knight:      { name: 'Tower Knight', nameRu: 'Башенный Рыцарь', nameDe: 'Turmritter', texKey: 'tower_knight', biome: 'tower',
+        description: 'A bound soul, fused to rusted armor by the king\'s curse. It knows only duty and defiance.',
+        weakness: 'Magic shatters the binding. The soul escapes, confused and grateful.',
+        essence: 'Warden energy. Tower Knight souls enhance physical defense and damage absorption.',
+        purification: 'Purifying a tower knight soul releases the binding oath. The armor crumbles, revealing a faint, fading light.',
+        lore: 'Tower Knights were the king\'s elite guard, sworn to protect the tower. The curse gave them eternity, but forgot to give them peace.' },
+    tower_mage:        { name: 'Tower Mage', nameRu: 'Башенный Маг', nameDe: 'Turmmagier', texKey: 'tower_mage', biome: 'tower',
+        description: 'A consumed soul, hollowed out and filled with arcane energy. It burns from the inside out.',
+        weakness: 'Physical attacks disrupt their casting. They are fragile without their magic.',
+        essence: 'Arcane energy. Tower Mage souls amplify spell power but destabilize the mind.',
+        purification: 'Purifying a tower mage soul releases a wave of forbidden knowledge. Most of it is useless. Some of it is terrifying.',
+        lore: 'Tower Mages sought forbidden knowledge in the tower. They found it — and the curse claimed their souls.' },
+    tower_archer:      { name: 'Tower Archer', nameRu: 'Башенный Лучник', nameDe: 'Turmbogenschütze', texKey: 'tower_archer', biome: 'tower',
+        description: 'A focused soul, honed by endless combat. It fires with lethal precision from the walls.',
+        weakness: 'Melee attacks disrupt their aim. Their soul falters when the distance closes.',
+        essence: 'Precision energy. Tower Archer souls enhance ranged damage and accuracy.',
+        purification: 'Purifying a tower archer soul releases a volley of spectral arrows. They arc upward and dissolve into light.',
+        lore: 'Tower Archers were royal guards who swore to protect the tower. Even in death, they refuse to abandon their posts.' },
+    tower_healer:      { name: 'Tower Healer', nameRu: 'Башенный Жрец', nameDe: 'Turmheiler', texKey: 'tower_healer', biome: 'tower',
+        description: 'A hollowed soul, inverted from healer to harvester. It sustains the tower\'s defenders.',
+        weakness: 'Fire purges the corruption. Without it, the soul is empty — neither good nor evil.',
+        essence: 'Drain energy. Tower Healer souls enhance life-stealing and debuffing capabilities.',
+        purification: 'Purifying a tower healer soul releases a wave of healing energy — the inverse of its curse. It remembers what it was meant to do.',
+        lore: 'Tower Healers were once devout priests who lost faith. The tower offered them purpose — and a congregation of the dead.' },
+    tower_assassin:    { name: 'Tower Assassin', nameRu: 'Башенный Ассассин', nameDe: 'Turmmeuchler', texKey: 'tower_assassin', biome: 'tower',
+        description: 'A restless soul that craves the kill. It moves between shadows like a knife through silk.',
+        weakness: 'Light exposes the assassin. In illumination, it cannot hide — and panics.',
+        essence: 'Shadow energy. Assassin souls enhance evasion and critical strike capability.',
+        purification: 'Purifying a tower assassin soul releases a burst of tactical knowledge. Centuries of assassination, compressed into a moment.',
+        lore: 'Tower Assassins were court spies who bargained with the tower for eternal life. They got it — and eternal servitude.' },
+    fallen_king:       { name: 'Fallen King', nameRu: 'Павший Король', nameDe: 'Gefallener König', texKey: 'fallen_king', biome: 'tower_boss',
+        description: 'A king\'s soul, twisted by curse and preserved by dark magic. He commands his eternal guard.',
+        weakness: 'Holy power disrupts his control. Without his crown, he is merely a bitter old king.',
+        essence: 'Dominion energy. The Fallen King\'s soul radiates authority — those nearby feel compelled to obey.',
+        purification: 'Purifying the Fallen King releases the souls of all he enslaved. A cascade of light fills the tower.',
+        lore: 'The Fallen King ruled wisely for 200 years. Then the curse came. Now he rules a kingdom of dust, waiting for someone worthy to free him.' }
 };
