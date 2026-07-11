@@ -298,65 +298,88 @@ export function drawZoneTextures(mk) {
         c.fillRect(8, 12, 12, 6);
     });
 
-    // Portal — stone frame with purple void (48x64)
-    mk('portal', 48, 64, (c) => {
+    // Portal — stone frame with purple void (64x80)
+    mk('portal', 64, 80, (c) => {
         c.imageSmoothingEnabled = false;
+        // Outer glow
+        c.fillStyle = 'rgba(155,89,182,0.2)';
+        c.fillRect(0, 0, 64, 80);
         // Outer stone frame
         c.fillStyle = '#3a3a4a';
-        c.fillRect(0, 0, 48, 64);
+        c.fillRect(4, 4, 56, 72);
         c.fillStyle = '#4a4a5a';
-        c.fillRect(2, 2, 44, 60);
+        c.fillRect(6, 6, 52, 68);
         c.fillStyle = '#2a2a3a';
-        c.fillRect(4, 4, 40, 56);
+        c.fillRect(8, 8, 48, 64);
         // Stone details
         c.fillStyle = '#5a5a6a';
-        c.fillRect(4, 4, 40, 4);
-        c.fillRect(4, 56, 40, 4);
-        c.fillRect(4, 4, 4, 56);
-        c.fillRect(40, 4, 4, 56);
-        // Purple void
+        c.fillRect(8, 8, 48, 6);
+        c.fillRect(8, 66, 48, 6);
+        c.fillRect(8, 8, 6, 64);
+        c.fillRect(50, 8, 6, 64);
+        // Stone highlights
+        c.fillStyle = '#6a6a7a';
+        c.fillRect(10, 10, 44, 2);
+        c.fillRect(10, 68, 44, 2);
+        c.fillRect(10, 10, 2, 60);
+        c.fillRect(52, 10, 2, 60);
+        // Purple void (concentric)
+        c.fillStyle = '#0a0020';
+        c.fillRect(14, 14, 36, 52);
         c.fillStyle = '#1a0035';
-        c.fillRect(8, 8, 32, 48);
+        c.fillRect(16, 16, 32, 48);
         c.fillStyle = '#2a0050';
-        c.fillRect(10, 10, 28, 44);
+        c.fillRect(18, 18, 28, 44);
         c.fillStyle = '#3a0068';
-        c.fillRect(12, 12, 24, 40);
+        c.fillRect(20, 20, 24, 40);
         c.fillStyle = '#4a1080';
-        c.fillRect(14, 14, 20, 36);
+        c.fillRect(22, 22, 20, 36);
         c.fillStyle = '#5a2098';
-        c.fillRect(16, 16, 16, 32);
+        c.fillRect(24, 24, 16, 32);
         c.fillStyle = '#6a30b0';
-        c.fillRect(18, 18, 12, 28);
+        c.fillRect(26, 26, 12, 28);
         c.fillStyle = '#7a40c8';
-        c.fillRect(20, 20, 8, 24);
+        c.fillRect(28, 28, 8, 24);
         c.fillStyle = '#8a50e0';
-        c.fillRect(22, 22, 4, 20);
+        c.fillRect(30, 30, 4, 20);
+        // Glowing center
+        c.fillStyle = 'rgba(155,89,182,0.5)';
+        c.fillRect(26, 32, 12, 16);
+        c.fillStyle = 'rgba(186,104,204,0.4)';
+        c.fillRect(24, 30, 16, 20);
+        c.fillStyle = 'rgba(220,130,255,0.3)';
+        c.fillRect(28, 34, 8, 12);
         // Magical runes on frame
         c.fillStyle = '#9b59b6';
-        c.fillRect(6, 6, 3, 3);
-        c.fillRect(39, 6, 3, 3);
-        c.fillRect(6, 55, 3, 3);
-        c.fillRect(39, 55, 3, 3);
+        c.fillRect(10, 10, 4, 4);
+        c.fillRect(50, 10, 4, 4);
+        c.fillRect(10, 66, 4, 4);
+        c.fillRect(50, 66, 4, 4);
         c.fillStyle = '#aa66cc';
-        c.fillRect(22, 6, 4, 3);
-        c.fillRect(22, 55, 4, 3);
-        c.fillRect(6, 30, 3, 4);
-        c.fillRect(39, 30, 3, 4);
-        // Glowing center
-        c.fillStyle = 'rgba(155,89,182,0.4)';
-        c.fillRect(20, 28, 8, 8);
-        c.fillStyle = 'rgba(186,104,204,0.3)';
-        c.fillRect(18, 26, 12, 12);
+        c.fillRect(30, 10, 4, 4);
+        c.fillRect(30, 66, 4, 4);
+        c.fillRect(10, 38, 4, 4);
+        c.fillRect(50, 38, 4, 4);
+        // Rune glow
+        c.fillStyle = 'rgba(155,89,182,0.6)';
+        c.fillRect(11, 11, 2, 2);
+        c.fillRect(51, 11, 2, 2);
+        c.fillRect(11, 67, 2, 2);
+        c.fillRect(51, 67, 2, 2);
         // Energy particles
         c.fillStyle = '#bb77dd';
-        c.fillRect(22, 16, 2, 2);
-        c.fillRect(24, 44, 2, 2);
-        c.fillRect(16, 30, 2, 2);
-        c.fillRect(30, 30, 2, 2);
+        c.fillRect(30, 20, 2, 2);
+        c.fillRect(32, 58, 2, 2);
+        c.fillRect(20, 40, 2, 2);
+        c.fillRect(44, 40, 2, 2);
         c.fillStyle = '#cc88ee';
-        c.fillRect(23, 20, 1, 1);
-        c.fillRect(25, 40, 1, 1);
-        c.fillRect(18, 28, 1, 1);
+        c.fillRect(31, 26, 1, 1);
+        c.fillRect(33, 52, 1, 1);
+        c.fillRect(22, 38, 1, 1);
+        c.fillRect(42, 38, 1, 1);
+        c.fillStyle = '#ddaaff';
+        c.fillRect(30, 36, 2, 2);
+        c.fillRect(34, 42, 2, 2);
         c.fillRect(28, 32, 1, 1);
     });
 
