@@ -8,7 +8,7 @@
 > - [[01-tech/ARCHITECTURE|Architecture]] — архитектура проекта
 > - [[12-plans/PROJECT_STATE|PROJECT STATE]] — текущее состояние
 > - [[01-tech/FILE_TREE|File Tree]] — структура файлов
-> - [[инструкция/инструкция|Правила разработки]]
+> - [[инструкция/RULES|Правила разработки]]
 > - [[AGENTS]] — руководство по AI-агентам
 
 ## What is this
