@@ -413,11 +413,11 @@ export class VillageZone extends BaseZone {
                     duration: 2000,
                     ease: 'Power1',
                     onComplete: () => {
-                        if (this.scene.castleChildNPC) {
+                        if (this.scene.castleChildNPC && this.scene.castleChildNPC.active) {
                             this.scene.castleChildNPC.destroy();
                             this.scene.castleChildNPC = null;
                         }
-                        if (this.scene.castleChildHint) {
+                        if (this.scene.castleChildHint && this.scene.castleChildHint.active) {
                             this.scene.castleChildHint.destroy();
                             this.scene.castleChildHint = null;
                         }
@@ -795,6 +795,7 @@ export class VillageZone extends BaseZone {
             }
         }
         if (s.zone === 'village' && s.zones.village.isThriving && s.depthsPortal) {
+            if (s.depthsPortalHint) s.depthsPortalHint.setPosition(s.depthsPortal.x, s.depthsPortal.y - 40);
             const dpd = Phaser.Math.Distance.Between(s.player.x, s.player.y, s.depthsPortal.x, s.depthsPortal.y);
             if (dpd < 80) {
                 if (s.depthsPortalHint) s.depthsPortalHint.setText('SPACE = enter Depths');
@@ -803,6 +804,7 @@ export class VillageZone extends BaseZone {
             }
         }
         if (s.zone === 'village' && s.cursedPortalVillage) {
+            if (s.cursedPortalVillageHint) s.cursedPortalVillageHint.setPosition(s.cursedPortalVillage.x, s.cursedPortalVillage.y - 40);
             const cpd = Phaser.Math.Distance.Between(s.player.x, s.player.y, s.cursedPortalVillage.x, s.cursedPortalVillage.y);
             if (cpd < 80) {
                 if (s.cursedPortalVillageHint) s.cursedPortalVillageHint.setText('SPACE = enter Cursed Lands');

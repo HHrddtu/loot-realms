@@ -16,7 +16,9 @@
 
 | Дата | Тип | Тема | Описание |
 |------|-----|------|----------|
-| — | — | *Пока нет записей* | Добавляйте знания через скилл `knowledge-base-update` |
+| 2026-07-11 | bug | [floatingText scrollfactor](bug-floating-text-scrollfactor.md) | UI текст должен использовать setScrollFactor(0) |
+| 2026-07-11 | bug | [NPC quest icon position](bug-npc-quest-icon-position.md) | Дочерние элементы NPC обновлять позицию в update |
+| 2026-07-11 | bug | [Portal hint position](bug-portal-hint-position.md) | Hint тексты привязанные к движущимся объектам обновлять в update |
 
 ---
 

@@ -80,6 +80,7 @@ export class NpcSystem {
         s.npcSprites.forEach(spr => {
             const status = getNpcQuestStatus(spr.npcKey);
             if (spr.questIcon) {
+                spr.questIcon.setPosition(spr.x, spr.y - 44);
                 spr.questIcon.setVisible(status === 'quest_available' || status === 'quest_complete');
                 if (status === 'quest_complete') {
                     spr.questIcon.setTint(0x2ecc71);

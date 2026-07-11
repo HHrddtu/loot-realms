@@ -260,8 +260,11 @@ export class HUD {
     }
 
     floatingText(x, y, text, color) {
-        const t = this.scene.add.text(x, y, text, { fontSize: '12px', fill: color, fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5);
-        this.scene.tweens.add({ targets: t, y: t.y - 30, alpha: 0, duration: 700, onComplete: () => t.destroy() });
+        const cam = this.scene.cameras.main;
+        const sx = x - cam.scrollX;
+        const sy = y - cam.scrollY;
+        const t = this.scene.add.text(sx, sy, text, { fontSize: '12px', fill: color, fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setScrollFactor(0).setDepth(200);
+        this.scene.tweens.add({ targets: t, y: sy - 30, alpha: 0, duration: 700, onComplete: () => t.destroy() });
     }
 
     showDamageFlash() {
