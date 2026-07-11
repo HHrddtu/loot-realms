@@ -209,6 +209,19 @@ export class AccountEquipUI {
         if (s.lootPercent) parts.push('+' + s.lootPercent + '% Loot');
         if (s.regenPercent) parts.push('+' + s.regenPercent + '% Regen');
         if (s.corruptionMax) parts.push('+' + s.corruptionMax + ' CorrMax');
+        if (s.damageReduction) parts.push('+' + s.damageReduction + '% DR');
+        if (s.lifeStealPercent) parts.push('+' + s.lifeStealPercent + '% LS');
+        if (s.shieldPercent) parts.push('+' + s.shieldPercent + '% Shield');
         return parts.join(' ');
+    }
+
+    _getRarityName(rarity) {
+        const names = { common: 'Common', uncommon: 'Uncommon', rare: 'Rare', epic: 'Epic', legendary: 'Legendary' };
+        return names[rarity] || rarity;
+    }
+
+    _getSlotIcon(slot) {
+        const icons = { hat: 'Hat', mantle: 'Cape', legs: 'Boots', weapon: 'Weapon', accessory: 'Acc', ring: 'Ring', charm: 'Charm', relic: 'Relic' };
+        return icons[slot] || slot;
     }
 }
