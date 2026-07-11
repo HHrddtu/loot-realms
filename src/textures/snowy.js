@@ -203,11 +203,11 @@ export function drawSnowyTextures(mk, textures) {
 
     // Winter enemy spritesheets — 5 types
     const winterEnemyDefs = [
-        { key: 'ice_golem',    w: 22, bh: 24, body: '#4488aa', head: '#5599bb', detail: '#336688', eyes: '#00ffff' },
-        { key: 'frost_wraith', w: 14, bh: 16, body: '#334466', head: '#445577', detail: '#223355', eyes: '#88ccff' },
-        { key: 'snow_wolf',    w: 18, bh: 16, body: '#ccdde8', head: '#ddeeff', detail: '#aabbcc', eyes: '#4488cc' },
-        { key: 'ice_elemental', w: 14, bh: 18, body: '#2266aa', head: '#3377bb', detail: '#115599', eyes: '#00ddff' },
-        { key: 'frost_mage',   w: 14, bh: 18, body: '#2a3a5a', head: '#3a4a6a', detail: '#1a2a4a', eyes: '#88ccff' }
+        { key: 'ice_golem',    w: 44, bh: 48, body: '#4488aa', head: '#5599bb', detail: '#336688', eyes: '#00ffff', accent: '#66bbdd' },
+        { key: 'frost_wraith', w: 28, bh: 32, body: '#334466', head: '#445577', detail: '#223355', eyes: '#88ccff', accent: '#556688' },
+        { key: 'snow_wolf',    w: 36, bh: 32, body: '#ccdde8', head: '#ddeeff', detail: '#aabbcc', eyes: '#4488cc', accent: '#eeffff' },
+        { key: 'ice_elemental', w: 28, bh: 36, body: '#2266aa', head: '#3377bb', detail: '#115599', eyes: '#00ddff', accent: '#4488cc' },
+        { key: 'frost_mage',   w: 28, bh: 36, body: '#2a3a5a', head: '#3a4a6a', detail: '#1a2a4a', eyes: '#88ccff', accent: '#4a5a7a' }
     ];
 
     winterEnemyDefs.forEach(def => {
@@ -221,34 +221,71 @@ export function drawSnowyTextures(mk, textures) {
             for (let f = 0; f < frames; f++) {
                 const ox = f * fw;
                 const wUp = f % 2 === 0;
-                ctx.fillStyle = def.body;
-                ctx.fillRect(ox + 3, wUp ? 4 : 5, fw - 6, fh - 8);
-                ctx.fillStyle = def.head;
-                ctx.fillRect(ox + 4, wUp ? 1 : 2, fw - 8, 6);
-                ctx.fillStyle = def.eyes;
-                ctx.fillRect(ox + 5, wUp ? 2 : 3, 2, 2);
-                ctx.fillRect(ox + fw - 7, wUp ? 2 : 3, 2, 2);
+                const bob = wUp ? 0 : 2;
+                // Shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                ctx.fillRect(ox + fw/2 - 8, fh - 4, 16, 4);
+                // Legs
                 ctx.fillStyle = def.detail;
-                ctx.fillRect(ox + 2, wUp ? 2 : 3, 3, 4);
-                ctx.fillRect(ox + fw - 5, wUp ? 2 : 3, 3, 4);
+                ctx.fillRect(ox + fw/2 - 8, fh - 10 + bob, 6, 10);
+                ctx.fillRect(ox + fw/2 + 2, fh - 10 + bob, 6, 10);
+                // Body
                 ctx.fillStyle = def.body;
-                ctx.fillRect(ox + 4, fh - 4, 3, 4);
-                ctx.fillRect(ox + fw - 7, fh - 4, 3, 4);
+                ctx.fillRect(ox + 6, 14 + bob, fw - 12, fh - 26);
+                ctx.fillStyle = def.accent;
+                ctx.fillRect(ox + 8, 16 + bob, fw - 16, fh - 30);
+                // Arms
+                ctx.fillStyle = def.body;
+                ctx.fillRect(ox + 2, 16 + bob, 6, 14);
+                ctx.fillRect(ox + fw - 8, 16 + bob, 6, 14);
+                // Head
+                ctx.fillStyle = def.head;
+                ctx.fillRect(ox + fw/2 - 7, 2 + bob, 14, 12);
+                ctx.fillStyle = def.accent;
+                ctx.fillRect(ox + fw/2 - 5, 4 + bob, 10, 8);
+                // Eyes
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(ox + fw/2 - 5, 5 + bob, 4, 4);
+                ctx.fillRect(ox + fw/2 + 1, 5 + bob, 4, 4);
+                ctx.fillStyle = def.eyes;
+                ctx.fillRect(ox + fw/2 - 4, 6 + bob, 2, 2);
+                ctx.fillRect(ox + fw/2 + 2, 6 + bob, 2, 2);
+                // Mouth
+                ctx.fillStyle = def.detail;
+                ctx.fillRect(ox + fw/2 - 2, 10 + bob, 4, 2);
             }
             addSheet(def.key + '_walk', canvas, { frameWidth: fw, frameHeight: fh });
         })();
         mk(def.key, def.w, def.bh, (c) => {
             c.imageSmoothingEnabled = false;
-            c.fillStyle = def.body;
-            c.fillRect(3, 4, def.w - 6, def.bh - 8);
-            c.fillStyle = def.head;
-            c.fillRect(4, 1, def.w - 8, 6);
-            c.fillStyle = def.eyes;
-            c.fillRect(5, 2, 2, 2);
-            c.fillRect(def.w - 7, 2, 2, 2);
+            // Shadow
+            c.fillStyle = 'rgba(0,0,0,0.3)';
+            c.fillRect(def.w/2 - 8, def.bh - 4, 16, 4);
+            // Legs
             c.fillStyle = def.detail;
-            c.fillRect(2, 2, 3, 4);
-            c.fillRect(def.w - 5, 2, 3, 4);
+            c.fillRect(def.w/2 - 8, def.bh - 10, 6, 10);
+            c.fillRect(def.w/2 + 2, def.bh - 10, 6, 10);
+            // Body
+            c.fillStyle = def.body;
+            c.fillRect(6, 14, def.w - 12, def.bh - 26);
+            c.fillStyle = def.accent;
+            c.fillRect(8, 16, def.w - 16, def.bh - 30);
+            // Arms
+            c.fillStyle = def.body;
+            c.fillRect(2, 16, 6, 14);
+            c.fillRect(def.w - 8, 16, 6, 14);
+            // Head
+            c.fillStyle = def.head;
+            c.fillRect(def.w/2 - 7, 2, 14, 12);
+            c.fillStyle = def.accent;
+            c.fillRect(def.w/2 - 5, 4, 10, 8);
+            // Eyes
+            c.fillStyle = '#ffffff';
+            c.fillRect(def.w/2 - 5, 5, 4, 4);
+            c.fillRect(def.w/2 + 1, 5, 4, 4);
+            c.fillStyle = def.eyes;
+            c.fillRect(def.w/2 - 4, 6, 2, 2);
+            c.fillRect(def.w/2 + 2, 6, 2, 2);
         });
     });
 
