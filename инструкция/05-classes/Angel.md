@@ -6,9 +6,9 @@
 
 | Параметр | Значение |
 |----------|---------|
-| HP | 90 |
-| DMG | 15 |
-| SPD | 190 |
+| HP | 75 |
+| DMG | 12 |
+| SPD | 180 |
 | Книга | Soul Book |
 | Спеллы | Soul Strike, Life Link, Purify |
 

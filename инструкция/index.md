@@ -18,8 +18,13 @@
 | 6 | [[02-zones/Village\|Village]] | [[03-bosses/PurpleDemon\|Purple Demon]] | → [[02-zones/Cemetery\|Cemetery]], → [[02-zones/Snowy\|Snowy]] |
 | 7 | [[02-zones/Cemetery\|Cemetery]] | — | → [[02-zones/Hell\|Hell]] |
 | 8 | [[02-zones/Hell\|Hell]] | [[03-bosses/RedDemon\|Red Demon]] | → [[02-zones/Snowy\|Snowy]] |
-| 9 | [[02-zones/Snowy\|Snowy]] | [[03-bosses/IceSpirit\|Ice Spirit]] | → [[02-zones/Village\|Village]] (восстановленная) |
+| 9 | [[02-zones/Snowy\|Snowy]] | [[03-bosses/IceSpirit\|Ice Spirit]] | → Village (восстановленная) |
 | 10 | [[02-zones/Castle\|Castle]] | [[03-bosses/BanditLeader\|Bandit Leader]] | ← Village (после восстановления) |
+| 11 | [[02-zones/Depths\|Depths]] | Lich King | → [[02-zones/Cursed\|Cursed]] |
+| 12 | [[02-zones/Cursed\|Cursed]] | Ancient Evil | → [[02-zones/Shadow\|Shadow]] |
+| 13 | [[02-zones/Shadow\|Shadow]] | Shadow King | → [[02-zones/Tower\|Tower]] |
+| 14 | [[02-zones/Tower\|Tower]] | Fallen King | → [[02-zones/Throne\|Throne]] |
+| 15 | [[02-zones/Throne\|Throne]] | Eternity Lord | Финал → Prestige |
 
 См. [[02-zones/_zones_index|Все зоны]]
 
@@ -58,9 +63,9 @@
 
 ## 🧙 Классы
 
-- [[05-classes/Sage|Sage]] — маг, 100 HP, 20 DMG
-- [[05-classes/Alchemist|Alchemist]] — алхимик, 110 HP, 18 DMG
-- [[05-classes/Angel|Angel]] — ангел, 90 HP, 15 DMG
+- [[05-classes/Sage|Sage]] — маг, 80 HP, 15 DMG
+- [[05-classes/Alchemist|Alchemist]] — алхимик, 90 HP, 14 DMG
+- [[05-classes/Angel|Angel]] — ангел, 75 HP, 12 DMG
 
 См. [[05-classes/_classes_index|Все классы]]
 

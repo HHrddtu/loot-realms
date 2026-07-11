@@ -1,4 +1,4 @@
-# ORIENTATION — Loot Realms v0.16.0+
+# ORIENTATION — Loot Realms v0.16.0
 
 #orientation #tech #design
 
@@ -6,9 +6,9 @@
 > - [[index|MOC]] — карта навигации по всем разделам
 > - [[01-tech/TECH_STACK|Tech Stack]] — технологический стек
 > - [[01-tech/ARCHITECTURE|Architecture]] — архитектура проекта
-> - [[12-plans/PROJECT_STATE|PROJECT STATE]] — текущее состояние
+> - [[планы/PROJECT_STATE|PROJECT STATE]] — текущее состояние
 > - [[01-tech/FILE_TREE|File Tree]] — структура файлов
-> - [[инструкция/RULES|Правила разработки]]
+> - [[RULES|Правила разработки]]
 > - [[AGENTS]] — руководство по AI-агентам
 
 ## What is this
@@ -18,12 +18,12 @@ No TypeScript. No external assets — all procedural (Canvas 2D).
 ## Quick links
 | Раздел | Ссылка |
 |--------|--------|
-| **Зоны** | [[02-zones/_zones_index\|Все зоны]] (10 файлов) |
-| **Боссы** | [[03-bosses/_bosses_index\|Все боссы]] (7 файлов) |
-| **Системы** | [[04-systems/_systems_index\|Все системы]] (8 файлов) |
-| **Классы** | [[05-classes/_classes_index\|Все классы]] (3 файла) |
-| **Механики** | [[06-mechanics/_mechanics_index\|Все механики]] (12 файлов) |
-| **Сцены** | [[07-scenes/_scenes_index\|Все сцены]] (12 файлов) |
+| **Зоны** | [[02-zones/_zones_index\|Все зоны]] (15 зон) |
+| **Боссы** | [[03-bosses/_bosses_index\|Все боссы]] (12 боссов) |
+| **Системы** | [[04-systems/_systems_index\|Все системы]] (25 систем) |
+| **Классы** | [[05-classes/_classes_index\|Все классы]] (3 класса) |
+| **Механики** | [[06-mechanics/_mechanics_index\|Все механики]] (15 механик) |
+| **Сцены** | [[07-scenes/_scenes_index\|Все сцены]] (15 сцен) |
 | **Архитектура** | [[01-tech/ARCHITECTURE\|Architecture]] |
 | **Планы** | [[12-plans/_plans_index\|Все планы]] |
 
@@ -37,16 +37,16 @@ No TypeScript. No external assets — all procedural (Canvas 2D).
 - i18n: EN/RU/DE
 
 ## Version
-Current: v0.16.0+ (package.json version)
+Current: v0.16.0 (package.json version)
 Account version: v3 (migration from v2 built-in)
 
 ## Key directories
 ```
 src/
-  config/     — items, pets, gold, classes, spells (data only)
-  scenes/     — Boot, Login, Menu, Game, Talent, Bestiary, etc.
-  systems/    — PlayerSystem, CombatSystem, UISystem, SpellSystem, ParticleSystem
-  zones/      — ForestZone, MineZone, CaveZone, VillageZone, HellZone, SnowyZone, CastleZone
+  config/     — items, pets, gold, classes, spells, balance, difficulty, sets (data only)
+  scenes/     — Boot, Login, Menu, Game, Talent, Bestiary, Craft, Pet, Keybinds, Intro, Map, etc.
+  systems/    — PlayerSystem, CombatSystem, UISystem, SpellSystem, ParticleSystem, PetSystem, etc.
+  zones/      — 15 zones: Meadow, Forest, Arena, Mine, Cave, Village, Cemetery, Hell, Snowy, Castle, Depths, Cursed, Shadow, Tower, Throne
   textures/   — all procedural draw functions (no PNG files)
   sound.js    — Web Audio oscillator sounds
   save.js     — localStorage + account management
@@ -67,7 +67,7 @@ git add -A && git commit -m "..." && git push
   gold, crystals, exp, level, zone, difficulty,
   equipment: { weapon, armor, accessory },
   materials: [], bag: [],
-  accountEquipment: {},
+  accountEquipment: { hat, mantle, legs, weapon, accessory, ring, charm, relic },
   unlockedTalents: [],
   petLevels: {},       // { pet_id: level }
   ownedPets: [],       // [ 'pet_slime', ... ]
@@ -79,6 +79,7 @@ git add -A && git commit -m "..." && git push
 ```
 
 ## Zones (progression order)
+Meadow → Forest → Mine → Cave → Village → Cemetery → Hell → Snowy → Castle → Depths → Cursed → Shadow → Tower → Throne
 Подробно: [[02-zones/_zones_index|Все зоны]]
 
 ## Pets

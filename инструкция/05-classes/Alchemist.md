@@ -6,9 +6,9 @@
 
 | Параметр | Значение |
 |----------|---------|
-| HP | 110 |
-| DMG | 18 |
-| SPD | 170 |
+| HP | 90 |
+| DMG | 14 |
+| SPD | 160 |
 | Книга | Material Book |
 | Спеллы | Acid Flask, Iron Skin, Healing Potion |
 
