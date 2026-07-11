@@ -275,7 +275,6 @@ export default class KeybindScene extends Phaser.Scene {
             setKeybind(id, key);
         });
         invalidateCache();
-        this.scene.stop();
-        this.scene.resume(this.returnScene);
+        this.scene.start(this.returnScene);
     }
 }
