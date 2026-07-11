@@ -345,7 +345,7 @@ export class HellZone extends BaseZone {
             });
         });
 
-        s.hellReturnPortal = s.add.rectangle(ox + HELL_WIDTH / 2, HELL_HEIGHT / 2 + 60, 60, 12, 0xff2200, 0.5).setDepth(2);
+        s.hellReturnPortal = s.add.sprite(ox + HELL_WIDTH / 2, HELL_HEIGHT / 2 + 60, 'portal').setDepth(6).setScale(1.2).setTint(0xff2200);
         s.hellReturnPortalHint = s.add.text(ox + HELL_WIDTH / 2, HELL_HEIGHT / 2 + 45, '', {
             fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 2

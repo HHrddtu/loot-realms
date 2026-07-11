@@ -43,7 +43,7 @@ export class VillageZone extends BaseZone {
         if (frozen) {
             this.scene.cameras.main.setBackgroundColor('#1a2438');
         } else if (!this.scene.zones.village.isRestored) {
-            this.scene.cameras.main.setBackgroundColor('#0e0a04');
+            this.scene.cameras.main.setBackgroundColor('#1a1208');
         } else {
             this.scene.cameras.main.setBackgroundColor('#1a1408');
         }
@@ -76,6 +76,12 @@ export class VillageZone extends BaseZone {
         this.scene.campfireHint = null;
         this.scene.castleChildNPC = null;
         this.scene.castleChildHint = null;
+        if (this.scene.hellPortal) { if (this.scene.hellPortal.destroy) this.scene.hellPortal.destroy(); this.scene.hellPortal = null; }
+        if (this.scene.hellPortalGlow) { if (this.scene.hellPortalGlow.destroy) this.scene.hellPortalGlow.destroy(); this.scene.hellPortalGlow = null; }
+        if (this.scene.hellPortalHint) { if (this.scene.hellPortalHint.destroy) this.scene.hellPortalHint.destroy(); this.scene.hellPortalHint = null; }
+        if (this.scene.depthsPortal) { if (this.scene.depthsPortal.destroy) this.scene.depthsPortal.destroy(); this.scene.depthsPortal = null; }
+        if (this.scene.depthsPortalGlow) { if (this.scene.depthsPortalGlow.destroy) this.scene.depthsPortalGlow.destroy(); this.scene.depthsPortalGlow = null; }
+        if (this.scene.depthsPortalHint) { if (this.scene.depthsPortalHint.destroy) this.scene.depthsPortalHint.destroy(); this.scene.depthsPortalHint = null; }
 
         if (frozen) {
             this.spawner.spawnVillageDecor(true);
@@ -120,6 +126,29 @@ export class VillageZone extends BaseZone {
             }
             this.shop.spawnShop();
             this.shop.spawnInn();
+            // Depths portal appears when village is thriving
+            if (!this.scene.depthsPortal && this.scene.zones.village.isThriving) {
+                const dpx = ox + VILLAGE_WIDTH / 2;
+                const dpy = 1850;
+                this.scene.depthsPortal = this.scene.add.sprite(dpx, dpy, 'portal').setDepth(6).setScale(1.2);
+                this.scene.depthsPortalGlow = this.scene.add.image(dpx, dpy, 'portal_glow').setDepth(1).setScale(2).setTint(0x8800ff).setAlpha(0.6);
+                this.scene.tweens.add({ targets: this.scene.depthsPortalGlow, scaleX: 2.3, scaleY: 2.3, alpha: 0.3, duration: 1500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+                this.scene.depthsPortalHint = this.scene.add.text(dpx, dpy - 40, '', {
+                    fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                    stroke: '#000', strokeThickness: 2
+                }).setOrigin(0.5).setDepth(12);
+            }
+            // Cursed Lands portal (after depths boss defeated)
+            if (!this.scene.cursedPortalVillage && this.scene.zones.depths.bossDefeated && !this.scene.zones.cursed.bossDefeated) {
+                const cpx = ox + VILLAGE_WIDTH / 2;
+                const cpy = 1700;
+                this.scene.cursedPortalVillage = this.scene.add.sprite(cpx, cpy, 'portal').setDepth(6).setScale(1.2).setTint(0x00aa00);
+                this.scene.tweens.add({ targets: this.scene.cursedPortalVillage, y: cpy - 5, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+                this.scene.cursedPortalVillageHint = this.scene.add.text(cpx, cpy - 40, '', {
+                    fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                    stroke: '#000', strokeThickness: 2
+                }).setOrigin(0.5).setDepth(12);
+            }
         }
 
         this.scene.physics.add.overlap(this.scene.player, this.scene.enemies, (p, e) => {
@@ -227,6 +256,11 @@ export class VillageZone extends BaseZone {
         s.zones.village.snowyAllCleared = false;
         s.zones.village.snowyBossDefeated = false;
         this.isFrozen = false;
+        if (s.cursedPortalVillage) { if (s.cursedPortalVillage.destroy) s.cursedPortalVillage.destroy(); s.cursedPortalVillage = null; }
+        if (s.cursedPortalVillageHint) { if (s.cursedPortalVillageHint.destroy) s.cursedPortalVillageHint.destroy(); s.cursedPortalVillageHint = null; }
+        if (s.depthsPortal) { if (s.depthsPortal.destroy) s.depthsPortal.destroy(); s.depthsPortal = null; }
+        if (s.depthsPortalGlow) { if (s.depthsPortalGlow.destroy) s.depthsPortalGlow.destroy(); s.depthsPortalGlow = null; }
+        if (s.depthsPortalHint) { if (s.depthsPortalHint.destroy) s.depthsPortalHint.destroy(); s.depthsPortalHint = null; }
         this._destroyDefeatedUI();
     }
 
@@ -264,6 +298,14 @@ export class VillageZone extends BaseZone {
             s.player.x, s.player.y, s.hellPortal.x, s.hellPortal.y
         ) < 60) {
             this.scene.zones.hell.enterHell();
+        } else if (!s.zones.village.isFrozen && s.zones.village.isThriving && s.depthsPortal && Phaser.Math.Distance.Between(
+            s.player.x, s.player.y, s.depthsPortal.x, s.depthsPortal.y
+        ) < 60) {
+            this.scene.zones.depths.enterDepths();
+        } else if (!s.zones.village.isFrozen && s.cursedPortalVillage && Phaser.Math.Distance.Between(
+            s.player.x, s.player.y, s.cursedPortalVillage.x, s.cursedPortalVillage.y
+        ) < 60) {
+            this.enterCursed();
         } else if (s.nearbyNpc) {
             s.npc.interactWithNpc();
         } else {
@@ -752,6 +794,22 @@ export class VillageZone extends BaseZone {
                 }
             }
         }
+        if (s.zone === 'village' && s.zones.village.isThriving && s.depthsPortal) {
+            const dpd = Phaser.Math.Distance.Between(s.player.x, s.player.y, s.depthsPortal.x, s.depthsPortal.y);
+            if (dpd < 80) {
+                if (s.depthsPortalHint) s.depthsPortalHint.setText('SPACE = enter Depths');
+            } else if (s.depthsPortalHint) {
+                s.depthsPortalHint.setText('');
+            }
+        }
+        if (s.zone === 'village' && s.cursedPortalVillage) {
+            const cpd = Phaser.Math.Distance.Between(s.player.x, s.player.y, s.cursedPortalVillage.x, s.cursedPortalVillage.y);
+            if (cpd < 80) {
+                if (s.cursedPortalVillageHint) s.cursedPortalVillageHint.setText('SPACE = enter Cursed Lands');
+            } else if (s.cursedPortalVillageHint) {
+                s.cursedPortalVillageHint.setText('');
+            }
+        }
     }
 
     _updateShopInnHints() {
@@ -778,5 +836,17 @@ export class VillageZone extends BaseZone {
                 }
             }
         }
+    }
+
+    enterCursed() {
+        const s = this.scene;
+        if (s.transitioning || s.menuOpen) return;
+        s.transitioning = true;
+        s.cameras.main.fadeOut(800, 10, 26, 10);
+        s.time.delayedCall(800, () => {
+            s._setupZone('cursed');
+            s.cameras.main.fadeIn(500, 10, 26, 10);
+            s.transitioning = false;
+        });
     }
 }

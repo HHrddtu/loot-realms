@@ -94,6 +94,71 @@ export const EQUIPMENT_SETS = {
             { pieces: 3, name: 'Holy Light', nameRu: 'Свет Святости', effects: { regenPercent: 5, dodgePercent: 5 } },
             { pieces: 5, name: 'Divine Avatar', nameRu: 'Божественный Аватар', effects: { hpPercent: 20, regenPercent: 10, corruptionMax: 25, spellPercent: 15 } }
         ]
+    },
+
+    // Bone Set - Depths
+    bone_set: {
+        id: 'bone_set',
+        name: 'Bone Collector',
+        nameRu: 'Собиратель Костей',
+        nameDe: 'Knochensammler',
+        pieces: ['craft_bone_sword', 'craft_spider_silk_armor', 'craft_bat_wing_cloak'],
+        bonuses: [
+            { pieces: 2, name: 'Bone Shield', nameRu: 'Костяной Щит', effects: { hpPercent: 5 } },
+            { pieces: 3, name: 'Undead Resilience', nameRu: 'Нежить Стойкость', effects: { hpPercent: 12, regenFlat: 1 } }
+        ]
+    },
+
+    // Cursed Set - Cursed Lands
+    cursed_set: {
+        id: 'cursed_set',
+        name: 'Cursed Battlegear',
+        nameRu: 'Проклятая Боевая Амуниция',
+        nameDe: 'Verfluchte Kampfausrüstung',
+        pieces: ['craft_venom_blade', 'craft_grave_armor', 'craft_holy_amulet'],
+        bonuses: [
+            { pieces: 2, name: 'Cursed Strike', nameRu: 'Проклятый Удар', effects: { damagePercent: 8 } },
+            { pieces: 3, name: 'Vampiric Fury', nameRu: ' Вампирическая Ярость', effects: { damagePercent: 18, lifeStealPercent: 5 } }
+        ]
+    },
+
+    // Shadow Set - Shadow District
+    shadow_set: {
+        id: 'shadow_set',
+        name: 'Shadow Dancer',
+        nameRu: 'Танцор Теней',
+        nameDe: 'Schattentänzer',
+        pieces: ['craft_shadow_blade', 'craft_void_armor', 'craft_mirror_ring'],
+        bonuses: [
+            { pieces: 2, name: 'Shadow Step', nameRu: 'Шаг Тени', effects: { critPercent: 5 } },
+            { pieces: 3, name: 'Mirror Image', nameRu: 'Зеркальное Отражение', effects: { critPercent: 12, dodgePercent: 8 } }
+        ]
+    },
+
+    // Tower Set - Tower of the Fallen King
+    tower_set: {
+        id: 'tower_set',
+        name: 'Royal Guard',
+        nameRu: 'Королевская Стража',
+        nameDe: 'Königsgarde',
+        pieces: ['craft_royal_blade', 'craft_tower_armor', 'craft_king_ring'],
+        bonuses: [
+            { pieces: 2, name: 'Royal Authority', nameRu: 'Королевский Авторитет', effects: { hpPercent: 3, damagePercent: 3, spellPercent: 3 } },
+            { pieces: 3, name: 'Tower Fortress', nameRu: 'Башенная Крепость', effects: { hpPercent: 8, damagePercent: 8, spellPercent: 8, shieldPercent: 10 } }
+        ]
+    },
+
+    // Eternal Set - Throne of Eternity
+    eternal_set: {
+        id: 'eternal_set',
+        name: 'Eternal Sovereign',
+        nameRu: 'Вечный Повелитель',
+        nameDe: 'Ewiger Herrscher',
+        pieces: ['crown_of_eternity', 'sword_of_eternity', 'amulet_of_eternity'],
+        bonuses: [
+            { pieces: 2, name: 'Eternal Power', nameRu: 'Вечная Сила', effects: { hpPercent: 5, damagePercent: 5, spellPercent: 5 } },
+            { pieces: 3, name: 'Transcendence', nameRu: 'Трансцендентность', effects: { hpPercent: 15, damagePercent: 15, spellPercent: 15, regenFlat: 2 } }
+        ]
     }
 };
 
