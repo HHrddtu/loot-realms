@@ -119,8 +119,8 @@ export class VillageBoss {
             if (s.anims.exists('zombie_walk_anim')) z.play('zombie_walk_anim');
             z.stats = { key: bt.key, name: bt.name, hp: Math.floor(bt.hp * s.diffMulti.hp), maxHp: Math.floor(bt.hp * s.diffMulti.hp), damage: Math.floor(bt.dmg * s.diffMulti.dmg), exp: Math.floor(bt.exp * s.diffMulti.exp), bw: bt.bw, bh: bt.bh, speed: 40 };
             const hpW = bt.bw + 6;
-            z.hpBg = s.add.rectangle(ix, iy - bt.bh / 2 - 6, hpW, 3, 0x000000).setDepth(6);
-            z.hpFill = s.add.rectangle(ix - hpW / 2, iy - bt.bh / 2 - 6, hpW, 3, 0x5a6a4a).setOrigin(0, 0.5).setDepth(6);
+            z.hpBg = s.add.rectangle(ix, iy - bt.bh / 2 - 6, hpW, 3, 0x000000).setDepth(15);
+            z.hpFill = s.add.rectangle(ix - hpW / 2, iy - bt.bh / 2 - 6, hpW, 3, 0x5a6a4a).setOrigin(0, 0.5).setDepth(15);
             s.villageZombies.add(z);
         }
     }
