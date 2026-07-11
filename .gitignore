@@ -8,3 +8,5 @@ dist/
 .idea/
 Thumbs.db
 check_db.py
+check_textures.js
+04-systems/
