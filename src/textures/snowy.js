@@ -1,4 +1,7 @@
 export function drawSnowyTextures(mk, textures) {
+    const addSheet = (key, canvas, config) => {
+        if (!textures.exists(key)) textures.addSpriteSheet(key, canvas, config);
+    };
     mk('snow_ground', 64, 64, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#c8d8e8';
@@ -163,7 +166,7 @@ export function drawSnowyTextures(mk, textures) {
             ctx.fillStyle = '#c0eaff';
             ctx.fillRect(ox + 4, wUp ? 2 : 3, 2, 7);
         }
-        textures.addSpriteSheet('ice_shard_walk', canvas, { frameWidth: fw, frameHeight: fh });
+        addSheet('ice_shard_walk', canvas, { frameWidth: fw, frameHeight: fh });
     })();
 
     mk('frost_wave_vfx', 24, 24, (c) => {
@@ -232,7 +235,7 @@ export function drawSnowyTextures(mk, textures) {
                 ctx.fillRect(ox + 4, fh - 4, 3, 4);
                 ctx.fillRect(ox + fw - 7, fh - 4, 3, 4);
             }
-            textures.addSpriteSheet(def.key + '_walk', canvas, { frameWidth: fw, frameHeight: fh });
+            addSheet(def.key + '_walk', canvas, { frameWidth: fw, frameHeight: fh });
         })();
         mk(def.key, def.w, def.bh, (c) => {
             c.imageSmoothingEnabled = false;
@@ -295,7 +298,7 @@ export function drawSnowyTextures(mk, textures) {
             ctx.fillRect(ox + 14, fh - 6, 5, 6);
             ctx.fillRect(ox + 21, fh - 6, 5, 6);
         }
-        textures.addSpriteSheet('ice_spirit_walk', canvas, { frameWidth: fw, frameHeight: fh });
+        addSheet('ice_spirit_walk', canvas, { frameWidth: fw, frameHeight: fh });
     })();
 
     mk('ice_spirit', 40, 44, (c) => {
