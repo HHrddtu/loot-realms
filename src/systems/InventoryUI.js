@@ -1,5 +1,5 @@
 import { RARITY_COLORS } from '../config/index.js';
-import { getSetInfo } from '../config/sets.js';
+import { getSetInfo, EQUIPMENT_SETS } from '../config/sets.js';
 
 export class InventoryUI {
     constructor(scene, ui) {
@@ -24,6 +24,13 @@ export class InventoryUI {
         this._drawMaterialsPanel();
         this._drawEquipmentBagPanel();
         this._drawCloseButton();
+    }
+
+    _isInSet(itemId) {
+        for (const set of Object.values(EQUIPMENT_SETS)) {
+            if (set.pieces.includes(itemId)) return set.name;
+        }
+        return null;
     }
 
     _drawEquippedPanel() {
@@ -65,9 +72,20 @@ export class InventoryUI {
                     fontSize: '12px', fill: rc, fontFamily: 'Georgia, serif'
                 })));
                 bg.setStrokeStyle(2, RARITY_COLORS[item.rarity]);
+                
+                // Set highlight glow
+                const setName = this._isInSet(item.id);
+                if (setName) {
+                    const glow = mkInv(this.scene.add.rectangle(equipX + 20, sl.y + 10, 48, 48, 0x9b59b6, 0.3));
+                    this.scene.invGroup.push(glow);
+                    this.scene.invGroup.push(mkInv(this.scene.add.text(equipX + 44, sl.y + 10, 'SET', {
+                        fontSize: '8px', fill: '#9b59b6', fontFamily: 'Georgia, serif', fontStyle: 'bold'
+                    }).setOrigin(0, 0.5)));
+                }
+                
                 bg.setInteractive({ useHandCursor: true });
-                bg.on('pointerover', () => this.ui._showItemTooltip(equipX + 50, sl.y, item));
-                bg.on('pointerout', () => this.ui._hideItemTooltip());
+                bg.on('pointerover', () => { bg.setScale(1.1); this.ui._showItemTooltip(equipX + 50, sl.y, item); });
+                bg.on('pointerout', () => { bg.setScale(1); this.ui._hideItemTooltip(); });
                 bg.on('pointerdown', (pointer) => {
                     if (pointer.rightButtonDown()) {
                         this.scene.playerSys.toggleLock('equip', this.scene.equipBag.indexOf(item));
@@ -101,8 +119,8 @@ export class InventoryUI {
             })));
             consBg.setStrokeStyle(2, RARITY_COLORS[item.rarity] || 0xaaaaaa);
             consBg.setInteractive({ useHandCursor: true });
-            consBg.on('pointerover', () => this.ui._showItemTooltip(equipX + 50, consY, item));
-            consBg.on('pointerout', () => this.ui._hideItemTooltip());
+            consBg.on('pointerover', () => { consBg.setScale(1.1); this.ui._showItemTooltip(equipX + 50, consY, item); });
+            consBg.on('pointerout', () => { consBg.setScale(1); this.ui._hideItemTooltip(); });
             consBg.on('pointerdown', () => {
                 this.ui._hideItemTooltip();
                 if (this.scene.playerSys) this.scene.playerSys.useConsumable();
@@ -133,6 +151,11 @@ export class InventoryUI {
                 this.scene.invGroup.push(mkInv(this.scene.add.text(equipX - 55, sy, set.name + ' (' + set.equipped + '/' + set.total + ')', {
                     fontSize: '11px', fill: '#9b59b6', fontFamily: 'Georgia, serif'
                 })));
+                // Progress bar
+                const barWidth = 80;
+                const progress = set.equipped / set.total;
+                this.scene.invGroup.push(mkInv(this.scene.add.rectangle(equipX + 30, sy + 5, barWidth, 6, 0x2a2a3e)));
+                this.scene.invGroup.push(mkInv(this.scene.add.rectangle(equipX + 30 - barWidth / 2 + (barWidth * progress) / 2, sy + 5, barWidth * progress, 6, 0x9b59b6)));
                 set.bonuses.forEach((bonus, j) => {
                     if (bonus.active) {
                         this.scene.invGroup.push(mkInv(this.scene.add.text(equipX - 45, sy + 12 + j * 12, '+ ' + bonus.name, {
@@ -252,6 +275,13 @@ export class InventoryUI {
                 this.scene.invGroup.push(mkInv(this.scene.add.sprite(sx, sy, item.texKey).setScale(1.4)));
                 bg.setStrokeStyle(2, RARITY_COLORS[item.rarity]);
                 bg.setInteractive({ useHandCursor: true });
+
+                // Set highlight
+                const setName = this._isInSet(item.id);
+                if (setName) {
+                    const glow = mkInv(this.scene.add.rectangle(sx, sy, slotSize + 4, slotSize + 4, 0x9b59b6, 0.3));
+                    this.scene.invGroup.push(glow);
+                }
 
                 if (item.locked) {
                     const lockIcon = mkInv(this.scene.add.text(sx - slotSize / 2 + 3, sy - slotSize / 2 + 2, '\u{1F512}', {
