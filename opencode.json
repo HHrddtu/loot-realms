@@ -2,66 +2,39 @@
   "$schema": "https://opencode.ai/config.json",
   "username": "pvova",
   "model": "opencode-go/mimo-v2.5",
-  "default_agent": "lead",
   "logLevel": "INFO",
   "share": "manual",
   "snapshot": true,
-  "instructions": ["AGENTS.md"],
 
   "skills": {
     "paths": [".opencode/skills"]
   },
 
   "agent": {
-    "lead": {
-      "mode": "primary",
-      "description": "Lead architect for Loot Realms. Handles complex decisions, code architecture, and delegates to the right specialist subagent.",
-      "steps": 50,
-      "permission": {
-        "edit": "ask",
-        "bash": { "npm *": "allow", "git *": "ask", "vite*": "allow", "*": "ask" },
-        "task": "allow",
-        "external_directory": { "*": "deny" }
-      }
-    },
     "build": {
       "model": "opencode-go/mimo-v2.5",
-      "mode": "subagent",
       "description": "General builder for everyday edits in Loot Realms."
     },
     "plan": {
       "model": "opencode-go/mimo-v2.5",
-      "mode": "subagent",
       "description": "Planning specialist for breaking down large features into steps."
-    }
-  },
-
-  "command": {
-    "team": {
-      "description": "Run a full-team analysis on a task",
-      "template": "As the lead architect, analyze the following request, then delegate focused subtasks to the appropriate specialist agents (@code, @review, @ui, @game-design, @multiplayer, @perf, @analyst, @creative). Synthesize their outputs into a single actionable plan. Request: {{args}}"
     },
-    "review": {
-      "description": "Get a code review from the review agent",
-      "template": "@review please review the current changes/files for code quality, bugs, and architecture issues. Focus on: {{args}}"
-    },
-    "debug": {
-      "description": "Debug a specific issue",
-      "template": "@debug investigate and fix this issue: {{args}}"
-    },
-    "design": {
-      "description": "Design a game feature",
-      "template": "@game-design design the following feature with mechanics, balance, and integration notes for Loot Realms: {{args}}"
-    },
-    "optimize": {
-      "description": "Optimize performance of a component",
-      "template": "@perf analyze and optimize the performance of: {{args}}"
+    "knowledge": {
+      "model": "opencode-go/mimo-v2.5",
+      "description": "Knowledge manager — ingests resources, updates knowledge base, maintains indexes."
     }
   },
 
   "permission": {
     "edit": "ask",
-    "bash": { "npm *": "allow", "npx *": "allow", "git *": "ask", "vite*": "allow", "node *": "allow", "*": "ask" },
+    "bash": {
+      "npm *": "allow",
+      "npx *": "allow",
+      "git *": "ask",
+      "vite*": "allow",
+      "node *": "allow",
+      "*": "ask"
+    },
     "task": "allow",
     "external_directory": { "*": "deny" }
   },
