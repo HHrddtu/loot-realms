@@ -48,7 +48,7 @@ export default class ClassSelectScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         this.menuBtn(400, 570, t('class.begin'), 0x27ae60, () => {
-            this.scene.start('Game', {
+            this.scene.start('Intro', {
                 difficulty: 'Normal',
                 classKey: this.selectedClass
             });

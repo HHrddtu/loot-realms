@@ -29,6 +29,11 @@ import { MineZone } from '../zones/MineZone.js';
 import { CaveZone } from '../zones/CaveZone.js';
 import { VillageZone } from '../zones/VillageZone.js';
 import { HellZone } from '../zones/HellZone.js';
+import { DepthsZone } from '../zones/DepthsZone.js';
+import { CursedZone } from '../zones/CursedZone.js';
+import { ShadowZone } from '../zones/ShadowZone.js';
+import { TowerZone } from '../zones/TowerZone.js';
+import { ThroneZone } from '../zones/ThroneZone.js';
 import { SnowyZone } from '../zones/SnowyZone.js';
 import { CastleZone } from '../zones/CastleZone.js';
 import { MeadowZone } from '../zones/MeadowZone.js';
@@ -75,6 +80,11 @@ export default class GameScene extends Phaser.Scene {
             cave: new CaveZone(this),
             village: new VillageZone(this),
             hell: new HellZone(this),
+            depths: new DepthsZone(this),
+            cursed: new CursedZone(this),
+            shadow: new ShadowZone(this),
+            tower: new TowerZone(this),
+            throne: new ThroneZone(this),
             snowy: new SnowyZone(this),
             castle: new CastleZone(this),
             meadow: new MeadowZone(this)
@@ -198,6 +208,16 @@ export default class GameScene extends Phaser.Scene {
                 startZoneMusic('cemetery');
             } else if (this._savedZone === 'hell') {
                 this._setupZone('hell');
+            } else if (this._savedZone === 'depths') {
+                this._setupZone('depths');
+            } else if (this._savedZone === 'cursed') {
+                this._setupZone('cursed');
+            } else if (this._savedZone === 'shadow') {
+                this._setupZone('shadow');
+            } else if (this._savedZone === 'tower') {
+                this._setupZone('tower');
+            } else if (this._savedZone === 'throne') {
+                this._setupZone('throne');
             } else if (this._savedZone === 'snowy') {
                 this._setupZone('village', true);
                 startZoneMusic('snowy');
@@ -362,6 +382,11 @@ export default class GameScene extends Phaser.Scene {
     _villageBossSplit(boss) { if (this.zones.village) this.zones.village.boss.splitBoss(boss); }
     _killBossClone(clone) { if (this.zones.village) this.zones.village.boss.killBossClone(clone); }
     _victoryHellBoss() { if (this.zones.hell) this.zones.hell.victoryHellBoss(); }
+    _victoryDepthsBoss() { if (this.zones.depths) this.zones.depths.victoryDepthsBoss(); }
+    _victoryCursedBoss() { if (this.zones.cursed) this.zones.cursed.victoryCursedBoss(); }
+    _victoryShadowBoss() { if (this.zones.shadow) this.zones.shadow.victoryShadowBoss(); }
+    _victoryTowerBoss() { if (this.zones.tower) this.zones.tower.victoryTowerBoss(); }
+    _victoryThroneBoss() { if (this.zones.throne) this.zones.throne.victoryThroneBoss(); }
     _snowyIceSpiritDied() { if (this.zones.village) this.zones.village.boss.iceSpiritDied(); }
     _setupVillage(frozen) {
         if (!this.zones.village) return;

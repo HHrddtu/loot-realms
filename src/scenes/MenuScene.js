@@ -5,6 +5,7 @@ import { hasSave, loadGame, deleteSave, hasAccount, loadAccount, getAccountLevel
 import { t, getLang, setLang } from '../i18n.js';
 import { getCurrentUser, getDisplayName, isAnonymous, logout } from '../auth.js';
 import { syncAccountFromCloud } from '../save.js';
+import { LORE } from '../config/lore.js';
 
 export default class MenuScene extends Phaser.Scene {
     constructor() {
@@ -66,9 +67,10 @@ export default class MenuScene extends Phaser.Scene {
         // Secondary buttons
         this.menuBtn(300, 340, t('menu.account'), 0x2980b9, () => this.showAccount(), 160, 35, '14px');
         this.menuBtn(500, 340, t('menu.advanced'), 0x555577, () => this.showAdvanced(), 160, 35, '14px');
+        this.menuBtn(400, 380, 'Lore', 0x8e44ad, () => this.showLore(), 140, 30, '14px');
 
         // Logout
-        this.menuBtn(400, 400, t('menu.logout'), 0xc0392b, async () => {
+        this.menuBtn(400, 420, t('menu.logout'), 0xc0392b, async () => {
             await logout();
             this.scene.start('Login');
         }, 140, 30, '14px');
@@ -182,6 +184,37 @@ export default class MenuScene extends Phaser.Scene {
         });
 
         this.ovlBtn(400, 480, t('adv.close'), 0x34495e, () => this.closeOverlay());
+    }
+
+    showLore() {
+        this.openOvl();
+        const lang = localStorage.getItem('game_lang') || 'en';
+
+        this.ovlText(400, 50, 'LORE', {
+            fontSize: '28px', fill: '#8b4513', fontFamily: 'Georgia, serif', fontStyle: 'bold'
+        });
+
+        // General lore
+        const general = lang === 'ru' ? LORE.general.textRu : lang === 'de' ? LORE.general.textDe : LORE.general.text;
+        this.ovlText(400, 100, general, {
+            fontSize: '11px', fill: '#2c1810', fontFamily: 'Georgia', wordWrap: { width: 480 }, align: 'center', lineSpacing: 4
+        });
+
+        // Class lore
+        let y = 180;
+        Object.entries(LORE.classes).forEach(([key, cls]) => {
+            const title = lang === 'ru' ? cls.nameRu : lang === 'de' ? cls.nameDe : cls.name;
+            this.ovlText(400, y, title, {
+                fontSize: '13px', fill: '#8b4513', fontFamily: 'Georgia', fontStyle: 'bold'
+            });
+            const text = lang === 'ru' ? cls.textRu : lang === 'de' ? cls.textDe : cls.text;
+            this.ovlText(400, y + 18, text, {
+                fontSize: '9px', fill: '#3a2a1a', fontFamily: 'Georgia', wordWrap: { width: 460 }, align: 'center'
+            });
+            y += 70;
+        });
+
+        this.ovlBtn(400, 560, t('adv.close'), 0x5a3d1a, () => this.closeOverlay());
     }
 
     menuBtn(x, y, text, color, cb, w, h, fontSize) {
