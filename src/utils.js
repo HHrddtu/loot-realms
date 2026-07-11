@@ -1,4 +1,4 @@
-import { MATERIAL_DB, EQUIP_DB, ACCOUNT_EQUIP_DB, CAVE_MATERIALS, ACCOUNT_EQUIP_DB_CAVE, VILLAGE_MATERIALS, ACCOUNT_EQUIP_DB_VILLAGE, VILLAGE_CHEST_DROP_ITEMS } from './config/index.js';
+import { MATERIAL_DB, EQUIP_DB, ACCOUNT_EQUIP_DB, CAVE_MATERIALS, ACCOUNT_EQUIP_DB_CAVE, VILLAGE_MATERIALS, ACCOUNT_EQUIP_DB_VILLAGE, ACCOUNT_EQUIP_DB_DEPTHS, ACCOUNT_EQUIP_DB_CURSED, ACCOUNT_EQUIP_DB_SHADOW, ACCOUNT_EQUIP_DB_TOWER, ACCOUNT_EQUIP_DB_THRONE, VILLAGE_CHEST_DROP_ITEMS } from './config/index.js';
 import { ZONE_LOOT_TABLES } from './config/gold.js';
 
 export function lighten(color, amt) {
@@ -50,6 +50,20 @@ export function rollVillageEquip() {
 export function rollVillageAccountEquip() {
     const idx = Math.floor(Math.random() * ACCOUNT_EQUIP_DB_VILLAGE.length);
     return { ...ACCOUNT_EQUIP_DB_VILLAGE[idx], type: 'accountEquip' };
+}
+
+export function rollZoneAccountEquip(zone) {
+    const tables = {
+        depths: ACCOUNT_EQUIP_DB_DEPTHS,
+        cursed: ACCOUNT_EQUIP_DB_CURSED,
+        shadow: ACCOUNT_EQUIP_DB_SHADOW,
+        tower: ACCOUNT_EQUIP_DB_TOWER,
+        throne: ACCOUNT_EQUIP_DB_THRONE
+    };
+    const table = tables[zone];
+    if (!table || table.length === 0) return rollAccountEquip();
+    const idx = Math.floor(Math.random() * table.length);
+    return { ...table[idx], type: 'accountEquip' };
 }
 
 export function rollZoneEquip(zone) {

@@ -26,6 +26,9 @@ export class NpcSystem {
                 const cond = npc.condition;
                 if (cond === '!isRestored' && s.zones.village && s.zones.village.isRestored) return;
                 if (cond === '!isThriving' && s.zones.village && s.zones.village.isThriving) return;
+                if (cond === 'isThriving' && s.zones.village && !s.zones.village.isThriving) return;
+                if (cond === 'depthsBossDefeated' && s.zones.depths && !s.zones.depths.bossDefeated) return;
+                if (cond === 'cursedBossDefeated' && s.zones.cursed && !s.zones.cursed.bossDefeated) return;
             }
             const spr = s.add.sprite(npc.x, npc.y, npc.texKey).setDepth(8);
             s.physics.add.existing(spr, true);
@@ -94,16 +97,30 @@ export class NpcSystem {
         const s = this.scene;
         if (s.menuOpen || s.transitioning) {
             s.nearbyNpc = null;
+            this._clearNpcHighlights();
             return;
         }
         s.nearbyNpc = null;
         let minDist = 60;
+        let closestSpr = null;
         s.npcSprites.forEach(spr => {
             if (!spr.active) return;
             const d = Phaser.Math.Distance.Between(s.player.x, s.player.y, spr.x, spr.y);
             if (d < minDist) {
                 minDist = d;
                 s.nearbyNpc = spr;
+                closestSpr = spr;
+            }
+        });
+        // Highlight closest NPC
+        s.npcSprites.forEach(spr => {
+            if (!spr.active) return;
+            if (spr === closestSpr) {
+                spr.setTint(0xffffaa);
+                if (spr.nameTag) spr.nameTag.setAlpha(1);
+            } else {
+                spr.clearTint();
+                if (spr.nameTag) spr.nameTag.setAlpha(0.7);
             }
         });
         if (s.nearbyNpc) {
@@ -141,6 +158,8 @@ export class NpcSystem {
                 const q = completable[0];
                 const rewards = completeQuest(q.key);
                 const rewardText = this._formatRewards(rewards);
+                // Show quest complete notification
+                s.floatingText(s.player.x, s.player.y - 60, 'QUEST COMPLETE: ' + q.name, '#2ecc71');
                 this._showDialog(npc, q.name + ' Complete!', rewardText, '#2ecc71', () => {
                     if (rewards.exp) {
                         s.playerExp += rewards.exp;
@@ -433,5 +452,14 @@ export class NpcSystem {
         s.questLogOpen = false;
         s.menuOpen = false;
         s.physics.resume();
+    }
+
+    _clearNpcHighlights() {
+        const s = this.scene;
+        if (s.npcSprites) {
+            s.npcSprites.forEach(spr => {
+                if (spr.active) spr.clearTint();
+            });
+        }
     }
 }

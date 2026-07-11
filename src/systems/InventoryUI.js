@@ -16,8 +16,8 @@ export class InventoryUI {
         this.scene.invOpen = true;
         this.scene.menuOpen = true;
         this.scene.physics.pause();
-        if (this.scene.enemies) this.scene.enemies.getChildren().forEach(e => { if (e.body) e.body.setVelocity(0); });
-        if (this.scene.stumps) this.scene.stumps.getChildren().forEach(s => { if (s.body) s.body.setVelocity(0); });
+        if (this.scene.enemies && this.scene.enemies.getLength) this.scene.enemies.getChildren().forEach(e => { if (e.body) e.body.setVelocity(0); });
+        if (this.scene.stumps && this.scene.stumps.getLength) this.scene.stumps.getChildren().forEach(s => { if (s.body) s.body.setVelocity(0); });
         this.scene.invGroup = [];
 
         this._drawEquippedPanel();

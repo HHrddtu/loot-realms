@@ -841,6 +841,445 @@ const ZONE_DEFS = {
             zoneMusicTimers.push(setTimeout(playBeat, 300));
             return nodes;
         }
+    },
+
+    depths: {
+        create(c) {
+            const nodes = [];
+            const droneGain = c.createGain();
+            droneGain.gain.value = 0;
+            droneGain.connect(c.destination);
+            const drone = c.createOscillator();
+            drone.type = 'sine';
+            drone.frequency.value = 48;
+            const lfo = c.createOscillator();
+            lfo.frequency.value = 0.2;
+            const lfoGain = c.createGain();
+            lfoGain.gain.value = 4;
+            lfo.connect(lfoGain);
+            lfoGain.connect(drone.frequency);
+            lfo.start();
+            drone.connect(droneGain);
+            drone.start();
+            nodes.push({ osc: drone, gain: droneGain, target: 0.035 });
+            nodes.push({ osc: lfo, gain: null, target: 0 });
+
+            const pad2Gain = c.createGain();
+            pad2Gain.gain.value = 0;
+            pad2Gain.connect(c.destination);
+            const pad2 = c.createOscillator();
+            pad2.type = 'sine';
+            pad2.frequency.value = 72;
+            pad2.connect(pad2Gain);
+            pad2.start();
+            nodes.push({ osc: pad2, gain: pad2Gain, target: 0.025 });
+
+            const notes = [330, 311, 294, 277, 262, 247, 233, 220, 233, 247, 262, 277, 294, 311, 330, 349];
+            let noteIdx = 0;
+            const playNote = () => {
+                if (!zoneMusicActive || muted) return;
+                const now = c.currentTime;
+                const o = c.createOscillator();
+                const g = c.createGain();
+                o.type = 'sine';
+                o.frequency.value = notes[noteIdx % notes.length];
+                g.gain.setValueAtTime(0, now);
+                g.gain.linearRampToValueAtTime(0.018, now + 0.05);
+                g.gain.exponentialRampToValueAtTime(0.001, now + 3);
+                o.connect(g);
+                g.connect(c.destination);
+                o.start(now);
+                o.stop(now + 3.5);
+                noteIdx++;
+                zoneMusicTimers.push(setTimeout(playNote, 4000 + Math.random() * 2000));
+            };
+            zoneMusicTimers.push(setTimeout(playNote, 1500));
+
+            const whisper = () => {
+                if (!zoneMusicActive || muted) return;
+                const now = c.currentTime;
+                const n = Math.floor(c.sampleRate * 0.8);
+                const buf = c.createBuffer(1, n, c.sampleRate);
+                const d = buf.getChannelData(0);
+                for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * 0.1;
+                const s = c.createBufferSource();
+                s.buffer = buf;
+                const g = c.createGain();
+                const f = c.createBiquadFilter();
+                f.type = 'bandpass';
+                f.frequency.value = 800;
+                f.Q.value = 5;
+                g.gain.setValueAtTime(0, now);
+                g.gain.linearRampToValueAtTime(0.015, now + 0.3);
+                g.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+                s.connect(f);
+                f.connect(g);
+                g.connect(c.destination);
+                s.start(now);
+                zoneMusicTimers.push(setTimeout(whisper, 8000 + Math.random() * 6000));
+            };
+            zoneMusicTimers.push(setTimeout(whisper, 3000));
+            return nodes;
+        }
+    },
+
+    depths_boss: {
+        create(c) {
+            const nodes = [];
+            const droneGain = c.createGain();
+            droneGain.gain.value = 0;
+            droneGain.connect(c.destination);
+            const drone = c.createOscillator();
+            drone.type = 'sawtooth';
+            drone.frequency.value = 48;
+            const f = c.createBiquadFilter();
+            f.type = 'lowpass';
+            f.frequency.value = 180;
+            drone.connect(f);
+            f.connect(droneGain);
+            drone.start();
+            nodes.push({ osc: drone, gain: droneGain, target: 0.02 });
+
+            const drone2Gain = c.createGain();
+            drone2Gain.gain.value = 0;
+            drone2Gain.connect(c.destination);
+            const drone2 = c.createOscillator();
+            drone2.type = 'sine';
+            drone2.frequency.value = 65;
+            drone2.connect(drone2Gain);
+            drone2.start();
+            nodes.push({ osc: drone2, gain: drone2Gain, target: 0.03 });
+
+            let beat = 0;
+            const playBeat = () => {
+                if (!zoneMusicActive || muted) return;
+                const now = c.currentTime;
+                const o = c.createOscillator();
+                const g = c.createGain();
+                o.type = 'square';
+                o.frequency.value = beat % 2 === 0 ? 98 : 73;
+                g.gain.setValueAtTime(0.03, now);
+                g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                o.connect(g);
+                g.connect(c.destination);
+                o.start(now);
+                o.stop(now + 0.15);
+                beat++;
+                zoneMusicTimers.push(setTimeout(playBeat, 350));
+            };
+            zoneMusicTimers.push(setTimeout(playBeat, 200));
+
+            const tension = () => {
+                if (!zoneMusicActive || muted) return;
+                const now = c.currentTime;
+                const o = c.createOscillator();
+                const g = c.createGain();
+                o.type = 'sawtooth';
+                o.frequency.value = 48;
+                const fl = c.createBiquadFilter();
+                fl.type = 'lowpass';
+                fl.frequency.setValueAtTime(150, now);
+                fl.frequency.linearRampToValueAtTime(500, now + 2);
+                g.gain.setValueAtTime(0.01, now);
+                g.gain.linearRampToValueAtTime(0.02, now + 2);
+                g.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+                o.connect(fl);
+                fl.connect(g);
+                g.connect(c.destination);
+                o.start(now);
+                o.stop(now + 3);
+                zoneMusicTimers.push(setTimeout(tension, 8000));
+            };
+            zoneMusicTimers.push(setTimeout(tension, 4000));
+            return nodes;
+        }
+    },
+
+    cursed: {
+        create(c) {
+            const nodes = [];
+            const droneGain = c.createGain();
+            droneGain.gain.value = 0;
+            droneGain.connect(c.destination);
+            const drone = c.createOscillator();
+            drone.type = 'sawtooth';
+            drone.frequency.value = 42;
+            const f = c.createBiquadFilter();
+            f.type = 'lowpass';
+            f.frequency.value = 160;
+            drone.connect(f);
+            f.connect(droneGain);
+            drone.start();
+            nodes.push({ osc: drone, gain: droneGain, target: 0.025 });
+
+            const pad2Gain = c.createGain();
+            pad2Gain.gain.value = 0;
+            pad2Gain.connect(c.destination);
+            const pad2 = c.createOscillator();
+            pad2.type = 'sine';
+            pad2.frequency.value = 63;
+            pad2.connect(pad2Gain);
+            pad2.start();
+            nodes.push({ osc: pad2, gain: pad2Gain, target: 0.03 });
+
+            const notes = [262, 247, 233, 220, 208, 196, 185, 175, 185, 196, 208, 220, 233, 247, 262, 277];
+            let noteIdx = 0;
+            const playNote = () => {
+                if (!zoneMusicActive || muted) return;
+                const now = c.currentTime;
+                const o = c.createOscillator();
+                const g = c.createGain();
+                o.type = 'sine';
+                o.frequency.value = notes[noteIdx % notes.length];
+                g.gain.setValueAtTime(0, now);
+                g.gain.linearRampToValueAtTime(0.018, now + 0.05);
+                g.gain.exponentialRampToValueAtTime(0.001, now + 3.5);
+                o.connect(g);
+                g.connect(c.destination);
+                o.start(now);
+                o.stop(now + 4);
+                noteIdx++;
+                zoneMusicTimers.push(setTimeout(playNote, 4500 + Math.random() * 2500));
+            };
+            zoneMusicTimers.push(setTimeout(playNote, 1500));
+
+            const swamp = () => {
+                if (!zoneMusicActive || muted) return;
+                const now = c.currentTime;
+                const n = Math.floor(c.sampleRate * 1.2);
+                const buf = c.createBuffer(1, n, c.sampleRate);
+                const d = buf.getChannelData(0);
+                for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * 0.08;
+                const s = c.createBufferSource();
+                s.buffer = buf;
+                const g = c.createGain();
+                const fl = c.createBiquadFilter();
+                fl.type = 'lowpass';
+                fl.frequency.value = 400;
+                fl.Q.value = 3;
+                g.gain.setValueAtTime(0, now);
+                g.gain.linearRampToValueAtTime(0.012, now + 0.4);
+                g.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+                s.connect(fl);
+                fl.connect(g);
+                g.connect(c.destination);
+                s.start(now);
+                zoneMusicTimers.push(setTimeout(swamp, 10000 + Math.random() * 8000));
+            };
+            zoneMusicTimers.push(setTimeout(swamp, 3000));
+            return nodes;
+        }
+    },
+
+    shadow: {
+        create(c) {
+            const nodes = [];
+            const droneGain = c.createGain();
+            droneGain.gain.value = 0;
+            droneGain.connect(c.destination);
+            const drone = c.createOscillator();
+            drone.type = 'sawtooth';
+            drone.frequency.value = 36;
+            const f = c.createBiquadFilter();
+            f.type = 'lowpass';
+            f.frequency.value = 120;
+            drone.connect(f);
+            f.connect(droneGain);
+            drone.start();
+            nodes.push({ osc: drone, gain: droneGain, target: 0.02 });
+
+            const pad2Gain = c.createGain();
+            pad2Gain.gain.value = 0;
+            pad2Gain.connect(c.destination);
+            const pad2 = c.createOscillator();
+            pad2.type = 'sine';
+            pad2.frequency.value = 55;
+            pad2.connect(pad2Gain);
+            pad2.start();
+            nodes.push({ osc: pad2, gain: pad2Gain, target: 0.025 });
+
+            const notes = [196, 185, 175, 165, 156, 147, 139, 131, 139, 147, 156, 165, 175, 185, 196, 208];
+            let noteIdx = 0;
+            const playNote = () => {
+                if (!zoneMusicActive || muted) return;
+                const now = c.currentTime;
+                const o = c.createOscillator();
+                const g = c.createGain();
+                o.type = 'sine';
+                o.frequency.value = notes[noteIdx % notes.length];
+                g.gain.setValueAtTime(0, now);
+                g.gain.linearRampToValueAtTime(0.015, now + 0.05);
+                g.gain.exponentialRampToValueAtTime(0.001, now + 4);
+                o.connect(g);
+                g.connect(c.destination);
+                o.start(now);
+                o.stop(now + 4.5);
+                noteIdx++;
+                zoneMusicTimers.push(setTimeout(playNote, 5000 + Math.random() * 3000));
+            };
+            zoneMusicTimers.push(setTimeout(playNote, 2000));
+
+            const whisper = () => {
+                if (!zoneMusicActive || muted) return;
+                const now = c.currentTime;
+                const n = Math.floor(c.sampleRate * 1.5);
+                const buf = c.createBuffer(1, n, c.sampleRate);
+                const d = buf.getChannelData(0);
+                for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * 0.06;
+                const s = c.createBufferSource();
+                s.buffer = buf;
+                const g = c.createGain();
+                const fl = c.createBiquadFilter();
+                fl.type = 'bandpass';
+                fl.frequency.value = 600;
+                fl.Q.value = 8;
+                g.gain.setValueAtTime(0, now);
+                g.gain.linearRampToValueAtTime(0.01, now + 0.5);
+                g.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+                s.connect(fl);
+                fl.connect(g);
+                g.connect(c.destination);
+                s.start(now);
+                zoneMusicTimers.push(setTimeout(whisper, 12000 + Math.random() * 10000));
+            };
+            zoneMusicTimers.push(setTimeout(whisper, 4000));
+            return nodes;
+        }
+    },
+
+    tower: {
+        create(c) {
+            const nodes = [];
+            const droneGain = c.createGain();
+            droneGain.gain.value = 0;
+            droneGain.connect(c.destination);
+            const drone = c.createOscillator();
+            drone.type = 'sawtooth';
+            drone.frequency.value = 50;
+            const f = c.createBiquadFilter();
+            f.type = 'lowpass';
+            f.frequency.value = 180;
+            drone.connect(f);
+            f.connect(droneGain);
+            drone.start();
+            nodes.push({ osc: drone, gain: droneGain, target: 0.02 });
+
+            const pad2Gain = c.createGain();
+            pad2Gain.gain.value = 0;
+            pad2Gain.connect(c.destination);
+            const pad2 = c.createOscillator();
+            pad2.type = 'sine';
+            pad2.frequency.value = 75;
+            pad2.connect(pad2Gain);
+            pad2.start();
+            nodes.push({ osc: pad2, gain: pad2Gain, target: 0.025 });
+
+            const notes = [196, 220, 247, 262, 247, 220, 196, 175, 196, 220, 262, 294, 262, 220, 196, 175];
+            let noteIdx = 0;
+            const playNote = () => {
+                if (!zoneMusicActive || muted) return;
+                const now = c.currentTime;
+                const o = c.createOscillator();
+                const g = c.createGain();
+                o.type = 'sine';
+                o.frequency.value = notes[noteIdx % notes.length];
+                g.gain.setValueAtTime(0, now);
+                g.gain.linearRampToValueAtTime(0.02, now + 0.1);
+                g.gain.exponentialRampToValueAtTime(0.001, now + 2);
+                o.connect(g);
+                g.connect(c.destination);
+                o.start(now);
+                o.stop(now + 2.5);
+                noteIdx++;
+                zoneMusicTimers.push(setTimeout(playNote, 2000 + Math.random() * 1500));
+            };
+            zoneMusicTimers.push(setTimeout(playNote, 1000));
+
+            const footstep = () => {
+                if (!zoneMusicActive || muted) return;
+                const now = c.currentTime;
+                const n = Math.floor(c.sampleRate * 0.1);
+                const buf = c.createBuffer(1, n, c.sampleRate);
+                const d = buf.getChannelData(0);
+                for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * 0.15;
+                const s = c.createBufferSource();
+                s.buffer = buf;
+                const g = c.createGain();
+                g.gain.setValueAtTime(0.03, now);
+                g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                s.connect(g);
+                g.connect(c.destination);
+                s.start(now);
+                zoneMusicTimers.push(setTimeout(footstep, 1500 + Math.random() * 2000));
+            };
+            zoneMusicTimers.push(setTimeout(footstep, 500));
+            return nodes;
+        }
+    },
+
+    throne: {
+        create(c) {
+            const nodes = [];
+            const droneGain = c.createGain();
+            droneGain.gain.value = 0;
+            droneGain.connect(c.destination);
+            const drone = c.createOscillator();
+            drone.type = 'sine';
+            drone.frequency.value = 65;
+            drone.connect(droneGain);
+            drone.start();
+            nodes.push({ osc: drone, gain: droneGain, target: 0.03 });
+
+            const pad2Gain = c.createGain();
+            pad2Gain.gain.value = 0;
+            pad2Gain.connect(c.destination);
+            const pad2 = c.createOscillator();
+            pad2.type = 'sine';
+            pad2.frequency.value = 98;
+            pad2.connect(pad2Gain);
+            pad2.start();
+            nodes.push({ osc: pad2, gain: pad2Gain, target: 0.02 });
+
+            const notes = [262, 330, 392, 523, 392, 330, 262, 220, 262, 330, 392, 523, 659, 523, 392, 330];
+            let noteIdx = 0;
+            const playNote = () => {
+                if (!zoneMusicActive || muted) return;
+                const now = c.currentTime;
+                const o = c.createOscillator();
+                const g = c.createGain();
+                o.type = 'sine';
+                o.frequency.value = notes[noteIdx % notes.length];
+                g.gain.setValueAtTime(0, now);
+                g.gain.linearRampToValueAtTime(0.025, now + 0.1);
+                g.gain.exponentialRampToValueAtTime(0.001, now + 3);
+                o.connect(g);
+                g.connect(c.destination);
+                o.start(now);
+                o.stop(now + 3.5);
+                noteIdx++;
+                zoneMusicTimers.push(setTimeout(playNote, 2500 + Math.random() * 2000));
+            };
+            zoneMusicTimers.push(setTimeout(playNote, 800));
+
+            const choir = () => {
+                if (!zoneMusicActive || muted) return;
+                const now = c.currentTime;
+                const o = c.createOscillator();
+                const g = c.createGain();
+                o.type = 'sine';
+                o.frequency.value = 392;
+                g.gain.setValueAtTime(0, now);
+                g.gain.linearRampToValueAtTime(0.015, now + 0.5);
+                g.gain.exponentialRampToValueAtTime(0.001, now + 4);
+                o.connect(g);
+                g.connect(c.destination);
+                o.start(now);
+                o.stop(now + 5);
+                zoneMusicTimers.push(setTimeout(choir, 10000 + Math.random() * 8000));
+            };
+            zoneMusicTimers.push(setTimeout(choir, 3000));
+            return nodes;
+        }
     }
 };
 

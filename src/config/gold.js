@@ -6,7 +6,12 @@ export const GOLD_DROPS = {
     cemetery:{ mobMin: 14, mobMax: 28, chestMin: 20, chestMax: 40, bossMin: 60,  bossMax: 120 },
     hell:   { mobMin: 16, mobMax: 30, chestMin: 30, chestMax: 60,  bossMin: 80,  bossMax: 140 },
     snowy:  { mobMin: 20, mobMax: 40, chestMin: 30, chestMax: 60,  bossMin: 80,  bossMax: 140 },
-    castle: { mobMin: 20, mobMax: 40, chestMin: 30, chestMax: 60,  bossMin: 80,  bossMax: 160 }
+    castle: { mobMin: 20, mobMax: 40, chestMin: 30, chestMax: 60,  bossMin: 80,  bossMax: 160 },
+    depths: { mobMin: 22, mobMax: 45, chestMin: 35, chestMax: 70,  bossMin: 100, bossMax: 180 },
+    cursed: { mobMin: 25, mobMax: 50, chestMin: 40, chestMax: 80,  bossMin: 120, bossMax: 200 },
+    shadow: { mobMin: 28, mobMax: 55, chestMin: 45, chestMax: 90,  bossMin: 140, bossMax: 220 },
+    tower:  { mobMin: 30, mobMax: 60, chestMin: 50, chestMax: 100, bossMin: 160, bossMax: 250 },
+    throne: { mobMin: 0,  mobMax: 0,  chestMin: 0,  chestMax: 0,   bossMin: 200, bossMax: 300 }
 };
 
 export function rollGold(zone) {
@@ -85,5 +90,18 @@ export const ZONE_LOOT_TABLES = {
     village:  { common: 0.10, uncommon: 0.35, rare: 0.40, epic: 0.14, legendary: 0.01 },
     snowy:    { common: 0.05, uncommon: 0.25, rare: 0.45, epic: 0.20, legendary: 0.05 },
     castle:   { common: 0,    uncommon: 0.15, rare: 0.40, epic: 0.35, legendary: 0.10 },
-    forest:   { common: 0.70, uncommon: 0.25, rare: 0.05, epic: 0,    legendary: 0 }
+    forest:   { common: 0.70, uncommon: 0.25, rare: 0.05, epic: 0,    legendary: 0 },
+    depths:   { common: 0.05, uncommon: 0.20, rare: 0.45, epic: 0.25, legendary: 0.05 },
+    cursed:   { common: 0.03, uncommon: 0.15, rare: 0.40, epic: 0.32, legendary: 0.10 },
+    shadow:   { common: 0.02, uncommon: 0.10, rare: 0.35, epic: 0.38, legendary: 0.15 },
+    tower:    { common: 0.01, uncommon: 0.08, rare: 0.30, epic: 0.41, legendary: 0.20 },
+    throne:   { common: 0,    uncommon: 0.05, rare: 0.25, epic: 0.40, legendary: 0.30 }
+};
+
+export const ZONE_ACCOUNT_LOOT_TABLES = {
+    depths:   { rare: 0.60, epic: 0.30, legendary: 0.10 },
+    cursed:   { rare: 0.50, epic: 0.35, legendary: 0.15 },
+    shadow:   { rare: 0.40, epic: 0.40, legendary: 0.20 },
+    tower:    { rare: 0.30, epic: 0.45, legendary: 0.25 },
+    throne:   { rare: 0.20, epic: 0.40, legendary: 0.40 }
 };

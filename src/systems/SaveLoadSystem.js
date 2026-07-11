@@ -47,6 +47,13 @@ export class SaveLoadSystem {
             villageAllCleared: s.zones.village.allCleared || false,
             villageBossDefeated: s.zones.village.bossDefeated || false,
             hellBossDefeated: s.zones.hell.bossDefeated || false,
+            depthsBossDefeated: s.zones.depths.bossDefeated || false,
+            cursedBossDefeated: s.zones.cursed.bossDefeated || false,
+            shadowBossDefeated: s.zones.shadow.bossDefeated || false,
+            towerBossDefeated: s.zones.tower.bossDefeated || false,
+            towerRoom: s.zones.tower.currentRoom || 0,
+            throneBossDefeated: s.zones.throne.bossDefeated || false,
+            prestigeUnlocked: s.prestigeUnlocked || false,
             villageThriving: s.zones.village.isThriving || false,
             castleQuestDone: s.zones.castle.questDone || false,
             castleRoom: s.zones.castle.currentRoom || 0,
@@ -134,6 +141,13 @@ export class SaveLoadSystem {
         s.zones.village.allCleared = data.villageAllCleared || false;
         s.zones.village.bossDefeated = data.villageBossDefeated || false;
         s.zones.hell.bossDefeated = data.hellBossDefeated || false;
+        s.zones.depths.bossDefeated = data.depthsBossDefeated || false;
+        s.zones.cursed.bossDefeated = data.cursedBossDefeated || false;
+        s.zones.shadow.bossDefeated = data.shadowBossDefeated || false;
+        s.zones.tower.bossDefeated = data.towerBossDefeated || false;
+        s.zones.tower.currentRoom = data.towerRoom || 0;
+        s.zones.throne.bossDefeated = data.throneBossDefeated || false;
+        s.prestigeUnlocked = data.prestigeUnlocked || false;
         s.zones.village.isThriving = data.villageThriving || false;
         s.zones.castle.questDone = data.castleQuestDone || false;
         s.zones.castle.currentRoom = data.castleRoom || 0;

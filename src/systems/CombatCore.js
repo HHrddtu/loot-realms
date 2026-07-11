@@ -134,6 +134,10 @@ export class CombatCore {
         this._forEachGroupInRange(this.scene.caveExtraChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg); });
         this._forEachGroupInRange(this.scene.mineChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg); });
         this._forEachGroupInRange(this.scene.caveChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg); });
+        this._forEachGroupInRange(this.scene.depthsChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg); });
+        this._forEachGroupInRange(this.scene.cursedChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg); });
+        this._forEachGroupInRange(this.scene.shadowChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg); });
+        this._forEachGroupInRange(this.scene.towerChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg); });
         this._forEachGroupInRange(this.scene.villageZombies, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg); if (isAlchemist) this._applyArmorShred(e); });
         this._forEachGroupInRange(this.scene.hellImps, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg); if (isAlchemist) this._applyArmorShred(e); });
         this._forEachGroupInRange(this.scene.caveSmallBats, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg); if (isAlchemist) this._applyArmorShred(e); });
@@ -241,8 +245,9 @@ export class CombatCore {
     }
 
     _isBoss(enemy) {
-        return enemy === this.scene.boss || enemy === this.scene.mineBoss || enemy === this.scene.caveBoss ||
-               enemy === this.scene.villageBoss || enemy === this.scene.hellBoss ||
-               enemy === this.scene.snowyIceSpirit || enemy === this.scene.castleBoss;
+        const s = this.scene;
+        return enemy === s.boss || enemy === s.mineBoss || enemy === s.caveBoss ||
+               enemy === s.villageBoss || enemy === s.hellBoss || enemy === s.depthsBoss || enemy === s.cursedBoss || enemy === s.shadowBoss || enemy === s.towerBoss || enemy === s.throneBoss ||
+               enemy === s.snowyIceSpirit || enemy === s.castleBoss;
     }
 }

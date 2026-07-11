@@ -27,10 +27,10 @@ export class VillageBoss {
         if (this.scene.anims.exists('purple_demon_walk_anim')) b.play('purple_demon_walk_anim');
         b.stats = { name: bt.name, hp, maxHp: hp, damage: dmg, exp, bw: bt.bw, bh: bt.bh, speed: bt.speeds[this.scene.difficulty] || bt.speeds.Normal, meteorTimer: 0, meteorInterval: bt.meteorInterval, meteorRadius: bt.meteorRadius, meteorDmgMul: bt.meteorDmgMul, corpseTimer: 0, corpseInterval: bt.corpseInterval, corpseCount: bt.corpseCount, splitThreshold: bt.splitThreshold, splitDone: false };
         const hpW = 80;
-        b.hpBg = this.scene.add.rectangle(bx, by - bt.bh / 2 - 12, hpW, 6, 0x000000).setDepth(12);
-        b.hpFill = this.scene.add.rectangle(bx - hpW / 2, by - bt.bh / 2 - 12, hpW, 6, 0x9b59b6).setOrigin(0, 0.5).setDepth(12);
+        b.hpBg = this.scene.add.rectangle(bx, by - bt.bh / 2 - 12, hpW, 6, 0x000000).setDepth(20).setScrollFactor(0);
+        b.hpFill = this.scene.add.rectangle(bx - hpW / 2, by - bt.bh / 2 - 12, hpW, 6, 0x9b59b6).setOrigin(0, 0.5).setDepth(20).setScrollFactor(0);
         b.hpBg.setVisible(false); b.hpFill.setVisible(false);
-        this.scene.villageBossNameText = this.scene.add.text(bx, by - bt.bh / 2 - 24, bt.name, { fontSize: '14px', fill: DIFF_COLORS[this.scene.difficulty] || '#9b59b6', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 3 }).setOrigin(0.5).setDepth(12).setVisible(false);
+        this.scene.villageBossNameText = this.scene.add.text(bx, by - bt.bh / 2 - 24, bt.name, { fontSize: '14px', fill: DIFF_COLORS[this.scene.difficulty] || '#9b59b6', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 3 }).setOrigin(0.5).setDepth(20).setScrollFactor(0).setVisible(false);
         this.scene.villageBoss = b;
         this.scene.enemies.add(b);
         this.scene.floatingText(bx, by - 60, 'PURPLE DEMON APPEARS!', '#9b59b6');

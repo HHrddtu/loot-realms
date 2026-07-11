@@ -27,6 +27,11 @@ export class CombatLoot {
             }
             return;
         } else if (enemy === s.hellBoss) { s.zones.hell.victoryHellBoss(); }
+        else if (enemy === s.depthsBoss) { s.zones.depths.victoryDepthsBoss(); }
+        else if (enemy === s.cursedBoss) { s.zones.cursed.victoryCursedBoss(); }
+        else if (enemy === s.shadowBoss) { s.zones.shadow.victoryShadowBoss(); }
+        else if (enemy === s.towerBoss) { s.zones.tower.victoryTowerBoss(); }
+        else if (enemy === s.throneBoss) { s.zones.throne.victoryThroneBoss(); }
         else if (enemy === s.snowyIceSpirit) { s.zones.village.boss.iceSpiritDied(); }
         else if (enemy === s.castleBoss) { /* handled by CastleZone._updateBoss */ }
         else if (enemy.stats && enemy.stats.isBossClone) { s.zones.village.boss.killBossClone(enemy); }

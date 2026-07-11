@@ -8,7 +8,12 @@ export class SpellProjectile {
     }
 
     _getPooledProjectile(texKey) {
-        for (const fb of this._pool) {
+        for (let i = this._pool.length - 1; i >= 0; i--) {
+            const fb = this._pool[i];
+            if (!fb || !fb.sys || !fb.sys.scene) {
+                this._pool.splice(i, 1);
+                continue;
+            }
             if (!fb.active) {
                 fb.setTexture(texKey).setActive(true).setVisible(true).setAlpha(1).setScale(1).clearTint().setDepth(15);
                 this.scene.physics.world.enable(fb);
@@ -372,6 +377,11 @@ export class SpellProjectile {
         hit = this._checkBossHit(fb, 'caveBoss', this.scene.killCaveBoss.bind(this.scene), spellTotalDmg) || hit;
         hit = this._checkVillageBossHit(fb, spellTotalDmg) || hit;
         hit = this._checkBossHit(fb, 'hellBoss', () => this.scene.zones.hell.victoryHellBoss(), spellTotalDmg) || hit;
+        hit = this._checkBossHit(fb, 'depthsBoss', () => this.scene.zones.depths.victoryDepthsBoss(), spellTotalDmg) || hit;
+        hit = this._checkBossHit(fb, 'cursedBoss', () => this.scene.zones.cursed.victoryCursedBoss(), spellTotalDmg) || hit;
+        hit = this._checkBossHit(fb, 'shadowBoss', () => this.scene.zones.shadow.victoryShadowBoss(), spellTotalDmg) || hit;
+        hit = this._checkBossHit(fb, 'towerBoss', () => this.scene.zones.tower.victoryTowerBoss(), spellTotalDmg) || hit;
+        hit = this._checkBossHit(fb, 'throneBoss', () => this.scene.zones.throne.victoryThroneBoss(), spellTotalDmg) || hit;
         hit = this._checkBossHit(fb, 'snowyIceSpirit', () => this.scene.zones.village.boss.iceSpiritDied(), spellTotalDmg) || hit;
 
         hit = this._checkGroupHit(fb, this.scene.mineChests, 'hitChest') || hit;
@@ -513,6 +523,11 @@ export class SpellProjectile {
             this.scene.floatingText(nearest.x, nearest.y - 20, '-' + chainDmg, '#9b59b6');
             if (nearest.stats.hp <= 0) {
                 if (nearest === this.scene.hellBoss) this.scene.zones.hell.victoryHellBoss();
+                else if (nearest === this.scene.depthsBoss) this.scene.zones.depths.victoryDepthsBoss();
+                else if (nearest === this.scene.cursedBoss) this.scene.zones.cursed.victoryCursedBoss();
+                else if (nearest === this.scene.shadowBoss) this.scene.zones.shadow.victoryShadowBoss();
+                else if (nearest === this.scene.towerBoss) this.scene.zones.tower.victoryTowerBoss();
+                else if (nearest === this.scene.throneBoss) this.scene.zones.throne.victoryThroneBoss();
                 else if (nearest.stats.isBossClone) this.scene.zones.village.boss.killBossClone(nearest);
                 else this.scene.killEnemy(nearest);
             }
