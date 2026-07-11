@@ -19,6 +19,8 @@
 | 2026-07-11 | bug | [floatingText scrollfactor](bug-floating-text-scrollfactor.md) | UI текст должен использовать setScrollFactor(0) |
 | 2026-07-11 | bug | [NPC quest icon position](bug-npc-quest-icon-position.md) | Дочерние элементы NPC обновлять позицию в update |
 | 2026-07-11 | bug | [Portal hint position](bug-portal-hint-position.md) | Hint тексты привязанные к движущимся объектам обновлять в update |
+| 2026-07-11 | convention | [Enemy texture template](convention-enemy-texture-template.md) | Паттерн отрисовки template-врагов (7 элементов, 3 оттенка) |
+| 2026-07-11 | convention | [HP bar depth](convention-hp-bar-depth.md) | HP bar depth >= 15 чтобы быть видимыми над врагами |
 
 ---
 
