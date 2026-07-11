@@ -108,6 +108,7 @@ export class VillageZone extends BaseZone {
             if (!this.scene.zones.village.isThriving && !this.scene.zones.castle.questDone && !this.scene.zones.village.childSpokenTo) {
                 if (!this.scene.castleChildNPC) {
                     this.scene.time.delayedCall(1500, () => {
+                        if (this.scene.zone !== 'village') return;
                         this.spawner.spawnCastleChild();
                     });
                 }
@@ -190,6 +191,9 @@ export class VillageZone extends BaseZone {
 
     _destroyZoneSpecific() {
         const s = this.scene;
+        // Kill ALL timers to prevent delayed calls from spawning objects in wrong zone
+        s.time.removeAllEvents();
+        if (this._snowyCheckTimer) { this._snowyCheckTimer.destroy(); this._snowyCheckTimer = null; }
         if (s.particles) { s.particles.stopEnvironment(); }
         if (s.villageChests && s.villageChests.getLength && s.villageChests.getLength() > 0) {
             s.villageChests.getChildren().forEach(ch => {
@@ -369,9 +373,11 @@ export class VillageZone extends BaseZone {
             this.scene.transitioning = false;
 
             this.scene.time.delayedCall(500, () => {
+                if (this.scene.zone !== 'village') return;
                 this.scene.floatingText(this.scene.villageOffsetX + VILLAGE_WIDTH / 2, 200, 'The village is restored!', '#ff6600');
             if (!this.scene.zones.village.isThriving && !this.scene.zones.castle.questDone) {
                     this.scene.time.delayedCall(2000, () => {
+                        if (this.scene.zone !== 'village') return;
                         this.spawner.spawnCastleChild();
                     });
                 }

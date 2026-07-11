@@ -29,6 +29,7 @@ export class VillageShop {
         });
 
         s.time.delayedCall(1000, () => {
+            if (s.zone !== 'village') return;
             if (s.villageMerchantHint && s.villageMerchantHint.active) {
                 s.villageMerchantHint.setText('SPACE = shop');
             }
