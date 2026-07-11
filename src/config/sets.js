@@ -159,6 +159,204 @@ export const EQUIPMENT_SETS = {
             { pieces: 2, name: 'Eternal Power', nameRu: 'Вечная Сила', effects: { hpPercent: 5, damagePercent: 5, spellPercent: 5 } },
             { pieces: 3, name: 'Transcendence', nameRu: 'Трансцендентность', effects: { hpPercent: 15, damagePercent: 15, spellPercent: 15, regenFlat: 2 } }
         ]
+    },
+
+    // === NEW SETS ===
+
+    // Wanderer Set - Meadow (beginner)
+    wanderer: {
+        id: 'wanderer',
+        name: 'Wanderer',
+        nameRu: 'Странник',
+        nameDe: 'Wanderer',
+        pieces: ['rusty_sword', 'leather_armor', 'wood_ring'],
+        bonuses: [
+            { pieces: 2, name: 'Pathfinder', nameRu: 'Прокладчик Пути', effects: { expPercent: 5, speedPercent: 3 } },
+            { pieces: 3, name: 'Explorer', nameRu: 'Исследователь', effects: { expPercent: 10, lootPercent: 5, speedPercent: 5 } }
+        ]
+    },
+
+    // Shadow Walker Set - Forest
+    shadow_walker: {
+        id: 'shadow_walker',
+        name: 'Shadow Walker',
+        nameRu: 'Тень Странника',
+        nameDe: 'Schattenwanderer',
+        pieces: ['iron_sword', 'leather_armor', 'ruby_ring'],
+        bonuses: [
+            { pieces: 2, name: 'Stealth', nameRu: 'Скрытность', effects: { critPercent: 5, dodgePercent: 3 } },
+            { pieces: 3, name: 'Shadow Strike', nameRu: 'Удар Тени', effects: { critPercent: 12, dodgePercent: 8, damagePercent: 8 } }
+        ]
+    },
+
+    // Iron Warden Set - Mine
+    iron_warden: {
+        id: 'iron_warden',
+        name: 'Iron Warden',
+        nameRu: 'Железный Страж',
+        nameDe: 'Eisenwächter',
+        pieces: ['iron_sword', 'iron_armor', 'ruby_ring'],
+        bonuses: [
+            { pieces: 2, name: 'Iron Skin', nameRu: 'Железная Кожа', effects: { damageReduction: 8, hpPercent: 10 } },
+            { pieces: 3, name: 'Fortress', nameRu: 'Крепость', effects: { damageReduction: 18, hpPercent: 20, shieldPercent: 5 } }
+        ]
+    },
+
+    // Flame Slayer Set - Hell
+    flame_slayer: {
+        id: 'flame_slayer',
+        name: 'Flame Slayer',
+        nameRu: 'Пламенный Убийца',
+        nameDe: 'Flammentöter',
+        pieces: ['flame_blade', 'dragon_scale', 'sapphire_ring'],
+        bonuses: [
+            { pieces: 2, name: 'Fire Mastery', nameRu: 'Владение Огнём', effects: { damagePercent: 12, critPercent: 5 } },
+            { pieces: 3, name: 'Inferno', nameRu: 'Инферно', effects: { damagePercent: 22, critPercent: 10, spellPercent: 8 } }
+        ]
+    },
+
+    // Dragon Knight Set - Castle
+    dragon_knight: {
+        id: 'dragon_knight',
+        name: 'Dragon Knight',
+        nameRu: 'Драконий Рыцарь',
+        nameDe: 'Drachenritter',
+        pieces: ['flame_blade', 'dragon_scale', 'ruby_ring', 'crown'],
+        bonuses: [
+            { pieces: 2, name: 'Dragon Blood', nameRu: 'Кровь Дракона', effects: { hpPercent: 12, damagePercent: 8 } },
+            { pieces: 3, name: 'Dragon Heart', nameRu: 'Сердце Дракона', effects: { hpPercent: 22, damagePercent: 16, critPercent: 6 } },
+            { pieces: 4, name: 'Dragon Soul', nameRu: 'Душа Дракона', effects: { hpPercent: 30, damagePercent: 25, critPercent: 12, spellPercent: 10 } }
+        ]
+    },
+
+    // Lich Slayer Set - Depths
+    lich_slayer: {
+        id: 'lich_slayer',
+        name: 'Lich Slayer',
+        nameRu: 'Убийца Личей',
+        nameDe: 'Lich-Töter',
+        pieces: ['bone_cleaver', 'crypt_plate', 'bone_ring'],
+        bonuses: [
+            { pieces: 2, name: 'Bone Shield', nameRu: 'Костяной Щит', effects: { hpPercent: 8, damageReduction: 5 } },
+            { pieces: 3, name: 'Undead Bane', nameRu: 'Гибель Нежити', effects: { hpPercent: 15, damagePercent: 12, critPercent: 5 } }
+        ]
+    },
+
+    // Cursed Breaker Set - Cursed Lands
+    cursed_breaker: {
+        id: 'cursed_breaker',
+        name: 'Cursed Breaker',
+        nameRu: 'Разрушитель Проклятий',
+        nameDe: 'Fluchbrecher',
+        pieces: ['venom_dagger', 'swamp_armor', 'cursed_ring'],
+        bonuses: [
+            { pieces: 2, name: 'Purify', nameRu: 'Очищение', effects: { regenPercent: 3, hpPercent: 5 } },
+            { pieces: 3, name: 'Anti-Magic', nameRu: 'Антимагия', effects: { regenPercent: 8, hpPercent: 12, spellPercent: 8 } }
+        ]
+    },
+
+    // Shadow Dancer Set - Shadow District
+    shadow_dancer: {
+        id: 'shadow_dancer',
+        name: 'Shadow Dancer',
+        nameRu: 'Танцор Теней',
+        nameDe: 'Schattentänzer',
+        pieces: ['shadow_blade', 'void_armor', 'mirror_ring'],
+        bonuses: [
+            { pieces: 2, name: 'Evasion', nameRu: 'Уклонение', effects: { dodgePercent: 8, speedPercent: 5 } },
+            { pieces: 3, name: 'Phantom', nameRu: 'Фантом', effects: { dodgePercent: 15, speedPercent: 10, critPercent: 8 } }
+        ]
+    },
+
+    // Royal Guard Set - Tower
+    royal_guard: {
+        id: 'royal_guard',
+        name: 'Royal Guard',
+        nameRu: 'Королевская Стража',
+        nameDe: 'Königsgarde',
+        pieces: ['royal_blade', 'tower_armor', 'king_ring'],
+        bonuses: [
+            { pieces: 2, name: 'Authority', nameRu: 'Авторитет', effects: { hpPercent: 5, damagePercent: 5, spellPercent: 5 } },
+            { pieces: 3, name: 'Fortress', nameRu: 'Крепость', effects: { hpPercent: 12, damagePercent: 12, spellPercent: 12, shieldPercent: 8 } }
+        ]
+    },
+
+    // Vampire Set - Hybrid
+    vampire: {
+        id: 'vampire',
+        name: 'Vampire',
+        nameRu: ' Вампир',
+        nameDe: 'Vampir',
+        pieces: ['flame_blade', 'dragon_scale', 'ruby_ring'],
+        bonuses: [
+            { pieces: 2, name: 'Life Steal', nameRu: 'Кража Жизни', effects: { lifeStealPercent: 5, damagePercent: 8 } },
+            { pieces: 3, name: 'Blood Drain', nameRu: 'Высасывание Крови', effects: { lifeStealPercent: 12, damagePercent: 15, hpPercent: 10 } }
+        ]
+    },
+
+    // Berserker Set - Hybrid
+    berserker: {
+        id: 'berserker',
+        name: 'Berserker',
+        nameRu: 'Берсерк',
+        nameDe: 'Berserker',
+        pieces: ['rusty_sword', 'iron_armor', 'wood_ring'],
+        bonuses: [
+            { pieces: 2, name: 'Rage', nameRu: 'Ярость', effects: { damagePercent: 15, damageReduction: -5 } },
+            { pieces: 3, name: 'Frenzy', nameRu: 'Безумие', effects: { damagePercent: 30, critPercent: 10, damageReduction: -10 } }
+        ]
+    },
+
+    // Mage Set - Hybrid
+    mage_set: {
+        id: 'mage_set',
+        name: 'Archmage',
+        nameRu: 'Архимаг',
+        nameDe: 'Erzmagier',
+        pieces: ['iron_sword', 'leather_armor', 'ruby_ring'],
+        bonuses: [
+            { pieces: 2, name: 'Arcane Focus', nameRu: 'Магический Фокус', effects: { spellPercent: 10, critPercent: 5 } },
+            { pieces: 3, name: 'Spell Mastery', nameRu: 'Владение Заклинаниями', effects: { spellPercent: 22, critPercent: 12, corruptionMax: 15 } }
+        ]
+    },
+
+    // Tank Set - Hybrid
+    tank_set: {
+        id: 'tank_set',
+        name: 'Guardian',
+        nameRu: 'Страж',
+        nameDe: 'Wächter',
+        pieces: ['iron_sword', 'iron_armor', 'wood_ring'],
+        bonuses: [
+            { pieces: 2, name: 'Fortitude', nameRu: 'Стойкость', effects: { hpPercent: 15, damageReduction: 8 } },
+            { pieces: 3, name: 'Unbreakable', nameRu: 'Несокрушимый', effects: { hpPercent: 30, damageReduction: 18, shieldPercent: 10 } }
+        ]
+    },
+
+    // Assassin Set - Hybrid
+    assassin_set: {
+        id: 'assassin_set',
+        name: 'Assassin',
+        nameRu: 'Ассассин',
+        nameDe: 'Assassine',
+        pieces: ['rusty_sword', 'leather_armor', 'ruby_ring'],
+        bonuses: [
+            { pieces: 2, name: 'Lethal', nameRu: 'Смертоносность', effects: { critPercent: 10, speedPercent: 5 } },
+            { pieces: 3, name: 'Death Mark', nameRu: 'Метка Смерти', effects: { critPercent: 20, speedPercent: 10, damagePercent: 15 } }
+        ]
+    },
+
+    // Healer Set - Hybrid
+    healer_set: {
+        id: 'healer_set',
+        name: 'Divine Healer',
+        nameRu: 'Божественный Целитель',
+        nameDe: 'Göttlicher Heiler',
+        pieces: ['iron_sword', 'leather_armor', 'ruby_ring'],
+        bonuses: [
+            { pieces: 2, name: 'Holy Light', nameRu: 'Свет Святости', effects: { regenPercent: 5, hpPercent: 8 } },
+            { pieces: 3, name: 'Divine Grace', nameRu: 'Божественная Благодать', effects: { regenPercent: 12, hpPercent: 18, spellPercent: 10 } }
+        ]
     }
 };
 
