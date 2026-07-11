@@ -352,8 +352,18 @@ export class SpellProjectile {
         let hit = false;
         let spellTotalDmg = 0;
 
-        if (this.scene.enemies) {
-            this.scene.enemies.getChildren().forEach(e => {
+        // Check all enemy groups including boss minions
+        const allEnemyGroups = [
+            this.scene.enemies,
+            this.scene.depthsMinions,
+            this.scene.cursedMinions,
+            this.scene.shadowMinions,
+            this.scene.towerMinions
+        ];
+
+        allEnemyGroups.forEach(group => {
+            if (!group) return;
+            group.getChildren().forEach(e => {
                 if (!e.active) return;
                 if (e === this.scene.boss || e === this.scene.mineBoss || e === this.scene.caveBoss || e === this.scene.villageBoss || e === this.scene.hellBoss) return;
                 if (Phaser.Math.Distance.Between(fb.x, fb.y, e.x, e.y) < 20) {
@@ -371,7 +381,7 @@ export class SpellProjectile {
                     }
                 }
             });
-        }
+        });
         hit = this._checkBossHit(fb, 'boss', this.scene.killBoss.bind(this.scene), spellTotalDmg) || hit;
         hit = this._checkBossHit(fb, 'mineBoss', this.scene.killMineBoss.bind(this.scene), spellTotalDmg) || hit;
         hit = this._checkBossHit(fb, 'caveBoss', this.scene.killCaveBoss.bind(this.scene), spellTotalDmg) || hit;

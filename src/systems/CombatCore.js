@@ -141,6 +141,11 @@ export class CombatCore {
         this._forEachGroupInRange(this.scene.villageZombies, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg); if (isAlchemist) this._applyArmorShred(e); });
         this._forEachGroupInRange(this.scene.hellImps, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg); if (isAlchemist) this._applyArmorShred(e); });
         this._forEachGroupInRange(this.scene.caveSmallBats, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg); if (isAlchemist) this._applyArmorShred(e); });
+        // Boss minion groups
+        this._forEachGroupInRange(this.scene.depthsMinions, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg); if (isAlchemist) this._applyArmorShred(e); });
+        this._forEachGroupInRange(this.scene.cursedMinions, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg); if (isAlchemist) this._applyArmorShred(e); });
+        this._forEachGroupInRange(this.scene.shadowMinions, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg); if (isAlchemist) this._applyArmorShred(e); });
+        this._forEachGroupInRange(this.scene.towerMinions, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg); if (isAlchemist) this._applyArmorShred(e); });
         this._forEachGroupInRange(this.scene.snowyIceShards, ax, ay, hitRadius, (s) => {
             if (!s.active || !s.stats) return;
             s.stats.hp -= dmg; this.scene.floatingText(s.x, s.y - 15, '-' + dmg, '#3498db');

@@ -83,7 +83,11 @@ export class SpellEffects {
         let targetX = this.scene.player.x, targetY = this.scene.player.y, foundTarget = false;
         const allTargets = [
             ...(this.scene.enemies && this.scene.enemies.scene ? this.scene.enemies.getChildren() : []),
-            ...(this.scene.villageZombies && this.scene.villageZombies.scene ? this.scene.villageZombies.getChildren() : [])
+            ...(this.scene.villageZombies && this.scene.villageZombies.scene ? this.scene.villageZombies.getChildren() : []),
+            ...(this.scene.depthsMinions && this.scene.depthsMinions.scene ? this.scene.depthsMinions.getChildren() : []),
+            ...(this.scene.cursedMinions && this.scene.cursedMinions.scene ? this.scene.cursedMinions.getChildren() : []),
+            ...(this.scene.shadowMinions && this.scene.shadowMinions.scene ? this.scene.shadowMinions.getChildren() : []),
+            ...(this.scene.towerMinions && this.scene.towerMinions.scene ? this.scene.towerMinions.getChildren() : [])
         ];
         let nearestDist = 60;
         allTargets.forEach(e => {
