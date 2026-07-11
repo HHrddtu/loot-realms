@@ -30,189 +30,263 @@ export function drawPlayerTextures(mk) {
 
     mk('player_sage', 32, 48, (c) => {
         c.imageSmoothingEnabled = false;
-        // Hat (pointed wizard hat, dark purple)
+        // Шляпа (детализированная)
         c.fillStyle = '#2d1b4e';
         c.fillRect(10, 0, 12, 4);
         c.fillRect(8, 4, 16, 4);
         c.fillRect(6, 8, 20, 4);
-        // Hat brim
+        // Узоры на шляпе
         c.fillStyle = '#3d2b5e';
         c.fillRect(4, 12, 24, 2);
-        // Hat tip star
+        c.fillRect(12, 2, 8, 2);
+        c.fillRect(10, 6, 12, 2);
+        // Звезда на шляпе
         c.fillStyle = '#f1c40f';
         c.fillRect(14, 1, 4, 2);
-        // Face (old, pale)
+        c.fillRect(12, 2, 2, 2);
+        c.fillRect(18, 2, 2, 2);
+        // Лицо (старое, бледное)
         c.fillStyle = '#d5c4a1';
         c.fillRect(10, 14, 12, 8);
-        // Eyes (wise, glowing slightly)
+        c.fillRect(8, 16, 16, 6);
+        // Морщины
+        c.fillStyle = '#c4b494';
+        c.fillRect(11, 17, 2, 1);
+        c.fillRect(17, 17, 2, 1);
+        c.fillRect(12, 20, 8, 1);
+        // Глаза (мудрые, светящиеся)
         c.fillStyle = '#7b68ee';
         c.fillRect(12, 16, 2, 2);
         c.fillRect(18, 16, 2, 2);
-        // Beard (long, grey)
+        c.fillStyle = '#9b8bff';
+        c.fillRect(12, 16, 1, 1);
+        c.fillRect(18, 16, 1, 1);
+        // Борода (длинная, серая, с прядями)
         c.fillStyle = '#9e9e9e';
         c.fillRect(12, 20, 8, 4);
         c.fillRect(10, 22, 12, 4);
         c.fillRect(12, 26, 8, 2);
-        // Robe (dark purple)
+        // Пряди бороды
+        c.fillStyle = '#bdbdbd';
+        c.fillRect(10, 23, 2, 3);
+        c.fillRect(20, 23, 2, 3);
+        c.fillRect(12, 27, 2, 2);
+        c.fillRect(18, 27, 2, 2);
+        // Роба (тёмно-фиолетовая с узорами)
         c.fillStyle = '#2d1b4e';
         c.fillRect(6, 14, 20, 16);
         c.fillStyle = '#3d2b5e';
         c.fillRect(8, 16, 16, 12);
-        // Robe trim
+        // Узоры на робе
+        c.fillStyle = '#4a3a6a';
+        c.fillRect(10, 18, 12, 2);
+        c.fillRect(14, 16, 4, 6);
+        // Кайма
         c.fillStyle = '#6a3d9a';
         c.fillRect(6, 28, 20, 2);
-        // Arms
+        // Руки
         c.fillStyle = '#2d1b4e';
         c.fillRect(2, 16, 4, 12);
         c.fillRect(26, 16, 4, 12);
-        // Hands (pale)
+        // Перчатки
         c.fillStyle = '#d5c4a1';
         c.fillRect(2, 28, 4, 4);
         c.fillRect(26, 28, 4, 4);
-        // Book in left hand
+        // Книга (детализированная)
         c.fillStyle = '#5a3d1a';
         c.fillRect(0, 26, 6, 8);
         c.fillStyle = '#f5f5dc';
         c.fillRect(1, 27, 4, 6);
         c.fillStyle = '#2d1b4e';
         c.fillRect(1, 27, 4, 1);
-        // Legs/boots
-        c.fillStyle = '#1a0e2e';
-        c.fillRect(10, 30, 5, 10);
-        c.fillRect(17, 30, 5, 10);
-        // Boots
-        c.fillStyle = '#3d2b1f';
-        c.fillRect(9, 38, 6, 6);
-        c.fillRect(17, 38, 6, 6);
-        // Staff in right hand
+        c.fillRect(1, 31, 4, 1);
+        // Посох с кристаллом
         c.fillStyle = '#8b6914';
         c.fillRect(28, 10, 2, 28);
         c.fillStyle = '#6a3d9a';
         c.fillRect(27, 8, 4, 4);
         c.fillStyle = '#9b59b6';
         c.fillRect(28, 9, 2, 2);
+        // Сияние кристалла
+        c.fillStyle = 'rgba(155,89,182,0.2)';
+        c.fillRect(26, 6, 6, 6);
+        // Ноги/ботинки
+        c.fillStyle = '#1a0e2e';
+        c.fillRect(10, 30, 5, 10);
+        c.fillRect(17, 30, 5, 10);
+        c.fillStyle = '#3d2b1f';
+        c.fillRect(9, 38, 6, 6);
+        c.fillRect(17, 38, 6, 6);
     });
 
     mk('player_alchemist', 32, 48, (c) => {
         c.imageSmoothingEnabled = false;
-        // Hat (round alchemist hat, brown)
+        // Шляпа (детализированная)
         c.fillStyle = '#5a3d1a';
         c.fillRect(8, 0, 16, 4);
         c.fillRect(6, 4, 20, 4);
         c.fillRect(4, 8, 24, 4);
-        // Hat brim
+        // Узоры на шляпе
         c.fillStyle = '#6b4423';
+        c.fillRect(10, 1, 12, 2);
+        c.fillRect(8, 5, 16, 2);
+        // Кайма
+        c.fillStyle = '#8b6914';
         c.fillRect(2, 12, 28, 2);
-        // Goggles
+        // Очки (детализированные)
         c.fillStyle = '#f39c12';
         c.fillRect(10, 14, 5, 4);
         c.fillRect(17, 14, 5, 4);
         c.fillStyle = '#2c3e50';
         c.fillRect(11, 15, 3, 2);
         c.fillRect(18, 15, 3, 2);
-        // Bridge of goggles
+        // Стекло
+        c.fillStyle = '#5dade2';
+        c.fillRect(11, 15, 1, 1);
+        c.fillRect(18, 15, 1, 1);
+        // Мостик очков
         c.fillStyle = '#f39c12';
         c.fillRect(15, 15, 2, 2);
-        // Face (weathered)
+        // Лицо (обветренное)
         c.fillStyle = '#c4956a';
         c.fillRect(10, 14, 12, 8);
-        // Beard (brown, bushy)
+        c.fillStyle = '#b4855a';
+        c.fillRect(11, 15, 10, 6);
+        // Морщины
+        c.fillStyle = '#a4754a';
+        c.fillRect(11, 17, 2, 1);
+        c.fillRect(17, 17, 2, 1);
+        // Борода (кустистая, коричневая)
         c.fillStyle = '#6b4423';
         c.fillRect(10, 20, 12, 4);
         c.fillRect(8, 22, 16, 4);
         c.fillRect(10, 26, 12, 2);
-        // Coat (brown leather)
+        // Пряди бороды
+        c.fillStyle = '#7a5a33';
+        c.fillRect(8, 23, 2, 3);
+        c.fillRect(22, 23, 2, 3);
+        c.fillRect(10, 27, 2, 2);
+        c.fillRect(20, 27, 2, 2);
+        // Плащ (кожаный)
         c.fillStyle = '#5a3d1a';
         c.fillRect(6, 14, 20, 16);
         c.fillStyle = '#6b4423';
         c.fillRect(8, 16, 16, 12);
-        // Coat trim
+        // Кайма
         c.fillStyle = '#8b6914';
         c.fillRect(6, 28, 20, 2);
-        // Belt
+        // Пояс с пряжкой
         c.fillStyle = '#3d2b1f';
         c.fillRect(6, 26, 20, 2);
         c.fillStyle = '#f1c40f';
         c.fillRect(14, 25, 4, 4);
-        // Arms
+        // Руки
         c.fillStyle = '#5a3d1a';
         c.fillRect(2, 16, 4, 12);
         c.fillRect(26, 16, 4, 12);
-        // Hands
+        // Перчатки
         c.fillStyle = '#c4956a';
         c.fillRect(2, 28, 4, 4);
         c.fillRect(26, 28, 4, 4);
-        // Flask in left hand (green liquid)
+        // Флакон (зелёная жидкость)
         c.fillStyle = '#27ae60';
         c.fillRect(0, 24, 6, 8);
         c.fillStyle = '#2ecc71';
         c.fillRect(1, 25, 4, 5);
         c.fillStyle = '#5a3d1a';
         c.fillRect(1, 23, 4, 2);
-        // Legs/boots
+        // Сияние жидкости
+        c.fillStyle = 'rgba(39,174,96,0.2)';
+        c.fillRect(0, 22, 6, 8);
+        // Ноги/ботинки
         c.fillStyle = '#3d2b1f';
         c.fillRect(10, 30, 5, 10);
         c.fillRect(17, 30, 5, 10);
-        // Boots
         c.fillStyle = '#2c1e14';
         c.fillRect(9, 38, 6, 6);
         c.fillRect(17, 38, 6, 6);
-        // Vials on belt
+        // Флаконы на поясе
         c.fillStyle = '#e74c3c';
         c.fillRect(26, 22, 3, 5);
         c.fillStyle = '#3498db';
         c.fillRect(27, 20, 3, 5);
+        // Сияние фляжек
+        c.fillStyle = 'rgba(231,76,60,0.2)';
+        c.fillRect(26, 21, 3, 6);
     });
 
     mk('player_angel', 32, 48, (c) => {
         c.imageSmoothingEnabled = false;
-        // Hair (blonde)
+        // Волосы (золотые, длинные)
         c.fillStyle = '#f1c40f';
         c.fillRect(10, 0, 12, 4);
         c.fillRect(8, 2, 16, 6);
         c.fillRect(6, 6, 20, 4);
-        // Face (pale, youthful)
+        // Пряди волос
+        c.fillStyle = '#d4ac0d';
+        c.fillRect(8, 4, 2, 6);
+        c.fillRect(22, 4, 2, 6);
+        // Лицо (нежное, божественное)
         c.fillStyle = '#fdebd0';
         c.fillRect(10, 8, 12, 8);
-        // Eyes (blue, divine)
+        c.fillStyle = '#f5cba7';
+        c.fillRect(11, 9, 10, 6);
+        // Глаза (голубые, божественные)
         c.fillStyle = '#5dade2';
         c.fillRect(12, 10, 2, 2);
         c.fillRect(18, 10, 2, 2);
-        // Mouth
+        c.fillStyle = '#85c1e9';
+        c.fillRect(12, 10, 1, 1);
+        c.fillRect(18, 10, 1, 1);
+        // Ресницы
+        c.fillStyle = '#34495e';
+        c.fillRect(12, 9, 2, 1);
+        c.fillRect(18, 9, 2, 1);
+        // Рот
         c.fillStyle = '#e8a0a0';
         c.fillRect(14, 14, 4, 1);
-        // Small white wings
+        // Нимб
+        c.fillStyle = 'rgba(241,196,15,0.3)';
+        c.fillRect(10, 0, 12, 2);
+        c.fillRect(8, 1, 16, 1);
+        // Крылья (детализированные)
         c.fillStyle = '#ecf0f1';
         c.fillRect(0, 10, 6, 8);
         c.fillRect(26, 10, 6, 8);
         c.fillStyle = '#ffffff';
         c.fillRect(1, 11, 4, 6);
         c.fillRect(27, 11, 4, 6);
-        // Wing feathers
+        // Слои перьев
         c.fillStyle = '#d5dbdb';
         c.fillRect(0, 12, 2, 4);
         c.fillRect(30, 12, 2, 4);
-        // White robe
+        c.fillRect(1, 14, 1, 3);
+        c.fillRect(30, 14, 1, 3);
+        // Сияние крыльев
+        c.fillStyle = 'rgba(241,196,15,0.1)';
+        c.fillRect(0, 8, 6, 10);
+        c.fillRect(26, 8, 6, 10);
+        // Белая роба
         c.fillStyle = '#ecf0f1';
         c.fillRect(6, 14, 20, 16);
         c.fillStyle = '#ffffff';
         c.fillRect(8, 16, 16, 12);
-        // Robe trim (golden)
+        // Золотая кайма
         c.fillStyle = '#f1c40f';
         c.fillRect(6, 28, 20, 2);
-        // Holy symbol on chest
+        // Святой символ (крест)
         c.fillStyle = '#f1c40f';
         c.fillRect(14, 18, 4, 6);
         c.fillRect(12, 20, 8, 2);
-        // Arms
+        // Руки
         c.fillStyle = '#ecf0f1';
         c.fillRect(2, 16, 4, 12);
         c.fillRect(26, 16, 4, 12);
-        // Hands
+        // Руки (нежные)
         c.fillStyle = '#fdebd0';
         c.fillRect(2, 28, 4, 4);
         c.fillRect(26, 28, 4, 4);
-        // Violin in right hand
+        // Скрипка
         c.fillStyle = '#8b4513';
         c.fillRect(27, 18, 2, 14);
         c.fillStyle = '#a0522d';
@@ -221,11 +295,11 @@ export function drawPlayerTextures(mk) {
         c.fillRect(26, 21, 4, 6);
         c.fillStyle = '#8b4513';
         c.fillRect(28, 16, 2, 4);
-        // Legs/boots (white)
+        // Ноги/ботинки (белые)
         c.fillStyle = '#ecf0f1';
         c.fillRect(10, 30, 5, 10);
         c.fillRect(17, 30, 5, 10);
-        // Boots (golden)
+        // Ботинки (золотые)
         c.fillStyle = '#f1c40f';
         c.fillRect(9, 38, 6, 6);
         c.fillRect(17, 38, 6, 6);

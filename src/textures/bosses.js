@@ -376,4 +376,80 @@ export function drawBossTextures(mk) {
         c.fillStyle = '#7f8c8d';
         c.fillRect(20, 13, 10, 2);
     });
+
+    // Shadow Child — dark mirror of grown child NPC (30x48)
+    mk('shadow_child', 30, 48, (c) => {
+        c.imageSmoothingEnabled = false;
+        // Head (dark silhouette)
+        c.fillStyle = '#1a0a2a';
+        c.fillRect(9, 0, 12, 10);
+        c.fillRect(7, 2, 16, 8);
+        c.fillStyle = '#2a1a3a';
+        c.fillRect(10, 1, 10, 6);
+        // Eyes (glowing red)
+        c.fillStyle = '#cc0044';
+        c.fillRect(11, 4, 2, 3);
+        c.fillRect(17, 4, 2, 3);
+        c.fillStyle = '#ff2266';
+        c.fillRect(11, 4, 1, 2);
+        c.fillRect(17, 4, 1, 2);
+        // Mouth (dark void)
+        c.fillStyle = '#0a0010';
+        c.fillRect(12, 8, 6, 2);
+        c.fillStyle = '#cc0044';
+        c.fillRect(13, 8, 1, 1);
+        c.fillRect(16, 8, 1, 1);
+        // Neck
+        c.fillStyle = '#1a0a2a';
+        c.fillRect(12, 10, 6, 2);
+        // Dark robe body
+        c.fillStyle = '#1a0a2a';
+        c.fillRect(6, 12, 18, 16);
+        c.fillStyle = '#2a1a3a';
+        c.fillRect(8, 14, 14, 12);
+        // Corrupted markings
+        c.fillStyle = '#4a0060';
+        c.fillRect(10, 16, 10, 2);
+        c.fillRect(12, 14, 6, 6);
+        c.fillStyle = '#6600aa';
+        c.fillRect(13, 15, 4, 4);
+        // Shadow tendrils from shoulders
+        c.fillStyle = '#0a0010';
+        c.fillRect(2, 14, 4, 12);
+        c.fillRect(24, 14, 4, 12);
+        c.fillStyle = '#1a0020';
+        c.fillRect(2, 20, 2, 8);
+        c.fillRect(26, 20, 2, 8);
+        // Arms (dark, reaching)
+        c.fillStyle = '#1a0a2a';
+        c.fillRect(2, 16, 4, 10);
+        c.fillRect(24, 16, 4, 10);
+        c.fillStyle = '#0a0010';
+        c.fillRect(2, 26, 3, 4);
+        c.fillRect(25, 26, 3, 4);
+        // Dark energy hands
+        c.fillStyle = '#4a0060';
+        c.fillRect(1, 28, 4, 3);
+        c.fillRect(25, 28, 4, 3);
+        c.fillStyle = '#6600aa';
+        c.fillRect(2, 28, 2, 2);
+        c.fillRect(26, 28, 2, 2);
+        // Lower robe
+        c.fillStyle = '#1a0a2a';
+        c.fillRect(8, 28, 14, 12);
+        c.fillStyle = '#0a0010';
+        c.fillRect(10, 32, 10, 10);
+        // Feet (shadowy)
+        c.fillStyle = '#0a0010';
+        c.fillRect(8, 38, 6, 6);
+        c.fillRect(16, 38, 6, 6);
+        c.fillStyle = '#1a0020';
+        c.fillRect(7, 42, 8, 4);
+        c.fillRect(15, 42, 8, 4);
+        // Aura effect
+        c.fillStyle = 'rgba(60,0,100,0.15)';
+        c.fillRect(4, 36, 22, 8);
+        c.fillStyle = 'rgba(100,0,160,0.1)';
+        c.fillRect(2, 38, 26, 6);
+    });
 }

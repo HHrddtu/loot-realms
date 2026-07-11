@@ -1,4 +1,7 @@
 export function drawExpansionTextures(mk, textures) {
+    const addSheet = (key, canvas, config) => {
+        if (!textures.exists(key)) textures.addSpriteSheet(key, canvas, config);
+    };
     // ===== SECRET KEY =====
     mk('item_key', 16, 16, (c) => {
         c.imageSmoothingEnabled = false;
@@ -218,7 +221,7 @@ export function drawExpansionTextures(mk, textures) {
             ctx.fillRect(ox + 8, 10 - lo, 2, 4 + lo);
             ctx.fillRect(ox + 11, 10 - lo, 2, 4 + lo);
         }
-        textures.addSpriteSheet('cave_spider_walk', canvas, { frameWidth: fw, frameHeight: fh });
+        addSheet('cave_spider_walk', canvas, { frameWidth: fw, frameHeight: fh });
     })();
 
     // ===== CAVE BAT =====
@@ -269,7 +272,7 @@ export function drawExpansionTextures(mk, textures) {
             ctx.fillRect(ox + 6, 8, 2, 3);
             ctx.fillRect(ox + 7, 9, 2, 2);
         }
-        textures.addSpriteSheet('cave_bat_walk', canvas, { frameWidth: fw, frameHeight: fh });
+        addSheet('cave_bat_walk', canvas, { frameWidth: fw, frameHeight: fh });
     })();
 
     // ===== STONE GOLEM (Tank) =====
@@ -328,7 +331,7 @@ export function drawExpansionTextures(mk, textures) {
             ctx.fillRect(ox + 6, 22 + step, 4, 4);
             ctx.fillRect(ox + 12, 22 + step, 4, 4);
         }
-        textures.addSpriteSheet('stone_golem_walk', canvas, { frameWidth: fw, frameHeight: fh });
+        addSheet('stone_golem_walk', canvas, { frameWidth: fw, frameHeight: fh });
     })();
 
     // ===== EARTH WORM (Tank) =====
@@ -379,7 +382,7 @@ export function drawExpansionTextures(mk, textures) {
             ctx.fillRect(ox + 8, 14 + w, 8, 4);
             ctx.fillRect(ox + 10, 16 + w, 4, 2);
         }
-        textures.addSpriteSheet('earth_worm_walk', canvas, { frameWidth: fw, frameHeight: fh });
+        addSheet('earth_worm_walk', canvas, { frameWidth: fw, frameHeight: fh });
     })();
 
     // ===== GIANT BAT (Boss) =====
@@ -453,7 +456,7 @@ export function drawExpansionTextures(mk, textures) {
             ctx.fillRect(ox + 22, 28, 2, 3);
             ctx.fillRect(ox + 26, 28, 2, 3);
         }
-        textures.addSpriteSheet('giant_bat_walk', canvas, { frameWidth: fw, frameHeight: fh });
+        addSheet('giant_bat_walk', canvas, { frameWidth: fw, frameHeight: fh });
     })();
 
     // ===== SMALL BAT (Summoned Add) =====
@@ -502,7 +505,7 @@ export function drawExpansionTextures(mk, textures) {
             ctx.fillStyle = '#3c1a4e';
             ctx.fillRect(ox + 8, 10, 4, 4);
         }
-        textures.addSpriteSheet('small_bat_walk', canvas, { frameWidth: fw, frameHeight: fh });
+        addSheet('small_bat_walk', canvas, { frameWidth: fw, frameHeight: fh });
     })();
 
     // ===== CAVE STAIRS =====
@@ -711,7 +714,7 @@ export function drawExpansionTextures(mk, textures) {
                 ctx.fillRect(ox + 4, fh - 4, 3, 4);
                 ctx.fillRect(ox + fw - 7, fh - 4, 3, 4);
             }
-            textures.addSpriteSheet(def.key + '_walk', canvas, { frameWidth: fw, frameHeight: fh });
+            addSheet(def.key + '_walk', canvas, { frameWidth: fw, frameHeight: fh });
         })();
         mk(def.key, def.w, def.bh, (c) => {
             c.imageSmoothingEnabled = false;
@@ -750,7 +753,7 @@ export function drawExpansionTextures(mk, textures) {
             ctx.fillRect(ox + 4, fh - 4, 3, 4);
             ctx.fillRect(ox + 7, fh - 4, 3, 4);
         }
-        textures.addSpriteSheet('zombie_walk', canvas, { frameWidth: fw, frameHeight: fh });
+        addSheet('zombie_walk', canvas, { frameWidth: fw, frameHeight: fh });
     })();
     mk('zombie', 14, 16, (c) => {
         c.imageSmoothingEnabled = false;
@@ -795,7 +798,7 @@ export function drawExpansionTextures(mk, textures) {
             ctx.fillRect(ox + 14, fh - 6, 5, 6);
             ctx.fillRect(ox + 21, fh - 6, 5, 6);
         }
-        textures.addSpriteSheet('purple_demon_walk', canvas, { frameWidth: fw, frameHeight: fh });
+        addSheet('purple_demon_walk', canvas, { frameWidth: fw, frameHeight: fh });
     })();
     mk('purple_demon', 40, 44, (c) => {
         c.imageSmoothingEnabled = false;
@@ -978,7 +981,7 @@ export function drawExpansionTextures(mk, textures) {
                 ctx.fillRect(ox + 4, fh - 4, 3, 4);
                 ctx.fillRect(ox + fw - 7, fh - 4, 3, 4);
             }
-            textures.addSpriteSheet(def.key + '_walk', canvas, { frameWidth: fw, frameHeight: fh });
+            addSheet(def.key + '_walk', canvas, { frameWidth: fw, frameHeight: fh });
         })();
         mk(def.key, def.w, def.bh, (c) => {
             c.imageSmoothingEnabled = false;
@@ -1017,7 +1020,7 @@ export function drawExpansionTextures(mk, textures) {
             ctx.fillRect(ox + 3, fh - 3, 2, 3);
             ctx.fillRect(ox + 7, fh - 3, 2, 3);
         }
-        textures.addSpriteSheet('hell_imp_walk', canvas, { frameWidth: fw, frameHeight: fh });
+        addSheet('hell_imp_walk', canvas, { frameWidth: fw, frameHeight: fh });
     })();
     mk('hell_imp', 12, 14, (c) => {
         c.imageSmoothingEnabled = false;
@@ -1069,7 +1072,7 @@ export function drawExpansionTextures(mk, textures) {
             ctx.fillRect(ox + 16, fh - 6, 5, 6);
             ctx.fillRect(ox + 23, fh - 6, 5, 6);
         }
-        textures.addSpriteSheet('red_demon_walk', canvas, { frameWidth: fw, frameHeight: fh });
+        addSheet('red_demon_walk', canvas, { frameWidth: fw, frameHeight: fh });
     })();
     mk('red_demon', 44, 48, (c) => {
         c.imageSmoothingEnabled = false;
@@ -1500,4 +1503,362 @@ export function drawExpansionTextures(mk, textures) {
         c.fillRect(4, 16, 3, 2);
         c.fillRect(8, 16, 3, 2);
     });
+
+    // ===== DEPTHS ENEMIES =====
+
+    const depthsEnemyDefs = [
+        { key: 'crypt_soldier',  w: 22, bh: 24, body: '#4a3a2a', head: '#5a4a3a', detail: '#3a2a1a', eyes: '#ff4400', armor: '#6a5a4a' },
+        { key: 'shadow_assassin', w: 14, bh: 14, body: '#1a0a2a', head: '#2a1a3a', detail: '#0a0010', eyes: '#ff00ff', armor: null },
+        { key: 'bone_archer',    w: 16, bh: 16, body: '#d4c5a9', head: '#e8dcc8', detail: '#c4b599', eyes: '#1a3a0a', armor: null },
+        { key: 'necro_mage',     w: 14, bh: 18, body: '#2d1b4e', head: '#3d2b5e', detail: '#1a0f2e', eyes: '#9b59b6', armor: null },
+        { key: 'dark_priest',    w: 14, bh: 18, body: '#3a1a2a', head: '#4a2a3a', detail: '#2a0a1a', eyes: '#ffffff', armor: null }
+    ];
+
+    depthsEnemyDefs.forEach(def => {
+        (() => {
+            const fw = def.w, fh = def.bh, frames = 4;
+            const canvas = document.createElement('canvas');
+            canvas.width = fw * frames;
+            canvas.height = fh;
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            for (let f = 0; f < frames; f++) {
+                const ox = f * fw;
+                const wUp = f % 2 === 0;
+                ctx.fillStyle = def.body;
+                ctx.fillRect(ox + 3, wUp ? 4 : 5, fw - 6, fh - 8);
+                ctx.fillStyle = def.head;
+                ctx.fillRect(ox + 4, wUp ? 1 : 2, fw - 8, 6);
+                ctx.fillStyle = def.eyes;
+                ctx.fillRect(ox + 5, wUp ? 2 : 3, 2, 2);
+                ctx.fillRect(ox + fw - 7, wUp ? 2 : 3, 2, 2);
+                ctx.fillStyle = def.detail;
+                ctx.fillRect(ox + 2, wUp ? 2 : 3, 3, 4);
+                ctx.fillRect(ox + fw - 5, wUp ? 2 : 3, 3, 4);
+                ctx.fillStyle = def.body;
+                ctx.fillRect(ox + 4, fh - 4, 3, 4);
+                ctx.fillRect(ox + fw - 7, fh - 4, 3, 4);
+                if (def.armor) {
+                    ctx.fillStyle = def.armor;
+                    ctx.fillRect(ox + 4, wUp ? 6 : 7, fw - 8, 4);
+                }
+            }
+            addSheet(def.key + '_walk', canvas, { frameWidth: fw, frameHeight: fh });
+        })();
+        mk(def.key, def.w, def.bh, (c) => {
+            c.imageSmoothingEnabled = false;
+            c.fillStyle = def.body;
+            c.fillRect(3, 4, def.w - 6, def.bh - 8);
+            c.fillStyle = def.head;
+            c.fillRect(4, 1, def.w - 8, 6);
+            c.fillStyle = def.eyes;
+            c.fillRect(5, 2, 2, 2);
+            c.fillRect(def.w - 7, 2, 2, 2);
+            c.fillStyle = def.detail;
+            c.fillRect(2, 2, 3, 4);
+            c.fillRect(def.w - 5, 2, 3, 4);
+            if (def.armor) {
+                c.fillStyle = def.armor;
+                c.fillRect(4, 6, def.w - 8, 4);
+            }
+        });
+    });
+
+    // Lich King boss spritesheet
+    (() => {
+        const fw = 44, fh = 52, frames = 4;
+        const canvas = document.createElement('canvas');
+        canvas.width = fw * frames;
+        canvas.height = fh;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        for (let f = 0; f < frames; f++) {
+            const ox = f * fw;
+            const wUp = f % 2 === 0;
+            // Body (dark robe)
+            ctx.fillStyle = '#1a0a2a';
+            ctx.fillRect(ox + 12, wUp ? 14 : 16, 20, 30);
+            ctx.fillStyle = '#2a1a3a';
+            ctx.fillRect(ox + 14, wUp ? 16 : 18, 16, 26);
+            // Head (skull)
+            ctx.fillStyle = '#d4c5a9';
+            ctx.fillRect(ox + 14, wUp ? 4 : 6, 16, 12);
+            ctx.fillStyle = '#e8dcc8';
+            ctx.fillRect(ox + 16, wUp ? 5 : 7, 12, 8);
+            // Eyes (glowing purple)
+            ctx.fillStyle = '#9b59b6';
+            ctx.fillRect(ox + 16, wUp ? 7 : 9, 3, 3);
+            ctx.fillRect(ox + 24, wUp ? 7 : 9, 3, 3);
+            ctx.fillStyle = '#bb6bd9';
+            ctx.fillRect(ox + 17, wUp ? 7 : 9, 1, 1);
+            ctx.fillRect(ox + 25, wUp ? 7 : 9, 1, 1);
+            // Crown
+            ctx.fillStyle = '#f1c40f';
+            ctx.fillRect(ox + 15, wUp ? 0 : 2, 14, 4);
+            ctx.fillStyle = '#e67e22';
+            ctx.fillRect(ox + 17, wUp ? 0 : 2, 2, 2);
+            ctx.fillRect(ox + 21, wUp ? 0 : 2, 2, 2);
+            ctx.fillRect(ox + 25, wUp ? 0 : 2, 2, 2);
+            // Staff (left hand)
+            ctx.fillStyle = '#4a2d10';
+            ctx.fillRect(ox + 6, wUp ? 10 : 12, 3, 28);
+            ctx.fillStyle = '#9b59b6';
+            ctx.fillRect(ox + 5, wUp ? 6 : 8, 5, 5);
+            ctx.fillStyle = '#bb6bd9';
+            ctx.fillRect(ox + 6, wUp ? 7 : 9, 3, 3);
+            // Arms
+            ctx.fillStyle = '#1a0a2a';
+            ctx.fillRect(ox + 8, wUp ? 14 : 16, 4, 16);
+            ctx.fillRect(ox + 32, wUp ? 14 : 16, 4, 16);
+            // Hands
+            ctx.fillStyle = '#d4c5a9';
+            ctx.fillRect(ox + 6, wUp ? 28 : 30, 4, 6);
+            ctx.fillRect(ox + 34, wUp ? 28 : 30, 4, 6);
+            // Legs
+            ctx.fillStyle = '#0a0010';
+            ctx.fillRect(ox + 16, fh - 6, 5, 6);
+            ctx.fillRect(ox + 23, fh - 6, 5, 6);
+        }
+        addSheet('lich_king_walk', canvas, { frameWidth: fw, frameHeight: fh });
+    })();
+    mk('lich_king', 44, 52, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#1a0a2a';
+        c.fillRect(12, 14, 20, 30);
+        c.fillStyle = '#2a1a3a';
+        c.fillRect(14, 16, 16, 26);
+        c.fillStyle = '#d4c5a9';
+        c.fillRect(14, 4, 16, 12);
+        c.fillStyle = '#e8dcc8';
+        c.fillRect(16, 5, 12, 8);
+        c.fillStyle = '#9b59b6';
+        c.fillRect(16, 7, 3, 3);
+        c.fillRect(24, 7, 3, 3);
+        c.fillStyle = '#bb6bd9';
+        c.fillRect(17, 7, 1, 1);
+        c.fillRect(25, 7, 1, 1);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(15, 0, 14, 4);
+        c.fillStyle = '#e67e22';
+        c.fillRect(17, 0, 2, 2);
+        c.fillRect(21, 0, 2, 2);
+        c.fillRect(25, 0, 2, 2);
+        c.fillStyle = '#4a2d10';
+        c.fillRect(6, 10, 3, 28);
+        c.fillStyle = '#9b59b6';
+        c.fillRect(5, 6, 5, 5);
+        c.fillStyle = '#bb6bd9';
+        c.fillRect(6, 7, 3, 3);
+    });
+
+    // Skeleton minion — reuses existing skeleton_walk from animations.js
+
+    // Death wave VFX
+    mk('death_wave_vfx', 24, 24, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#8800ff';
+        c.beginPath();
+        c.arc(12, 12, 10, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = '#aa00ff';
+        c.beginPath();
+        c.arc(12, 12, 6, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = '#cc44ff';
+        c.beginPath();
+        c.arc(12, 12, 3, 0, Math.PI * 2);
+        c.fill();
+    });
+
+    // Soul storm VFX
+    mk('soul_storm_vfx', 20, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#6600aa';
+        c.beginPath();
+        c.arc(10, 10, 8, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = '#9900cc';
+        c.beginPath();
+        c.arc(10, 10, 5, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = '#cc66ff';
+        c.beginPath();
+        c.arc(10, 10, 2, 0, Math.PI * 2);
+        c.fill();
+    });
+
+    // ===== CURSED LANDS ENEMIES =====
+
+    const cursedEnemyDefs = [
+        { key: 'swamp_thug',       w: 22, bh: 24, body: '#2a3a1a', head: '#3a4a2a', detail: '#1a2a0a', eyes: '#ff4400', armor: '#4a5a3a' },
+        { key: 'thorn_walker',     w: 18, bh: 20, body: '#2a4a1a', head: '#3a5a2a', detail: '#1a3a0a', eyes: '#ffff00', armor: null },
+        { key: 'death_mage',       w: 14, bh: 18, body: '#1a1a2a', head: '#2a2a3a', detail: '#0a0a1a', eyes: '#00ff00', armor: null },
+        { key: 'corrupted_priest', w: 14, bh: 18, body: '#3a2a1a', head: '#4a3a2a', detail: '#2a1a0a', eyes: '#ffffff', armor: null }
+    ];
+
+    cursedEnemyDefs.forEach(def => {
+        (() => {
+            const fw = def.w, fh = def.bh, frames = 4;
+            const canvas = document.createElement('canvas');
+            canvas.width = fw * frames;
+            canvas.height = fh;
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            for (let f = 0; f < frames; f++) {
+                const ox = f * fw;
+                const wUp = f % 2 === 0;
+                ctx.fillStyle = def.body;
+                ctx.fillRect(ox + 3, wUp ? 4 : 5, fw - 6, fh - 8);
+                ctx.fillStyle = def.head;
+                ctx.fillRect(ox + 4, wUp ? 1 : 2, fw - 8, 6);
+                ctx.fillStyle = def.eyes;
+                ctx.fillRect(ox + 5, wUp ? 2 : 3, 2, 2);
+                ctx.fillRect(ox + fw - 7, wUp ? 2 : 3, 2, 2);
+                ctx.fillStyle = def.detail;
+                ctx.fillRect(ox + 2, wUp ? 2 : 3, 3, 4);
+                ctx.fillRect(ox + fw - 5, wUp ? 2 : 3, 3, 4);
+                ctx.fillStyle = def.body;
+                ctx.fillRect(ox + 4, fh - 4, 3, 4);
+                ctx.fillRect(ox + fw - 7, fh - 4, 3, 4);
+                if (def.armor) {
+                    ctx.fillStyle = def.armor;
+                    ctx.fillRect(ox + 4, wUp ? 6 : 7, fw - 8, 4);
+                }
+            }
+            addSheet(def.key + '_walk', canvas, { frameWidth: fw, frameHeight: fh });
+        })();
+        mk(def.key, def.w, def.bh, (c) => {
+            c.imageSmoothingEnabled = false;
+            c.fillStyle = def.body;
+            c.fillRect(3, 4, def.w - 6, def.bh - 8);
+            c.fillStyle = def.head;
+            c.fillRect(4, 1, def.w - 8, 6);
+            c.fillStyle = def.eyes;
+            c.fillRect(5, 2, 2, 2);
+            c.fillRect(def.w - 7, 2, 2, 2);
+            c.fillStyle = def.detail;
+            c.fillRect(2, 2, 3, 4);
+            c.fillRect(def.w - 5, 2, 3, 4);
+            if (def.armor) {
+                c.fillStyle = def.armor;
+                c.fillRect(4, 6, def.w - 8, 4);
+            }
+        });
+    });
+
+    // Ancient Evil boss spritesheet (matches enemies.js 40x56)
+    (() => {
+        const fw = 40, fh = 56, frames = 4;
+        const canvas = document.createElement('canvas');
+        canvas.width = fw * frames;
+        canvas.height = fh;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        for (let f = 0; f < frames; f++) {
+            const ox = f * fw;
+            const wUp = f % 2 === 0;
+            // Dark aura
+            ctx.fillStyle = 'rgba(30,0,50,0.3)';
+            ctx.fillRect(ox, 0, fw, fh);
+            // Main body
+            ctx.fillStyle = '#1a0a2a';
+            ctx.fillRect(ox + 10, wUp ? 8 : 10, 20, 30);
+            ctx.fillRect(ox + 8, wUp ? 14 : 16, 24, 20);
+            ctx.fillRect(ox + 6, wUp ? 20 : 22, 28, 14);
+            ctx.fillStyle = '#2a1a3a';
+            ctx.fillRect(ox + 12, wUp ? 10 : 12, 16, 26);
+            ctx.fillRect(ox + 10, wUp ? 16 : 18, 20, 16);
+            ctx.fillStyle = '#3a2a4a';
+            ctx.fillRect(ox + 14, wUp ? 12 : 14, 12, 20);
+            // Multiple eyes
+            ctx.fillStyle = '#cc22ff';
+            ctx.fillRect(ox + 14, wUp ? 14 : 16, 4, 4);
+            ctx.fillRect(ox + 22, wUp ? 14 : 16, 4, 4);
+            ctx.fillRect(ox + 18, wUp ? 18 : 20, 4, 4);
+            ctx.fillStyle = '#ee44ff';
+            ctx.fillRect(ox + 15, wUp ? 14 : 16, 2, 2);
+            ctx.fillRect(ox + 23, wUp ? 14 : 16, 2, 2);
+            ctx.fillRect(ox + 19, wUp ? 18 : 20, 2, 2);
+            // Crown/horns
+            ctx.fillStyle = '#5a2a8a';
+            ctx.fillRect(ox + 14, wUp ? 0 : 2, 4, 8);
+            ctx.fillRect(ox + 22, wUp ? 0 : 2, 4, 8);
+            ctx.fillStyle = '#7a3aaa';
+            ctx.fillRect(ox + 15, wUp ? 0 : 2, 2, 6);
+            ctx.fillRect(ox + 23, wUp ? 0 : 2, 2, 6);
+            // Arms (tentacles)
+            ctx.fillStyle = '#1a0a2a';
+            ctx.fillRect(ox + 2, wUp ? 16 : 18, 6, 20);
+            ctx.fillRect(ox + 32, wUp ? 16 : 18, 6, 20);
+            ctx.fillStyle = '#0a0010';
+            ctx.fillRect(ox + 0, wUp ? 20 : 22, 4, 14);
+            ctx.fillRect(ox + 36, wUp ? 20 : 22, 4, 14);
+            // Corruption tendrils
+            ctx.fillStyle = '#9900cc';
+            ctx.fillRect(ox + 14, wUp ? 32 : 34, 12, 4);
+            ctx.fillRect(ox + 16, wUp ? 36 : 38, 8, 4);
+            // Legs
+            ctx.fillStyle = '#0a0010';
+            ctx.fillRect(ox + 14, fh - 8, 5, 8);
+            ctx.fillRect(ox + 21, fh - 8, 5, 8);
+        }
+        addSheet('ancient_evil_walk', canvas, { frameWidth: fw, frameHeight: fh });
+    })();
+    // ancient_evil static texture defined by visualist in enemies.js
+
+    // ===== SHADOW DIMENSION ENEMIES =====
+
+    const shadowEnemyDefs = [
+        { key: 'rift_walker',       w: 16, bh: 18, body: '#0a0020', head: '#1a0030', detail: '#000010', eyes: '#00ffff', armor: null },
+        { key: 'shadow_mage',       w: 14, bh: 18, body: '#2a0040', head: '#3a0050', detail: '#1a0030', eyes: '#aa00ff', armor: null },
+        { key: 'reality_breaker',   w: 14, bh: 18, body: '#1a0a2a', head: '#2a1a3a', detail: '#0a0010', eyes: '#ffffff', armor: null },
+        { key: 'shade',             w: 12, bh: 14, body: '#0a0015', head: '#1a0025', detail: '#000005', eyes: '#6600cc', armor: null },
+        { key: 'abyss_watcher',     w: 22, bh: 24, body: '#0a001a', head: '#1a002a', detail: '#000010', eyes: '#ff0066', armor: '#1a0030' }
+    ];
+
+    shadowEnemyDefs.forEach(def => {
+        (() => {
+            const fw = def.w, fh = def.bh, frames = 4;
+            const canvas = document.createElement('canvas');
+            canvas.width = fw * frames;
+            canvas.height = fh;
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            for (let f = 0; f < frames; f++) {
+                const ox = f * fw;
+                const wUp = f % 2 === 0;
+                ctx.fillStyle = def.body;
+                ctx.fillRect(ox + 3, wUp ? 4 : 5, fw - 6, fh - 8);
+                ctx.fillStyle = def.head;
+                ctx.fillRect(ox + 4, wUp ? 1 : 2, fw - 8, 6);
+                ctx.fillStyle = def.eyes;
+                ctx.fillRect(ox + 5, wUp ? 2 : 3, 2, 2);
+                ctx.fillRect(ox + fw - 7, wUp ? 2 : 3, 2, 2);
+                ctx.fillStyle = def.detail;
+                ctx.fillRect(ox + 2, wUp ? 2 : 3, 3, 4);
+                ctx.fillRect(ox + fw - 5, wUp ? 2 : 3, 3, 4);
+                ctx.fillStyle = def.body;
+                ctx.fillRect(ox + 4, fh - 4, 3, 4);
+                ctx.fillRect(ox + fw - 7, fh - 4, 3, 4);
+            }
+            addSheet(def.key + '_walk', canvas, { frameWidth: fw, frameHeight: fh });
+        })();
+        mk(def.key, def.w, def.bh, (c) => {
+            c.imageSmoothingEnabled = false;
+            c.fillStyle = def.body;
+            c.fillRect(3, 4, def.w - 6, def.bh - 8);
+            c.fillStyle = def.head;
+            c.fillRect(4, 1, def.w - 8, 6);
+            c.fillStyle = def.eyes;
+            c.fillRect(5, 2, 2, 2);
+            c.fillRect(def.w - 7, 2, 2, 2);
+            c.fillStyle = def.detail;
+            c.fillRect(2, 2, 3, 4);
+            c.fillRect(def.w - 5, 2, 3, 4);
+        });
+    });
+
+    // shadow_king spritesheet and static texture defined by visualist in enemies.js + animations.js
+
+    // shadow_ground and shadow_chest defined by visualist in zones.js
 }
