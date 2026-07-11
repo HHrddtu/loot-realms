@@ -17,16 +17,16 @@ export const CLASS_DB = {
         meleeColor: 0xe74c3c,
         rSpell: 'meteor',
         stats: {
-            hp: 100,
-            damage: 20,
-            speed: 180,
+            hp: 80,
+            damage: 15,
+            speed: 170,
             corruptionMax: 100,
             corruptionDecay: 0.08,
             corruptionDmg: 2
         },
         growth: {
-            hpPerLevel: 10,
-            dmgPerLevel: 5,
+            hpPerLevel: 8,
+            dmgPerLevel: 4,
             speedPerLevel: 0
         }
     },
@@ -48,16 +48,16 @@ export const CLASS_DB = {
         meleeColor: 0x27ae60,
         rSpell: 'chemical_cloud',
         stats: {
-            hp: 110,
-            damage: 18,
-            speed: 170,
+            hp: 90,
+            damage: 14,
+            speed: 160,
             corruptionMax: 80,
             corruptionDecay: 0.08,
             corruptionDmg: 2
         },
         growth: {
-            hpPerLevel: 12,
-            dmgPerLevel: 4,
+            hpPerLevel: 10,
+            dmgPerLevel: 3,
             speedPerLevel: 0
         }
     },
@@ -81,16 +81,16 @@ export const CLASS_DB = {
         meleeHealPercent: 0.25,
         rSpell: 'divine_blessing',
         stats: {
-            hp: 90,
-            damage: 15,
-            speed: 190,
+            hp: 75,
+            damage: 12,
+            speed: 180,
             corruptionMax: 120,
             corruptionDecay: 0.10,
             corruptionDmg: 1
         },
         growth: {
-            hpPerLevel: 8,
-            dmgPerLevel: 3,
+            hpPerLevel: 6,
+            dmgPerLevel: 2,
             speedPerLevel: 1
         }
     }

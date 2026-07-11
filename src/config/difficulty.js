@@ -6,7 +6,7 @@ export const DIFF_NAMES = {
 };
 
 export const DIFF_MULT = {
-    Normal:   { hp: 1,   dmg: 1,   exp: 1 }
+    Normal:   { hp: 1.3,   dmg: 1.4,   exp: 0.9 }
 };
 
 export const DIFF_COLORS = {
