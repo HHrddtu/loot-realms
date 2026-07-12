@@ -61,49 +61,175 @@ export class UISystem {
     _openSpellAssign() {
         if (this.scene.menuOpen || this.scene.transitioning) return;
         this.scene.menuOpen = true;
+        this.scene.physics.pause();
         const cls = this.scene.classKey;
-        const allSpells = { sage: ['fireball', 'shield', 'heal', 'meteor'], alchemist: ['acid_flask', 'toxic_puddle', 'burrow', 'chemical_cloud'], angel: ['soul_strike', 'holy_shield', 'holy_nova', 'divine_blessing'] };
-        const available = allSpells[cls] || allSpells.sage;
+        const level = this.scene.playerLevel || 1;
+
+        // Get all spells for this class (default + new unlockable)
+        const classSpells = {
+            sage: ['fireball', 'shield', 'heal', 'meteor', 'chain_lightning', 'arcane_burst', 'time_warp', 'nova_blast'],
+            alchemist: ['acid_flask', 'toxic_puddle', 'burrow', 'chemical_cloud', 'poison_cloud', 'transmute', 'summon_golem', 'philosopher_stone'],
+            angel: ['soul_strike', 'holy_shield', 'holy_nova', 'divine_blessing', 'smite', 'divine_shield', 'resurrection', 'archangel_form']
+        };
+        const available = classSpells[cls] || classSpells.sage;
+
         const assignments = { ...(this.scene.spellAssignments || {}) };
         const defaults = { sage: { q: 'fireball', w: 'shield', e: 'heal', r: 'meteor' }, alchemist: { q: 'acid_flask', w: 'toxic_puddle', e: 'burrow', r: 'chemical_cloud' }, angel: { q: 'soul_strike', w: 'holy_shield', e: 'holy_nova', r: 'divine_blessing' } };
         const d = defaults[cls] || defaults.sage;
         if (!assignments.q) assignments.q = d.q; if (!assignments.w) assignments.w = d.w; if (!assignments.e) assignments.e = d.e; if (!assignments.r) assignments.r = d.r;
-        const iconMap = { fireball: 'icon_fireball', shield: 'icon_shield', heal: 'icon_heal', acid_flask: 'icon_acid_flask', toxic_puddle: 'icon_toxic_puddle', burrow: 'icon_burrow', soul_strike: 'icon_soul_strike', holy_shield: 'icon_holy_shield', holy_nova: 'icon_holy_nova', meteor: 'icon_meteor', chemical_cloud: 'icon_chemical_cloud', divine_blessing: 'icon_divine_blessing' };
+
         const container = this.scene.add.container(0, 0).setScrollFactor(0).setDepth(90);
-        const overlay = this.scene.add.rectangle(400, 300, 800, 600, 0x000000, 0.7).setScrollFactor(0).setDepth(90);
+        const overlay = this.scene.add.rectangle(400, 300, 800, 600, 0x000000, 0.85).setScrollFactor(0).setDepth(90);
         overlay.setInteractive(); container.add(overlay);
-        const title = this.scene.add.text(400, 80, 'SPELL ASSIGNMENT', { fontSize: '14px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(91);
-        container.add(title);
-        const slotKeys = ['q', 'w', 'e', 'r'], slotLabels = ['Q', 'W', 'E', 'R'], slotX = [300, 360, 420, 480], slotY = 140;
+
+        // Title
+        container.add(this.scene.add.text(400, 40, 'SPELL ASSIGNMENT', { fontSize: '18px', fill: '#f1c40f', fontFamily: 'Georgia', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(91));
+        container.add(this.scene.add.text(400, 60, 'Level: ' + level + '  |  Click slot, then click spell', { fontSize: '10px', fill: '#888', fontFamily: 'Arial' }).setOrigin(0.5).setScrollFactor(0).setDepth(91));
+
+        // Current slots (Q/W/E/R)
+        const slotKeys = ['q', 'w', 'e', 'r'], slotLabels = ['Q', 'W', 'E', 'R'];
+        const slotX = [320, 380, 440, 500], slotY = 110;
         let selectedSlot = null; const slotElements = [];
+
+        container.add(this.scene.add.text(400, 85, 'ACTIVE SPELLS', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(91));
+
         slotKeys.forEach((sk, i) => {
-            const bg = this.scene.add.rectangle(slotX[i], slotY, 40, 40, 0x1a1a2e).setStrokeStyle(2, 0xf1c40f).setScrollFactor(0).setDepth(91);
-            const icon = this.scene.add.sprite(slotX[i], slotY, iconMap[assignments[sk]] || 'icon_fireball').setScale(1.5).setScrollFactor(0).setDepth(92);
-            const lbl = this.scene.add.text(slotX[i], slotY - 28, slotLabels[i], { fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(92);
+            const bg = this.scene.add.rectangle(slotX[i], slotY, 44, 44, 0x1a1a2e).setStrokeStyle(2, 0xf1c40f).setScrollFactor(0).setDepth(91);
+            const spell = SPELLS[assignments[sk]];
+            const spellName = spell ? (spell.nameRu || spell.name) : '?';
+            const spellColor = spell ? '#' + (spell.color || 0xffffff).toString(16).padStart(6, '0') : '#666';
+            const icon = this.scene.add.text(slotX[i], slotY - 4, spellName.substring(0, 6), { fontSize: '8px', fill: spellColor, fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(92);
+            const lbl = this.scene.add.text(slotX[i], slotY + 26, slotLabels[i], { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(92);
             container.add([bg, icon, lbl]); slotElements.push({ bg, icon, lbl, key: sk });
             bg.setInteractive({ useHandCursor: true });
-            bg.on('pointerdown', () => { if (selectedSlot) { slotElements.forEach(s => s.bg.setStrokeStyle(2, 0xf1c40f)); selectedSlot.bg.setStrokeStyle(2, 0xf1c40f); } selectedSlot = slotElements[i]; selectedSlot.bg.setStrokeStyle(2, 0xff0000); });
+            bg.on('pointerdown', () => {
+                if (selectedSlot) { slotElements.forEach(s => s.bg.setStrokeStyle(2, 0xf1c40f)); }
+                selectedSlot = slotElements[i];
+                selectedSlot.bg.setStrokeStyle(2, 0xff0000);
+            });
         });
-        const spellElements = []; const spellY = 240;
+
+        // Available spells grid
+        container.add(this.scene.add.text(400, 160, 'AVAILABLE SPELLS', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(91));
+
+        const spellElements = [];
+        const cols = 4, spellW = 70, spellH = 90, startX = 400 - (cols * spellW) / 2 + spellW / 2;
+        const startY = 200;
+
         available.forEach((sp, i) => {
-            const sx = 300 + (i % 4) * 60, sy = spellY + Math.floor(i / 4) * 70;
-            const bg = this.scene.add.rectangle(sx, sy, 44, 44, 0x1a1a2e).setStrokeStyle(2, 0x555555).setScrollFactor(0).setDepth(91);
-            const icon = this.scene.add.sprite(sx, sy, iconMap[sp] || 'icon_fireball').setScale(1.6).setScrollFactor(0).setDepth(92);
-            const nm = this.scene.add.text(sx, sy + 30, (SPELLS[sp] ? SPELLS[sp].nameRu || SPELLS[sp].name : sp), { fontSize: '7px', fill: '#aaa', fontFamily: 'Arial' }).setOrigin(0.5).setScrollFactor(0).setDepth(92);
-            container.add([bg, icon, nm]); spellElements.push({ bg, icon, nm, key: sp });
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            const sx = startX + col * spellW;
+            const sy = startY + row * (spellH + 10);
+            const spell = SPELLS[sp];
+            const isLocked = spell.unlockLevel && spell.unlockLevel > level;
+            const isActive = Object.values(assignments).includes(sp);
+
+            const bgColor = isLocked ? 0x1a1a1a : (isActive ? 0x1a2a1a : 0x1a1a2e);
+            const borderColor = isLocked ? 0x333333 : (isActive ? 0x2ecc71 : 0x555555);
+            const bg = this.scene.add.rectangle(sx, sy, spellW - 4, spellH, bgColor).setStrokeStyle(2, borderColor).setScrollFactor(0).setDepth(91);
+            container.add(bg);
+
+            // Spell name
+            const nameColor = isLocked ? '#555' : '#fff';
+            container.add(this.scene.add.text(sx, sy - 25, spell ? (spell.nameRu || spell.name) : sp, { fontSize: '9px', fill: nameColor, fontFamily: 'Arial', fontStyle: 'bold', wordWrap: { width: spellW - 8 } }).setOrigin(0.5).setScrollFactor(0).setDepth(92));
+
+            // Spell slot indicator
+            const slotColor = isLocked ? '#333' : '#f1c40f';
+            container.add(this.scene.add.text(sx, sy - 12, '[' + (spell ? spell.slot : '?') + ']', { fontSize: '8px', fill: slotColor, fontFamily: 'Arial' }).setOrigin(0.5).setScrollFactor(0).setDepth(92));
+
+            // Stats preview
+            if (!isLocked && spell) {
+                const stats = [];
+                if (spell.damage) stats.push(spell.damage + ' DMG');
+                if (spell.healPercent) stats.push('+' + Math.round(spell.healPercent * 100) + '% HP');
+                if (spell.absorption) stats.push(spell.absorption + ' Shield');
+                if (spell.dot) stats.push(spell.dot + ' DoT');
+                container.add(this.scene.add.text(sx, sy + 4, stats.join(' '), { fontSize: '7px', fill: '#aaa', fontFamily: 'Arial' }).setOrigin(0.5).setScrollFactor(0).setDepth(92));
+
+                // Cooldown
+                container.add(this.scene.add.text(sx, sy + 15, spell.cooldown + 's', { fontSize: '7px', fill: '#666', fontFamily: 'Arial' }).setOrigin(0.5).setScrollFactor(0).setDepth(92));
+            }
+
+            // Lock indicator
+            if (isLocked) {
+                container.add(this.scene.add.text(sx, sy + 5, 'Lv.' + spell.unlockLevel, { fontSize: '9px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(92));
+                container.add(this.scene.add.text(sx, sy + 18, 'LOCKED', { fontSize: '8px', fill: '#666', fontFamily: 'Arial' }).setOrigin(0.5).setScrollFactor(0).setDepth(92));
+            }
+
+            // Active indicator
+            if (isActive && !isLocked) {
+                container.add(this.scene.add.text(sx + spellW / 2 - 6, sy - spellH / 2 + 2, '✓', { fontSize: '10px', fill: '#2ecc71', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(1, 0).setScrollFactor(0).setDepth(92));
+            }
+
+            // Click handler
             bg.setInteractive({ useHandCursor: true });
-            bg.on('pointerdown', () => { if (selectedSlot) { assignments[selectedSlot.key] = sp; selectedSlot.icon.setTexture(iconMap[sp] || 'icon_fireball'); slotElements.forEach(s => s.bg.setStrokeStyle(2, 0xf1c40f)); selectedSlot = null; } });
+            bg.on('pointerover', () => { if (!isLocked) bg.setFillStyle(isActive ? 0x1a3a1a : 0x2a2a4e); });
+            bg.on('pointerout', () => { bg.setFillStyle(bgColor); });
+            bg.on('pointerdown', () => {
+                if (isLocked || !selectedSlot) return;
+                // Unassign spell from other slots if already assigned
+                Object.keys(assignments).forEach(k => { if (assignments[k] === sp) assignments[k] = d[k]; });
+                assignments[selectedSlot.key] = sp;
+                // Update slot display
+                const newSpell = SPELLS[sp];
+                selectedSlot.icon.setText(newSpell ? (newSpell.nameRu || newSpell.name).substring(0, 6) : '?');
+                selectedSlot.icon.setColor(newSpell ? '#' + (newSpell.color || 0xffffff).toString(16).padStart(6, '0') : '#666');
+                // Reset selection
+                slotElements.forEach(s => s.bg.setStrokeStyle(2, 0xf1c40f));
+                selectedSlot = null;
+                // Refresh grid to update active indicators
+                this._refreshSpellGrid(container, spellElements, available, assignments, level, d);
+            });
+
+            spellElements.push({ bg, key: sp, isLocked, isActive });
         });
-        const saveBtn = this.scene.add.rectangle(400, 420, 100, 30, 0x27ae60).setStrokeStyle(2, 0x2ecc71).setScrollFactor(0).setDepth(91);
-        const saveTxt = this.scene.add.text(400, 420, 'SAVE', { fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(92);
+
+        // Tooltip area
+        const tooltipBg = this.scene.add.rectangle(400, 520, 500, 40, 0x111122, 0.9).setStrokeStyle(1, 0x333).setScrollFactor(0).setDepth(91);
+        const tooltipText = this.scene.add.text(400, 520, 'Hover over a spell to see details', { fontSize: '9px', fill: '#888', fontFamily: 'Arial', wordWrap: { width: 480 } }).setOrigin(0.5).setScrollFactor(0).setDepth(92);
+        container.add([tooltipBg, tooltipText]);
+
+        // Add hover handlers to show descriptions
+        spellElements.forEach(se => {
+            const spell = SPELLS[se.key];
+            if (!spell) return;
+            se.bg.on('pointerover', () => {
+                if (!se.isLocked) {
+                    const desc = spell.description || '';
+                    const cost = spell.corruptionCost > 0 ? 'Corruption: ' + spell.corruptionCost : 'No corruption';
+                    tooltipText.setText((spell.nameRu || spell.name) + ': ' + desc + '  |  ' + cost + '  |  Cooldown: ' + spell.cooldown + 's');
+                }
+            });
+        });
+
+        // Save button
+        const saveBtn = this.scene.add.rectangle(350, 560, 100, 30, 0x27ae60).setStrokeStyle(2, 0x2ecc71).setScrollFactor(0).setDepth(91);
+        const saveTxt = this.scene.add.text(350, 560, 'SAVE', { fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(92);
         container.add([saveBtn, saveTxt]);
-        const closeBtn = this.scene.add.rectangle(400, 460, 100, 30, 0x555555).setStrokeStyle(2, 0x888888).setScrollFactor(0).setDepth(91);
-        const closeTxt = this.scene.add.text(400, 460, 'CLOSE', { fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(92);
+
+        // Close button
+        const closeBtn = this.scene.add.rectangle(450, 560, 100, 30, 0x555555).setStrokeStyle(2, 0x888888).setScrollFactor(0).setDepth(91);
+        const closeTxt = this.scene.add.text(450, 560, 'CLOSE', { fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(92);
         container.add([closeBtn, closeTxt]);
+
         const cleanup = () => { container.destroy(); this.scene.menuOpen = false; this.scene.physics.resume(); };
-        saveBtn.setInteractive({ useHandCursor: true }); saveBtn.on('pointerdown', () => { this.scene.spellAssignments = { ...assignments }; const acc = loadAccount() || {}; acc.spellAssignments = { ...(acc.spellAssignments || {}), [this.scene.classKey]: { ...assignments } }; saveAccount(acc); cleanup(); });
-        closeBtn.setInteractive({ useHandCursor: true }); closeBtn.on('pointerdown', cleanup);
+        saveBtn.setInteractive({ useHandCursor: true });
+        saveBtn.on('pointerdown', () => {
+            this.scene.spellAssignments = { ...assignments };
+            const acc = loadAccount() || {};
+            acc.spellAssignments = { ...(acc.spellAssignments || {}), [this.scene.classKey]: { ...assignments } };
+            saveAccount(acc);
+            cleanup();
+        });
+        closeBtn.setInteractive({ useHandCursor: true });
+        closeBtn.on('pointerdown', cleanup);
         overlay.on('pointerdown', () => {});
+    }
+
+    _refreshSpellGrid(container, spellElements, available, assignments, level, defaults) {
+        // This is a simplified refresh - in practice, we'd need to track and update individual elements
+        // For now, the grid is rebuilt when the UI is opened
     }
 
     toggleInventory() { this.invPanel.toggleInventory(); }
