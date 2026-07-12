@@ -338,8 +338,9 @@ export const THRONE_NEW_ITEMS = [
 ];
 
 export const ACCOUNT_EQUIP_DB_VILLAGE = [
-    { id: 'relic_village_sage',      name: 'Tome of Flames',     nameRu: 'Том Пламени',       nameDe: 'Flammenschaft',    rarity: 'legendary', slot: 'accessory', texKey: 'relic_sage', chance: 0.50, stats: { spellPercent: 8, critPercent: 5 } },
-    { id: 'relic_village_alchemist', name: 'Alchemist Belt',     nameRu: 'Пояс Алхимика',     nameDe: 'Alchemistengürtel', rarity: 'legendary', slot: 'accessory', texKey: 'relic_alchemist', chance: 0.50, stats: { hpPercent: 10, damagePercent: 6 } }
+    { id: 'relic_village_sage',      name: 'Tome of Flames',     nameRu: 'Том Пламени',       nameDe: 'Flammenschaft',    rarity: 'legendary', slot: 'accessory', texKey: 'relic_sage', chance: 0.34, stats: { spellPercent: 8, critPercent: 5 } },
+    { id: 'relic_village_alchemist', name: 'Alchemist Belt',     nameRu: 'Пояс Алхимика',     nameDe: 'Alchemistengürtel', rarity: 'legendary', slot: 'accessory', texKey: 'relic_alchemist', chance: 0.33, stats: { hpPercent: 10, damagePercent: 6 } },
+    { id: 'relic_village_angel',     name: 'Angel Feather',      nameRu: 'Перо Ангела',       nameDe: 'Engelsfeder',      rarity: 'legendary', slot: 'accessory', texKey: 'relic_angel', chance: 0.33, stats: { regenPercent: 5, dodgePercent: 4 } }
 ];
 
 export const VILLAGE_CHEST_DROP_ITEMS = [

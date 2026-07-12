@@ -205,11 +205,11 @@ export const BANDIT_LEADER_BOSS = {
 export const DEPTHS_CAMP_COUNT = 10;
 export const DEPTHS_MOBS_PER_CAMP = 5;
 export const DEPTHS_ENEMY_TYPES = {
-    tank:     { key: 'crypt_soldier',  name: 'Crypt Soldier',  nameRu: 'Криптовый Солдат',  nameDe: 'Kryptsoldat',     texKey: 'shadow_stalker',  hp: 700, dmg: 42, exp: 110, bw: 22, bh: 24, role: 'tank' },
-    assassin: { key: 'shadow_assassin', name: 'Shadow Assassin', nameRu: 'Теневой Убийца',   nameDe: 'Schattenmeuchler', texKey: 'dark_reflection', hp: 340, dmg: 58, exp: 105, bw: 14, bh: 14, role: 'assassin' },
-    archer:   { key: 'bone_archer',    name: 'Bone Archer',    nameRu: 'Костяной Лучник',   nameDe: 'Knochenbogenschütze', texKey: 'dark_counselor', hp: 370, dmg: 38, exp: 95,  bw: 16, bh: 16, role: 'archer' },
-    mage:     { key: 'necro_mage',     name: 'Necro Mage',     nameRu: 'Некромаг',          nameDe: 'Nekromagier',     texKey: 'shadow_advisor',     hp: 280, dmg: 65, exp: 110, bw: 14, bh: 18, role: 'mage' },
-    healer:   { key: 'dark_priest',    name: 'Dark Priest',    nameRu: 'Тёмный Жрец',       nameDe: 'Dunkelpriester',  texKey: 'shadow_mimic',    hp: 320, dmg: 30, exp: 98,  bw: 14, bh: 18, role: 'healer' }
+    tank:     { key: 'crypt_soldier',  name: 'Crypt Soldier',  nameRu: 'Криптовый Солдат',  nameDe: 'Kryptsoldat',     texKey: 'crypt_soldier',  hp: 700, dmg: 42, exp: 110, bw: 22, bh: 24, role: 'tank' },
+    assassin: { key: 'shadow_assassin', name: 'Shadow Assassin', nameRu: 'Теневой Убийца',   nameDe: 'Schattenmeuchler', texKey: 'shadow_assassin', hp: 340, dmg: 58, exp: 105, bw: 14, bh: 14, role: 'assassin' },
+    archer:   { key: 'bone_archer',    name: 'Bone Archer',    nameRu: 'Костяной Лучник',   nameDe: 'Knochenbogenschütze', texKey: 'bone_archer', hp: 370, dmg: 38, exp: 95,  bw: 16, bh: 16, role: 'archer' },
+    mage:     { key: 'necro_mage',     name: 'Necro Mage',     nameRu: 'Некромаг',          nameDe: 'Nekromagier',     texKey: 'necro_mage',     hp: 280, dmg: 65, exp: 110, bw: 14, bh: 18, role: 'mage' },
+    healer:   { key: 'dark_priest',    name: 'Dark Priest',    nameRu: 'Тёмный Жрец',       nameDe: 'Dunkelpriester',  texKey: 'dark_priest',    hp: 320, dmg: 30, exp: 98,  bw: 14, bh: 18, role: 'healer' }
 };
 
 // Depths boss
