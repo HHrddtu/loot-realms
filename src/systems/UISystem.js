@@ -248,4 +248,111 @@ export class UISystem {
     _openPauseAdvanced() { this.pause._openPauseAdvanced(); }
     _openAccountEquipOverlay() { this.accountEquip._openAccountEquipOverlay(); }
     _closeAccountEquipOverlay() { this.accountEquip._closeAccountEquipOverlay(); }
+
+    _openSpellProgress() {
+        if (this.scene.menuOpen || this.scene.transitioning) return;
+        this.scene.menuOpen = true;
+        this.scene.physics.pause();
+        const cls = this.scene.classKey;
+        const level = this.scene.playerLevel || 1;
+
+        // Get all spells for this class
+        const classSpells = {
+            sage: ['fireball', 'shield', 'heal', 'meteor', 'chain_lightning', 'arcane_burst', 'time_warp', 'nova_blast'],
+            alchemist: ['acid_flask', 'toxic_puddle', 'burrow', 'chemical_cloud', 'poison_cloud', 'transmute', 'summon_golem', 'philosopher_stone'],
+            angel: ['soul_strike', 'holy_shield', 'holy_nova', 'divine_blessing', 'smite', 'divine_shield', 'resurrection', 'archangel_form']
+        };
+        const allSpells = classSpells[cls] || classSpells.sage;
+
+        const container = this.scene.add.container(0, 0).setScrollFactor(0).setDepth(90);
+        const overlay = this.scene.add.rectangle(400, 300, 800, 600, 0x000000, 0.85).setScrollFactor(0).setDepth(90);
+        overlay.setInteractive(); container.add(overlay);
+
+        // Title
+        container.add(this.scene.add.text(400, 30, 'SPELL PROGRESSION', { fontSize: '18px', fill: '#f1c40f', fontFamily: 'Georgia', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(91));
+        container.add(this.scene.add.text(400, 52, 'Level: ' + level + ' / 20', { fontSize: '12px', fill: '#888', fontFamily: 'Arial' }).setOrigin(0.5).setScrollFactor(0).setDepth(91));
+
+        // Level progress bar
+        const barWidth = 400;
+        const barX = 400 - barWidth / 2;
+        const barY = 68;
+        container.add(this.scene.add.rectangle(400, barY + 5, barWidth, 10, 0x333333).setScrollFactor(0).setDepth(91));
+        const progress = Math.min(level / 20, 1);
+        container.add(this.scene.add.rectangle(barX + (barWidth * progress) / 2, barY + 5, barWidth * progress, 10, 0xf1c40f).setScrollFactor(0).setDepth(92));
+
+        // Spells by unlock level
+        const unlockLevels = [1, 5, 10, 15, 20];
+        let yPos = 95;
+
+        unlockLevels.forEach(unlockLvl => {
+            const spellsAtLevel = allSpells.filter(sp => {
+                const spell = SPELLS[sp];
+                return spell && (spell.unlockLevel || 1) === unlockLvl;
+            });
+
+            if (spellsAtLevel.length === 0) return;
+
+            // Level header
+            const isUnlocked = level >= unlockLvl;
+            const headerColor = isUnlocked ? '#f1c40f' : '#555';
+            container.add(this.scene.add.text(60, yPos, 'LEVEL ' + unlockLvl, { fontSize: '13px', fill: headerColor, fontFamily: 'Arial', fontStyle: 'bold' }).setScrollFactor(0).setDepth(91));
+            if (isUnlocked) {
+                container.add(this.scene.add.text(140, yPos, '✓ UNLOCKED', { fontSize: '10px', fill: '#2ecc71', fontFamily: 'Arial' }).setScrollFactor(0).setDepth(91));
+            } else {
+                container.add(this.scene.add.text(140, yPos, '🔒 LOCKED', { fontSize: '10px', fill: '#e74c3c', fontFamily: 'Arial' }).setScrollFactor(0).setDepth(91));
+            }
+            yPos += 20;
+
+            // Spells at this level
+            spellsAtLevel.forEach((sp, i) => {
+                const spell = SPELLS[sp];
+                const spellUnlocked = level >= (spell.unlockLevel || 1);
+                const x = 80 + i * 120;
+
+                // Spell card background
+                const bgColor = spellUnlocked ? 0x1a2a1a : 0x1a1a1a;
+                const borderColor = spellUnlocked ? 0x2ecc71 : 0x333333;
+                container.add(this.scene.add.rectangle(x + 40, yPos + 40, 100, 80, bgColor).setStrokeStyle(2, borderColor).setScrollFactor(0).setDepth(91));
+
+                // Spell name
+                const nameColor = spellUnlocked ? '#fff' : '#555';
+                container.add(this.scene.add.text(x + 40, yPos + 10, spell.nameRu || spell.name, { fontSize: '10px', fill: nameColor, fontFamily: 'Arial', fontStyle: 'bold', wordWrap: { width: 90 } }).setOrigin(0.5).setScrollFactor(0).setDepth(92));
+
+                // Slot indicator
+                container.add(this.scene.add.text(x + 40, yPos + 24, '[' + spell.slot + ']', { fontSize: '9px', fill: spellUnlocked ? '#f1c40f' : '#444', fontFamily: 'Arial' }).setOrigin(0.5).setScrollFactor(0).setDepth(92));
+
+                // Stats
+                if (spellUnlocked) {
+                    const stats = [];
+                    if (spell.damage) stats.push(spell.damage + ' DMG');
+                    if (spell.healPercent) stats.push('+' + Math.round(spell.healPercent * 100) + '% HP');
+                    if (spell.absorption) stats.push(spell.absorption + ' Shield');
+                    container.add(this.scene.add.text(x + 40, yPos + 38, stats.join(' '), { fontSize: '8px', fill: '#aaa', fontFamily: 'Arial' }).setOrigin(0.5).setScrollFactor(0).setDepth(92));
+
+                    // Cooldown
+                    container.add(this.scene.add.text(x + 40, yPos + 50, spell.cooldown + 's CD', { fontSize: '8px', fill: '#666', fontFamily: 'Arial' }).setOrigin(0.5).setScrollFactor(0).setDepth(92));
+
+                    // Corruption
+                    if (spell.corruptionCost > 0) {
+                        container.add(this.scene.add.text(x + 40, yPos + 60, spell.corruptionCost + ' Cor', { fontSize: '7px', fill: '#9b59b6', fontFamily: 'Arial' }).setOrigin(0.5).setScrollFactor(0).setDepth(92));
+                    }
+                } else {
+                    // Locked overlay
+                    container.add(this.scene.add.text(x + 40, yPos + 40, 'Lv.' + (spell.unlockLevel || 1), { fontSize: '12px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(92));
+                }
+            });
+
+            yPos += 100;
+        });
+
+        // Close button
+        const closeBtn = this.scene.add.rectangle(400, 560, 120, 30, 0x555555).setStrokeStyle(2, 0x888888).setScrollFactor(0).setDepth(91);
+        const closeTxt = this.scene.add.text(400, 560, 'CLOSE', { fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(92);
+        container.add([closeBtn, closeTxt]);
+
+        const cleanup = () => { container.destroy(); this.scene.menuOpen = false; this.scene.physics.resume(); };
+        closeBtn.setInteractive({ useHandCursor: true });
+        closeBtn.on('pointerdown', cleanup);
+        overlay.on('pointerdown', () => {});
+    }
 }

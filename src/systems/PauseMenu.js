@@ -70,13 +70,15 @@ export class PauseMenu {
         };
         makeSmallBtn(335, 210, t('adv.talents'), 0x9b59b6, () => { this.closePause(); this.ui._openTalentTree(); });
         makeSmallBtn(465, 210, t('adv.accountEquip'), 0xf39c12, () => { this.closePause(); this.ui.accountEquip._openAccountEquipOverlay(); });
-        makeSmallBtn(335, 255, t('pause.changeClass'), 0x1abc9c, () => { this.scene.doSave(); this.closePause(); this.scene.scene.start('ClassSelect'); });
+        makeSmallBtn(335, 255, 'Spells', 0xe74c3c, () => { this.closePause(); this.ui._openSpellAssign(); });
+        makeSmallBtn(465, 255, t('pause.changeClass'), 0x1abc9c, () => { this.scene.doSave(); this.closePause(); this.scene.scene.start('ClassSelect'); });
         makeSmallBtn(335, 300, t('keybind.controls'), 0x2980b9, () => { 
             this.scene.doSave();
             this.scene.menuOpen = false;
             if (this.scene.pauseGroup) { this.scene.pauseGroup.forEach(e => e.destroy()); this.scene.pauseGroup = []; }
             this.scene.scene.start('Keybinds', { returnScene: 'Game' });
         });
+        makeSmallBtn(465, 300, 'Progress', 0x3498db, () => { this.closePause(); this.ui._openSpellProgress(); });
         makeSmallBtn(400, 345, t('pause.restart'), 0xe67e22, () => { this.scene.doSave(); this.closePause(); this.scene.scene.restart({ difficulty: this.scene.difficulty, classKey: this.scene.classKey }); });
         makeSmallBtn(400, 385, t('pause.back'), 0x34495e, () => { this.closePause(); this.openPause(); });
     }
