@@ -76,6 +76,57 @@ export function drawNpcTextures(mk) {
         c.fillRect(17, 43, 6, 1);
     });
 
+    // Miner — шахтёр с киркой
+    mk('npc_miner', 32, 48, (c) => {
+        c.imageSmoothingEnabled = false;
+        // Голова
+        c.fillStyle = '#c49a6c';
+        c.fillRect(10, 2, 12, 10);
+        c.fillRect(8, 4, 16, 8);
+        // Шлем шахтёра
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(8, 0, 16, 4);
+        c.fillRect(6, 2, 20, 3);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(10, 1, 12, 2);
+        // Фонарик на шлеме
+        c.fillStyle = '#f1c40f';
+        c.fillRect(14, 0, 4, 2);
+        // Глаза (усталые)
+        c.fillStyle = '#2c3e50';
+        c.fillRect(12, 6, 2, 2);
+        c.fillRect(18, 6, 2, 2);
+        // Усы
+        c.fillStyle = '#5d4037';
+        c.fillRect(12, 9, 2, 1);
+        c.fillRect(18, 9, 2, 1);
+        // Тело (рабочая одежда)
+        c.fillStyle = '#5d4037';
+        c.fillRect(8, 12, 16, 16);
+        c.fillStyle = '#795548';
+        c.fillRect(10, 14, 12, 12);
+        // Ремень
+        c.fillStyle = '#3e2723';
+        c.fillRect(8, 20, 16, 2);
+        // Руки
+        c.fillStyle = '#c49a6c';
+        c.fillRect(4, 14, 4, 10);
+        c.fillRect(24, 14, 4, 10);
+        // Кирка в руке
+        c.fillStyle = '#5d4037';
+        c.fillRect(26, 8, 2, 12);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(24, 6, 6, 4);
+        // Ноги
+        c.fillStyle = '#3e2723';
+        c.fillRect(10, 28, 4, 10);
+        c.fillRect(18, 28, 4, 10);
+        // Ботинки
+        c.fillStyle = '#2c1810';
+        c.fillRect(9, 36, 5, 4);
+        c.fillRect(17, 36, 5, 4);
+    });
+
     // Merchant — торговец с товарами
     mk('npc_merchant', 32, 48, (c) => {
         c.imageSmoothingEnabled = false;

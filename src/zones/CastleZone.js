@@ -26,10 +26,12 @@ export class CastleZone extends BaseZone {
 
     setup(roomIndex = 0) {
         this.scene._destroyOrphanedCaveStairs();
-        // Clean up village NPCs that might still be visible in castle zone
-        // They will be respawned when returning to village
+        // Clean up ALL village NPCs that might still be visible
         const npcRefs = ['castleChildNPC', 'castleChildHint', 'villageChildNPC', 'villageChildHint', 
-                        'villageMerchantNPC', 'villageMerchantHint', 'villageInn', 'villageInnHint'];
+                        'villageMerchantNPC', 'villageMerchantHint', 'villageInn', 'villageInnHint',
+                        'campfire', 'campfireHint', 'hellPortal', 'hellPortalGlow', 'hellPortalHint',
+                        'depthsPortal', 'depthsPortalGlow', 'depthsPortalHint',
+                        'cursedPortalVillage', 'cursedPortalVillageHint'];
         npcRefs.forEach(ref => {
             if (this.scene[ref]) {
                 if (this.scene[ref].destroy) this.scene[ref].destroy();

@@ -27,6 +27,40 @@ export class BaseZone {
         this._destroyDefeatedUI();
         this._destroyZoneSpecific();
         this._destroyNPCs();
+        this._destroyVillageObjects();
+    }
+
+    _destroyVillageObjects() {
+        const s = this.scene;
+        // Clean up ALL village-specific objects that might persist across zones
+        const villageRefs = [
+            'villageChildNPC', 'villageChildHint',
+            'castleChildNPC', 'castleChildHint',
+            'villageMerchantNPC', 'villageMerchantHint',
+            'villageInn', 'villageInnHint',
+            'campfire', 'campfireHint',
+            'hellPortal', 'hellPortalGlow', 'hellPortalHint',
+            'depthsPortal', 'depthsPortalGlow', 'depthsPortalHint',
+            'cursedPortalVillage', 'cursedPortalVillageHint',
+            'villageBg', 'villageCemeteryGate',
+            'villageBoss', 'villageBossNameText',
+            'villageBossAlive', 'childSpawned',
+            'snowyIceSpirit', 'snowyIceSpiritNameText', 'snowyIceSpiritAbilities', 'snowyIceShards'
+        ];
+        villageRefs.forEach(ref => {
+            if (s[ref]) {
+                if (s[ref].destroy) s[ref].destroy();
+                s[ref] = null;
+            }
+        });
+        // Clean up village groups
+        if (s.villageChests) { s.villageChests.clear(true, true); s.villageChests.destroy(); s.villageChests = null; }
+        if (s.villageCorpses) { s.villageCorpses.clear(true, true); s.villageCorpses.destroy(); s.villageCorpses = null; }
+        if (s.villageZombies) { s.villageZombies.clear(true, true); s.villageZombies.destroy(); s.villageZombies = null; }
+        if (s.villageDecor) { s.villageDecor.forEach(d => { if (d && d.destroy) d.destroy(); }); s.villageDecor = null; }
+        if (s.shopGroup) { s.shopGroup.forEach(e => { if (e && e.destroy) e.destroy(); }); s.shopGroup = []; }
+        // Kill all timers
+        s.time.removeAllEvents();
     }
 
     _destroyFireballs() {

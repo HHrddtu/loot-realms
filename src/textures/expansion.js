@@ -1042,53 +1042,55 @@ export function drawExpansionTextures(mk, textures) {
         c.fill();
     });
 
-    // Hell portal (fiery rift)
-    mk('hell_portal', 60, 28, (c) => {
+    // Hell portal (fiery rift) - improved version
+    mk('hell_portal', 80, 40, (c) => {
         c.imageSmoothingEnabled = false;
+        // Outer glow
+        c.fillStyle = 'rgba(255,68,0,0.2)';
+        c.fillRect(0, 0, 80, 40);
         // Outer dark burned edges
         c.fillStyle = '#1a0a0a';
-        c.fillRect(0, 0, 60, 28);
+        c.fillRect(4, 4, 72, 32);
         c.fillStyle = '#2a0a00';
-        c.fillRect(2, 2, 56, 24);
+        c.fillRect(6, 6, 68, 28);
         // Cracked stone rim
         c.fillStyle = '#3a1500';
-        c.fillRect(4, 3, 8, 4);
-        c.fillRect(48, 3, 8, 4);
-        c.fillRect(3, 10, 4, 8);
-        c.fillRect(53, 10, 4, 8);
-        c.fillRect(6, 20, 8, 4);
-        c.fillRect(46, 20, 8, 4);
-        // Deep fiery void
+        c.fillRect(8, 7, 12, 6);
+        c.fillRect(60, 7, 12, 6);
+        c.fillRect(7, 14, 6, 12);
+        c.fillRect(67, 14, 6, 12);
+        c.fillRect(10, 28, 12, 6);
+        c.fillRect(58, 28, 12, 6);
+        // Deep fiery void (concentric)
         c.fillStyle = '#ff2200';
-        c.fillRect(8, 6, 44, 16);
+        c.fillRect(12, 10, 56, 20);
         c.fillStyle = '#ff4400';
-        c.fillRect(10, 7, 40, 14);
+        c.fillRect(14, 11, 52, 18);
         c.fillStyle = '#ff6600';
-        c.fillRect(12, 8, 36, 12);
+        c.fillRect(16, 12, 48, 16);
         c.fillStyle = '#ff8800';
-        c.fillRect(14, 9, 32, 10);
+        c.fillRect(18, 13, 44, 14);
         c.fillStyle = '#ffaa00';
-        c.fillRect(16, 10, 28, 8);
+        c.fillRect(20, 14, 40, 12);
         c.fillStyle = '#ffcc00';
-        c.fillRect(18, 11, 24, 6);
+        c.fillRect(22, 15, 36, 10);
         c.fillStyle = '#ffdd44';
-        c.fillRect(20, 12, 20, 4);
+        c.fillRect(24, 16, 32, 8);
         c.fillStyle = '#ffee88';
-        c.fillRect(22, 13, 16, 2);
+        c.fillRect(26, 17, 28, 6);
         c.fillStyle = '#ffffff';
-        c.fillRect(24, 13, 12, 2);
-        // Lava drip effect
+        c.fillRect(28, 18, 24, 4);
+        // Lava drip effects
         c.fillStyle = '#ff4400';
-        c.fillRect(14, 18, 3, 4);
-        c.fillRect(42, 19, 3, 3);
-        c.fillStyle = '#ff6600';
-        c.fillRect(30, 20, 4, 3);
-        // Outer glow hints
-        c.fillStyle = '#ff3300';
-        c.fillRect(2, 6, 2, 2);
-        c.fillRect(56, 6, 2, 2);
-        c.fillRect(2, 18, 2, 2);
-        c.fillRect(56, 18, 2, 2);
+        c.fillRect(18, 26, 4, 6);
+        c.fillRect(56, 27, 4, 5);
+        c.fillRect(38, 28, 3, 4);
+        // Fire particles
+        c.fillStyle = '#ffcc00';
+        c.fillRect(30, 8, 3, 3);
+        c.fillRect(50, 9, 2, 2);
+        c.fillRect(22, 24, 2, 2);
+        c.fillRect(58, 25, 2, 2);
     });
 
     // Hell enemy spritesheets

@@ -130,13 +130,8 @@ export class MineSpawner {
         cart.cartPath = path;
         cart.cartIdx = 0;
         cart.cartSpeed = 120;
-        cart.cartActive = false;
+        cart.cartActive = true; // Auto-start on zone entry
         cart.cartCooldown = 0;
-        cart.cartTriggerZone = s.add.zone(100, 100, 60, 60);
-        s.physics.add.existing(cart.cartTriggerZone, true);
-        s.physics.add.overlap(s.player, cart.cartTriggerZone, () => {
-            if (!cart.cartActive && cart.cartCooldown <= 0) { cart.cartActive = true; cart.cartIdx = 0; }
-        }, null, s);
         s.mineCart = cart;
     }
 }
