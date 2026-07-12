@@ -12,8 +12,8 @@ export const EQUIPMENT_SETS = {
         nameDe: 'Waldwanderer',
         pieces: ['rusty_sword', 'leather_armor', 'wood_ring'],
         bonuses: [
-            { pieces: 2, name: 'Forest Touch', nameRu: 'Касание Леса', effects: { hpPercent: 5, regenFlat: 1 } },
-            { pieces: 3, name: 'Forest Guardian', nameRu: 'Хранитель Леса', effects: { hpPercent: 10, damagePercent: 5, regenFlat: 2 } }
+            { pieces: 2, name: 'Forest Touch', nameRu: 'Касание Леса', effects: { hpPercent: 10, regenPercent: 3 } },
+            { pieces: 3, name: 'Forest Guardian', nameRu: 'Хранитель Леса', effects: { hpPercent: 18, damagePercent: 8, regenPercent: 5, regenOnLow: true } }
         ]
     },
 
@@ -25,8 +25,8 @@ export const EQUIPMENT_SETS = {
         nameDe: 'Eisenwächter',
         pieces: ['iron_sword', 'iron_armor', 'ruby_ring'],
         bonuses: [
-            { pieces: 2, name: 'Iron Will', nameRu: 'Железная Воля', effects: { damageReduction: 5, hpPercent: 8 } },
-            { pieces: 3, name: 'Iron Fortress', nameRu: 'Железная Крепость', effects: { damageReduction: 15, hpPercent: 15, damagePercent: 10 } }
+            { pieces: 2, name: 'Iron Will', nameRu: 'Железная Воля', effects: { damageReduction: 10, hpPercent: 12 } },
+            { pieces: 3, name: 'Iron Fortress', nameRu: 'Железная Крепость', effects: { damageReduction: 20, hpPercent: 22, damagePercent: 12, drOnHit: true } }
         ]
     },
 
@@ -38,8 +38,8 @@ export const EQUIPMENT_SETS = {
         nameDe: 'Flammentöter',
         pieces: ['flame_blade', 'dragon_scale', 'sapphire_ring'],
         bonuses: [
-            { pieces: 2, name: 'Flame Power', nameRu: 'Сила Пламени', effects: { damagePercent: 15, critPercent: 5 } },
-            { pieces: 3, name: 'Inferno', nameRu: 'Инферно', effects: { damagePercent: 25, critPercent: 10, spellPercent: 10 } }
+            { pieces: 2, name: 'Flame Power', nameRu: 'Сила Пламени', effects: { damagePercent: 18, critPercent: 8 } },
+            { pieces: 3, name: 'Inferno', nameRu: 'Инферно', effects: { damagePercent: 28, critPercent: 12, spellPercent: 12, burnOnCrit: true } }
         ]
     },
 
@@ -51,9 +51,9 @@ export const EQUIPMENT_SETS = {
         nameDe: 'Drachenritter',
         pieces: ['flame_blade', 'dragon_scale', 'ruby_ring', 'crown'],
         bonuses: [
-            { pieces: 2, name: 'Dragon Blood', nameRu: 'Кровь Дракона', effects: { hpPercent: 15, damagePercent: 10 } },
-            { pieces: 3, name: 'Dragon Heart', nameRu: 'Сердце Дракона', effects: { hpPercent: 25, damagePercent: 20, critPercent: 8 } },
-            { pieces: 4, name: 'Dragon Soul', nameRu: 'Душа Дракона', effects: { hpPercent: 35, damagePercent: 30, critPercent: 15, spellPercent: 15 } }
+            { pieces: 2, name: 'Dragon Blood', nameRu: 'Кровь Дракона', effects: { hpPercent: 18, damagePercent: 12 } },
+            { pieces: 3, name: 'Dragon Heart', nameRu: 'Сердце Дракона', effects: { hpPercent: 28, damagePercent: 22, critPercent: 10 } },
+            { pieces: 4, name: 'Dragon Soul', nameRu: 'Душа Дракона', effects: { hpPercent: 38, damagePercent: 32, critPercent: 18, spellPercent: 15, dragonBreath: true } }
         ]
     },
 
@@ -65,8 +65,8 @@ export const EQUIPMENT_SETS = {
         nameDe: 'Weisheit des Weisen',
         pieces: ['sage_hat', 'sage_mantle', 'sage_legs', 'sage_book', 'sage_amulet'],
         bonuses: [
-            { pieces: 3, name: 'Scholar', nameRu: 'Учёный', effects: { spellPercent: 10, critPercent: 5 } },
-            { pieces: 5, name: 'Grand Sage', nameRu: 'Великий Мудрец', effects: { spellPercent: 25, critPercent: 12, corruptionMax: 20 } }
+            { pieces: 3, name: 'Scholar', nameRu: 'Учёный', effects: { spellPercent: 12, critPercent: 6 } },
+            { pieces: 5, name: 'Grand Sage', nameRu: 'Великий Мудрец', effects: { spellPercent: 28, critPercent: 15, corruptionMax: 25, spellEcho: true } }
         ]
     },
 
@@ -78,8 +78,8 @@ export const EQUIPMENT_SETS = {
         nameDe: 'Weisheit des Alchemisten',
         pieces: ['alch_hat', 'alch_mantle', 'alch_legs', 'alch_wand', 'alch_amulet'],
         bonuses: [
-            { pieces: 3, name: 'Transmuter', nameRu: 'Трансмутатор', effects: { spellPercent: 8, hpPercent: 10 } },
-            { pieces: 5, name: 'Philosopher', nameRu: 'Философ', effects: { spellPercent: 20, damagePercent: 15, hpPercent: 20 } }
+            { pieces: 3, name: 'Transmuter', nameRu: 'Трансмутатор', effects: { spellPercent: 10, hpPercent: 12 } },
+            { pieces: 5, name: 'Philosopher', nameRu: 'Философ', effects: { spellPercent: 22, damagePercent: 18, hpPercent: 22, transmuteOnKill: true } }
         ]
     },
 
@@ -91,8 +91,8 @@ export const EQUIPMENT_SETS = {
         nameDe: 'Weisheit des Engels',
         pieces: ['angel_hat', 'angel_mantle', 'angel_legs', 'angel_staff', 'angel_amulet'],
         bonuses: [
-            { pieces: 3, name: 'Holy Light', nameRu: 'Свет Святости', effects: { regenPercent: 5, dodgePercent: 5 } },
-            { pieces: 5, name: 'Divine Avatar', nameRu: 'Божественный Аватар', effects: { hpPercent: 20, regenPercent: 10, corruptionMax: 25, spellPercent: 15 } }
+            { pieces: 3, name: 'Holy Light', nameRu: 'Свет Святости', effects: { regenPercent: 8, dodgePercent: 8 } },
+            { pieces: 5, name: 'Divine Avatar', nameRu: 'Божественный Аватар', effects: { hpPercent: 22, regenPercent: 12, corruptionMax: 30, spellPercent: 18, divineShield: true } }
         ]
     },
 
@@ -104,8 +104,8 @@ export const EQUIPMENT_SETS = {
         nameDe: 'Knochensammler',
         pieces: ['craft_bone_sword', 'craft_spider_silk_armor', 'craft_bat_wing_cloak'],
         bonuses: [
-            { pieces: 2, name: 'Bone Shield', nameRu: 'Костяной Щит', effects: { hpPercent: 5 } },
-            { pieces: 3, name: 'Undead Resilience', nameRu: 'Нежить Стойкость', effects: { hpPercent: 12, regenFlat: 1 } }
+            { pieces: 2, name: 'Bone Shield', nameRu: 'Костяной Щит', effects: { hpPercent: 10, damageReduction: 5 } },
+            { pieces: 3, name: 'Undead Resilience', nameRu: 'Нежить Стойкость', effects: { hpPercent: 18, regenPercent: 3, damageReduction: 8, boneShield: true } }
         ]
     },
 
@@ -117,8 +117,8 @@ export const EQUIPMENT_SETS = {
         nameDe: 'Verfluchte Kampfausrüstung',
         pieces: ['craft_venom_blade', 'craft_grave_armor', 'craft_holy_amulet'],
         bonuses: [
-            { pieces: 2, name: 'Cursed Strike', nameRu: 'Проклятый Удар', effects: { damagePercent: 8 } },
-            { pieces: 3, name: 'Vampiric Fury', nameRu: ' Вампирическая Ярость', effects: { damagePercent: 18, lifeStealPercent: 5 } }
+            { pieces: 2, name: 'Cursed Strike', nameRu: 'Проклятый Удар', effects: { damagePercent: 12, lifeStealPercent: 3 } },
+            { pieces: 3, name: 'Vampiric Fury', nameRu: 'Вампирическая Ярость', effects: { damagePercent: 22, lifeStealPercent: 8, hpPercent: 10, curseOnKill: true } }
         ]
     },
 
@@ -130,8 +130,8 @@ export const EQUIPMENT_SETS = {
         nameDe: 'Schattentänzer',
         pieces: ['craft_shadow_blade', 'craft_void_armor', 'craft_mirror_ring'],
         bonuses: [
-            { pieces: 2, name: 'Shadow Step', nameRu: 'Шаг Тени', effects: { critPercent: 5 } },
-            { pieces: 3, name: 'Mirror Image', nameRu: 'Зеркальное Отражение', effects: { critPercent: 12, dodgePercent: 8 } }
+            { pieces: 2, name: 'Shadow Step', nameRu: 'Шаг Тени', effects: { critPercent: 8, dodgePercent: 5 } },
+            { pieces: 3, name: 'Mirror Image', nameRu: 'Зеркальное Отражение', effects: { critPercent: 15, dodgePercent: 12, speedPercent: 8, shadowClone: true } }
         ]
     },
 
@@ -143,8 +143,8 @@ export const EQUIPMENT_SETS = {
         nameDe: 'Königsgarde',
         pieces: ['craft_royal_blade', 'craft_tower_armor', 'craft_king_ring'],
         bonuses: [
-            { pieces: 2, name: 'Royal Authority', nameRu: 'Королевский Авторитет', effects: { hpPercent: 3, damagePercent: 3, spellPercent: 3 } },
-            { pieces: 3, name: 'Tower Fortress', nameRu: 'Башенная Крепость', effects: { hpPercent: 8, damagePercent: 8, spellPercent: 8, shieldPercent: 10 } }
+            { pieces: 2, name: 'Royal Authority', nameRu: 'Королевский Авторитет', effects: { hpPercent: 8, damagePercent: 8, spellPercent: 8 } },
+            { pieces: 3, name: 'Tower Fortress', nameRu: 'Башенная Крепость', effects: { hpPercent: 15, damagePercent: 15, spellPercent: 15, shieldPercent: 12, royalGuard: true } }
         ]
     },
 
