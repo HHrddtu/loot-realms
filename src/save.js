@@ -89,6 +89,9 @@ function migrateAccount(data) {
     if (!data.upgradeLevels) data.upgradeLevels = {};
     if (!data.activeBoosts) data.activeBoosts = {};
     if (!data.spellAssignments) data.spellAssignments = {};
+    if (data.gold === undefined) data.gold = 0;
+    if (data.unlockedTalents === undefined) data.unlockedTalents = [];
+    if (data.talentPoints === undefined) data.talentPoints = 0;
     data.version = 3;
     return data;
 }
