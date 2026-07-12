@@ -840,6 +840,76 @@ export function drawExpansionTextures(mk, textures) {
         c.fillRect(15, 5, 2, 2);
     });
 
+    // Cursed Zombie variant (purple/dark for Cursed zone)
+    (() => {
+        const fw = 28, fh = 32, frames = 4;
+        const canvas = document.createElement('canvas');
+        canvas.width = fw * frames;
+        canvas.height = fh;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        for (let f = 0; f < frames; f++) {
+            const ox = f * fw;
+            const wUp = f % 2 === 0;
+            const bob = wUp ? 0 : 2;
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.fillRect(ox + 6, fh - 4, 16, 4);
+            // Legs
+            ctx.fillStyle = '#2a1a3a';
+            ctx.fillRect(ox + 8, fh - 10 + bob, 5, 10);
+            ctx.fillRect(ox + 15, fh - 10 + bob, 5, 10);
+            // Body
+            ctx.fillStyle = '#3a2a4a';
+            ctx.fillRect(ox + 6, 12 + bob, 16, 16);
+            ctx.fillStyle = '#4a3a5a';
+            ctx.fillRect(ox + 8, 14 + bob, 12, 12);
+            // Arms (reaching forward)
+            ctx.fillStyle = '#3a2a4a';
+            ctx.fillRect(ox + 2, 14 + bob, 6, 10);
+            ctx.fillRect(ox + 20, 14 + bob, 6, 10);
+            // Head
+            ctx.fillStyle = '#4a3a5a';
+            ctx.fillRect(ox + 9, 2 + bob, 10, 10);
+            ctx.fillStyle = '#5a4a6a';
+            ctx.fillRect(ox + 10, 3 + bob, 8, 8);
+            // Eyes (green glow)
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(ox + 11, 5 + bob, 2, 2);
+            ctx.fillRect(ox + 15, 5 + bob, 2, 2);
+            // Mouth
+            ctx.fillStyle = '#1a0a2a';
+            ctx.fillRect(ox + 12, 9 + bob, 4, 2);
+        }
+        addSheet('cursed_zombie_walk', canvas, { frameWidth: fw, frameHeight: fh });
+    })();
+    mk('cursed_zombie', 28, 32, (c) => {
+        c.imageSmoothingEnabled = false;
+        // Shadow
+        c.fillStyle = 'rgba(0,0,0,0.3)';
+        c.fillRect(6, 28, 16, 4);
+        // Legs
+        c.fillStyle = '#2a1a3a';
+        c.fillRect(8, 22, 5, 10);
+        c.fillRect(15, 22, 5, 10);
+        // Body
+        c.fillStyle = '#3a2a4a';
+        c.fillRect(6, 12, 16, 16);
+        c.fillStyle = '#4a3a5a';
+        c.fillRect(8, 14, 12, 12);
+        // Arms
+        c.fillStyle = '#3a2a4a';
+        c.fillRect(2, 14, 6, 10);
+        c.fillRect(20, 14, 6, 10);
+        // Head
+        c.fillStyle = '#4a3a5a';
+        c.fillRect(9, 2, 10, 10);
+        // Eyes (green glow)
+        c.fillStyle = '#00ff00';
+        c.fillRect(11, 5, 2, 2);
+        c.fillRect(15, 5, 2, 2);
+    });
+
     // Purple Demon spritesheet
     (() => {
         const fw = 40, fh = 44, frames = 4;

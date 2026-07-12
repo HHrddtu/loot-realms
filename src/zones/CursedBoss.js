@@ -174,11 +174,11 @@ export class CursedBoss {
             const clampedX = Phaser.Math.Clamp(ix, ox + 10, ox + CURSED_WIDTH - 10);
             const clampedY = Phaser.Math.Clamp(iy, 10, CURSED_HEIGHT - 10);
 
-            const minion = s.add.sprite(clampedX, clampedY, 'zombie_walk').setDepth(5);
+            const minion = s.add.sprite(clampedX, clampedY, 'cursed_zombie_walk').setDepth(5);
             s.physics.add.existing(minion, false);
             minion.body.setSize(bt.bw, bt.bh);
             minion.body.setCollideWorldBounds(true);
-            if (s.anims.exists('zombie_walk_anim')) minion.play('zombie_walk_anim');
+            if (s.anims.exists('cursed_zombie_walk_anim')) minion.play('cursed_zombie_walk_anim');
 
             const hp = Math.floor(bt.hp * s.diffMulti.hp);
             minion.stats = {
