@@ -397,4 +397,180 @@ export class SpellEffects {
             repeat: Math.floor(duration * 1000 / healInterval)
         });
     }
+
+    // === NEW SPELL EFFECTS ===
+
+    _castArcaneBurst(spell) {
+        const s = this.scene;
+        const radius = spell.radius || 100;
+        const dmg = spell.damage + Math.floor(s.playerDamage * 0.5);
+
+        // Visual explosion
+        const burst = s.add.circle(s.player.x, s.player.y, radius, spell.color, 0.6).setDepth(15);
+        s.tweens.add({ targets: burst, alpha: 0, scale: 1.5, duration: 300, onComplete: () => burst.destroy() });
+
+        // Damage all enemies in range
+        const allEnemies = this._getAllEnemies();
+        allEnemies.forEach(e => {
+            if (!e.active || !e.stats) return;
+            if (Phaser.Math.Distance.Between(s.player.x, s.player.y, e.x, e.y) < radius) {
+                s.combat.hitEnemy(e, dmg);
+                s.floatingText(e.x, e.y - 20, '-' + dmg, '#9b59b6');
+            }
+        });
+        if (s.particles) s.particles.spawnHitSpark(s.player.x, s.player.y);
+        s.cameras.main.shake(100, 0.003);
+    }
+
+    _castTimeWarp(spell) {
+        const s = this.scene;
+        const radius = spell.radius || 150;
+        const slowPct = spell.slowPercent || 50;
+        const duration = spell.duration || 3.0;
+
+        // Visual effect
+        const warp = s.add.circle(s.player.x, s.player.y, radius, spell.color, 0.3).setDepth(10);
+        s.tweens.add({ targets: warp, alpha: 0.1, duration: duration * 1000, onComplete: () => warp.destroy() });
+
+        // Slow all enemies
+        const allEnemies = this._getAllEnemies();
+        allEnemies.forEach(e => {
+            if (!e.active || !e.stats) return;
+            if (Phaser.Math.Distance.Between(s.player.x, s.player.y, e.x, e.y) < radius) {
+                e.stats._slowed = true;
+                e.stats._slowTimer = duration;
+                e.stats._slowPct = slowPct;
+            }
+        });
+        s.floatingText(s.player.x, s.player.y - 40, 'TIME WARP!', '#9b59b6');
+    }
+
+    _castTransmute(spell) {
+        const s = this.scene;
+        const healAmt = Math.floor(s.playerMaxHP * (spell.healPercent || 0.25));
+        s.playerHP = Math.min(s.playerMaxHP, s.playerHP + healAmt);
+        s.floatingText(s.player.x, s.player.y - 40, '+' + healAmt + ' HP', '#e67e22');
+
+        // Apply damage buff
+        s._consumableBonusDmg = (s._consumableBonusDmg || 0) + (spell.damageBuff || 15) / 100;
+        s.time.delayedCall((spell.buffDuration || 5) * 1000, () => {
+            s._consumableBonusDmg = Math.max(0, (s._consumableBonusDmg || 0) - (spell.damageBuff || 15) / 100);
+        });
+        s.floatingText(s.player.x, s.player.y - 60, '+' + spell.damageBuff + '% DMG', '#e67e22');
+    }
+
+    _castSummonGolem(spell) {
+        const s = this.scene;
+        const duration = spell.duration || 10;
+
+        // Create golem minion
+        const golem = s.add.sprite(s.player.x + 40, s.player.y, 'stone_golem_walk').setDepth(5);
+        s.physics.add.existing(golem, false);
+        golem.body.setSize(30, 34);
+        golem.body.setCollideWorldBounds(true);
+        if (s.anims.exists('stone_golem_walk_anim')) golem.play('stone_golem_walk_anim');
+
+        const hp = spell.summonHp || 200;
+        golem.stats = { key: 'golem_summon', name: 'Golem', hp, maxHp: hp, damage: spell.summonDamage || 15, exp: 0, bw: 30, bh: 34 };
+        golem.isSummon = true;
+        golem.summonTimer = duration;
+
+        // HP bar
+        golem.hpBg = s.add.rectangle(golem.x, golem.y - 20, 34, 3, 0x000000).setDepth(15);
+        golem.hpFill = s.add.rectangle(golem.x - 17, golem.y - 20, 34, 3, 0x2ecc71).setOrigin(0, 0.5).setDepth(15);
+
+        if (!s.summonedMinions) s.summonedMinions = [];
+        s.summonedMinions.push(golem);
+
+        s.floatingText(s.player.x, s.player.y - 40, 'GOLEM SUMMONED!', '#95a5a6');
+    }
+
+    _castDivineShield(spell) {
+        const s = this.scene;
+        s.shieldActive = true;
+        s.shieldHP = spell.absorption || 80;
+        s.shieldTimer = spell.duration || 6;
+        s.shieldReflect = spell.reflectPercent || 15;
+        s.shieldVfx = s.add.sprite(s.player.x, s.player.y, 'shield_vfx')
+            .setDepth(15).setAlpha(0.8).setTint(0xf1c40f);
+        s.tweens.add({ targets: s.shieldVfx, alpha: 0.4, duration: 500, yoyo: true, repeat: -1 });
+        if (s.particles) s.particles.spawnShieldEffect(s.player.x, s.player.y);
+        s.floatingText(s.player.x, s.player.y - 30, 'DIVINE SHIELD!', '#f1c40f');
+    }
+
+    _castResurrection(spell) {
+        const s = this.scene;
+        s.playerHP = s.playerMaxHP;
+        s.floatingText(s.player.x, s.player.y - 60, 'RESURRECTED!', '#f1c40f');
+        if (s.particles) s.particles.spawnHealEffect(s.player.x, s.player.y);
+        s.cameras.main.flash(500, 255, 255, 200);
+    }
+
+    _castArchangelForm(spell) {
+        const s = this.scene;
+        const healAmt = Math.floor(s.playerMaxHP * (spell.healPercent || 0.5));
+        s.playerHP = Math.min(s.playerMaxHP, s.playerHP + healAmt);
+
+        // Apply buffs
+        s._consumableBonusDmg = (s._consumableBonusDmg || 0) + (spell.damageBuff || 40) / 100;
+        s.computedDamageReduction = (s.computedDamageReduction || 0) + (spell.defenseBuff || 30);
+
+        s.player.setTint(0xf1c40f);
+        s.floatingText(s.player.x, s.player.y - 60, 'ARCHANGEL FORM!', '#f1c40f');
+        s.cameras.main.flash(500, 255, 255, 200);
+
+        s.time.delayedCall((spell.duration || 12) * 1000, () => {
+            s._consumableBonusDmg = Math.max(0, (s._consumableBonusDmg || 0) - (spell.damageBuff || 40) / 100);
+            s.computedDamageReduction = Math.max(0, (s.computedDamageReduction || 0) - (spell.defenseBuff || 30));
+            s.player.clearTint();
+            s.floatingText(s.player.x, s.player.y - 40, 'Form ended', '#999');
+        });
+    }
+
+    _castPoisonCloud(spell) {
+        const s = this.scene;
+        const pointer = s.input.activePointer;
+        const worldPoint = s.cameras.main.getWorldPoint(pointer.x, pointer.y);
+        const radius = spell.radius || 80;
+        const duration = spell.duration || 4;
+        const dmgPerSec = spell.damagePerSec || 6;
+        const slowPct = spell.slowPercent || 20;
+
+        const cloud = s.add.circle(worldPoint.x, worldPoint.y, radius, spell.color, 0.4).setDepth(10);
+        s.tweens.add({ targets: cloud, alpha: 0.1, duration: duration * 1000, onComplete: () => cloud.destroy() });
+
+        let elapsed = 0;
+        const tickInterval = 500;
+        const timer = s.time.addEvent({
+            delay: tickInterval, repeat: Math.floor(duration * 1000 / tickInterval),
+            callback: () => {
+                elapsed += tickInterval;
+                if (elapsed >= duration * 1000) { timer.remove(); return; }
+                const allEnemies = this._getAllEnemies();
+                allEnemies.forEach(e => {
+                    if (!e.active || !e.stats) return;
+                    if (Phaser.Math.Distance.Between(worldPoint.x, worldPoint.y, e.x, e.y) < radius) {
+                        const dotDmg = Math.floor(dmgPerSec * (tickInterval / 1000));
+                        s.combat.hitEnemy(e, dotDmg);
+                        e.stats._slowed = true;
+                        e.stats._slowTimer = 1;
+                        e.stats._slowPct = slowPct;
+                    }
+                });
+            }
+        });
+        s.floatingText(worldPoint.x, worldPoint.y - 20, 'POISON!', '#27ae60');
+    }
+
+    _getAllEnemies() {
+        const s = this.scene;
+        return [
+            ...(s.enemies && s.enemies.scene ? s.enemies.getChildren() : []),
+            ...(s.villageZombies && s.villageZombies.scene ? s.villageZombies.getChildren() : []),
+            ...(s.depthsMinions && s.depthsMinions.scene ? s.depthsMinions.getChildren() : []),
+            ...(s.cursedMinions && s.cursedMinions.scene ? s.cursedMinions.getChildren() : []),
+            ...(s.shadowMinions && s.shadowMinions.scene ? s.shadowMinions.getChildren() : []),
+            ...(s.towerMinions && s.towerMinions.scene ? s.towerMinions.getChildren() : [])
+        ];
+    }
 }

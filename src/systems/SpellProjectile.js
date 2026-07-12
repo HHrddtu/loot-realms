@@ -519,9 +519,65 @@ export class SpellProjectile {
         return hit;
     }
 
+    // === NEW SPELL PROJECTILES ===
+
+    _castChainLightning(spell) {
+        const s = this.scene;
+        const facing = s.facing || 'right';
+        let vx = 0, vy = 0, ox = 0, oy = 0;
+        if (facing === 'left') { vx = -spell.speed; ox = -20; }
+        else if (facing === 'right') { vx = spell.speed; ox = 20; }
+        else if (facing === 'up') { vy = -spell.speed; oy = -20; }
+        else { vy = spell.speed; oy = 20; }
+
+        const px = s.player.x + ox, py = s.player.y + oy;
+        const fb = s.add.sprite(px, py, 'soul_strike').setDepth(15).setTint(0x3498db);
+        s.physics.add.existing(fb);
+        fb.body.setVelocity(vx, vy);
+        fb.damage = spell.damage;
+        fb.lifespan = (spell.range || 350) / spell.speed;
+        fb.isMeleeProjectile = false;
+        fb.spellKey = 'chain_lightning';
+        fb.chainCount = spell.chainCount || 3;
+        fb.chainRange = spell.chainRange || 150;
+        fb.healPercent = 0;
+        s.fireballs.push(fb);
+        const glow = s.add.circle(px, py, 10, 0x3498db, 0.4).setDepth(14);
+        fb.glow = glow;
+    }
+
+    _castNovaBlast(spell) {
+        const s = this.scene;
+        const pointer = s.input.activePointer;
+        const worldPoint = s.cameras.main.getWorldPoint(pointer.x, pointer.y);
+        const radius = spell.radius || 180;
+        const dmg = spell.damage + Math.floor(s.playerDamage * 0.8);
+
+        // Visual explosion
+        const burst = s.add.circle(worldPoint.x, worldPoint.y, radius, spell.color, 0.7).setDepth(15);
+        s.tweens.add({ targets: burst, alpha: 0, scale: 1.5, duration: 400, onComplete: () => burst.destroy() });
+
+        // Damage all enemies
+        const allEnemies = this._getAllEnemies();
+        allEnemies.forEach(e => {
+            if (!e.active || !e.stats) return;
+            if (Phaser.Math.Distance.Between(worldPoint.x, worldPoint.y, e.x, e.y) < radius) {
+                e.stats.hp -= dmg;
+                s.floatingText(e.x, e.y - 20, '-' + dmg, '#e74c3c');
+                if (e.stats.hp <= 0) {
+                    if (e.stats.isBossClone) s.zones.village.boss.killBossClone(e);
+                    else s.killEnemy(e);
+                }
+            }
+        });
+        s.cameras.main.shake(200, 0.008);
+        s.floatingText(worldPoint.x, worldPoint.y - 30, 'NOVA BLAST!', '#e74c3c');
+    }
+
     _tryChain(fb, hitEnemy, totalDmg) {
-        let nearest = null, nearDist = 150;
-        this.scene.enemies.getChildren().forEach(e2 => {
+        let nearest = null, nearDist = fb.chainRange || 150;
+        const allEnemies = this._getAllEnemies();
+        allEnemies.forEach(e2 => {
             if (e2.active && e2 !== hitEnemy && e2.stats) {
                 const d = Phaser.Math.Distance.Between(hitEnemy.x, hitEnemy.y, e2.x, e2.y);
                 if (d < nearDist) { nearDist = d; nearest = e2; }
@@ -530,7 +586,7 @@ export class SpellProjectile {
         if (nearest) {
             const chainDmg = Math.floor(totalDmg * 0.6);
             nearest.stats.hp -= chainDmg;
-            this.scene.floatingText(nearest.x, nearest.y - 20, '-' + chainDmg, '#9b59b6');
+            this.scene.floatingText(nearest.x, nearest.y - 20, '-' + chainDmg, '#3498db');
             if (nearest.stats.hp <= 0) {
                 if (nearest === this.scene.hellBoss) this.scene.zones.hell.victoryHellBoss();
                 else if (nearest === this.scene.depthsBoss) this.scene.zones.depths.victoryDepthsBoss();
@@ -543,5 +599,17 @@ export class SpellProjectile {
             }
             fb.chained = true;
         }
+    }
+
+    _getAllEnemies() {
+        const s = this.scene;
+        return [
+            ...(s.enemies && s.enemies.scene ? s.enemies.getChildren() : []),
+            ...(s.villageZombies && s.villageZombies.scene ? s.villageZombies.getChildren() : []),
+            ...(s.depthsMinions && s.depthsMinions.scene ? s.depthsMinions.getChildren() : []),
+            ...(s.cursedMinions && s.cursedMinions.scene ? s.cursedMinions.getChildren() : []),
+            ...(s.shadowMinions && s.shadowMinions.scene ? s.shadowMinions.getChildren() : []),
+            ...(s.towerMinions && s.towerMinions.scene ? s.towerMinions.getChildren() : [])
+        ];
     }
 }

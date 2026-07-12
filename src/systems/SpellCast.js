@@ -1,4 +1,5 @@
 import { CORRUPTION } from '../config/index.js';
+import { SPELLS } from '../config/index.js';
 
 export class SpellCast {
     constructor(scene) {
@@ -46,14 +47,30 @@ export class SpellCast {
         }
     }
 
-    _getClassSpells() {
+    /** Get all spells available to a class at a given level */
+    getAvailableSpells(classKey, level) {
+        const available = [];
+        Object.values(SPELLS).forEach(spell => {
+            if (spell.unlockLevel && spell.unlockLevel <= level) {
+                available.push(spell);
+            }
+        });
+        return available;
+    }
+
+    /** Get default spells for a class */
+    _getDefaultSpells(cls) {
         const defaults = {
             alchemist: { q: 'acid_flask', w: 'toxic_puddle', e: 'burrow', r: 'chemical_cloud' },
             angel: { q: 'soul_strike', w: 'holy_shield', e: 'holy_nova', r: 'divine_blessing' },
             sage: { q: 'fireball', w: 'shield', e: 'heal', r: 'meteor' }
         };
+        return defaults[cls] || defaults.sage;
+    }
+
+    _getClassSpells() {
         const cls = this.scene.classKey || 'sage';
-        const d = defaults[cls] || defaults.sage;
+        const d = this._getDefaultSpells(cls);
         const saved = this.scene.spellAssignments || {};
         return {
             q: saved.q || d.q, w: saved.w || d.w,
@@ -62,9 +79,8 @@ export class SpellCast {
     }
 
     _updateTimers(dt) {
-        ['fireball', 'shield', 'heal', 'purify', 'meteor', 'chemical_cloud', 'divine_blessing',
-         'acid_flask', 'iron_skin', 'healing_potion', 'life_link', 'soul_strike',
-         'toxic_puddle', 'burrow', 'holy_shield', 'holy_nova'].forEach(k => {
+        const allSpellKeys = Object.keys(SPELLS);
+        allSpellKeys.forEach(k => {
             if (this.scene.spellCooldowns[k] > 0) {
                 this.scene.spellCooldowns[k] = Math.max(0, this.scene.spellCooldowns[k] - dt);
             }
