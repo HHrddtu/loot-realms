@@ -9,6 +9,7 @@ import { playBossDeath, playEnemyDeath, playLoot, playBreak } from '../sound.js'
 import { recordKill } from '../bestiary.js';
 import { recordSoulCollect } from '../soulBook.js';
 import { onKill, onCollect } from '../quests.js';
+import { getMyId } from '../network.js';
 
 export class CombatLoot {
     constructor(scene) {
@@ -16,6 +17,10 @@ export class CombatLoot {
     }
 
     handleEnemyDeath(enemy) {
+        // Guard against multiple calls in same frame
+        if (enemy._deathHandled) return;
+        enemy._deathHandled = true;
+
         const s = this.scene;
         if (enemy === s.boss) { this.killBoss(); }
         else if (enemy === s.mineBoss) { this.killMineBoss(); }
@@ -35,15 +40,17 @@ export class CombatLoot {
         else if (enemy === s.snowyIceSpirit) { s.zones.village.boss.iceSpiritDied(); }
         else if (enemy === s.castleBoss) { /* handled by CastleZone._updateBoss */ }
         else if (enemy.stats && enemy.stats.isBossClone) { s.zones.village.boss.killBossClone(enemy); }
-        else { this.killEnemy(enemy); }
+        else {
+            const lootData = this.killEnemy(enemy);
+            const killer = enemy._lastAttackerPeerId || (typeof getMyId === 'function' ? getMyId() : null);
+            if (s._distributeLoot) s._distributeLoot(lootData, killer);
+        }
     }
 
     killEnemy(enemy) {
         const s = this.scene;
         const exp = enemy.stats.exp;
-        const expBonus = 1 + (s.accountEffects ? (s.accountEffects.expPercent || 0) / 100 : 0);
-        s.playerExp += exp; s.accountExp += Math.floor(exp * expBonus);
-        s.kills++; playEnemyDeath();
+        playEnemyDeath();
         if (s.particles) s.particles.spawnEnemyDeath(enemy.x, enemy.y);
         if (enemy.stats.key) { recordKill(enemy.stats.key); recordSoulCollect(enemy.stats.key); onKill(enemy.stats.key); s._updateQuestIcons(); }
 
@@ -55,30 +62,19 @@ export class CombatLoot {
         const goldAmount = rollGold(s.zone || 'forest');
         const petStats = getPetStats(s.equippedPet, (s.petLevels || {})[s.equippedPet] || 1);
         const lootBonus = (petStats.lootPercent || 0) / 100;
-        const goldBonus = 1 + ((s.accountEffects ? s.accountEffects.goldPercent || 0 : 0)) / 100 + lootBonus;
+        const goldBonus = 1 + ((s.accountEffects ? s.accountEffects.goldPercent || 0 : 0) / 100) + lootBonus;
         const finalGold = Math.floor(goldAmount * goldBonus);
-        s.gold = (s.gold || 0) + finalGold;
-        s.floatingText(enemy.x, enemy.y - 30, '+' + exp + ' EXP', '#f1c40f');
-        s.floatingText(enemy.x, enemy.y - 45, '+' + finalGold + ' gold', '#f1c40f');
 
+        const items = [];
         if (Math.random() < EQUIP_DROP_CHANCE + lootBonus * 0.5) {
             const item = rollEquip();
-            if (s.addEquip(item)) {
-                s.floatingText(enemy.x, enemy.y - 45, '+' + item.name, '#' + RARITY_COLORS[item.rarity].toString(16).padStart(6, '0'));
-                if (s.particles) s.particles.spawnLootPickup(enemy.x, enemy.y, item.rarity);
-                playLoot();
-            }
+            if (item) items.push({ kind: 'equip', item, x: enemy.x, y: enemy.y - 45, rarity: item.rarity });
         }
         if (Math.random() < ACCOUNT_EQUIP_DROP_CHANCE) {
             const accItem = rollAccountEquip();
-            if (s.addAccountEquip(accItem)) {
-                s.floatingText(enemy.x, enemy.y - 60, '+' + accItem.name + ' [ACCOUNT]', '#' + RARITY_COLORS[accItem.rarity].toString(16).padStart(6, '0'));
-                if (s.particles) s.particles.spawnLootPickup(enemy.x, enemy.y, accItem.rarity);
-                playLoot();
-            }
+            if (accItem) items.push({ kind: 'accountEquip', item: { ...accItem, name: accItem.name + ' [ACCOUNT]' }, x: enemy.x, y: enemy.y - 60, rarity: accItem.rarity });
         }
 
-        s.checkLevelUp(); s._checkAccountLevelUp(); s.updateUI();
         if (enemy.hpBg) enemy.hpBg.destroy();
         if (enemy.hpFill) enemy.hpFill.destroy();
         enemy.destroy();
@@ -87,36 +83,49 @@ export class CombatLoot {
             if (s.zone === 'forest') { const t = ENEMY_TYPES[Math.floor(Math.random() * ENEMY_TYPES.length)]; s.combat.makeEnemy(t, 80 + Math.random() * 640, 350 + Math.random() * 400); }
             else if (s.zone === 'mine') { const t = MINE_ENEMY_TYPES[Math.floor(Math.random() * MINE_ENEMY_TYPES.length)]; s.zones.mine.makeMineEnemy(t, 80 + Math.random() * 640, 200 + Math.random() * 500); }
         });
+
+        return {
+            source: 'mob',
+            exp, killsDelta: 1,
+            gold: finalGold, goldX: enemy.x, goldY: enemy.y - 45,
+            items
+        };
     }
 
     killBoss() {
         const s = this.scene;
-        this.killGenericBoss({
+        const boss = s.boss;
+        const killer = (boss && boss._lastAttackerPeerId) || (typeof getMyId === 'function' ? getMyId() : null);
+        const lootData = this.killGenericBoss({
             bossRef: 'boss',
             nameTextKey: 'bossNameText', recordKey: 'ancient_treant',
             defeatedText: 'BOSS DEFEATED!', defeatedColor: '#f1c40f', secondDropChance: 0.5,
             textX: 400, textY: 200,
             onPostKill: () => { s.zones.mine.isUnlocked = true; s.exitPortal.setTexture('mine_ladder'); s.exitPortal.setScale(1); s.exitHint.setText('SPACE to enter the Mine'); }
         });
+        if (s._distributeLoot) s._distributeLoot(lootData, killer);
         s.zones.arena.bossDefeated = true;
         s.zones.arena.bossAlive = false;
     }
 
     killMineBoss() {
         const s = this.scene;
-        this.killGenericBoss({
+        const boss = s.mineBoss;
+        const killer = (boss && boss._lastAttackerPeerId) || (typeof getMyId === 'function' ? getMyId() : null);
+        const lootData = this.killGenericBoss({
             bossRef: 'mineBoss',
             nameTextKey: 'mineBossNameText', recordKey: 'skeleton_lord',
             defeatedText: 'SKELETON LORD DEFEATED!', defeatedColor: '#bf77f6', secondDropChance: 0.6,
             textX: 400, textY: 200,
             extraLoot: () => {
                 if (!s.zones.mine.hasSecretKey) {
-                    s.zones.mine.hasSecretKey = true; const keyItem = { ...SECRET_KEY_ITEM };
-                    playLoot(); s.floatingText(400, 280, SECRET_KEY_ITEM.name + ' obtained!', '#f1c40f');
-                    return [keyItem];
-                } return [];
+                    const keyItem = { ...SECRET_KEY_ITEM };
+                    return { items: [keyItem], zoneFlags: { 'mine.hasSecretKey': true } };
+                }
+                return { items: [], zoneFlags: {} };
             }
         });
+        if (s._distributeLoot) s._distributeLoot(lootData, killer);
         s.zones.mine.bossDefeated = true;
         s.zones.mine.bossAlive = false;
     }
@@ -124,21 +133,24 @@ export class CombatLoot {
     killCaveBoss() {
         const s = this.scene;
         const textX = s.caveOffsetX + CAVE_WIDTH / 2;
-        this.killGenericBoss({
+        const boss = s.caveBoss;
+        const killer = (boss && boss._lastAttackerPeerId) || (typeof getMyId === 'function' ? getMyId() : null);
+        const lootData = this.killGenericBoss({
             bossRef: 'caveBoss',
             nameTextKey: 'caveBossNameText', recordKey: 'giant_bat',
             defeatedText: 'GIANT BAT DEFEATED!', defeatedColor: '#bf77f6', secondDropChance: 0.6,
             textX, textY: 200,
             extraLoot: () => {
                 const items = []; const relic = rollCaveRelic(s.classKey);
-                if (relic && s.addAccountEquip(relic)) { items.push({ ...relic, name: relic.name + ' [RELIC]' }); playLoot(); s.floatingText(textX, 280, 'Relic obtained!', '#9b59b6'); }
-                return items;
+                if (relic) items.push({ ...relic, name: relic.name + ' [RELIC]' });
+                return { items, zoneFlags: {} };
             },
             onPostKill: () => {
                 s.caveStairs = s.add.sprite(textX, CAVE_HEIGHT - 80, 'cave_stairs').setDepth(1);
                 s.caveStairsHint = s.add.text(textX, CAVE_HEIGHT - 55, '', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setDepth(12);
             }
         });
+        if (s._distributeLoot) s._distributeLoot(lootData, killer);
         s.zones.cave.bossDefeated = true;
         s.zones.cave.bossAlive = false;
     }
@@ -147,9 +159,6 @@ export class CombatLoot {
         const s = this.scene;
         const b = s[cfg.bossRef];
         const exp = b.stats.exp;
-        const expBonus = 1 + (s.accountEffects ? (s.accountEffects.expPercent || 0) / 100 : 0);
-        s.playerExp += exp; s.accountExp += Math.floor(exp * expBonus);
-        s.kills++;
         playBossDeath(); recordKill(cfg.recordKey); recordSoulCollect(cfg.recordKey); onKill(cfg.recordKey);
         s._updateQuestIcons();
         if (s.particles) s.particles.spawnBossDeath(b.x, b.y);
@@ -160,45 +169,56 @@ export class CombatLoot {
         if (s[cfg.nameTextKey]) { s[cfg.nameTextKey].destroy(); s[cfg.nameTextKey] = null; }
 
         const bossGold = rollBossGold(s.zone || 'forest');
-        const bossGoldBonus = 1 + ((s.accountEffects ? s.accountEffects.goldPercent || 0 : 0)) / 100;
-        s.gold = (s.gold || 0) + Math.floor(bossGold * bossGoldBonus);
-        s.floatingText(cfg.textX, cfg.textY, '+' + exp + ' EXP', '#f1c40f');
-        s.floatingText(cfg.textX, cfg.textY + 20, '+' + Math.floor(bossGold * bossGoldBonus) + ' gold', '#f1c40f');
+        const bossGoldBonus = 1 + ((s.accountEffects ? s.accountEffects.goldPercent || 0 : 0) / 100);
+        const finalGold = Math.floor(bossGold * bossGoldBonus);
 
         const bossCrystals = rollBossCrystals(s.zone || 'forest', s.difficulty);
-        if (bossCrystals > 0) { const granted = s.awardCrystals(bossCrystals, cfg.textX, cfg.textY + 40); if (granted > 0) s.floatingText(cfg.textX, cfg.textY + 40, '+' + granted + ' \u{1F48E}', '#3498db'); }
 
-        s.defeatedText = s.add.text(cfg.textX, cfg.textY + 50, cfg.defeatedText, { fontSize: '28px', fill: cfg.defeatedColor, fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 4 }).setOrigin(0.5).setScrollFactor(0);
-        s.tweens.add({ targets: s.defeatedText, alpha: 0, duration: 5000, onComplete: () => { if (s.defeatedText) s.defeatedText.destroy(); s.defeatedText = null; } });
+        const lootItems = [];
+        if (Math.random() < BOSS_DROP_CHANCE) { const item = rollEquip(); if (item) lootItems.push({ kind: 'equip', item, x: cfg.textX, y: cfg.textY + 100 + lootItems.length * 24, rarity: item.rarity }); }
+        if (Math.random() < cfg.secondDropChance) { const item2 = rollEquip(); if (item2) lootItems.push({ kind: 'equip', item: item2, x: cfg.textX, y: cfg.textY + 100 + lootItems.length * 24, rarity: item2.rarity }); }
+        if (Math.random() < BOSS_DROP_CHANCE) { const accItem = rollAccountEquip(); if (accItem) lootItems.push({ kind: 'accountEquip', item: { ...accItem, name: accItem.name + ' [ACCOUNT]' }, x: cfg.textX, y: cfg.textY + 100 + lootItems.length * 24, rarity: accItem.rarity }); }
 
-        s.defeatedLoot = []; const lootItems = [];
-        if (Math.random() < BOSS_DROP_CHANCE) { const item = rollEquip(); if (s.addEquip(item)) { lootItems.push(item); playLoot(); } }
-        if (Math.random() < cfg.secondDropChance) { const item2 = rollEquip(); if (s.addEquip(item2)) { lootItems.push(item2); playLoot(); } }
-        if (Math.random() < BOSS_DROP_CHANCE) { const accItem = rollAccountEquip(); if (s.addAccountEquip(accItem)) { lootItems.push({ ...accItem, name: accItem.name + ' [ACCOUNT]' }); playLoot(); } }
-        if (cfg.extraLoot) { cfg.extraLoot().forEach(item => lootItems.push(item)); }
+        const zoneFlags = {};
+        if (cfg.extraLoot) {
+            const extra = cfg.extraLoot();
+            if (extra) {
+                if (extra.items) {
+                    extra.items.forEach(it => {
+                        lootItems.push({ kind: 'accountEquip', item: it, x: cfg.textX, y: cfg.textY + 100 + lootItems.length * 24, rarity: it.rarity });
+                    });
+                }
+                if (extra.zoneFlags) Object.assign(zoneFlags, extra.zoneFlags);
+            }
+        }
         if (cfg.onPostKill) cfg.onPostKill();
 
-        lootItems.forEach((item, i) => {
-            const lt = s.add.text(cfg.textX, cfg.textY + 100 + i * 24, '+' + item.name, { fontSize: '16px', fill: '#' + RARITY_COLORS[item.rarity].toString(16).padStart(6, '0'), fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setScrollFactor(0);
-            s.defeatedLoot.push(lt);
-            s.tweens.add({ targets: lt, alpha: 0, duration: 5000, onComplete: () => { if (lt.active) lt.destroy(); } });
-        });
-        if (lootItems.length === 0) {
-            const noLoot = s.add.text(cfg.textX, cfg.textY + 100, 'No drops...', { fontSize: '14px', fill: '#95a5a6', fontFamily: 'Arial', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setScrollFactor(0);
-            s.defeatedLoot.push(noLoot);
-            s.tweens.add({ targets: noLoot, alpha: 0, duration: 5000, onComplete: () => { if (noLoot.active) noLoot.destroy(); } });
+        const lootItemTexts = lootItems.map((li, i) => ({
+            name: li.item.name, rarity: li.rarity,
+            x: cfg.textX, y: cfg.textY + 100 + i * 24
+        }));
+
+        if (s.multiplayer && s.mpSync && b.mpId) {
+            s.mpSync.notifyBossKilled(b.mpId);
         }
-        s.checkLevelUp(); s._checkAccountLevelUp(); s.updateUI();
-        
-        // Broadcast boss killed to multiplayer guests
-        if (s.multiplayer && s.mpSync) {
-            s.mpSync.broadcastBossKilled(cfg.bossRef, lootItems);
-        }
+
+        return {
+            source: 'boss',
+            exp, killsDelta: 1,
+            gold: finalGold, goldX: cfg.textX, goldY: cfg.textY + 20,
+            crystals: bossCrystals, crystalsX: cfg.textX, crystalsY: cfg.textY + 40,
+            items: lootItems,
+            defeatedText: cfg.defeatedText, defeatedColor: cfg.defeatedColor,
+            textX: cfg.textX, textY: cfg.textY,
+            lootItemTexts,
+            zoneFlags
+        };
     }
 
     breakChest(ch) {
         const s = this.scene;
-        if (ch.broken) return; ch.broken = true; ch.body.enable = false;
+        if (ch.broken) return { items: [], gold: 0 };
+        ch.broken = true; ch.body.enable = false;
         if (ch.isForestChest) { ch.setAlpha(0.4); ch.setTint(0x886633); }
         else { ch.setTexture(ch.isCaveChest ? CAVE_CHEST_OPEN_KEY : 'mine_chest_broken'); }
         ch.hpBg.destroy(); ch.hpFill.destroy(); if (ch.hintText) ch.hintText.setText('');
@@ -206,20 +226,18 @@ export class CombatLoot {
         s._updateQuestIcons();
 
         const chestGold = rollChestGold(s.zone || 'mine');
-        const goldBonus = 1 + ((s.accountEffects ? s.accountEffects.goldPercent || 0 : 0)) / 100;
+        const goldBonus = 1 + ((s.accountEffects ? s.accountEffects.goldPercent || 0 : 0) / 100);
         const finalGold = Math.floor(chestGold * goldBonus);
-        s.gold = (s.gold || 0) + finalGold; s.floatingText(ch.x, ch.y - 35, '+' + finalGold + ' gold', '#f1c40f');
 
+        const items = [];
         if (ch.loot.length > 0) {
             ch.loot.forEach((item, i) => {
-                if (s.addEquip(item)) {
-                    s.floatingText(ch.x + (i * 20 - 10), ch.y - 35, '+' + item.name, '#' + RARITY_COLORS[item.rarity].toString(16).padStart(6, '0'));
-                } else { s.floatingText(ch.x, ch.y - 35, 'Bag full!', '#e74c3c'); }
+                items.push({ kind: 'equip', item, x: ch.x + (i * 20 - 10), y: ch.y - 35, rarity: item.rarity });
             });
         } else {
             for (let i = 0; i < 1 + Math.floor(Math.random() * 2); i++) {
                 const item = rollZoneMaterial(s.zone);
-                if (s.addMaterial(item)) { s.floatingText(ch.x + (i * 18 - 9), ch.y - 35, '+' + item.name, '#' + RARITY_COLORS[item.rarity].toString(16).padStart(6, '0')); }
+                if (item) items.push({ kind: 'material', item, x: ch.x + (i * 18 - 9), y: ch.y - 35, rarity: item.rarity });
             }
         }
         s.time.delayedCall(12000, () => {
@@ -234,37 +252,36 @@ export class CombatLoot {
                 }
             }
         });
+        return { source: 'chest', gold: finalGold, goldX: ch.x, goldY: ch.y - 35, items };
     }
 
     breakStump(stump) {
         const s = this.scene;
-        s.stumpsBroken++; playBreak();
+        const items = [];
         for (let i = 0; i < 1 + Math.floor(Math.random() * 2); i++) {
             const item = rollMaterial(s.zone);
-            if (s.addMaterial(item)) { s.floatingText(stump.x + (i * 20 - 10), stump.y - 15, '+' + item.name, '#' + RARITY_COLORS[item.rarity].toString(16).padStart(6, '0')); }
-            else { s.floatingText(stump.x, stump.y - 15, 'Bag full!', '#e74c3c'); }
+            if (item) items.push({ kind: 'material', item, x: stump.x + (i * 20 - 10), y: stump.y - 15, rarity: item.rarity });
         }
         stump.hpBg.destroy(); stump.hpFill.destroy(); stump.setTexture('stump_broken');
         s.time.delayedCall(8000, () => { if (stump.active) stump.setTexture('stump'); stump.stats.hp = stump.stats.maxHp; });
-        s.updateUI();
+        return { source: 'stump', items, stumpsBrokenDelta: 1 };
     }
 
     breakVillageChest(ch) {
         const s = this.scene;
-        if (!ch || ch.broken) return;
+        if (!ch || ch.broken) return { items: [], gold: 0 };
         ch.broken = true; ch.setTexture(VILLAGE_CHEST_OPEN_KEY);
         ch.hpBg.destroy(); ch.hpFill.destroy(); playBreak();
         const vGold = rollChestGold(s.zone || 'village');
-        const goldBonus = 1 + ((s.accountEffects ? s.accountEffects.goldPercent || 0 : 0)) / 100;
-        s.gold = (s.gold || 0) + Math.floor(vGold * goldBonus);
-        s.floatingText(ch.x, ch.y - 20, '+' + Math.floor(vGold * goldBonus) + ' gold', '#f1c40f');
+        const goldBonus = 1 + ((s.accountEffects ? s.accountEffects.goldPercent || 0 : 0) / 100);
+        const finalGold = Math.floor(vGold * goldBonus);
+
+        const items = [];
         ch.loot.forEach((item, i) => {
-            const lt = s.add.text(ch.x, ch.y - 20 - i * 16, '+' + item.name, { fontSize: '11px', fill: '#' + RARITY_COLORS[item.rarity].toString(16).padStart(6, '0'), fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setDepth(13);
-            s.tweens.add({ targets: lt, y: lt.y - 20, alpha: 0, duration: 2000, onComplete: () => lt.destroy() });
-            if (item.type === 'equip') s.addEquip(item);
-            else if (item.type === 'accountEquip') s.addAccountEquip(item);
-            playLoot();
+            const kind = item.type === 'accountEquip' ? 'accountEquip' : 'equip';
+            items.push({ kind, item, x: ch.x, y: ch.y - 20 - i * 16, rarity: item.rarity });
         });
         s.time.delayedCall(2500, () => { if (ch.active) ch.destroy(); });
+        return { source: 'village_chest', gold: finalGold, goldX: ch.x, goldY: ch.y - 20, items };
     }
 }
