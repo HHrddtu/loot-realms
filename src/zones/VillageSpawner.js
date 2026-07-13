@@ -282,9 +282,8 @@ export class VillageSpawner {
 
     showVillageClearedDecor() {
         const ox = this.scene.villageOffsetX;
-        // Only remove ruined decor (corpses, dead trees, broken houses)
-        // Keep fresh decor (fountain, elder, walker, lantern, glows, dancer)
-        const ruinedKeys = ['corpse', 'dead_tree', 'broken_house', 'tombstone'];
+        // Ruined decor to remove after clearing
+        const ruinedKeys = ['village_corpse', 'dead_tree', 'broken_fence'];
         this.scene.villageDecor = this.scene.villageDecor.filter(d => {
             if (d && d.texture && ruinedKeys.some(k => d.texture.key.includes(k))) {
                 d.destroy();
@@ -297,10 +296,10 @@ export class VillageSpawner {
             const house = this.scene.add.sprite(ox + hp.x, hp.y, 'village_house').setDepth(2);
             this.scene.villageDecor.push(house);
         });
-        // Cemetery gate with portal sprite and glow (not plain rectangle)
+        // Cemetery gate with mine_gate sprite (more thematic than portal)
         if (!this.scene.villageCemeteryGate && !this.scene.zones.castle.questDone) {
             const gx = ox + VILLAGE_WIDTH / 2, gy = 2000;
-            this.scene.villageCemeteryGate = this.scene.add.sprite(gx, gy, 'hell_portal').setDepth(1);
+            this.scene.villageCemeteryGate = this.scene.add.sprite(gx, gy, 'mine_gate').setDepth(1);
             this.scene.villageCemeteryGateHint = this.scene.add.text(gx, gy + 40, '', {
                 fontSize: '11px', fill: '#9b59b6', fontFamily: 'Arial', fontStyle: 'bold',
                 stroke: '#000', strokeThickness: 2
