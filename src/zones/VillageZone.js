@@ -218,8 +218,28 @@ export class VillageZone extends BaseZone {
         }
         if (s.villageZombies) { s.villageZombies.destroy(); s.villageZombies = null; }
         if (s.villageDecor) {
-            s.villageDecor.forEach(d => { if (d && d.destroy) d.destroy(); });
+            // Destroy ALL objects including fresh ones (houses, gardens, etc.)
+            const decorCopy = [...s.villageDecor];
+            decorCopy.forEach(d => {
+                if (d && !d.destroyed) {
+                    if (d.hpBg) { d.hpBg.destroy(); d.hpBg = null; }
+                    if (d.hpFill) { d.hpFill.destroy(); d.hpFill = null; }
+                    if (d.nameText) { d.nameText.destroy(); d.nameText = null; }
+                    d.destroy();
+                }
+            });
             s.villageDecor = null;
+        }
+        // Also remove from scene's display list if any objects remain
+        if (s.children) {
+            const toRemove = [];
+            s.children.list.forEach(child => {
+                if (child && child.texture && child.texture.key &&
+                    (child.texture.key.includes('village') || child.texture.key.includes('house'))) {
+                    toRemove.push(child);
+                }
+            });
+            toRemove.forEach(child => child.destroy());
         }
         if (s.villageBg) { s.villageBg.destroy(); s.villageBg = null; }
         if (s.villageChildNPC) { if (s.villageChildNPC.destroy) s.villageChildNPC.destroy(); s.villageChildNPC = null; }
