@@ -189,6 +189,12 @@ export class VillageZone extends BaseZone {
         }
     }
 
+    clear() {
+        // Call BaseZone.clear() to destroy enemies, stumps, fireballs, etc.
+        // BaseZone.clear() will also call _destroyZoneSpecific()
+        super.clear();
+    }
+
     _destroyZoneSpecific() {
         const s = this.scene;
         if (this._snowyCheckTimer) { this._snowyCheckTimer.destroy(); this._snowyCheckTimer = null; }
