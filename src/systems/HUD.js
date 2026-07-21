@@ -13,6 +13,7 @@ export class HUD {
         this.scene = scene;
         this.ui = ui;
         this._uiFrame = 0;
+        this._floatingTexts = [];
     }
 
     _mkEl(el) { el.setScrollFactor(0).setDepth(100); return el; }
@@ -264,7 +265,17 @@ export class HUD {
         const sx = x - cam.scrollX;
         const sy = y - cam.scrollY;
         const t = this.scene.add.text(sx, sy, text, { fontSize: '12px', fill: color, fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setScrollFactor(0).setDepth(200);
-        this.scene.tweens.add({ targets: t, y: sy - 30, alpha: 0, duration: 700, onComplete: () => t.destroy() });
+        this._floatingTexts.push(t);
+        this.scene.tweens.add({ targets: t, y: sy - 30, alpha: 0, duration: 700, onComplete: () => {
+            const idx = this._floatingTexts.indexOf(t);
+            if (idx !== -1) this._floatingTexts.splice(idx, 1);
+            t.destroy();
+        } });
+    }
+
+    clearFloatingTexts() {
+        this._floatingTexts.forEach(t => { if (t && t.active) t.destroy(); });
+        this._floatingTexts = [];
     }
 
     showDamageFlash() {

@@ -14,13 +14,15 @@ export class DepthsSpawner {
     spawnDepthsCamps() {
         const s = this.scene;
         const ox = s.depthsOffsetX;
-        const roleOrder = ['tank', 'assassin', 'archer', 'mage', 'healer'];
+        const baseRoles = ['tank', 'assassin', 'archer', 'mage', 'healer'];
         for (let i = 0; i < DEPTHS_CAMP_COUNT; i++) {
             const cp = DEPTHS_CAMP_POSITIONS[i];
-            for (let j = 0; j < DEPTHS_MOBS_PER_CAMP; j++) {
-                const role = roleOrder[j];
+            const roles = [...baseRoles].sort(() => Math.random() - 0.5);
+            const mobs = DEPTHS_MOBS_PER_CAMP + Math.floor(Math.random() * 3) - 1;
+            for (let j = 0; j < mobs; j++) {
+                const role = roles[j % roles.length];
                 const t = DEPTHS_ENEMY_TYPES[role];
-                const angle = (j / DEPTHS_MOBS_PER_CAMP) * Math.PI * 2;
+                const angle = (j / mobs) * Math.PI * 2;
                 const ex = ox + cp.x + Math.cos(angle) * 35;
                 const ey = cp.y + Math.sin(angle) * 30;
                 this.makeDepthsEnemy(t, ex, ey, i);
@@ -30,9 +32,8 @@ export class DepthsSpawner {
 
     makeDepthsEnemy(t, x, y, campIndex) {
         const s = this.scene;
-        const walkTex = t.key + '_walk';
         const animKey = t.key + '_walk_anim';
-        const e = s.add.sprite(x, y, walkTex).setDepth(5);
+        const e = s.add.sprite(x, y, t.key).setDepth(5);
         s.physics.add.existing(e, false);
         e.body.setSize(t.bw, t.bh);
         e.body.setCollideWorldBounds(true);
@@ -53,6 +54,9 @@ export class DepthsSpawner {
         const hpW = t.bw + 10;
         e.hpBg = s.add.rectangle(x, y - t.bh / 2 - 8, hpW, 4, 0x000000).setOrigin(0.5).setDepth(15);
         e.hpFill = s.add.rectangle(x, y - t.bh / 2 - 8, hpW, 4, 0xff0000).setOrigin(0.5).setDepth(15);
+        if (t.hasShield) e.shieldIcon = s.add.text(x, y - t.bh / 2 - 16, '\u{1F6E1}', { fontSize: '10px' }).setOrigin(0.5).setDepth(12);
+        const roleIcons = { healer: '\u{2764}', mage: '\u{2728}', assassin: '\u{1F5E1}', fire: '\u{1F525}', poison: '\u{2620}', necro: '\u{1F480}', swarm: '\u{1F41D}' };
+        if (roleIcons[t.role] && !t.hasShield) e.roleIcon = s.add.text(x, y - t.bh / 2 - 16, roleIcons[t.role], { fontSize: '10px' }).setOrigin(0.5).setDepth(12);
 
         s.enemies.add(e);
         if (s.multiplayer && s.mpSync) {

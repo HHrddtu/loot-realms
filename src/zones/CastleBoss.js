@@ -31,6 +31,23 @@ export class CastleBoss {
             const dy = aggro.y - e.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
+            // Patrol behavior: follow waypoints when not chasing
+            if (e.stats.patrol && e.stats.patrol.length > 0 && dist > 150) {
+                if (!e._patrolIdx) e._patrolIdx = 0;
+                const target = e.stats.patrol[e._patrolIdx];
+                const pdx = target.x - e.x;
+                const pdy = target.y - e.y;
+                const pdist = Math.sqrt(pdx * pdx + pdy * pdy);
+                if (pdist < 15) {
+                    e._patrolIdx = (e._patrolIdx + 1) % e.stats.patrol.length;
+                } else {
+                    const spd = 40;
+                    e.body.setVelocity((pdx / pdist) * spd, (pdy / pdist) * spd);
+                    e.setFlipX(pdx < 0);
+                }
+                return;
+            }
+
             if (e.stats.role === 'ranger') {
                 e.body.setVelocity(0);
                 if (dist < 200 && dist > 40) {
@@ -83,11 +100,10 @@ export class CastleBoss {
         if (this.zone.bossSpawned) return;
         try {
             const bt = BANDIT_LEADER_BOSS;
-            const diffKey = this.scene.difficulty || 'Normal';
-            const hp = Math.floor(bt.hp[diffKey] || bt.hp.Normal);
-            const dmg = Math.floor(bt.dmg[diffKey] || bt.dmg.Normal);
-            const exp = Math.floor(bt.exp[diffKey] || bt.exp.Normal);
-            const spd = bt.speeds[diffKey] || bt.speeds.Normal;
+            const hp = Math.floor(bt.hp);
+            const dmg = Math.floor(bt.dmg);
+            const exp = Math.floor(bt.exp);
+            const spd = bt.speed;
 
             this.zone.bossSpawned = true;
             this.zone.bossAlive = true;

@@ -235,6 +235,74 @@ export function drawEnemyTextures(mk) {
         c.fillRect(9, 0, 12, 1);
     });
 
+    mk('skeleton_shield', 30, 36, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#d4c5a9';
+        c.fillRect(10, 0, 10, 8);
+        c.fillRect(8, 2, 14, 4);
+        c.fillStyle = '#e8dcc8';
+        c.fillRect(11, 1, 8, 3);
+        c.fillStyle = '#1a0a00';
+        c.fillRect(11, 3, 3, 3);
+        c.fillRect(18, 3, 3, 3);
+        c.fillStyle = '#c4b599';
+        c.fillRect(10, 6, 10, 3);
+        c.fillStyle = '#1a0a00';
+        c.fillRect(12, 8, 1, 1);
+        c.fillRect(15, 8, 1, 1);
+        c.fillRect(18, 8, 1, 1);
+        c.fillStyle = '#d4c5a9';
+        c.fillRect(12, 9, 6, 2);
+        c.fillStyle = '#e8dcc8';
+        c.fillRect(13, 10, 4, 1);
+        c.fillStyle = '#d4c5a9';
+        c.fillRect(11, 11, 8, 2);
+        c.fillRect(12, 13, 6, 2);
+        c.fillRect(11, 15, 8, 2);
+        c.fillStyle = '#c4b599';
+        c.fillRect(12, 11, 2, 2);
+        c.fillRect(16, 13, 2, 2);
+        c.fillRect(12, 15, 2, 2);
+        c.fillStyle = '#1a0a00';
+        c.fillRect(13, 11, 1, 2);
+        c.fillRect(16, 15, 1, 2);
+        c.fillStyle = '#d4c5a9';
+        c.fillRect(20, 11, 4, 2);
+        c.fillRect(22, 13, 2, 4);
+        c.fillRect(22, 17, 2, 2);
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(0, 6, 8, 16);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(1, 7, 6, 14);
+        c.fillStyle = '#bdc3c7';
+        c.fillRect(2, 8, 4, 6);
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(0, 6, 8, 2);
+        c.fillRect(0, 20, 8, 2);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(1, 6, 6, 1);
+        c.fillStyle = '#d4c5a9';
+        c.fillRect(11, 17, 3, 7);
+        c.fillRect(16, 17, 3, 7);
+        c.fillStyle = '#c4b599';
+        c.fillRect(11, 22, 3, 2);
+        c.fillRect(16, 22, 3, 2);
+        c.fillStyle = '#555';
+        c.fillRect(10, 24, 4, 4);
+        c.fillRect(16, 24, 4, 4);
+        c.fillStyle = '#666';
+        c.fillRect(10, 24, 4, 2);
+        c.fillRect(16, 24, 4, 2);
+        c.fillStyle = '#444';
+        c.fillRect(9, 27, 6, 2);
+        c.fillRect(15, 27, 6, 2);
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(8, 0, 14, 2);
+        c.fillRect(7, 1, 16, 2);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(9, 0, 12, 1);
+    });
+
     mk('skeleton_archer', 30, 36, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#d4c5a9';
@@ -5216,5 +5284,60 @@ export function drawEnemyTextures(mk) {
         c.fillStyle = '#0a0a14';
         c.fillRect(3, 18, 4, 3);
         c.fillRect(8, 18, 4, 3);
+    });
+
+    mk('chaos_elemental', 30, 36, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#9b59b6';
+        c.fillRect(8, 6, 14, 16);
+        c.fillRect(6, 10, 18, 10);
+        c.fillStyle = '#8e44ad';
+        c.fillRect(10, 8, 10, 12);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(12, 10, 2, 2);
+        c.fillRect(16, 10, 2, 2);
+        c.fillStyle = '#e74c3c';
+        c.fillRect(13, 14, 4, 4);
+        c.fillStyle = 'rgba(155,89,182,0.4)';
+        c.fillRect(4, 6, 22, 20);
+        c.fillRect(8, 4, 14, 4);
+    });
+
+    mk('void_wraith', 26, 32, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#1a1a2a';
+        c.fillRect(8, 4, 10, 14);
+        c.fillRect(6, 8, 14, 8);
+        c.fillStyle = '#2a2a4a';
+        c.fillRect(9, 6, 8, 10);
+        c.fillStyle = '#ff44ff';
+        c.fillRect(10, 8, 2, 2);
+        c.fillRect(14, 8, 2, 2);
+        c.fillStyle = '#1a1a2a';
+        c.fillRect(6, 18, 4, 8);
+        c.fillRect(16, 18, 4, 8);
+        c.fillStyle = 'rgba(255,68,255,0.15)';
+        c.fillRect(4, 4, 18, 22);
+    });
+
+    mk('blood_golem', 36, 40, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#8b0000';
+        c.fillRect(6, 8, 24, 20);
+        c.fillRect(4, 12, 28, 14);
+        c.fillRect(10, 4, 16, 10);
+        c.fillStyle = '#a00000';
+        c.fillRect(8, 10, 20, 16);
+        c.fillRect(12, 6, 12, 8);
+        c.fillStyle = '#ff0000';
+        c.fillRect(12, 10, 3, 3);
+        c.fillRect(21, 10, 3, 3);
+        c.fillStyle = '#cc0000';
+        c.fillRect(13, 18, 10, 4);
+        c.fillStyle = '#5a0000';
+        c.fillRect(4, 28, 6, 8);
+        c.fillRect(26, 28, 6, 8);
+        c.fillRect(10, 30, 4, 6);
+        c.fillRect(22, 30, 4, 6);
     });
 }

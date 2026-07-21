@@ -1,4 +1,4 @@
-import { MINE_ENEMY_TYPES, MINE_ROCK_COUNT, MINE_CRYSTAL_COUNT, MINE_CHEST_COUNT, MINE_CHEST_DROP_CHANCE } from '../config/index.js';
+import { MINE_ENEMY_TYPES, MINE_ROCK_COUNT, MINE_CRYSTAL_COUNT, MINE_CHEST_COUNT, MINE_CHEST_DROP_CHANCE, PRESTIGE_ENEMIES } from '../config/index.js';
 import { rollZoneEquip, rollZoneMaterial } from '../utils.js';
 
 export class MineSpawner {
@@ -8,9 +8,17 @@ export class MineSpawner {
     }
 
     spawnEnemies() {
-        for (let i = 0; i < MINE_ENEMY_TYPES.length; i++) {
-            const t = MINE_ENEMY_TYPES[i % MINE_ENEMY_TYPES.length];
+        const count = MINE_ENEMY_TYPES.length + Math.floor(Math.random() * 3) - 1;
+        for (let i = 0; i < count; i++) {
+            const t = MINE_ENEMY_TYPES[Math.floor(Math.random() * MINE_ENEMY_TYPES.length)];
             this.makeEnemy(t, 80 + Math.random() * 640, 200 + Math.random() * 500);
+        }
+        const prestige = this.scene.prestigeLevel || 0;
+        if (prestige >= 3) {
+            const pt = PRESTIGE_ENEMIES.chaos_elemental;
+            if (pt && pt.prestigeReq <= prestige) {
+                this.makeEnemy(pt, 200 + Math.random() * 400, 300 + Math.random() * 300);
+            }
         }
     }
 
@@ -19,10 +27,13 @@ export class MineSpawner {
         const e = s.add.sprite(x, y, t.key).setDepth(5);
         s.physics.add.existing(e, false);
         e.body.setSize(t.bw, t.bh); e.body.setCollideWorldBounds(true);
-        e.stats = { key: t.key, name: t.name, hp: Math.floor(t.hp * s.diffMulti.hp), maxHp: Math.floor(t.hp * s.diffMulti.hp), damage: Math.floor(t.dmg * s.diffMulti.dmg), exp: Math.floor(t.exp * s.diffMulti.exp), bw: t.bw, bh: t.bh, wTimer: 0, wDir: 0 };
+        e.stats = { key: t.key, name: t.name, hp: Math.floor(t.hp * s.diffMulti.hp), maxHp: Math.floor(t.hp * s.diffMulti.hp), damage: Math.floor(t.dmg * s.diffMulti.dmg), exp: Math.floor(t.exp * s.diffMulti.exp), bw: t.bw, bh: t.bh, wTimer: 0, wDir: 0, hasShield: t.hasShield || false, role: t.role || 'dps' };
         const hw = t.bw + 4;
         e.hpBg = s.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = s.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0xe74c3c).setOrigin(0.5).setDepth(11);
+        if (t.hasShield) {
+            e.shieldIcon = s.add.text(x, y - t.bh / 2 - 16, '\u{1F6E1}', { fontSize: '10px' }).setOrigin(0.5).setDepth(12);
+        }
         s.enemies.add(e);
         return e;
     }

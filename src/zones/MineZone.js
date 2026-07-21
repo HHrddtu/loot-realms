@@ -73,6 +73,13 @@ export class MineZone extends BaseZone {
 
         this.setupEnemyOverlap();
 
+        if (s.loreItems) {
+            s.loreItems.spawnLoreItems('mine', [
+                { x: 150, y: 350 },
+                { x: 650, y: 850 }
+            ]);
+        }
+
         s.zone = 'mine';
         s.npc.spawnNPCs();
         s.hintText.setText('Q=quests | I=inventory | TAB=stats | T=talents | P=pause');
@@ -148,9 +155,11 @@ export class MineZone extends BaseZone {
 
     update(time, delta) {
         const s = this.scene;
+        if (s.zone === 'mine' && s.loreItems) s.loreItems.update();
         if (s.zone === 'mine') {
             this.checkMineExitProximity();
             this.updateMineCart();
+            this._updateDarkness();
         } else if (s.zone === 'mine_boss') {
             this.bossAI.checkExitProximity();
             this.bossAI.update(delta);
@@ -356,8 +365,9 @@ export class MineZone extends BaseZone {
                 if (e.active && e.stats) {
                     const d = Phaser.Math.Distance.Between(cart.x, cart.y, e.x, e.y);
                     if (d < 30) {
-                        const knockX = (e.x - cart.x) / d * 200;
-                        const knockY = (e.y - cart.y) / d * 200;
+                        const angle = Math.atan2(e.y - cart.y, e.x - cart.x);
+                        const knockX = Math.cos(angle) * 200;
+                        const knockY = Math.min(0, Math.sin(angle) * 200);
                         e.body.setVelocity(knockX, knockY);
                         s.time.delayedCall(200, () => { if (e.body) e.body.setVelocity(0, 0); });
                         s.combat.hitEnemy(e, 25);
@@ -369,9 +379,25 @@ export class MineZone extends BaseZone {
         const pd = Phaser.Math.Distance.Between(cart.x, cart.y, s.player.x, s.player.y);
         if (pd < 25 && !s.menuOpen && !s.transitioning) {
             s.combat.takeDamage(15);
-            const knockDir = s.player.x < cart.x ? -1 : 1;
-            s.player.body.setVelocity(knockDir * 200, -150);
+            const angle = Math.atan2(s.player.y - cart.y, s.player.x - cart.x);
+            const knockX = Math.cos(angle) * 200;
+            const knockY = Math.min(0, Math.sin(angle) * 150);
+            s.player.body.setVelocity(knockX, knockY);
         }
+    }
+
+    _updateDarkness() {
+        const s = this.scene;
+        if (!s.mineDarkness || !s.mineTorches) return;
+        let minDist = Infinity;
+        for (const t of s.mineTorches) {
+            if (!t.torch || !t.torch.active) continue;
+            const d = Phaser.Math.Distance.Between(s.player.x, s.player.y, t.torch.x, t.torch.y);
+            if (d < minDist) minDist = d;
+        }
+        const maxVis = 200;
+        const alpha = minDist < maxVis ? 0.3 + (minDist / maxVis) * 0.6 : 0.9;
+        s.mineDarkness.setAlpha(alpha);
     }
 
     checkMineExitProximity() {
@@ -506,6 +532,8 @@ export class MineZone extends BaseZone {
             s.enemies.getChildren().forEach(e => {
                 if (e.hpBg) e.hpBg.destroy();
                 if (e.hpFill) e.hpFill.destroy();
+                if (e.shieldIcon) e.shieldIcon.destroy();
+                if (e.roleIcon) e.roleIcon.destroy();
             });
             s.enemies.clear(true, true);
         }
@@ -536,7 +564,7 @@ export class MineZone extends BaseZone {
 
     handleSpace() {
         const s = this.scene;
-        if (s.nearbyNpc) {
+        if (s.nearbyNpc && !s.menuOpen) {
             s.npc.interactWithNpc();
             return;
         }
@@ -555,6 +583,7 @@ export class MineZone extends BaseZone {
         ) < 50) {
             this.enterMineBossArena();
         } else {
+            if (s.loreItems && s.loreItems.tryInteract()) return;
             s.attack();
         }
     }

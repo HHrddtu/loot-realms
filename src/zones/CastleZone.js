@@ -53,6 +53,13 @@ export class CastleZone extends BaseZone {
         this.scene.enemies = this.scene.physics.add.group();
         this.scene.villageChests = this.scene.physics.add.group();
 
+        if (this.currentRoom === 0 && this.scene.loreItems) {
+            this.scene.loreItems.spawnLoreItems('castle', [
+                { x: 200, y: 300 },
+                { x: 600, y: 500 }
+            ]);
+        }
+
         this.currentRoom = roomIndex;
         this.bossAlive = false;
         this.bossDefeated = false;
@@ -120,7 +127,9 @@ export class CastleZone extends BaseZone {
     }
 
     update(time, delta) {
-        if (this.scene.zone !== 'castle' || this.scene.menuOpen || this.scene.transitioning) return;
+        const s = this.scene;
+        if (s.zone !== 'castle' || s.menuOpen || s.transitioning) return;
+        if (this.currentRoom === 0 && s.loreItems) s.loreItems.update();
         this.bossAI._updateBandits();
         this.bossAI._updateBoss();
         this._updateChestHints();
@@ -169,6 +178,7 @@ export class CastleZone extends BaseZone {
             if (ed < 60) { this._talkToElder(); return; }
         }
 
+        if (this.scene.loreItems && this.scene.loreItems.tryInteract()) return;
         if (!this.bossDefeated && this.currentRoom === CASTLE_ROOMS - 1) {
             this.scene.attack();
         } else if (this.scene.enemies && this.scene.enemies.getLength() > 0) {
@@ -434,6 +444,8 @@ export class CastleZone extends BaseZone {
                 this.scene.enemies.getChildren().forEach(e => {
                     if (e.hpBg) e.hpBg.destroy();
                     if (e.hpFill) e.hpFill.destroy();
+                    if (e.shieldIcon) e.shieldIcon.destroy();
+                    if (e.roleIcon) e.roleIcon.destroy();
                 });
                 this.scene.enemies.clear(true, true);
             }
@@ -486,6 +498,8 @@ export class CastleZone extends BaseZone {
                 this.scene.enemies.getChildren().forEach(e => {
                     if (e.hpBg) e.hpBg.destroy();
                     if (e.hpFill) e.hpFill.destroy();
+                    if (e.shieldIcon) e.shieldIcon.destroy();
+                    if (e.roleIcon) e.roleIcon.destroy();
                 });
                 this.scene.enemies.clear(true, true);
             }

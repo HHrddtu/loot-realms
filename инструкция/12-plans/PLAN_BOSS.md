@@ -3,10 +3,10 @@
 #plan #boss #design
 
 > [!INFO] Связанные заметки
-> - [[GAME_DESIGN]] — формулы боссов
-> - [[TECHNICAL_DESIGN]] — архитектура зон
-> - [[PLAN_SNOWY_VILLAGE]] — другой план босса (Ice Spirit)
-> - [[README]] — карта содержимого
+> - [[06-mechanics/Combat|Combat]] — формулы боссов
+> - [[01-tech/ARCHITECTURE|Architecture]] — архитектура зон
+> - [[12-plans/PLAN_SNOWY_VILLAGE|PLAN_SNOWY_VILLAGE]] — другой план босса (Ice Spirit)
+> - [[index|MOC]] — карта содержимого
 
 ## Концепция
 Текущий экран (800x600) — лес. Сверху по центру стоит **огромное дерево с дуплом**. Игрок подходит → жмёт SPACE → fade → попадает в тёмную арену босса. Там один трент. Убил → показ лута + надпись "BOSS DEFEATED" 5 сек → fade обратно в лес.

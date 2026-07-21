@@ -52,6 +52,13 @@ export class ShadowZone extends BaseZone {
 
         this.setupEnemyOverlap();
 
+        if (s.loreItems) {
+            s.loreItems.spawnLoreItems('shadow', [
+                { x: s.shadowOffsetX + 200, y: 300 },
+                { x: s.shadowOffsetX + 600, y: 1000 }
+            ]);
+        }
+
         s.physics.add.overlap(s.player, s.shadowMinions, (p, e) => {
             if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
                 s.combat.takeDamage(e.stats.damage);
@@ -72,6 +79,8 @@ export class ShadowZone extends BaseZone {
             s.shadowMinions.getChildren().forEach(e => {
                 if (e.hpBg) e.hpBg.destroy();
                 if (e.hpFill) e.hpFill.destroy();
+                if (e.shieldIcon) e.shieldIcon.destroy();
+                if (e.roleIcon) e.roleIcon.destroy();
             });
             s.shadowMinions.clear(true, true);
         }
@@ -106,7 +115,7 @@ export class ShadowZone extends BaseZone {
 
     handleSpace() {
         const s = this.scene;
-        if (s.nearbyNpc) {
+        if (s.nearbyNpc && !s.menuOpen) {
             s.npc.interactWithNpc();
             return;
         }
@@ -123,6 +132,7 @@ export class ShadowZone extends BaseZone {
             ) < 60) {
                 this.exitShadow();
             } else {
+                if (s.loreItems && s.loreItems.tryInteract()) return;
                 s.attack();
             }
         }
@@ -130,6 +140,7 @@ export class ShadowZone extends BaseZone {
 
     update(time, delta) {
         this.updateShadowMobs(delta);
+        if (this.scene.loreItems) this.scene.loreItems.update();
         this.bossAI.updateShadowBoss();
         this.updateShadowMinions();
         this.checkReturnPortal();
@@ -153,15 +164,15 @@ export class ShadowZone extends BaseZone {
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist < 250) {
-                let speed = 50;
+                let speed = e.stats.speed || 50;
                 let engageDist = 30;
 
                 switch (e.stats.role) {
-                    case 'tank':     speed = 40; engageDist = 25; break;
-                    case 'assassin': speed = 90; engageDist = 20; break;
-                    case 'archer':   speed = 45; engageDist = 150; break;
-                    case 'mage':     speed = 40; engageDist = 180; break;
-                    case 'healer':   speed = 45; engageDist = 120; break;
+                    case 'tank':     speed = (e.stats.speed || 50) * 0.8; engageDist = 25; break;
+                    case 'assassin': speed = (e.stats.speed || 50) * 1.8; engageDist = 20; break;
+                    case 'archer':   speed = (e.stats.speed || 50) * 0.9; engageDist = 150; break;
+                    case 'mage':     speed = (e.stats.speed || 50) * 0.8; engageDist = 180; break;
+                    case 'healer':   speed = (e.stats.speed || 50) * 0.9; engageDist = 120; break;
                 }
 
                 if (dist > engageDist) {
@@ -256,7 +267,10 @@ export class ShadowZone extends BaseZone {
         const s = this.scene;
         if (this.bossDefeated) return;
         this.bossDefeated = true;
+        s.shadowStepUnlocked = true;
+        s.doSave();
         playBossDeath();
+        s.tutorialMgr.showAbilityTutorial('shadowStep');
         const ox = s.shadowOffsetX;
 
         if (s.shadowBoss) {

@@ -22,10 +22,10 @@ export class ThroneBoss {
         this.healed = false;
         const bt = THRONE_BOSS_TYPE;
         const ox = s.throneOffsetX;
-        const hp = Math.floor(bt.hp[s.difficulty] || bt.hp.Normal);
-        const dmg = Math.floor(bt.dmg[s.difficulty] || bt.dmg.Normal);
-        const exp = Math.floor(bt.exp[s.difficulty] || bt.exp.Normal);
-        const spd = bt.speeds[s.difficulty] || bt.speeds.Normal;
+        const hp = Math.floor(bt.hp);
+        const dmg = Math.floor(bt.dmg);
+        const exp = Math.floor(bt.exp);
+        const spd = bt.speed;
 
         const bx = ox + THRONE_WIDTH / 2;
         const by = 200;
@@ -54,6 +54,7 @@ export class ThroneBoss {
         }).setOrigin(0.5).setDepth(12).setScrollFactor(0).setVisible(false);
 
         s.throneBoss = b;
+        s.throneBoss.bossHandler = () => { if (s.zones.throne) s.zones.throne.victoryThroneBoss(); };
         s.throneBossVfx = [];
         s.enemies.add(b);
         if (s.multiplayer && s.mpSync) {

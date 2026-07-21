@@ -80,6 +80,36 @@ export function onCollect(itemKey) {
     });
 }
 
+export function onExplore(zoneKey) {
+    activeQuests.forEach(qKey => {
+        const quest = QUEST_DB[qKey];
+        if (!quest) return;
+        if (quest.type === 'explore' && quest.target === zoneKey) {
+            questProgress[qKey] = (questProgress[qKey] || 0) + 1;
+        }
+    });
+}
+
+export function onTalk(npcKey) {
+    activeQuests.forEach(qKey => {
+        const quest = QUEST_DB[qKey];
+        if (!quest) return;
+        if (quest.type === 'talk' && quest.target === npcKey) {
+            questProgress[qKey] = (questProgress[qKey] || 0) + 1;
+        }
+    });
+}
+
+export function onEscortTick(npcKey, delta) {
+    activeQuests.forEach(qKey => {
+        const quest = QUEST_DB[qKey];
+        if (!quest) return;
+        if (quest.type === 'escort' && quest.target === npcKey) {
+            questProgress[qKey] = (questProgress[qKey] || 0) + delta;
+        }
+    });
+}
+
 export function isQuestComplete(qKey) {
     const quest = QUEST_DB[qKey];
     if (!quest) return false;

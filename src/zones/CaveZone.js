@@ -55,6 +55,13 @@ export class CaveZone extends BaseZone {
 
         this.setupEnemyOverlap();
 
+        if (s.loreItems) {
+            s.loreItems.spawnLoreItems('cave', [
+                { x: s.caveOffsetX + 150, y: 250 },
+                { x: s.caveOffsetX + 650, y: 850 }
+            ]);
+        }
+
         s.physics.add.overlap(s.player, s.caveSmallBats, (p, e) => {
             if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
                 s.combat.takeDamage(e.stats.damage);
@@ -89,6 +96,10 @@ export class CaveZone extends BaseZone {
 
         s.physics.add.overlap(s.player, s.groundLootGroup, (p, loot) => {
             if (!loot.active) return;
+            if (s.multiplayer && s.mpManager) {
+                s.mpManager.handleLocalLootPickup(loot);
+                return;
+            }
             const gold = loot.goldValue || 10;
             s.gold += gold;
             s.floatingText(loot.x, loot.y - 20, '+' + gold + ' gold', '#f1c40f');
@@ -177,6 +188,7 @@ export class CaveZone extends BaseZone {
     update(time, delta) {
         const s = this.scene;
         if (s.zone === 'cave') {
+            if (s.loreItems) s.loreItems.update();
             this.checkCaveProximity();
             this.caveBossSpawnCheck();
             this.updateCaveMobs();
@@ -264,7 +276,7 @@ export class CaveZone extends BaseZone {
             }
 
             if (dist < 250) {
-                const speed = 55;
+                const speed = e.stats.speed || 55;
                 if (dist > 25) {
                     e.body.setVelocity((dx / dist) * speed, (dy / dist) * speed);
                     e.setFlipX(dx < 0);
@@ -329,7 +341,7 @@ export class CaveZone extends BaseZone {
 
     handleSpace() {
         const s = this.scene;
-        if (s.nearbyNpc) {
+        if (s.nearbyNpc && !s.menuOpen) {
             s.npc.interactWithNpc();
             return;
         }
@@ -338,6 +350,7 @@ export class CaveZone extends BaseZone {
         ) < 50) {
             this.enterCaveVillage();
         } else {
+        if (s.loreItems && s.loreItems.tryInteract()) return;
             s.attack();
         }
     }

@@ -129,6 +129,9 @@ export default class LobbyScene extends Phaser.Scene {
 
         if (hostMode) {
             this._createBtn(400, 400, t('mp.startGame'), 0x27ae60, () => this._startGame());
+            this._add(this.add.text(400, 425, '⚠ If host disconnects, session ends for all players', {
+                fontSize: '9px', fill: '#e67e22', fontFamily: 'Arial', align: 'center'
+            }).setOrigin(0.5));
         }
         this._createBtn(400, 450, t('mp.leave'), 0xc0392b, () => {
             disconnect();

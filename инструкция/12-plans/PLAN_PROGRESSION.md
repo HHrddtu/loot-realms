@@ -3,10 +3,10 @@
 #plan #progression #design
 
 > [!INFO] Связанные заметки
-> - [[GAME_DESIGN]] — механики прогрессии
-> - [[PROJECT_STATE]] — текущий статус
-> - [[PLAN_ROADMAP]] — дорожная карта
-> - [[README]] — карта содержимого
+> - [[06-mechanics/Progression|Progression]] — механики прогрессии
+> - [[12-plans/PROJECT_STATE|PROJECT STATE]] — текущий статус
+> - [[12-plans/PLAN_ROADMAP|PLAN_ROADMAP]] — дорожная карта
+> - [[index|MOC]] — карта содержимого
 
 ## Текущее состояние
 

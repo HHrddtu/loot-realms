@@ -1,12 +1,27 @@
 node_modules/
 dist/
+build/
 .DS_Store
+Thumbs.db
+
+# Environment & secrets
+.env
+.env.*
 *.local
-*.bak
-*.log
+
+# IDE
 .vscode/
 .idea/
-Thumbs.db
+
+# Logs & temp
+*.log
+*.bak
+*.tmp
+
+# Obsidian workspace (personal, changes per machine)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+
+# Test/debug scripts (not part of game)
 check_db.py
 check_textures.js
-04-systems/

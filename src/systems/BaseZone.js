@@ -18,7 +18,10 @@ export class BaseZone {
 
     clear() {
         const s = this.scene;
+        s.tweens.killAll();
         s.physics.world.colliders.destroy();
+        if (s.ui && s.ui.hud) s.ui.hud.clearFloatingTexts();
+        if (s.loreItems) s.loreItems.cleanup();
         this._destroyFireballs();
         this._destroyEnemyProjectiles();
         this._destroyShield();
@@ -96,6 +99,8 @@ export class BaseZone {
                 if (e.hpBg) e.hpBg.destroy();
                 if (e.hpFill) e.hpFill.destroy();
                 if (e.nameText) e.nameText.destroy();
+                if (e.shieldIcon) e.shieldIcon.destroy();
+                if (e.roleIcon) e.roleIcon.destroy();
             });
             s.enemies.clear(true, true);
         }

@@ -56,6 +56,13 @@ export class ForestZone extends BaseZone {
 
         this.setupEnemyOverlap();
 
+        if (s.loreItems) {
+            s.loreItems.spawnLoreItems('forest', [
+                { x: 200, y: 400 },
+                { x: 600, y: 300 }
+            ]);
+        }
+
         s.physics.add.overlap(s.player, s.trapGroup, (p, trap) => {
             if (!trap.active || trap.onCooldown || s.menuOpen || s.transitioning) return;
             trap.onCooldown = true;
@@ -126,6 +133,7 @@ export class ForestZone extends BaseZone {
             s.npc.interactWithNpc();
             return;
         }
+        if (s.loreItems && s.loreItems.tryInteract()) return;
         if (s.player.y < 100) {
             this.enterPortal();
         } else {
@@ -136,6 +144,7 @@ export class ForestZone extends BaseZone {
     update(time, delta) {
         this.checkPortalProximity();
         this.checkChestProximity();
+        if (this.scene.loreItems) this.scene.loreItems.update();
     }
 
     checkChestProximity() {
@@ -221,6 +230,18 @@ export class ForestZone extends BaseZone {
                 stroke: '#000', strokeThickness: 2
             }).setOrigin(0.5).setDepth(12);
             ch.mpId = 'chest_forest_' + i;
+
+            if (i === 0 && !s._tutorialChestShown) {
+                s._tutorialChestShown = true;
+                ch.glow = s.add.rectangle(cx, cy, 34, 28, 0xf1c40f, 0.3).setDepth(5);
+                s.tweens.add({ targets: ch.glow, alpha: { from: 0.15, to: 0.45 }, duration: 600, yoyo: true, repeat: -1 });
+                ch.arrow = s.add.text(cx, cy - 35, '\u2193', { fontSize: '14px', fill: '#f1c40f', fontFamily: 'Arial' }).setOrigin(0.5).setDepth(13);
+                s.tweens.add({ targets: ch.arrow, y: cy - 30, duration: 400, yoyo: true, repeat: -1 });
+                const lang = localStorage.getItem('game_lang') || 'en';
+                const hint = lang === 'ru' ? '\u0410\u0442\u0430\u043a\u0443\u0439 \u0441\u0443\u043d\u0434\u0443\u043a!' : lang === 'de' ? 'Greife die Truhe an!' : 'Attack the chest!';
+                s.time.delayedCall(2000, () => { s.floatingText(cx, cy - 50, hint, '#f1c40f'); });
+            }
+
             ch.isForestChest = true;
             s.forestChests.add(ch);
             ch.body.setSize(22, 18);

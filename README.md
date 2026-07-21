@@ -9,51 +9,45 @@
 | Заметка | Описание |
 |---------|----------|
 | [[инструкция/ORIENTATION\|ORIENTATION]] | Быстрая ориентация по проекту (стек, структура, ключевые паттерны) |
-| [[GAME_VISION]] | Общее видение игры, философия дизайна, целевая аудитория |
-| [[GAME_DESIGN]] | Игровые механики, формулы баланса, системы |
+| [[инструкция/00-vision/GAME_VISION\|GAME_VISION]] | Общее видение игры, философия дизайна, целевая аудитория |
+| [[инструкция/01-tech/ARCHITECTURE\|Architecture]] | Архитектура проекта, системы, сцены, потоки данных |
 
 ## 🛠️ Технологии и архитектура
 
 | Заметка | Описание |
 |---------|----------|
-| [[TECH_STACK]] | Выбор технологий (Phaser 3, Vite, Firebase, PeerJS) |
-| [[TECHNICAL_DESIGN]] | Архитектура проекта, системы, сцены, потоки данных |
-| [[docs/web/module-bundling\|Module Bundling]] | Документация по сборке модулей |
+| [[инструкция/01-tech/TECH_STACK\|TECH_STACK]] | Выбор технологий (Phaser 3, Vite, Firebase, PeerJS) |
+| [[инструкция/01-tech/FILE_TREE\|FILE_TREE]] | Структура файлов проекта |
+| [[инструкция/01-tech/SAVE_FORMAT\|SAVE_FORMAT]] | Формат сохранений |
 
 ## 📊 Состояние и задачи
 
 | Заметка | Описание |
 |---------|----------|
-| [[PROJECT_STATE]] | Текущее состояние проекта (v0.16.0+) |
-| [[TASK_QUEUE]] | Очередь задач с приоритетами |
-| [[TODO_v017]] | План разработки v0.17 (выполнено) |
-| [[TODO_v018]] | План разработки v0.18 (следующий) |
-| [[PLAN_10x]] | План достижения 10/10 по качеству |
+| [[инструкция/12-plans/PROJECT_STATE\|PROJECT_STATE]] | Текущее состояние проекта |
+| [[инструкция/12-plans/TASK_QUEUE\|TASK_QUEUE]] | Очередь задач с приоритетами |
+| [[инструкция/12-plans/TODO_v017\|TODO v0.17]] | План разработки v0.17 (выполнено) |
+| [[инструкция/12-plans/TODO_v018\|TODO v0.18]] | План разработки v0.18 (следующий) |
+| [[инструкция/12-plans/PLAN_10x\|PLAN_10x]] | План достижения 10/10 по качеству |
 
 ## 📐 Планы разработки
 
 | Заметка | Описание |
 |---------|----------|
-| [[PLAN_ROADMAP]] | Дорожная карта (v0.12.0 → v0.15.0) |
-| [[PLAN_BOSS]] | План: Лес + Босс Трент |
-| [[PLAN_SNOWY_VILLAGE]] | План: Snowy Village (v0.11.0) |
-| [[PLAN_PROGRESSION]] | План: Прогрессия и Сложность |
-| [[BUGFIX_CAVE_STAIRS]] | Багфикс: Cave Stairs Ghost + Account Equip Save |
+| [[инструкция/12-plans/PLAN_ROADMAP\|PLAN_ROADMAP]] | Дорожная карта (v0.12.0+) |
+| [[инструкция/12-plans/PLAN_BOSS\|PLAN_BOSS]] | План: Лес + Босс Трент |
+| [[инструкция/12-plans/PLAN_SNOWY_VILLAGE\|PLAN_SNOWY_VILLAGE]] | План: Snowy Village (v0.11.0) |
+| [[инструкция/12-plans/PLAN_PROGRESSION\|PLAN_PROGRESSION]] | План: Прогрессия и Сложность |
+| [[инструкция/12-plans/BUGFIX_CAVE_STAIRS\|BUGFIX_CAVE_STAIRS]] | Багфикс: Cave Stairs Ghost + Account Equip Save |
 
 ## 🧪 Код-ревью и метрики
 
 | Заметка | Описание |
 |---------|----------|
 | [[REVIEW]] | Полный код-ревью (архитектура, качество, баланс) |
-| [[BENCHMARKS]] | Бенчмарки производительности |
+| [[инструкция/14-knowledge/game-design-review-critical\|GAME_REVIEW_v2]] | **Критическое ревью геймдизайна** — нарратив, геймплей, мультиплеер |
+| [[инструкция/RULES\|Правила разработки]] | Основные правила и инструкции |
 | [[AGENTS]] | Руководство по агентам AI для разработки |
-
-## 📁 Структура
-
-| Заметка | Описание |
-|---------|----------|
-| [[FILE_TREE]] | Полная структура файлов проекта |
-| [[инструкция/инструкция\|Правила разработки]] | Основные правила и инструкции |
 
 ---
 
@@ -71,27 +65,4 @@
 
 ---
 
-## 🗺️ Граф связей
-
-```mermaid
-graph LR
-    README --> GAME_VISION
-    README --> GAME_DESIGN
-    README --> TECH_STACK
-    README --> TECHNICAL_DESIGN
-    README --> TASK_QUEUE
-    README --> PROJECT_STATE
-    GAME_VISION --> GAME_DESIGN
-    GAME_DESIGN --> TECHNICAL_DESIGN
-    TECH_STACK --> TECHNICAL_DESIGN
-    TECHNICAL_DESIGN --> FILE_TREE
-    TASK_QUEUE --> TODO_v017
-    TASK_QUEUE --> TODO_v018
-    PROJECT_STATE --> TASK_QUEUE
-    PLAN_ROADMAP --> TECHNICAL_DESIGN
-    PLAN_ROADMAP --> TASK_QUEUE
-    REVIEW --> TECHNICAL_DESIGN
-    REVIEW --> PROJECT_STATE
-```
-
-*Последнее обновление: v0.18.0 | Всего заметок: 18*
+*Последнее обновление: v0.18.0*

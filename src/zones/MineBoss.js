@@ -16,10 +16,10 @@ export class MineBoss extends BaseBossAI {
     spawn() {
         const s = this.scene;
         const bt = MINE_BOSS_TYPE;
-        const hp = Math.floor(bt.hp[s.difficulty] || bt.hp.Normal);
-        const dmg = Math.floor(bt.dmg[s.difficulty] || bt.dmg.Normal);
-        const exp = Math.floor(bt.exp[s.difficulty] || bt.exp.Normal);
-        const spd = bt.speeds[s.difficulty] || bt.speeds.Normal;
+        const hp = Math.floor(bt.hp);
+        const dmg = Math.floor(bt.dmg);
+        const exp = Math.floor(bt.exp);
+        const spd = bt.speed;
         const bx = 400, by = 180;
         const b = s.add.sprite(bx, by, 'skeleton_lord_walk').setDepth(5);
         s.physics.add.existing(b, false);

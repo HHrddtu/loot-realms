@@ -90,7 +90,7 @@ export class ArenaZone extends BaseZone {
 
     handleSpace() {
         const s = this.scene;
-        if (s.nearbyNpc) {
+        if (s.nearbyNpc && !s.menuOpen) {
             s.npc.interactWithNpc();
             return;
         }
@@ -108,10 +108,10 @@ export class ArenaZone extends BaseZone {
     spawnBoss() {
         const s = this.scene;
         const bt = BOSS_TYPE;
-        const hp = Math.floor(bt.hp[s.difficulty] || bt.hp.Normal);
-        const dmg = Math.floor(bt.dmg[s.difficulty] || bt.dmg.Normal);
-        const exp = Math.floor(bt.exp[s.difficulty] || bt.exp.Normal);
-        const spd = bt.speeds[s.difficulty] || bt.speeds.Normal;
+        const hp = Math.floor(bt.hp);
+        const dmg = Math.floor(bt.dmg);
+        const exp = Math.floor(bt.exp);
+        const spd = bt.speed;
 
         s.boss = s.add.sprite(400, 180, 'treant_boss').setDepth(5);
         s.physics.add.existing(s.boss, false);
@@ -142,6 +142,7 @@ export class ArenaZone extends BaseZone {
             rootCooldown: 0,
             chargeCooldown: 0
         };
+        s.boss.bossHandler = () => this._onBossKilled();
 
         const hw = bt.bw + 20;
         s.boss.hpBg = s.add.rectangle(400, 130, hw, 5, 0x222222).setOrigin(0.5).setDepth(15);
@@ -157,6 +158,11 @@ export class ArenaZone extends BaseZone {
         if (s.multiplayer && s.mpSync) {
             s.mpSync.assignMobId(s.boss, 'boss');
         }
+    }
+
+    _onBossKilled() {
+        const s = this.scene;
+        s.combat.killBoss();
     }
 
     checkExitProximity() {

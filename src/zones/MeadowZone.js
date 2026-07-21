@@ -31,9 +31,40 @@ export class MeadowZone extends BaseZone {
         s.cameras.main.startFollow(s.player, true, 0.1, 0.1);
         s.cameras.main.setDeadzone(100, 80);
 
+        s.enemies = s.physics.add.group();
+
+        this._spawnMeadowNPC();
+
         s.zone = 'meadow';
         startZoneMusic('meadow');
         s.doSave();
+    }
+
+    _spawnMeadowNPC() {
+        const s = this.scene;
+        const ex = 400, ey = 350;
+        const elder = s.add.sprite(ex, ey, 'npc_elder').setDepth(8);
+        s.physics.add.existing(elder, true);
+        elder.body.setSize(24, 24);
+        elder.npcKey = 'meadow_elder';
+        s.npcSprites.push(elder);
+        s.meadowElder = elder;
+
+        const lang = localStorage.getItem('game_lang') || 'en';
+        elder.name = 'Old Traveler';
+        elder.nameRu = 'Старый Странник';
+        elder.nameDe = 'Alter Reisender';
+        elder.greeting = 'The path ahead leads to the cave. Be careful — darkness lurks below.';
+        elder.greetingRu = 'Путь ведёт в пещеру. Будь осторожен — внизу таится тьма.';
+        elder.greetingDe = 'Der Weg führt zur Höhle. Sei vorsichtig — unten lauert Dunkelheit.';
+        elder.hideName = false;
+        elder.quests = [];
+
+        const nameTag = s.add.text(ex, ey - 30, elder.name, {
+            fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
+        }).setOrigin(0.5).setDepth(9);
+        elder.nameTag = nameTag;
     }
 
     handleSpace() {
@@ -81,5 +112,6 @@ export class MeadowZone extends BaseZone {
         if (s.meadowBg) { s.meadowBg.destroy(); s.meadowBg = null; }
         if (s.meadowGate) { s.meadowGate.destroy(); s.meadowGate = null; }
         if (s.gateHint) { s.gateHint.destroy(); s.gateHint = null; }
+        if (s.meadowElder) { if (s.meadowElder.nameTag) s.meadowElder.nameTag.destroy(); s.meadowElder.destroy(); s.meadowElder = null; }
     }
 }

@@ -54,13 +54,19 @@ export class SaveLoadSystem {
             towerRoom: s.zones.tower.currentRoom ?? 0,
             throneBossDefeated: s.zones.throne.bossDefeated ?? false,
             prestigeUnlocked: s.prestigeUnlocked ?? false,
+            prestigeLevel: s.prestigeLevel ?? 0,
+            shadowStepUnlocked: s.shadowStepUnlocked ?? false,
+            timeSlowUnlocked: s.timeSlowUnlocked ?? false,
+            visionUnlocked: s.visionUnlocked ?? false,
+            mapUnlocked: s.mapUnlocked ?? false,
             villageThriving: s.zones.village.isThriving ?? false,
             castleQuestDone: s.zones.castle.questDone ?? false,
             castleRoom: s.zones.castle.currentRoom ?? 0,
             castleBossDefeated: s.zones.castle.bossDefeated ?? false,
             castleKeyObtained: s.zones.castle.keyObtained ?? false,
             castleRescued: s.zones.castle.rescued ?? false,
-            innUsed: s.innUsed ?? false
+            innUsed: s.innUsed ?? false,
+            tutorialSeen: s.tutorialMgr ? s.tutorialMgr.save() : {}
         };
     }
 
@@ -148,6 +154,11 @@ export class SaveLoadSystem {
         s.zones.tower.currentRoom = data.towerRoom ?? 0;
         s.zones.throne.bossDefeated = data.throneBossDefeated ?? false;
         s.prestigeUnlocked = data.prestigeUnlocked ?? false;
+        s.prestigeLevel = data.prestigeLevel ?? 0;
+        s.shadowStepUnlocked = data.shadowStepUnlocked ?? false;
+        s.timeSlowUnlocked = data.timeSlowUnlocked ?? false;
+        s.visionUnlocked = data.visionUnlocked ?? false;
+        s.mapUnlocked = data.mapUnlocked ?? false;
         s.zones.village.isThriving = data.villageThriving ?? false;
         s.zones.castle.questDone = data.castleQuestDone ?? false;
         s.zones.castle.currentRoom = data.castleRoom ?? 0;
@@ -173,6 +184,7 @@ export class SaveLoadSystem {
         s.talentEffects = getTalentEffects(s.unlockedTalents);
         s.corruptionMax = s.classStats.corruptionMax + (s.talentEffects.corruptionMax ?? 0);
         s.recalcStats();
+        if (s.tutorialMgr && data.tutorialSeen) s.tutorialMgr.load(data.tutorialSeen);
         if (s.petSys.petSprite) {
             s.petSys.petSprite.x = s.player.x + 20;
             s.petSys.petSprite.y = s.player.y + 10;

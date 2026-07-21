@@ -23,10 +23,10 @@ export class TowerBoss {
         this.berserkActive = false;
         const bt = TOWER_BOSS_TYPE;
         const ox = s.towerOffsetX;
-        const hp = Math.floor(bt.hp[s.difficulty] || bt.hp.Normal);
-        const dmg = Math.floor(bt.dmg[s.difficulty] || bt.dmg.Normal);
-        const exp = Math.floor(bt.exp[s.difficulty] || bt.exp.Normal);
-        const spd = bt.speeds[s.difficulty] || bt.speeds.Normal;
+        const hp = Math.floor(bt.hp);
+        const dmg = Math.floor(bt.dmg);
+        const exp = Math.floor(bt.exp);
+        const spd = bt.speed;
 
         const bx = ox + TOWER_WIDTH / 2;
         const by = 200; // Inside the room (room height = 600)
@@ -57,6 +57,7 @@ export class TowerBoss {
         }).setOrigin(0.5).setDepth(12).setScrollFactor(0).setVisible(false);
 
         s.towerBoss = b;
+        s.towerBoss.bossHandler = () => { if (s.zones.tower) s.zones.tower.victoryTowerBoss(); };
         s.towerBossVfx = [];
         s.enemies.add(b);
         if (s.multiplayer && s.mpSync) {

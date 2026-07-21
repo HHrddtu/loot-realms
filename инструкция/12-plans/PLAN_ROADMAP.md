@@ -3,11 +3,11 @@
 #plan #roadmap #design
 
 > [!INFO] Связанные заметки
-> - [[TECHNICAL_DESIGN]] — архитектура (цель рефакторинга)
-> - [[TASK_QUEUE]] — задачи (v0.12.0 детали)
-> - [[PROJECT_STATE]] — текущий статус
-> - [[TODO_v017]] — следующий этап после roadmap
-> - [[README]] — карта содержимого
+> - [[01-tech/ARCHITECTURE|Architecture]] — архитектура (цель рефакторинга)
+> - [[12-plans/TASK_QUEUE|TASK QUEUE]] — задачи
+> - [[12-plans/PROJECT_STATE|PROJECT STATE]] — текущий статус
+> - [[12-plans/TODO_v017|TODO v0.17]] — следующий этап после roadmap
+> - [[index|MOC]] — карта содержимого
 
 ## Общая дорожная карта
 

@@ -22,6 +22,14 @@ export class CombatLoot {
         enemy._deathHandled = true;
 
         const s = this.scene;
+
+        // Generic boss handler: if boss has bossHandler, call it
+        if (enemy.bossHandler) {
+            enemy.bossHandler(enemy);
+            return;
+        }
+
+        // Legacy boss detection (will be removed as zones migrate to bossHandler)
         if (enemy === s.boss) { this.killBoss(); }
         else if (enemy === s.mineBoss) { this.killMineBoss(); }
         else if (enemy === s.caveBoss) { this.killCaveBoss(); }
@@ -75,14 +83,23 @@ export class CombatLoot {
             if (accItem) items.push({ kind: 'accountEquip', item: { ...accItem, name: accItem.name + ' [ACCOUNT]' }, x: enemy.x, y: enemy.y - 60, rarity: accItem.rarity });
         }
 
+        // Prestige-exclusive drops
+        const prestige = s.prestigeLevel || 0;
+        if (prestige >= 3 && Math.random() < 0.05) {
+            const prestigeItems = [
+                { name: 'Chaos Shard', rarity: 'epic', stats: { dmgPercent: 5 } },
+                { name: 'Void Essence', rarity: 'epic', stats: { hpPercent: 5 } },
+                { name: 'Blood Crystal', rarity: 'legendary', stats: { critPercent: 3 } }
+            ];
+            const pItem = prestigeItems[Math.floor(Math.random() * prestigeItems.length)];
+            items.push({ kind: 'material', item: pItem, x: enemy.x, y: enemy.y - 50, rarity: pItem.rarity });
+        }
+
         if (enemy.hpBg) enemy.hpBg.destroy();
         if (enemy.hpFill) enemy.hpFill.destroy();
+        if (enemy.shieldIcon) enemy.shieldIcon.destroy();
+        if (enemy.roleIcon) enemy.roleIcon.destroy();
         enemy.destroy();
-
-        s.time.delayedCall(3000, () => {
-            if (s.zone === 'forest') { const t = ENEMY_TYPES[Math.floor(Math.random() * ENEMY_TYPES.length)]; s.combat.makeEnemy(t, 80 + Math.random() * 640, 350 + Math.random() * 400); }
-            else if (s.zone === 'mine') { const t = MINE_ENEMY_TYPES[Math.floor(Math.random() * MINE_ENEMY_TYPES.length)]; s.zones.mine.makeMineEnemy(t, 80 + Math.random() * 640, 200 + Math.random() * 500); }
-        });
 
         return {
             source: 'mob',
@@ -146,6 +163,9 @@ export class CombatLoot {
                 return { items, zoneFlags: {} };
             },
             onPostKill: () => {
+                s.visionUnlocked = true;
+                s.doSave();
+                s.tutorialMgr.showAbilityTutorial('vision');
                 s.caveStairs = s.add.sprite(textX, CAVE_HEIGHT - 80, 'cave_stairs').setDepth(1);
                 s.caveStairsHint = s.add.text(textX, CAVE_HEIGHT - 55, '', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setDepth(12);
             }
@@ -166,6 +186,7 @@ export class CombatLoot {
         s.tweens.add({ targets: b, alpha: 0, scaleX: 1.5, scaleY: 1.5, duration: 800, onComplete: () => { if (b.hpBg) b.hpBg.destroy(); if (b.hpFill) b.hpFill.destroy(); b.destroy(); s[cfg.bossRef] = null; } });
         if (b.aoeRing) { b.aoeRing.destroy(); b.aoeRing = null; }
         if (b.aoeRing2) { b.aoeRing2.destroy(); b.aoeRing2 = null; }
+        if (b.telegraph) { b.telegraph.destroy(); b.telegraph = null; }
         if (s[cfg.nameTextKey]) { s[cfg.nameTextKey].destroy(); s[cfg.nameTextKey] = null; }
 
         const bossGold = rollBossGold(s.zone || 'forest');
@@ -178,6 +199,20 @@ export class CombatLoot {
         if (Math.random() < BOSS_DROP_CHANCE) { const item = rollEquip(); if (item) lootItems.push({ kind: 'equip', item, x: cfg.textX, y: cfg.textY + 100 + lootItems.length * 24, rarity: item.rarity }); }
         if (Math.random() < cfg.secondDropChance) { const item2 = rollEquip(); if (item2) lootItems.push({ kind: 'equip', item: item2, x: cfg.textX, y: cfg.textY + 100 + lootItems.length * 24, rarity: item2.rarity }); }
         if (Math.random() < BOSS_DROP_CHANCE) { const accItem = rollAccountEquip(); if (accItem) lootItems.push({ kind: 'accountEquip', item: { ...accItem, name: accItem.name + ' [ACCOUNT]' }, x: cfg.textX, y: cfg.textY + 100 + lootItems.length * 24, rarity: accItem.rarity }); }
+
+        // Prestige boss drops
+        const prestige = s.prestigeLevel || 0;
+        if (prestige >= 1) {
+            const prestigeBossItems = [
+                { name: 'Prestige Crown', rarity: 'legendary', stats: { allStats: 3 } },
+                { name: 'Eternity Fragment', rarity: 'legendary', stats: { dmgPercent: 8, hpPercent: 8 } }
+            ];
+            const dropChance = 0.2 + prestige * 0.1;
+            if (Math.random() < dropChance) {
+                const pItem = prestigeBossItems[Math.floor(Math.random() * prestigeBossItems.length)];
+                lootItems.push({ kind: 'material', item: pItem, x: cfg.textX, y: cfg.textY + 100 + lootItems.length * 24, rarity: pItem.rarity });
+            }
+        }
 
         const zoneFlags = {};
         if (cfg.extraLoot) {
@@ -218,10 +253,30 @@ export class CombatLoot {
     breakChest(ch) {
         const s = this.scene;
         if (ch.broken) return { items: [], gold: 0 };
+
+        // Cooperative chest: need 2 players nearby
+        if (ch.cooperative && s.multiplayer && s.mpManager) {
+            const rpm = s.mpManager.remotePlayers;
+            let nearbyCount = 1;
+            for (const id in rpm) {
+                const rp = rpm[id];
+                if (!rp || !rp.sprite || !rp.sprite.active) continue;
+                const dist = Phaser.Math.Distance.Between(s.player.x, s.player.y, rp.sprite.x, rp.sprite.y);
+                if (dist < 100) nearbyCount++;
+            }
+            if (nearbyCount < 2) {
+                s.floatingText(ch.x, ch.y - 20, 'Need 2 players!', '#e74c3c');
+                return { items: [], gold: 0 };
+            }
+            s.floatingText(ch.x, ch.y - 20, 'COOPERATIVE CHEST!', '#f1c40f');
+        }
+
         ch.broken = true; ch.body.enable = false;
         if (ch.isForestChest) { ch.setAlpha(0.4); ch.setTint(0x886633); }
         else { ch.setTexture(ch.isCaveChest ? CAVE_CHEST_OPEN_KEY : 'mine_chest_broken'); }
         ch.hpBg.destroy(); ch.hpFill.destroy(); if (ch.hintText) ch.hintText.setText('');
+        if (ch.glow) { ch.glow.destroy(); ch.glow = null; }
+        if (ch.arrow) { ch.arrow.destroy(); ch.arrow = null; }
         playBreak(); onCollect(ch.isForestChest ? 'treasure_chest' : 'mine_chest');
         s._updateQuestIcons();
 

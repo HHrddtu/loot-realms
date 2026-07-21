@@ -15,14 +15,16 @@ export class VillageSpawner {
 
     spawnVillageCamps() {
         const ox = this.scene.villageOffsetX;
-        const roleOrder = ['tank', 'assassin', 'archer', 'healer'];
+        const baseRoles = ['tank', 'assassin', 'archer', 'healer'];
         for (let i = 0; i < VILLAGE_CAMP_POSITIONS.length; i++) {
             const cp = VILLAGE_CAMP_POSITIONS[i];
-            for (let j = 0; j < VILLAGE_MOBS_PER_CAMP; j++) {
-                const role = roleOrder[j % roleOrder.length];
+            const roles = [...baseRoles].sort(() => Math.random() - 0.5);
+            const mobs = VILLAGE_MOBS_PER_CAMP + Math.floor(Math.random() * 3) - 1;
+            for (let j = 0; j < mobs; j++) {
+                const role = roles[j % roles.length];
                 const t = VILLAGE_ENEMY_TYPES[role];
                 if (!t) continue;
-                const angle = (j / VILLAGE_MOBS_PER_CAMP) * Math.PI * 2;
+                const angle = (j / mobs) * Math.PI * 2;
                 const ex = ox + cp.x + Math.cos(angle) * 25, ey = cp.y + Math.sin(angle) * 20;
                 this._makeVillageEnemy(t, ex, ey, i);
             }
@@ -355,13 +357,15 @@ export class VillageSpawner {
 
     spawnSnowyVillageCamps() {
         const ox = this.scene.villageOffsetX;
-        const roleOrder = ['tank', 'assassin', 'archer', 'healer'];
+        const baseRoles = ['tank', 'assassin', 'archer', 'healer'];
         for (let i = 0; i < SNOWY_VILLAGE_CAMP_POSITIONS.length; i++) {
             const cp = SNOWY_VILLAGE_CAMP_POSITIONS[i];
-            for (let j = 0; j < 4; j++) {
-                const role = roleOrder[j % roleOrder.length];
+            const roles = [...baseRoles].sort(() => Math.random() - 0.5);
+            const mobs = 4 + Math.floor(Math.random() * 3) - 1;
+            for (let j = 0; j < mobs; j++) {
+                const role = roles[j % roles.length];
                 const t = SNOWY_VILLAGE_ENEMY_TYPES[role];
-                const angle = (j / 4) * Math.PI * 2;
+                const angle = (j / mobs) * Math.PI * 2;
                 const ex = ox + cp.x + Math.cos(angle) * 30, ey = cp.y + Math.sin(angle) * 25;
                 this._makeSnowyVillageEnemy(t, ex, ey, i);
             }

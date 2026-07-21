@@ -3,11 +3,11 @@
 #tasks #plan #state
 
 > [!INFO] Связанные заметки
-> - [[TASK_QUEUE]] — очередь задач
-> - [[PROJECT_STATE]] — текущее состояние
-> - [[TODO_v018]] — следующий план
-> - [[PLAN_ROADMAP]] — дорожная карта
-> - [[README]] — карта содержимого
+> - [[12-plans/TASK_QUEUE|TASK QUEUE]] — очередь задач
+> - [[12-plans/PROJECT_STATE|PROJECT STATE]] — текущее состояние
+> - [[12-plans/TODO_v018|TODO v0.18]] — следующий план
+> - [[12-plans/PLAN_ROADMAP|PLAN_ROADMAP]] — дорожная карта
+> - [[index|MOC]] — карта содержимого
 
 ## 🔴 Группа A — Игровой процесс (критичное)
 

@@ -74,6 +74,8 @@ export class VillageZone extends BaseZone {
         this.scene.snowyIceShards = null;
         this.scene.campfire = null;
         this.scene.campfireHint = null;
+        if (this.scene.campfire) { if (this.scene.campfire.destroy) this.scene.campfire.destroy(); this.scene.campfire = null; }
+        if (this.scene.campfireHint) { if (this.scene.campfireHint.destroy) this.scene.campfireHint.destroy(); this.scene.campfireHint = null; }
         this.scene.castleChildNPC = null;
         this.scene.castleChildHint = null;
         if (this.scene.hellPortal) { if (this.scene.hellPortal.destroy) this.scene.hellPortal.destroy(); this.scene.hellPortal = null; }
@@ -86,6 +88,12 @@ export class VillageZone extends BaseZone {
         if (frozen) {
             this.spawner.spawnVillageDecor(true);
             this.spawner.spawnSnowyVillageCamps();
+            if (this.scene.loreItems) {
+                this.scene.loreItems.spawnLoreItems('snowy', [
+                    { x: ox + 200, y: 400 },
+                    { x: ox + 600, y: 1200 }
+                ]);
+            }
             this.spawner.spawnSnowyVillageChests();
             this.spawner.spawnSnowyCampfire();
             this._snowyCheckTimer = this.scene.time.addEvent({
@@ -95,6 +103,12 @@ export class VillageZone extends BaseZone {
         } else if (!this.scene.zones.village.isRestored) {
             this.spawner.spawnVillageCamps();
             this.spawner.spawnDeadVillageDecor();
+            if (this.scene.loreItems) {
+                this.scene.loreItems.spawnLoreItems('village', [
+                    { x: ox + 400, y: 600 },
+                    { x: ox + 600, y: 1400 }
+                ]);
+            }
             this.spawner.spawnVillageChests();
         } else if (!this.scene.zones.village.isThriving) {
             // Restored but not thriving — simple village with shop/inn
@@ -334,8 +348,10 @@ export class VillageZone extends BaseZone {
             s.player.x, s.player.y, s.cursedPortalVillage.x, s.cursedPortalVillage.y
         ) < 60) {
             this.enterCursed();
-        } else if (s.nearbyNpc) {
+        } else if (s.nearbyNpc && !s.menuOpen) {
             s.npc.interactWithNpc();
+        } else if (s.loreItems && s.loreItems.tryInteract()) {
+            return;
         } else {
             s.attack();
         }
@@ -351,6 +367,7 @@ export class VillageZone extends BaseZone {
         this._updateCastleChildHint();
         this._updateCampfireHints();
         this._updateShopInnHints();
+        if (this.scene.loreItems) this.scene.loreItems.update();
     }
 
     _updateCastleChildHint() {
@@ -862,6 +879,125 @@ export class VillageZone extends BaseZone {
                 }
             }
         }
+    }
+
+    _showPrestigeInfo() {
+        const s = this.scene;
+        if (s.menuOpen) return;
+        if (!s.prestigeSys || !s.prestigeSys.canPrestige()) return;
+        s.menuOpen = true;
+        s.physics.pause();
+
+        const lang = localStorage.getItem('game_lang') || 'en';
+        const ox = (GAME_WIDTH - 500) / 2;
+        const cx = ox + 250;
+
+        const txts = {
+            title: { en: 'PRESTIGE', ru: 'PRESTIGE', de: 'PRESTIGE' },
+            subtitle: { en: 'New Game+', ru: 'Новая Игра+', de: 'Neues Spiel+' },
+            desc1: { en: 'Restart the game from the beginning with powerful bonuses.', ru: 'Начни игру заново с мощными бонусами.', de: 'Starte das Spiel mit mächtigen Boni neu.' },
+            desc2: { en: 'Enemies become 1.5x HP and 1.3x damage per level.', ru: 'Враги получают +50% HP и +30% урона за уровень.', de: 'Gegner bekommen +50% HP und +30% Schaden pro Stufe.' },
+            warn: { en: 'This action is IRREVERSIBLE. Your save will reset.', ru: 'Это действие НЕОБРАТИМО. Твой сейв сбросится.', de: 'Diese Handlung ist UNWIDERRUFLICH. Dein Save wird zurückgesetzt.' },
+            mods: { en: 'Your Prestige modifiers:', ru: 'Твои Prestige модификаторы:', de: 'Deine Prestige-Modifikatoren:' },
+            confirm: { en: '[Y] ACTIVATE PRESTIGE', ru: '[Y] АКТИВИРОВАТЬ PRESTIGE', de: '[Y] PRESTIGE AKTIVIEREN' },
+            cancel: { en: '[N] Cancel', ru: '[N] Отмена', de: '[N] Abbrechen' }
+        };
+        const ts = (key) => txts[key]?.[lang] || txts[key]?.en || '';
+
+        const elements = [];
+        const depth = 100;
+
+        const overlay = s.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.7).setDepth(depth).setScrollFactor(0);
+        elements.push(overlay);
+
+        const panel = s.add.rectangle(cx, 320, 460, 400, 0x000000, 0.9).setDepth(depth + 1).setScrollFactor(0);
+        elements.push(panel);
+        const border = s.add.rectangle(cx, 320, 462, 402).setDepth(depth).setStrokeStyle(2, 0xf1c40f).setScrollFactor(0).setFillStyle();
+        elements.push(border);
+
+        const title = s.add.text(cx, 150, ts('title'), {
+            fontSize: '28px', fill: '#ffd700', fontFamily: 'Georgia', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 4
+        }).setOrigin(0.5).setDepth(depth + 2).setScrollFactor(0);
+        elements.push(title);
+
+        const subtitle = s.add.text(cx, 185, ts('subtitle'), {
+            fontSize: '16px', fill: '#f1c40f', fontFamily: 'Georgia', fontStyle: 'italic'
+        }).setOrigin(0.5).setDepth(depth + 2).setScrollFactor(0);
+        elements.push(subtitle);
+
+        const descStyle = { fontSize: '13px', fill: '#ccc', fontFamily: 'Arial', wordWrap: { width: 400 }, align: 'center', lineSpacing: 4 };
+        const desc1 = s.add.text(cx, 225, ts('desc1'), descStyle).setOrigin(0.5).setDepth(depth + 2).setScrollFactor(0);
+        elements.push(desc1);
+        const desc2 = s.add.text(cx, 260, ts('desc2'), descStyle).setOrigin(0.5).setDepth(depth + 2).setScrollFactor(0);
+        elements.push(desc2);
+
+        const modsLabel = s.add.text(cx, 295, ts('mods'), {
+            fontSize: '13px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(depth + 2).setScrollFactor(0);
+        elements.push(modsLabel);
+
+        const modifiers = s.prestigeSys.getModifiers();
+        const nextMod = s.prestigeSys.getNextModifier();
+        const allMods = nextMod ? [...modifiers, nextMod] : modifiers;
+        allMods.forEach((mod, i) => {
+            const modName = lang === 'ru' ? (mod.nameRu || mod.name) : lang === 'de' ? (mod.nameDe || mod.name) : mod.name;
+            const modDesc = lang === 'ru' ? (mod.descriptionRu || mod.description) : lang === 'de' ? (mod.descriptionDe || mod.description) : mod.description;
+            const isNext = nextMod && mod.level === nextMod.level;
+            const color = isNext ? '#ffd700' : '#888';
+            const prefix = isNext ? '> ' : '  ';
+            const modText = s.add.text(cx, 320 + i * 22, prefix + modName + ' — ' + modDesc, {
+                fontSize: '12px', fill: color, fontFamily: 'Arial'
+            }).setOrigin(0.5).setDepth(depth + 2).setScrollFactor(0);
+            elements.push(modText);
+        });
+
+        const warn = s.add.text(cx, 410, ts('warn'), {
+            fontSize: '12px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold',
+            wordWrap: { width: 400 }, align: 'center'
+        }).setOrigin(0.5).setDepth(depth + 2).setScrollFactor(0);
+        elements.push(warn);
+
+        const btnBase = { fontSize: '14px', fill: '#ccc', fontFamily: 'Arial', padding: { x: 16, y: 10 }, backgroundColor: '#2a2a2a' };
+
+        const confirmBtn = s.add.text(cx, 450, ts('confirm'), btnBase)
+            .setOrigin(0.5).setDepth(depth + 2).setInteractive({ useHandCursor: true }).setScrollFactor(0);
+        elements.push(confirmBtn);
+
+        const cancelBtn = s.add.text(cx, 485, ts('cancel'), btnBase)
+            .setOrigin(0.5).setDepth(depth + 2).setInteractive({ useHandCursor: true }).setScrollFactor(0);
+        elements.push(cancelBtn);
+
+        const cleanup = () => {
+            s.input.keyboard.off('keydown', onKey);
+            elements.forEach(el => { if (el && el.destroy) el.destroy(); });
+            s.menuOpen = false;
+            s.physics.resume();
+        };
+
+        confirmBtn.on('pointerover', () => confirmBtn.setStyle({ fill: '#ffd700' }));
+        confirmBtn.on('pointerout', () => confirmBtn.setStyle({ fill: '#ccc' }));
+        confirmBtn.on('pointerdown', () => {
+            cleanup();
+            if (s.prestigeSys.activatePrestige()) {
+                s.floatingText(s.player.x, s.player.y - 60, 'PRESTIGE ACTIVATED!', '#ffd700');
+                s.floatingText(s.player.x, s.player.y - 40, 'Enemies are now stronger!', '#e74c3c');
+            }
+        });
+
+        cancelBtn.on('pointerover', () => cancelBtn.setStyle({ fill: '#e74c3c' }));
+        cancelBtn.on('pointerout', () => cancelBtn.setStyle({ fill: '#ccc' }));
+        cancelBtn.on('pointerdown', () => { cleanup(); });
+
+        function onKey(event) {
+            if (s.zone !== 'village') { cleanup(); return; }
+            if (event.key === 'y' || event.key === 'Y') {
+                confirmBtn.emit('pointerdown');
+            } else if (event.key === 'n' || event.key === 'N' || event.key === 'Escape') {
+                cancelBtn.emit('pointerdown');
+            }
+        }
+        s.input.keyboard.on('keydown', onKey);
     }
 
     enterCursed() {

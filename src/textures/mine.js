@@ -1094,4 +1094,21 @@ export function drawMineTextures(mk) {
         c.fillRect(4, 10, 6, 1);
         c.fillRect(4, 12, 7, 1);
     });
+
+    mk('nav_map', 16, 16, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#deb887';
+        c.fillRect(1, 2, 14, 12);
+        c.fillStyle = '#d2b48c';
+        c.fillRect(1, 2, 14, 1);
+        c.fillRect(1, 13, 14, 1);
+        c.fillStyle = '#8B4513';
+        c.fillRect(3, 5, 3, 2);
+        c.fillRect(8, 4, 4, 3);
+        c.fillRect(5, 9, 5, 2);
+        c.fillStyle = '#2ecc71';
+        c.fillRect(4, 6, 1, 1);
+        c.fillRect(9, 5, 1, 1);
+        c.fillRect(7, 10, 1, 1);
+    });
 }

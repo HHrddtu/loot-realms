@@ -93,6 +93,7 @@
 
 ## 🏗 Архитектура
 
+- [[01-tech/QUICK_START|Quick Start]] — быстрый вход для AI-агента (1 страница)
 - [[01-tech/TECH_STACK|Tech Stack]]
 - [[01-tech/ARCHITECTURE|Architecture]]
 - [[01-tech/FILE_TREE|File Tree]]

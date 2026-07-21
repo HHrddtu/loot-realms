@@ -122,21 +122,11 @@ export const CRYSTAL_DROPS = {
 };
 
 export const CRYSTAL_RUN_CAPS = {
-    Normal: 200,
-    Hard: 50,
-    Expert: 75,
-    Nightmare: 100,
-    Hell: 150,
-    Abyss: 200
+    Normal: 200
 };
 
 export const CRYSTAL_DIFF_MULT = {
-    Normal: 1.0,
-    Hard: 0.8,
-    Expert: 0.7,
-    Nightmare: 0.6,
-    Hell: 0.5,
-    Abyss: 0.4
+    Normal: 1.0
 };
 
 export function rollBossCrystals(zone, difficulty) {

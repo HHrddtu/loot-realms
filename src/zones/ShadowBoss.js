@@ -19,10 +19,10 @@ export class ShadowBoss {
         this.phase = 0;
         const bt = SHADOW_BOSS_TYPE;
         const ox = s.shadowOffsetX;
-        const hp = Math.floor(bt.hp[s.difficulty] || bt.hp.Normal);
-        const dmg = Math.floor(bt.dmg[s.difficulty] || bt.dmg.Normal);
-        const exp = Math.floor(bt.exp[s.difficulty] || bt.exp.Normal);
-        const spd = bt.speeds[s.difficulty] || bt.speeds.Normal;
+        const hp = Math.floor(bt.hp);
+        const dmg = Math.floor(bt.dmg);
+        const exp = Math.floor(bt.exp);
+        const spd = bt.speed;
 
         const bx = ox + SHADOW_WIDTH / 2;
         const by = SHADOW_HEIGHT - 150;
@@ -53,6 +53,7 @@ export class ShadowBoss {
         }).setOrigin(0.5).setDepth(12).setScrollFactor(0).setVisible(false);
 
         s.shadowBoss = b;
+        s.shadowBoss.bossHandler = () => { if (s.zones.shadow) s.zones.shadow.victoryShadowBoss(); };
         s.shadowBossVfx = [];
         s.enemies.add(b);
         if (s.multiplayer && s.mpSync) {

@@ -15,9 +15,7 @@ export const LOW_HP_DAMAGE_BONUS_THRESHOLD = 0.3;
 export const ARMOR_SHRED_DAMAGE_BONUS_PER_STACK = 0.05;
 export const LIFELINK_DAMAGE_REDUCTION = 0.7;
 
-export const CHEST_RESPAWN_MS = 12000;
 export const STUMP_RESPAWN_MS = 8000;
-export const ENEMY_RESPAWN_MS = 3000;
 export const VILLAGE_CHEST_DESTROY_DELAY = 2500;
 
 export const COIN_DROP_COUNT = 3;

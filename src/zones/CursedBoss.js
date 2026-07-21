@@ -19,10 +19,10 @@ export class CursedBoss {
         this.phase = 0;
         const bt = CURSED_BOSS_TYPE;
         const ox = s.cursedOffsetX;
-        const hp = Math.floor(bt.hp[s.difficulty] || bt.hp.Normal);
-        const dmg = Math.floor(bt.dmg[s.difficulty] || bt.dmg.Normal);
-        const exp = Math.floor(bt.exp[s.difficulty] || bt.exp.Normal);
-        const spd = bt.speeds[s.difficulty] || bt.speeds.Normal;
+        const hp = Math.floor(bt.hp);
+        const dmg = Math.floor(bt.dmg);
+        const exp = Math.floor(bt.exp);
+        const spd = bt.speed;
 
         const bx = ox + CURSED_WIDTH / 2;
         const by = CURSED_HEIGHT - 150;
@@ -52,6 +52,7 @@ export class CursedBoss {
         }).setOrigin(0.5).setDepth(12).setScrollFactor(0).setVisible(false);
 
         s.cursedBoss = b;
+        s.cursedBoss.bossHandler = () => { if (s.zones.cursed) s.zones.cursed.victoryCursedBoss(); };
         s.cursedBossVfx = [];
         s.enemies.add(b);
         if (s.multiplayer && s.mpSync) {

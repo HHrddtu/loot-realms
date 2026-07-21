@@ -53,8 +53,16 @@ export class HellZone extends BaseZone {
 
         this.spawner.spawnHellCamps();
         this.spawner.spawnHellLavaCircles();
+        this._spawnLavaPlatforms();
 
         this.setupEnemyOverlap();
+
+        if (s.loreItems) {
+            s.loreItems.spawnLoreItems('hell', [
+                { x: s.hellOffsetX + 200, y: 500 },
+                { x: s.hellOffsetX + 700, y: 1500 }
+            ]);
+        }
 
         s.physics.add.overlap(s.player, s.hellImps, (p, e) => {
             if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
@@ -69,12 +77,39 @@ export class HellZone extends BaseZone {
         }
     }
 
+    _spawnLavaPlatforms() {
+        const s = this.scene;
+        const ox = s.hellOffsetX;
+        s.hellLavaPlatforms = [];
+        s.hellLavaSafes = [];
+
+        const lavaZones = [
+            { x: ox + 200, y: 400, w: 150, h: 100 },
+            { x: ox + 500, y: 600, w: 120, h: 80 },
+            { x: ox + 350, y: 900, w: 180, h: 90 }
+        ];
+
+        lavaZones.forEach(zone => {
+            const lava = s.add.rectangle(zone.x, zone.y, zone.w, zone.h, 0xff4400, 0.4).setDepth(2);
+            s.tweens.add({ targets: lava, alpha: { from: 0.3, to: 0.6 }, duration: 1500, yoyo: true, repeat: -1 });
+            s.hellLavaPlatforms.push(lava);
+
+            const safe1 = s.add.rectangle(zone.x - zone.w / 2 - 30, zone.y, 50, zone.h, 0x333333, 0.6).setDepth(2);
+            const safe2 = s.add.rectangle(zone.x + zone.w / 2 + 30, zone.y, 50, zone.h, 0x333333, 0.6).setDepth(2);
+            s.hellLavaSafes.push(safe1, safe2);
+        });
+
+        s.hellLavaDamageTimer = 0;
+    }
+
     _destroyZoneSpecific() {
         const s = this.scene;
         if (s.hellImps && s.hellImps.getLength && s.hellImps.getLength() > 0) {
             s.hellImps.getChildren().forEach(e => {
                 if (e.hpBg) e.hpBg.destroy();
                 if (e.hpFill) e.hpFill.destroy();
+                if (e.shieldIcon) e.shieldIcon.destroy();
+                if (e.roleIcon) e.roleIcon.destroy();
             });
             s.hellImps.clear(true, true);
         }
@@ -85,6 +120,14 @@ export class HellZone extends BaseZone {
                 if (lc.vfx) lc.vfx.destroy();
             });
             s.hellLavaCircles = null;
+        }
+        if (s.hellLavaPlatforms) {
+            s.hellLavaPlatforms.forEach(lp => { if (lp && lp.destroy) lp.destroy(); });
+            s.hellLavaPlatforms = null;
+        }
+        if (s.hellLavaSafes) {
+            s.hellLavaSafes.forEach(sf => { if (sf && sf.destroy) sf.destroy(); });
+            s.hellLavaSafes = null;
         }
         if (s.hellBoss) {
             if (s.hellBoss.hpBg) s.hellBoss.hpBg.destroy();
@@ -105,7 +148,7 @@ export class HellZone extends BaseZone {
 
     handleSpace() {
         const s = this.scene;
-        if (s.nearbyNpc) {
+        if (s.nearbyNpc && !s.menuOpen) {
             s.npc.interactWithNpc();
             return;
         }
@@ -121,6 +164,7 @@ export class HellZone extends BaseZone {
             ) < 60) {
                 this.exitHell();
             } else {
+                if (s.loreItems && s.loreItems.tryInteract()) return;
                 s.attack();
             }
         }
@@ -128,10 +172,30 @@ export class HellZone extends BaseZone {
 
     update(time, delta) {
         this.updateHellLava(time, delta);
+        if (this.scene.loreItems) this.scene.loreItems.update();
         this.updateHellMobs(delta);
         this.bossAI.updateHellBoss();
         this.updateHellImps();
         this.checkReturnPortal();
+        this._updateLavaPlatforms(delta);
+    }
+
+    _updateLavaPlatforms(delta) {
+        const s = this.scene;
+        if (!s.hellLavaPlatforms || s.menuOpen || s.transitioning) return;
+        s.hellLavaDamageTimer = (s.hellLavaDamageTimer || 0) + delta;
+        if (s.hellLavaDamageTimer < 500) return;
+        s.hellLavaDamageTimer = 0;
+
+        s.hellLavaPlatforms.forEach(lava => {
+            if (!lava.active) return;
+            const dist = Phaser.Math.Distance.Between(s.player.x, s.player.y, lava.x, lava.y);
+            if (dist < 60) {
+                const dmg = HELL_LAVA_DAMAGE;
+                s.combat.takeDamage(dmg);
+                s.floatingText(s.player.x, s.player.y - 30, '-' + dmg + ' LAVA', '#ff4400');
+            }
+        });
     }
 
     updateHellLava(time, delta) {
@@ -183,15 +247,15 @@ export class HellZone extends BaseZone {
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist < 250) {
-                let speed = 50;
+                let speed = e.stats.speed || 50;
                 let engageDist = 30;
 
                 switch (e.stats.role) {
-                    case 'tank':     speed = 40; engageDist = 25; break;
-                    case 'assassin': speed = 90; engageDist = 20; break;
-                    case 'archer':   speed = 45; engageDist = 150; break;
-                    case 'mage':     speed = 40; engageDist = 180; break;
-                    case 'healer':   speed = 45; engageDist = 120; break;
+                    case 'tank':     speed = (e.stats.speed || 50) * 0.8; engageDist = 25; break;
+                    case 'assassin': speed = (e.stats.speed || 50) * 1.8; engageDist = 20; break;
+                    case 'archer':   speed = (e.stats.speed || 50) * 0.9; engageDist = 150; break;
+                    case 'mage':     speed = (e.stats.speed || 50) * 0.8; engageDist = 180; break;
+                    case 'healer':   speed = (e.stats.speed || 50) * 0.9; engageDist = 120; break;
                 }
 
                 if (dist > engageDist) {

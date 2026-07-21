@@ -12,8 +12,9 @@ import { getAccountTalentEffects } from '../accountTalents.js';
 import { initBestiary, recordEncounter } from '../bestiary.js';
 import { initMaterialBook } from '../materialBook.js';
 import { initSoulBook } from '../soulBook.js';
-import { initQuests } from '../quests.js';
+import { initQuests, onExplore } from '../quests.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
+import { CombatFacade } from '../systems/CombatFacade.js';
 import { PlayerSystem } from '../systems/PlayerSystem.js';
 import { SpellSystem } from '../systems/SpellSystem.js';
 import { UISystem } from '../systems/UISystem.js';
@@ -21,6 +22,11 @@ import { NpcSystem } from '../systems/NpcSystem.js';
 import { ParticleSystem } from '../systems/ParticleSystem.js';
 import { PetSystem } from '../systems/PetSystem.js';
 import { SaveLoadSystem } from '../systems/SaveLoadSystem.js';
+import { InputSystem } from '../systems/InputSystem.js';
+import { LootDistributor } from '../systems/LootDistributor.js';
+import { PrestigeSystem } from '../systems/PrestigeSystem.js';
+import { TutorialManager } from '../systems/TutorialManager.js';
+import { LoreItemSystem } from '../systems/LoreItemSystem.js';
 import { ForestBossAI } from '../systems/ForestBossAI.js';
 import { EnemyAI } from '../systems/EnemyAI.js';
 import { ForestZone } from '../zones/ForestZone.js';
@@ -38,8 +44,8 @@ import { SnowyZone } from '../zones/SnowyZone.js';
 import { CastleZone } from '../zones/CastleZone.js';
 import { MeadowZone } from '../zones/MeadowZone.js';
 import { MultiplayerManager } from '../systems/MultiplayerManager.js';
+import { isHost, getMyId, disconnect as mpDisconnect, sendInventoryUpdate } from '../network.js';
 import { CRYSTAL_RUN_CAPS } from '../config/pets.js';
-import { getKeybinds, parseKeyCode } from '../keybinds.js';
 import { createAllAnimations } from '../config/animations.js';
 
 
@@ -63,6 +69,7 @@ export default class GameScene extends Phaser.Scene {
         this.defeatedLoot = null;
 
         this.combat = new CombatSystem(this);
+        this.combatFacade = new CombatFacade(this);
         this.playerSys = new PlayerSystem(this);
         this.spellSys = new SpellSystem(this);
         this.ui = new UISystem(this);
@@ -71,6 +78,11 @@ export default class GameScene extends Phaser.Scene {
         this.particles.init();
         this.petSys = new PetSystem(this);
         this.saveLoad = new SaveLoadSystem(this);
+        this.inputSys = new InputSystem(this);
+        this.lootDist = new LootDistributor(this);
+        this.prestigeSys = new PrestigeSystem(this);
+        this.tutorialMgr = new TutorialManager(this);
+        this.loreItems = new LoreItemSystem(this);
         this.forestBossAI = new ForestBossAI(this);
 
         this.zones = {
@@ -97,24 +109,10 @@ export default class GameScene extends Phaser.Scene {
         this._initInventory();
         this._initStats();
         this._createUI();
-        this._bindKeys();
+        this.inputSys.bindKeys();
 
         this.events.on('resume', () => {
-            this._bindKeys();
-        });
-
-        this.input.on('pointerdown', (pointer) => {
-            if (this.menuOpen || this.transitioning || this.invOpen) return;
-            if (pointer.button !== 0) return;
-            const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-            const dx = worldPoint.x - this.player.x;
-            const dy = worldPoint.y - this.player.y;
-            if (Math.abs(dx) > Math.abs(dy)) {
-                this.facing = dx > 0 ? 'right' : 'left';
-            } else {
-                this.facing = dy > 0 ? 'down' : 'up';
-            }
-            this.attack();
+            this.inputSys.bindKeys();
         });
 
         this.invOpen = false;
@@ -248,6 +246,8 @@ export default class GameScene extends Phaser.Scene {
             stopMusic();
             if (this.multiplayer) {
                 this._cleanupMultiplayer();
+                this._synergyDmgBuff = 0;
+                this._synergyDmgTimer = 0;
             }
         });
 
@@ -303,6 +303,44 @@ export default class GameScene extends Phaser.Scene {
         this._remotePlayers = {};
     }
 
+    /* ===== LOOT DELEGATION ===== */
+
+    _applyLoot(lootData) { this.lootDist.applyLoot(lootData); }
+    _distributeLoot(lootData, targetPeerId) { this.lootDist.distributeLoot(lootData, targetPeerId); }
+    _lootDataToPayload(lootData) { return this.lootDist._lootDataToPayload(lootData); }
+
+    _onMultiplayerGameOver(data) {
+        if (this._multiplayerGameOverHandled) return;
+        this._multiplayerGameOverHandled = true;
+        const reason = (data && data.reason) || 'unknown';
+        this._exitToMenu('Multiplayer ended: ' + reason);
+    }
+
+    _onMultiplayerDisconnect(reason) {
+        if (this._multiplayerGameOverHandled) return;
+        this._multiplayerGameOverHandled = true;
+        this._exitToMenu('Disconnected: ' + (reason || 'unknown'));
+    }
+
+    _exitToMenu(message) {
+        const s = this;
+        try {
+            if (s.mpSync && s.mpSync.cleanup) s.mpSync.cleanup();
+        } catch (e) { /* ignore */ }
+        try {
+            if (s.mpManager && s.mpManager.cleanup) s.mpManager.cleanup();
+        } catch (e) { /* ignore */ }
+        try {
+            if (message && s.cameras && s.cameras.main && s.cameras.main.flash) {
+                s.cameras.main.flash(200, 60, 30, 30);
+            }
+        } catch (e) { /* ignore */ }
+        s.time.delayedCall(400, () => {
+            try { mpDisconnect(); } catch (e) { /* ignore */ }
+            s.scene.start('Menu');
+        });
+    }
+
     /* ===== STATS ===== */
 
     _initStats() {
@@ -316,12 +354,19 @@ export default class GameScene extends Phaser.Scene {
         this.playerExp = 0;
         this.playerLevel = 1;
         this.attackCooldown = false;
+        this._synergyDmgBuff = 0;
+        this._synergyDmgTimer = 0;
         this.playerAttacking = false;
         this.facing = 'right';
         this.invincible = false;
+        this.isDodging = false;
+        this.dodgeCooldown = false;
+        this.isDowned = false;
+        this.downedTimer = 0;
         this.menuOpen = false;
         this.kills = 0;
         this.stumpsBroken = 0;
+        this.tutorialSeen = {};
         this.talentEffects = getTalentEffects([]);
 
         const acc = loadAccount() || {};
@@ -486,28 +531,40 @@ export default class GameScene extends Phaser.Scene {
             } else {
                 zone.setup(...args);
             }
-            if (this.multiplayer && this.mpSync) {
-                this.mpSync.broadcastZoneChange(zoneName);
-            }
+            this.tutorialMgr.cleanupZoneIntro();
+            onExplore(zoneName);
+            this.tutorialMgr.showZoneIntro(zoneName);
+            this.tutorialMgr.showZoneTutorial(zoneName);
+            if (this.prestigeSys) this.prestigeSys.applyZoneModifiers(zoneName);
         }
     }
 
     /* ===== COMBAT DELEGATION ===== */
 
     floatingText(x, y, text, color) { if (this.ui) this.ui.floatingText(x, y, text, color); }
-    takeDamage(amount) { if (this.combat) this.combat.takeDamage(amount); }
-    attack() { if (this.combat) this.combat.attack(); }
-    hitEnemy(enemy, damage) { if (this.combat) this.combat.hitEnemy(enemy, damage); }
-    killEnemy(enemy) { if (this.combat) this.combat.killEnemy(enemy); }
-    killBoss() { if (this.combat) this.combat.killBoss(); }
-    killMineBoss() { if (this.combat) this.combat.killMineBoss(); }
-    killCaveBoss() { if (this.combat) this.combat.killCaveBoss(); }
-    breakChest(ch) { if (this.combat) this.combat.breakChest(ch); }
-    breakStump(stump) { if (this.combat) this.combat.breakStump(stump); }
-    breakVillageChest(ch) { if (this.combat) this.combat.breakVillageChest(ch); }
-    hitChest(ch, damage) { if (this.combat) this.combat.hitChest(ch, damage); }
-    hitStump(stump, damage) { if (this.combat) this.combat.hitStump(stump, damage); }
-    respawnPlayer() { if (this.combat) this.combat.respawnPlayer(); }
+    takeDamage(amount) { this.combatFacade.takeDamage(amount); }
+    attack() { this.combatFacade.attack(); }
+
+    /* ===== INPUT DELEGATION ===== */
+
+    _bindKeys() { this.inputSys.bindKeys(); }
+    _handleInput() { this.inputSys.handleInput(); }
+    _handleActionKeys() { this.inputSys.handleActionKeys(); }
+    dodgeRoll() { this.inputSys.dodgeRoll(); }
+    _tryReviveAlly() { return this.inputSys._tryReviveAlly(); }
+
+    _guestAttack() { this.combatFacade._guestAttack(); }
+    hitEnemy(enemy, damage, opts) { this.combatFacade.hitEnemy(enemy, damage, opts); }
+    killEnemy(enemy) { this.combatFacade.killEnemy(enemy); }
+    killBoss() { this.combatFacade.killBoss(); }
+    killMineBoss() { this.combatFacade.killMineBoss(); }
+    killCaveBoss() { this.combatFacade.killCaveBoss(); }
+    breakChest(ch, opts) { this.combatFacade.breakChest(ch, opts); }
+    breakStump(stump, opts) { this.combatFacade.breakStump(stump, opts); }
+    breakVillageChest(ch, opts) { this.combatFacade.breakVillageChest(ch, opts); }
+    hitChest(ch, damage, opts) { this.combatFacade.hitChest(ch, damage, opts); }
+    hitStump(stump, damage) { this.combatFacade.hitStump(stump, damage); }
+    respawnPlayer() { this.combatFacade.respawnPlayer(); }
 
     /* ===== PLAYER DELEGATION ===== */
 
@@ -596,126 +653,37 @@ export default class GameScene extends Phaser.Scene {
         this.doSave();
     }
 
-    /* ===== INPUT ===== */
-
-    _bindKeys() {
-        const binds = getKeybinds();
-        const kb = this.input.keyboard;
-
-        const resolveKey = (name) => {
-            const code = parseKeyCode(binds[name]);
-            return code !== null ? kb.addKey(code) : kb.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-        };
-
-        this.cursors = {
-            left: resolveKey('move_left'),
-            right: resolveKey('move_right'),
-            up: resolveKey('move_up'),
-            down: resolveKey('move_down')
-        };
-        this.spaceKey = resolveKey('attack');
-        this.fKey = resolveKey('consumable');
-        this.qKey = resolveKey('spell_q');
-        this.wKey = resolveKey('spell_w');
-        this.eKey = resolveKey('spell_e');
-        this.rKey = resolveKey('spell_r');
-        this.iKey = resolveKey('inventory');
-        this.pKey = resolveKey('pause');
-        this.tKey = resolveKey('talents');
-        this.bKey = resolveKey('bestiary');
-        this.nKey = resolveKey('quests');
-        this.cKey = resolveKey('crafting');
-        this.xKey = resolveKey('spell_assign');
-        this.mKey = resolveKey('mute');
-    }
-
-    _handleInput() {
-        const body = this.player.body;
-        body.setVelocity(0);
-        let isMoving = false;
-
-        if (!this.menuOpen && !this.transitioning) {
-            // Movement
-            let moveX = 0, moveY = 0;
-            if (this.cursors.left.isDown) moveX = -1;
-            else if (this.cursors.right.isDown) moveX = 1;
-            if (this.cursors.up.isDown) moveY = -1;
-            else if (this.cursors.down.isDown) moveY = 1;
-
-            if (moveX !== 0 || moveY !== 0) {
-                // Normalize diagonal movement so speed is consistent
-                const len = Math.sqrt(moveX * moveX + moveY * moveY);
-                body.setVelocityX((moveX / len) * this.playerSpeed);
-                body.setVelocityY((moveY / len) * this.playerSpeed);
-                if (moveX !== 0) this.facing = moveX < 0 ? 'left' : 'right';
-                else this.facing = moveY < 0 ? 'up' : 'down';
-                isMoving = true;
-            }
-
-            // Walk animation
-            if (isMoving && !this.playerAttacking) {
-                const cls = this.classData || getClassData(this.classKey);
-                const walkAnim = cls.walkAnim || 'sage_walk_right';
-                if (!this.player.anims.isPlaying || this.player.anims.currentAnim.key !== walkAnim) {
-                    this.player.play(walkAnim);
-                }
-                this.player.setFlipX(this.facing === 'left');
-            } else if (!isMoving && !this.playerAttacking) {
-                this.player.stop();
-                this.player.setFrame(0);
-            }
-
-            // Action keys
-            this._handleActionKeys();
-        } else if (this.invOpen) {
-            if (Phaser.Input.Keyboard.JustDown(this.iKey)) this.closeInventory();
-            if (Phaser.Input.Keyboard.JustDown(this.pKey)) {
-                this.closeInventory();
-                this.togglePause();
-            }
-        }
-    }
-
-    _handleActionKeys() {
-        const JustDown = Phaser.Input.Keyboard.JustDown;
-
-        // SPACE: zone > npc > attack
-        if (JustDown(this.spaceKey)) {
-            if (this.currentZone && typeof this.currentZone.handleSpace === 'function') {
-                this.currentZone.handleSpace();
-            } else if (this.nearbyNpc) {
-                this._interactWithNpc();
-            } else {
-                this.attack();
-            }
-        }
-
-        // UI keys
-        if (JustDown(this.iKey)) this.toggleInventory();
-        if (JustDown(this.pKey)) this.togglePause();
-        if (JustDown(this.tKey)) this._openTalentTree();
-        if (JustDown(this.mKey)) this._toggleMute();
-        if (JustDown(this.fKey) && this.playerSys) this.playerSys.useConsumable();
-        if (JustDown(this.bKey)) this._openBestiary();
-        if (JustDown(this.nKey)) this._openQuestLog();
-        if (JustDown(this.cKey)) this._openCrafting();
-        if (JustDown(this.xKey)) this._openSpellAssign();
-
-        // Spell keys
-        const spells = this._getClassSpells();
-        if (JustDown(this.qKey)) this._castSpell(spells.q);
-        if (JustDown(this.wKey)) this._castSpell(spells.w);
-        if (JustDown(this.eKey)) this._castSpell(spells.e);
-        if (JustDown(this.rKey)) this._castSpell(spells.r);
-    }
-
     /* ===== GAME LOOP ===== */
 
     update(time, delta) {
-        if (this.menuOpen) return; // Skip update when menu is open
+        if (this.menuOpen) return;
         if (this.playerSys) this.playerSys.resetStatsRecalcFlag();
         this._handleInput();
+        if (this.isDowned) {
+            this.downedTimer -= delta;
+            if (this.downedTimer <= 0) {
+                this.isDowned = false;
+                this.combat.respawnPlayer();
+            }
+        }
         this._updateEnemies();
+        this._checkTutorials();
+        if (this._poisonDot && this._poisonTimer > 0) {
+            this._poisonTimer -= delta;
+            if (this._poisonTimer <= 0) {
+                this._poisonDot = false;
+                if (this.player && this.player.active) this.player.clearTint();
+            } else if (this.game.loop.frame % 30 === 0) {
+                this.combat.takeDamage(3);
+                this.floatingText(this.player.x, this.player.y - 20, '-3 POISON', '#27ae60');
+            }
+        }
+        if (this._synergyDmgBuff && this._synergyDmgTimer > 0) {
+            this._synergyDmgTimer -= delta;
+            if (this._synergyDmgTimer <= 0) {
+                this._synergyDmgBuff = 0;
+            }
+        }
         this.forestBossAI.update(time, delta);
         this._updateCorruption();
         this._updateSpells(delta);
@@ -748,9 +716,12 @@ export default class GameScene extends Phaser.Scene {
             if (!this.bestiarySeen[e.stats.key]) {
                 try { recordEncounter(e.stats.key); } catch (e2) {}
                 this.bestiarySeen[e.stats.key] = true;
+                this.tutorialMgr.showEnemyTutorial(e.stats);
             }
 
             try { EnemyAI.updateWanderChase(e, this.player, this); } catch (e2) {}
         });
     }
+
+    _checkTutorials() { /* handled by TutorialManager */ }
 }

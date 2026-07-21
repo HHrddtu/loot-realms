@@ -162,9 +162,8 @@ export class CastleSpawner {
     }
 
     _makeBandit(t, x, y) {
-        const walkTex = t.key + '_walk';
         const animKey = t.key + '_walk_anim';
-        const e = this.scene.add.sprite(x, y, walkTex).setDepth(5);
+        const e = this.scene.add.sprite(x, y, t.key).setDepth(5);
         this.scene.physics.add.existing(e, false);
         e.body.setSize(t.bw, t.bh);
         e.body.setCollideWorldBounds(true);
@@ -178,12 +177,19 @@ export class CastleSpawner {
             exp: Math.floor(t.exp * this.scene.diffMulti.exp),
             bw: t.bw, bh: t.bh, role: t.role,
             wTimer: 0, wDir: 0,
-            rangedTimer: 0, rangedInterval: t.role === 'ranger' ? 1800 : 2000
+            rangedTimer: 0, rangedInterval: t.role === 'ranger' ? 1800 : 2000,
+            patrol: [
+                { x: x - 60, y: y },
+                { x: x + 60, y: y }
+            ]
         };
 
         const hw = t.bw + 4;
         e.hpBg = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0xc0392b).setOrigin(0.5).setDepth(11);
+        if (t.hasShield) e.shieldIcon = this.scene.add.text(x, y - t.bh / 2 - 16, '\u{1F6E1}', { fontSize: '10px' }).setOrigin(0.5).setDepth(12);
+        const roleIcons = { healer: '\u{2764}', mage: '\u{2728}', assassin: '\u{1F5E1}', fire: '\u{1F525}', poison: '\u{2620}', necro: '\u{1F480}', swarm: '\u{1F41D}' };
+        if (roleIcons[t.role] && !t.hasShield) e.roleIcon = this.scene.add.text(x, y - t.bh / 2 - 16, roleIcons[t.role], { fontSize: '10px' }).setOrigin(0.5).setDepth(12);
         this.scene.enemies.add(e);
         if (this.scene.multiplayer && this.scene.mpSync) {
             this.scene.mpSync.assignMobId(e, t.key);

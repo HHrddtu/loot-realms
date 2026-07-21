@@ -15,18 +15,15 @@ export class CaveSpawner {
     spawnCaveEnemies() {
         const s = this.scene;
         const ox = s.caveOffsetX;
-        const pairs = [
-            { tank: CAVE_ENEMY_TYPES[2], dps: CAVE_ENEMY_TYPES[0] },
-            { tank: CAVE_ENEMY_TYPES[2], dps: CAVE_ENEMY_TYPES[0] },
-            { tank: CAVE_ENEMY_TYPES[2], dps: CAVE_ENEMY_TYPES[0] },
-            { tank: CAVE_ENEMY_TYPES[2], dps: CAVE_ENEMY_TYPES[0] },
-            { tank: CAVE_ENEMY_TYPES[3], dps: CAVE_ENEMY_TYPES[1] },
-            { tank: CAVE_ENEMY_TYPES[3], dps: CAVE_ENEMY_TYPES[1] },
-            { tank: CAVE_ENEMY_TYPES[3], dps: CAVE_ENEMY_TYPES[1] },
-            { tank: CAVE_ENEMY_TYPES[3], dps: CAVE_ENEMY_TYPES[1] },
-            { tank: CAVE_ENEMY_TYPES[2], dps: CAVE_ENEMY_TYPES[1] },
-            { tank: CAVE_ENEMY_TYPES[2], dps: CAVE_ENEMY_TYPES[1] }
-        ];
+        const pool = [...CAVE_ENEMY_TYPES];
+        const pairs = [];
+        const pairCount = 8 + Math.floor(Math.random() * 5);
+        for (let i = 0; i < pairCount; i++) {
+            const tank = pool[Math.floor(Math.random() * pool.length)];
+            let dps = pool[Math.floor(Math.random() * pool.length)];
+            while (dps === tank && pool.length > 1) dps = pool[Math.floor(Math.random() * pool.length)];
+            pairs.push({ tank, dps });
+        }
 
         for (let i = 0; i < pairs.length; i++) {
             const y = 100 + (i * 105);
@@ -66,6 +63,9 @@ export class CaveSpawner {
         const hw = t.bw + 4;
         e.hpBg = s.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = s.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0xe74c3c).setOrigin(0.5).setDepth(11);
+        if (t.hasShield) e.shieldIcon = s.add.text(x, y - t.bh / 2 - 16, '\u{1F6E1}', { fontSize: '10px' }).setOrigin(0.5).setDepth(12);
+        const roleIcons = { healer: '\u{2764}', mage: '\u{2728}', assassin: '\u{1F5E1}', fire: '\u{1F525}', poison: '\u{2620}', necro: '\u{1F480}', swarm: '\u{1F41D}' };
+        if (roleIcons[t.role] && !t.hasShield) e.roleIcon = s.add.text(x, y - t.bh / 2 - 16, roleIcons[t.role], { fontSize: '10px' }).setOrigin(0.5).setDepth(12);
         s.enemies.add(e);
         if (s.multiplayer && s.mpSync) {
             s.mpSync.assignMobId(e, t.key);
@@ -79,19 +79,21 @@ export class CaveSpawner {
         for (let i = 0; i < CAVE_CHEST_COUNT; i++) {
             const cy = 120 + (i * 108);
             const cx = ox + 40 + Math.random() * (CAVE_WIDTH - 80);
-            this.createCaveChest(cx, cy);
+            const isCoop = i === CAVE_CHEST_COUNT - 1;
+            this.createCaveChest(cx, cy, isCoop);
         }
     }
 
-    createCaveChest(x, y) {
+    createCaveChest(x, y, cooperative) {
         const s = this.scene;
         const ch = s.add.sprite(x, y, CAVE_CHEST_CLOSED_KEY).setDepth(6);
         s.physics.add.existing(ch, false);
         ch.body.setSize(CAVE_CHEST_W, CAVE_CHEST_H);
         ch.body.setCollideWorldBounds(true);
         ch.stats = { hp: 50, maxHp: 50 };
-        ch.hpBg = s.add.rectangle(x, y - 14, CAVE_CHEST_W + 4, 3, 0x333333).setOrigin(0.5).setDepth(11);
-        ch.hpFill = s.add.rectangle(x, y - 14, CAVE_CHEST_W + 4, 3, 0xf39c12).setOrigin(0.5).setDepth(11);
+        ch.cooperative = !!cooperative;
+        ch.hpBg = s.add.rectangle(x, y - 14, CAVE_CHEST_W + 4, 3, cooperative ? 0xf1c40f : 0x333333).setOrigin(0.5).setDepth(11);
+        ch.hpFill = s.add.rectangle(x, y - 14, CAVE_CHEST_W + 4, 3, cooperative ? 0xffd700 : 0xf39c12).setOrigin(0.5).setDepth(11);
         ch.loot = [];
         const count = 1 + Math.floor(Math.random() * 2);
         for (let i = 0; i < count; i++) {

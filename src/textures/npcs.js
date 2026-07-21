@@ -1654,4 +1654,171 @@ export function drawNpcTextures(mk) {
         c.fillStyle = 'rgba(52,152,219,0.08)';
         c.fillRect(6, 14, 20, 28);
     });
+
+    // Priest — белая роба, священный символ
+    mk('npc_priest', 32, 48, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#f5cba7';
+        c.fillRect(10, 2, 12, 10);
+        c.fillRect(8, 4, 16, 8);
+        c.fillStyle = '#2c3e50';
+        c.fillRect(12, 6, 2, 2);
+        c.fillRect(18, 6, 2, 2);
+        c.fillStyle = '#ecf0f1';
+        c.fillRect(10, 10, 12, 4);
+        c.fillRect(8, 14, 16, 16);
+        c.fillRect(6, 20, 20, 10);
+        c.fillStyle = '#f8f9f9';
+        c.fillRect(12, 16, 8, 12);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(14, 18, 4, 6);
+        c.fillRect(13, 20, 6, 2);
+        c.fillStyle = '#bdc3c7';
+        c.fillRect(8, 28, 16, 2);
+        c.fillStyle = '#ecf0f1';
+        c.fillRect(10, 30, 4, 12);
+        c.fillRect(18, 30, 4, 12);
+        c.fillStyle = '#d5dbdb';
+        c.fillRect(10, 34, 4, 8);
+        c.fillRect(18, 34, 4, 8);
+        c.fillStyle = '#ecf0f1';
+        c.fillRect(8, 42, 6, 4);
+        c.fillRect(18, 42, 6, 4);
+    });
+
+    // Guard — броня, копьё
+    mk('npc_guard', 32, 48, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#f5cba7';
+        c.fillRect(10, 2, 12, 10);
+        c.fillRect(8, 4, 16, 8);
+        c.fillStyle = '#2c3e50';
+        c.fillRect(12, 6, 2, 2);
+        c.fillRect(18, 6, 2, 2);
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(8, 0, 16, 4);
+        c.fillRect(7, 2, 18, 3);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(9, 1, 14, 2);
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(6, 12, 20, 18);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(8, 14, 16, 14);
+        c.fillStyle = '#bdc3c7';
+        c.fillRect(12, 16, 8, 4);
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(8, 28, 16, 4);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(10, 30, 12, 2);
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(4, 14, 4, 16);
+        c.fillStyle = '#bdc3c7';
+        c.fillRect(5, 16, 2, 12);
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(28, 14, 2, 16);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(28, 16, 2, 12);
+        c.fillStyle = '#6c3483';
+        c.fillRect(10, 32, 4, 12);
+        c.fillRect(18, 32, 4, 12);
+        c.fillStyle = '#5b2c6f';
+        c.fillRect(10, 36, 4, 8);
+        c.fillRect(18, 36, 4, 8);
+        c.fillStyle = '#4a235a';
+        c.fillRect(8, 44, 6, 3);
+        c.fillRect(18, 44, 6, 3);
+    });
+
+    // Child Girl — девочка
+    mk('npc_child_girl', 24, 28, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#f5cba7';
+        c.fillRect(6, 1, 12, 8);
+        c.fillRect(5, 2, 14, 6);
+        c.fillStyle = '#2c3e50';
+        c.fillRect(8, 4, 2, 2);
+        c.fillRect(14, 4, 2, 2);
+        c.fillStyle = '#e74c3c';
+        c.fillRect(6, 1, 12, 2);
+        c.fillRect(4, 2, 3, 6);
+        c.fillRect(17, 2, 3, 6);
+        c.fillStyle = '#c0392b';
+        c.fillRect(5, 3, 2, 4);
+        c.fillRect(17, 3, 2, 4);
+        c.fillStyle = '#e74c3c';
+        c.fillRect(4, 8, 16, 10);
+        c.fillStyle = '#c0392b';
+        c.fillRect(6, 10, 12, 8);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(10, 12, 4, 4);
+        c.fillStyle = '#f5cba7';
+        c.fillRect(6, 18, 4, 6);
+        c.fillRect(14, 18, 4, 6);
+        c.fillStyle = '#c0392b';
+        c.fillRect(5, 24, 6, 3);
+        c.fillRect(13, 24, 6, 3);
+    });
+
+    // Scholar — книжный NPC, синяя роба
+    mk('npc_scholar', 32, 48, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#f5cba7';
+        c.fillRect(10, 2, 12, 10);
+        c.fillRect(8, 4, 16, 8);
+        c.fillStyle = '#2c3e50';
+        c.fillRect(12, 6, 2, 2);
+        c.fillRect(18, 6, 2, 2);
+        c.fillStyle = '#3498db';
+        c.fillRect(8, 0, 16, 4);
+        c.fillRect(7, 1, 18, 2);
+        c.fillStyle = '#2980b9';
+        c.fillRect(6, 12, 20, 20);
+        c.fillRect(4, 18, 24, 12);
+        c.fillStyle = '#3498db';
+        c.fillRect(8, 14, 16, 16);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(14, 16, 4, 2);
+        c.fillRect(13, 18, 6, 1);
+        c.fillStyle = '#2980b9';
+        c.fillRect(6, 32, 8, 12);
+        c.fillRect(18, 32, 8, 12);
+        c.fillStyle = '#3498db';
+        c.fillRect(8, 34, 4, 8);
+        c.fillRect(20, 34, 4, 8);
+        c.fillStyle = '#2980b9';
+        c.fillRect(6, 44, 6, 4);
+        c.fillRect(20, 44, 6, 4);
+    });
+
+    // Knight — рыцарь, серебряная броня
+    mk('npc_knight', 32, 48, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#f5cba7';
+        c.fillRect(10, 2, 12, 10);
+        c.fillRect(8, 4, 16, 8);
+        c.fillStyle = '#2c3e50';
+        c.fillRect(12, 6, 2, 2);
+        c.fillRect(18, 6, 2, 2);
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(8, 0, 16, 4);
+        c.fillRect(7, 1, 18, 3);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(9, 1, 14, 2);
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(6, 12, 20, 20);
+        c.fillRect(4, 18, 24, 12);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(8, 14, 16, 16);
+        c.fillStyle = '#bdc3c7';
+        c.fillRect(12, 16, 8, 6);
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(6, 32, 8, 12);
+        c.fillRect(18, 32, 8, 12);
+        c.fillStyle = '#95a5a6';
+        c.fillRect(8, 34, 4, 8);
+        c.fillRect(20, 34, 4, 8);
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(6, 44, 6, 4);
+        c.fillRect(20, 44, 6, 4);
+    });
 }

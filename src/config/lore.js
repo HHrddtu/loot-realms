@@ -34,6 +34,86 @@ export const LORE = {
         }
     },
     zones: {
+        meadow: {
+            title: 'The Meadow',
+            titleRu: 'Луг',
+            titleDe: 'Die Wiese',
+            text: 'A quiet field at the edge of the world. Wildflowers sway in the wind. Here, time moves slowly — a moment of peace before the darkness ahead.',
+            textRu: 'Тихое поле на краю мира. Полевые цветы качаются на ветру. Здесь время течёт медленно — мгновение покоя перед тьмой впереди.',
+            textDe: 'Eine stille Wiese am Rand der Welt. Wildblumen wiegen sich im Wind. Hier bewegt sich die Zeit langsam — ein Moment des Friedens vor der Dunkelheit.'
+        },
+        forest: {
+            title: 'The Corrupted Forest',
+            titleRu: 'Проклятый Лес',
+            titleDe: 'Der Verwaldete Wald',
+            text: 'The forest that once sheltered the village now teems with corrupted creatures. Goblins, slimes, rats — twisted by the darkness seeping from below. The trees groan with pain.',
+            textRu: 'Лес, что когда-то защищал деревню, кишит проклятыми тварями. Гоблины, слизни, крысы — искажённые тьмой, просачивающейся снизу. Деревья стонут от боли.',
+            textDe: 'Der Wald, der das Dorf einst schützte, wimmelt von verfluchten Kreaturen. Goblin, Schleim, Ratten — von der Dunkelheit verzerrt, die von unten sickert.'
+        },
+        arena: {
+            title: 'The Arena',
+            titleRu: 'Арена',
+            titleDe: 'Die Arena',
+            text: 'An ancient fighting pit where warriors once trained. Now the Ancient Treant guards the passage deeper. Its roots grip the stone — it will not yield easily.',
+            textRu: 'Древняя яма для сражений, где когда-то тренировались воины. Теперь Древний Трент охраняет путь глубже. Его корни впитались в камень — он не сдастся легко.',
+            textDe: 'Eine alte Kampfgrube, wo Krieger einst trainierten. Jetzt bewacht der Uralte Treant den Weg nach unten. Seine Wurzeln greifen in den Stein.'
+        },
+        mine: {
+            title: 'The Abandoned Mine',
+            titleRu: 'Заброшенная Шахта',
+            titleDe: 'Das Verlassene Bergwerk',
+            text: 'Deep shafts dug by miners seeking precious ore. They found something else — restless dead. Skeleton warriors guard these tunnels, shield-bearers blocking the way. A cart still runs on ancient rails.',
+            textRu: 'Глубокие шахты, вырытые горняками в поисках драгоценной руды. Они нашли кое-что другое — неупокоенных мертвецов. Скелеты-воины охраняют тоннели, щитоносцы закрывают путь. Вагонетка всё ещё едет по древним рельсам.',
+            textDe: 'Tiefe Schächte, von Bergleuten gegraben, die Erz suchten. Sie fanden etwas anderes — rastlose Tote. Skelettkrieger bewachen diese Tunnel.'
+        },
+        cave: {
+            title: 'The Dark Caverns',
+            titleRu: 'Тёмные Пещеры',
+            titleDe: 'Die Dunklen Höhlen',
+            text: 'Caves so deep that light fears to enter. Giant bats screech in the darkness. Stone golems patrol the passages. Earth worms burrow through living rock. Something ancient stirs below.',
+            textRu: 'Пещеры настолько глубокие, что свет боится входить. Гигантские летучие мыши кричат в темноте. Каменные големы патрулируют проходы. Земляные черви прогрызают живой камень. Что-то древнее шевелится внизу.',
+            textDe: 'Höhlen so tief, dass Licht zu betreten scheut. Riesenfledermäuse schreien in der Dunkelheit. Steingolems patrouillieren die Gänge.'
+        },
+        village: {
+            title: 'The Fallen Village',
+            titleRu: 'Павшая Деревня',
+            titleDe: 'Das Gefallene Dorf',
+            text: 'Your home. Once peaceful, now overrun by infected horrors. The Purple Demon commands them from the cemetery. The villagers hide, waiting for a savior. The corruption spreads from the graves.',
+            textRu: 'Твой дом. Когда-то мирный, теперь захваченный ужасами заражения. Фиолетовый Демон командует ими из кладбища. Жители прячутся, спасаясь. Коррупция распространяетсяจาก могил.',
+            textDe: 'Dein Zuhause. Einst friedlich, jetzt von Infizierten Horror überrollt. Der Lila Dämon befehligt sie vom Friedhof.'
+        },
+        cemetery: {
+            title: 'The Cemetery',
+            titleRu: 'Кладбище',
+            titleDe: 'Der Friedhof',
+            text: 'Rows of weathered tombstones. Some graves are open — their occupants walks again. The dead here are not at peace. They claw at the earth, seeking warmth they can never find.',
+            textRu: 'Ряды обветренных надгробий. Some могилы открыты — их обитатели снова ходят. Мертвецы здесь не покоятся. Они царапают землю, ища тепло, которого никогда не найдут.',
+            textDe: 'Reihen verwitterter Grabsteine. Einige Gräber sind geöffnet — ihre Bewohner wandeln wieder.'
+        },
+        hell: {
+            title: 'The Infernal Gates',
+            titleRu: 'Адские Врата',
+            titleDe: 'Die Höllischen Tore',
+            text: 'Beyond the cemetery, the earth cracks open. Lava flows through molten rivers. The Red Demon rules here — a fallen archangel consumed by rage. His imps swarm like fire ants.',
+            textRu: 'За кладбищем земля трескается. Лава течёт по расплавленным рекам. Красный Демон правит здесь — павший архангел, пожаренный яростью. Его импы кишят, как огненные муравьи.',
+            textDe: 'Hinter dem Friedhof bricht die Erde auf. Lava fließt durch geschmolzene Flüsse. Der Rote Dämon regiert hier.'
+        },
+        snowy: {
+            title: 'The Frozen Village',
+            titleRu: 'Замёрзшая Деревня',
+            titleDe: 'Das Gefrorene Dorf',
+            text: 'A village locked in eternal winter. The Ice Spirit froze everything — homes, people, hope. Frost wraiths drift through empty streets. Ice golems stand guard at silent gates.',
+            textRu: 'Деревня, заключённая в вечную зиму. Ледяной Дух заморозил всё — дома, людей, надежду. Морозные призраки скользят по пустым улицам. Ледяные големы стоят у молчаливых ворот.',
+            textDe: 'Ein Dorf in ewigem Winter gefangen. Der Eisgeist hat alles gefroren — Häuser, Menschen, Hoffnung.'
+        },
+        castle: {
+            title: 'The Bandit Castle',
+            titleRu: 'Замок Бандитов',
+            titleDe: 'Die Banditenburg',
+            text: 'A fortress seized by outlaws. The Bandit Leader commands from the throne room. His enforcers guard every corridor. Gold and blood stain the same stones.',
+            textRu: 'Крепость, захваченная изгнанниками. Лидер Бандитов командует из тронного зала. Его караулы охраняют каждый коридор. Золото и кровь пачкают одни и те же камни.',
+            textDe: 'Eine Festung, von Gesetzlosen besetzt. Der Banditenanführer befehligt vom Thronsaal.'
+        },
         depths: {
             title: 'Depths of Oblivion',
             titleRu: 'Подземелье Забвения',
@@ -76,13 +156,23 @@ export const LORE = {
         }
     },
     finale: {
-        text: 'You have won. The darkness dissipates.\n\nTwenty years ago, you saved the village.\nNow you have saved the world.\n\nThe boy you saved back then has grown.\nHe became King. The village thrives.\n\nBut this is not the end. This is a new beginning.',
-        textRu: 'Ты победил. Тьма рассеивается.\n\nДвадцать лет назад ты спас деревню.\nТеперь ты спас мир.\n\nМальчик, которого ты спас тогда, вырос.\nОн стал Королём. Деревня процветает.\n\nНо это не конец. Это новое начало.',
-        textDe: 'Du hast gewonnen. Die Dunkelheit weicht.\n\nVor zwanzig Jahren hast du das Dorf gerettet.\nJetzt hast du die Welt gerettet.\n\nDer Junge, den du damals gerettet hast, ist aufgewachsen.\nEr wurde König. Das Dorf blüht auf.\n\nAber das ist nicht das Ende. Das ist ein neuer Anfang.'
+        text: 'You have won. The darkness dissipates.\n\nThe Treant fell. The Skeleton Lord crumbled.\nThe Demon burned. The Lich King was silenced.\nEach soul you freed lightened the weight on this land.\n\nThe village breathes again. The curse is broken.\nBut the cycle continues — new heroes will rise.\n\nThis is not the end. This is a new beginning.',
+        textRu: 'Ты победил. Тьма рассеивается.\n\nТрент пал. Повелитель Скелетов рассыпался.\nДемон сгорел. Король Лич замолк.\nКаждая душа, которую ты освободил, облегчила ношу этой земли.\n\nДеревня дышит снова. Проклятие снято.\nНо цикл продолжается — новые герои восстанут.\n\nЭто не конец. Это новое начало.',
+        textDe: 'Du hast gewonnen. Die Dunkelheit weicht.\n\nDer Treant fiel. Der Skelett-Lord zerfiel.\nDer Dämon brannte. Der Lichkönig verstummte.\nJede Seele, die du befreit hast, erleichterte das Land.\n\nDas Dorf atmet wieder. Der Fluch ist gebrochen.\nAber der Kreislauf geht weiter — neue Helden werden aufstehen.\n\nDas ist nicht das Ende. Das ist ein neuer Anfang.'
     }
 };
 
 export const ZONE_LORE_KEYS = {
+    meadow: 'meadow',
+    forest: 'forest',
+    arena: 'arena',
+    mine: 'mine',
+    cave: 'cave',
+    village: 'village',
+    cemetery: 'cemetery',
+    hell: 'hell',
+    snowy: 'snowy',
+    castle: 'castle',
     depths: 'depths',
     cursed: 'cursed',
     shadow: 'shadow',

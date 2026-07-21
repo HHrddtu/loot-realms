@@ -3,9 +3,9 @@
 #bugfix #tech
 
 > [!INFO] Связанные заметки
-> - [[PROJECT_STATE]] — история версий
-> - [[TECHNICAL_DESIGN]] — архитектура зон
-> - [[README]] — карта содержимого
+> - [[12-plans/PROJECT_STATE|PROJECT STATE]] — история версий
+> - [[01-tech/ARCHITECTURE|Architecture]] — архитектура зон
+> - [[index|MOC]] — карта содержимого
 
 ## Билд: v0.9.8
 

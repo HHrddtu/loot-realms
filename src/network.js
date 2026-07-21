@@ -8,30 +8,33 @@ let _hostConn = null;
 let _guestConns = {};
 let _players = {};
 let _myId = null;
-let _onStateUpdate = null;
+let _hostName = '';
+let _playerNames = {};
+
 let _onPlayerJoin = null;
 let _onPlayerLeave = null;
-let _onLoot = null;
-let _onKey = null;
 let _onChat = null;
 let _onDisconnect = null;
 let _onStartGame = null;
 let _onWelcome = null;
 let _onDifficulty = null;
-let _onMobSync = null;
-let _onBossUpdate = null;
+
+let _onSnapshot = null;
+let _onAttackAction = null;
+let _onChestInteract = null;
+let _onLootPickup = null;
+let _onPortalEnter = null;
+let _onEntitySpawn = null;
+let _onEntityDespawn = null;
+let _onDamageEvent = null;
 let _onChestOpened = null;
 let _onLootCollected = null;
-let _onMobUpdate = null;
-let _onPlayerUpdate = null;
-let _onZoneChange = null;
-let _onBossKilled = null;
-let _onMobDamage = null;
-let _hostName = '';
-let _playerNames = {};
+let _onZoneState = null;
+let _onGameOver = null;
+let _onInventoryUpdate = null;
 
 const ROOM_PREFIX = 'lr-';
-const MAX_PLAYERS = 4;
+const MAX_PLAYERS = 3;
 
 function _genCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -57,42 +60,47 @@ function _sendToGuest(peerId, data) {
     if (conn && conn.open) conn.send(data);
 }
 
+function _makePlayerState(x, y, hp, maxHp, classKey) {
+    return {
+        x: x || 400, y: y || 300,
+        vx: 0, vy: 0,
+        facing: 'down',
+        attacking: false, casting: false,
+        hp: hp || 100, maxHp: maxHp || 100,
+        alive: true, zone: 'forest',
+        classKey: classKey || 'sage'
+    };
+}
+
 export function isHost() { return _isHost; }
 export function getRoomCode() { return _roomCode; }
 export function getMyId() { return _myId; }
 export function getPlayers() { return { ..._players }; }
 export function getPlayerNames() { return { ..._playerNames }; }
 export function isConnected() { return _peer !== null; }
+export function getMaxPlayers() { return MAX_PLAYERS; }
 
-export function onStateUpdate(cb) { _onStateUpdate = cb; }
 export function onPlayerJoin(cb) { _onPlayerJoin = cb; }
 export function onPlayerLeave(cb) { _onPlayerLeave = cb; }
-export function onLoot(cb) { _onLoot = cb; }
-export function onKey(cb) { _onKey = cb; }
 export function onChat(cb) { _onChat = cb; }
 export function onDisconnect(cb) { _onDisconnect = cb; }
 export function onStartGame(cb) { _onStartGame = cb; }
 export function onWelcome(cb) { _onWelcome = cb; }
 export function onDifficulty(cb) { _onDifficulty = cb; }
-export function onMobSync(cb) { _onMobSync = cb; }
-export function onBossUpdate(cb) { _onBossUpdate = cb; }
+
+export function onSnapshot(cb) { _onSnapshot = cb; }
+export function onAttackAction(cb) { _onAttackAction = cb; }
+export function onChestInteract(cb) { _onChestInteract = cb; }
+export function onLootPickup(cb) { _onLootPickup = cb; }
+export function onPortalEnter(cb) { _onPortalEnter = cb; }
+export function onEntitySpawn(cb) { _onEntitySpawn = cb; }
+export function onEntityDespawn(cb) { _onEntityDespawn = cb; }
+export function onDamageEvent(cb) { _onDamageEvent = cb; }
 export function onChestOpened(cb) { _onChestOpened = cb; }
 export function onLootCollected(cb) { _onLootCollected = cb; }
-export function onMobUpdate(cb) { _onMobUpdate = cb; }
-export function onPlayerUpdate(cb) { _onPlayerUpdate = cb; }
-export function onZoneChange(cb) { _onZoneChange = cb; }
-export function onBossKilled(cb) { _onBossKilled = cb; }
-export function onMobDamage(cb) { _onMobDamage = cb; }
-
-function _getHostPlayerNames() {
-    const out = {};
-    Object.keys(_playerNames).forEach(id => {
-        if (_guestConns[id] || id === _myId) {
-            out[id] = _playerNames[id];
-        }
-    });
-    return out;
-}
+export function onZoneState(cb) { _onZoneState = cb; }
+export function onGameOver(cb) { _onGameOver = cb; }
+export function onInventoryUpdate(cb) { _onInventoryUpdate = cb; }
 
 export function createRoom(playerName) {
     return new Promise((resolve, reject) => {
@@ -120,13 +128,19 @@ export function createRoom(playerName) {
             settled = true;
             clearTimeout(timer);
             _myId = id;
-            _players[id] = { x: 400, y: 300, facing: 'down', hp: 100, maxHp: 100, classKey: 'sage', attacking: false };
+            const acc = loadAccount();
+            const classKey = (acc && acc.classKey) || 'sage';
+            _players[id] = _makePlayerState(400, 300, 100, 100, classKey);
             _playerNames[id] = _hostName;
             resolve(_roomCode);
         });
 
         _peer.on('connection', (conn) => {
             _handleGuestConnection(conn);
+        });
+
+        _peer.on('disconnected', () => {
+            if (_onDisconnect) _onDisconnect('peer_disconnected');
         });
 
         _peer.on('error', (err) => {
@@ -151,7 +165,7 @@ export function createRoom(playerName) {
 function _handleGuestConnection(conn) {
     const peerId = conn.peer;
 
-    if (Object.keys(_guestConns).length >= MAX_PLAYERS) {
+    if (Object.keys(_guestConns).length >= MAX_PLAYERS - 1) {
         conn.on('open', () => {
             conn.send({ type: 'disconnect' });
             conn.close();
@@ -168,11 +182,18 @@ function _handleGuestConnection(conn) {
     });
 
     conn.on('close', () => {
-        delete _guestConns[peerId];
-        delete _players[peerId];
-        delete _playerNames[peerId];
-        _broadcastToGuests({ type: 'playerLeave', peerId });
-        if (_onPlayerLeave) _onPlayerLeave(peerId);
+        const disconnectedPeerId = peerId;
+        delete _guestConns[disconnectedPeerId];
+        delete _players[disconnectedPeerId];
+        delete _playerNames[disconnectedPeerId];
+        _broadcastToGuests({ type: 'playerLeave', peerId: disconnectedPeerId });
+        if (_onPlayerLeave) _onPlayerLeave(disconnectedPeerId);
+        _broadcastToGuests({ type: 'game_over', reason: 'player_disconnect', peerId: disconnectedPeerId });
+        if (_onGameOver) _onGameOver({ reason: 'player_disconnect', peerId: disconnectedPeerId });
+    });
+
+    conn.on('error', (err) => {
+        console.warn('PeerJS guest conn error:', err);
     });
 }
 
@@ -180,78 +201,69 @@ function _handleGuestData(peerId, data) {
     switch (data.type) {
         case 'join':
             _playerNames[peerId] = data.name || 'Guest';
-            _players[peerId] = { x: data.x || 400, y: data.y || 300, facing: 'down', hp: data.hp || 100, maxHp: data.maxHp || 100, classKey: data.classKey || 'sage', attacking: false };
+            _players[peerId] = _makePlayerState(data.x, data.y, data.hp, data.maxHp, data.classKey);
 
-            const existingNames = {};
+            const existingPlayers = {};
             Object.keys(_playerNames).forEach(id => {
                 if (_guestConns[id] || id === _myId) {
-                    existingNames[id] = _playerNames[id];
+                    existingPlayers[id] = {
+                        name: _playerNames[id],
+                        classKey: (_players[id] && _players[id].classKey) || 'sage'
+                    };
                 }
             });
-            _sendToGuest(peerId, { type: 'welcome', roomCode: _roomCode, hostName: _hostName, players: existingNames });
+            _sendToGuest(peerId, { type: 'welcome', roomCode: _roomCode, hostName: _hostName, players: existingPlayers });
 
             _broadcastToGuests({ type: 'playerJoin', peerId, name: data.name, classKey: data.classKey });
-            if (_onPlayerJoin) _onPlayerJoin(peerId, data.name);
+            if (_onPlayerJoin) _onPlayerJoin(peerId, data.name, data.classKey);
             break;
 
         case 'input':
             if (_players[peerId]) {
                 _players[peerId].x = data.x;
                 _players[peerId].y = data.y;
+                _players[peerId].vx = data.vx || 0;
+                _players[peerId].vy = data.vy || 0;
                 _players[peerId].facing = data.facing;
-                _players[peerId].attacking = data.attacking;
+                _players[peerId].attacking = !!data.attacking;
+                _players[peerId].casting = !!data.casting;
                 _players[peerId].hp = data.hp;
                 _players[peerId].maxHp = data.maxHp;
+                _players[peerId].zone = data.zone || _players[peerId].zone;
+                if (data.pet !== undefined) _players[peerId].pet = data.pet;
             }
+            break;
+
+        case 'attack_action':
+            if (_onAttackAction) _onAttackAction(peerId, data);
+            break;
+
+        case 'chest_interact':
+            if (_onChestInteract) _onChestInteract(peerId, data);
+            break;
+
+        case 'loot_pickup':
+            if (_onLootPickup) _onLootPickup(peerId, data);
+            break;
+
+        case 'portal_enter':
+            if (_onPortalEnter) _onPortalEnter(peerId, data);
+            break;
+
+        case 'player_downed':
+            if (_players[peerId]) _players[peerId].isDowned = data.isDowned;
+            _broadcastToGuests({ type: 'player_downed', peerId, isDowned: data.isDowned });
+            if (_onPlayerDowned) _onPlayerDowned(peerId, data.isDowned);
+            break;
+
+        case 'revive':
+            _broadcastToGuests({ type: 'revive', peerId, targetId: data.targetId });
+            if (_onRevive) _onRevive(peerId, data.targetId);
             break;
 
         case 'chat':
             _broadcastToGuests({ type: 'chat', peerId, name: _playerNames[peerId] || '??', msg: data.msg });
             if (_onChat) _onChat(peerId, _playerNames[peerId], data.msg);
-            break;
-
-        case 'mob_sync':
-            _broadcastToGuests(data);
-            if (_onMobSync) _onMobSync(data);
-            break;
-
-        case 'boss_update':
-            _broadcastToGuests(data);
-            if (_onBossUpdate) _onBossUpdate(data);
-            break;
-
-        case 'chest_opened':
-            _broadcastToGuests(data);
-            if (_onChestOpened) _onChestOpened(data);
-            break;
-
-        case 'loot_collected':
-            _broadcastToGuests(data);
-            if (_onLootCollected) _onLootCollected(data);
-            break;
-
-        case 'player_update':
-            if (_players[peerId]) {
-                _players[peerId].x = data.x;
-                _players[peerId].y = data.y;
-                _players[peerId].facing = data.direction;
-            }
-            if (_onPlayerUpdate) _onPlayerUpdate(data);
-            break;
-
-        case 'zone_change':
-            _broadcastToGuests(data);
-            if (_onZoneChange) _onZoneChange(data);
-            break;
-
-        case 'boss_killed':
-            _broadcastToGuests(data);
-            if (_onBossKilled) _onBossKilled(data);
-            break;
-
-        case 'mob_damage':
-            _broadcastToGuests(data);
-            if (_onMobDamage) _onMobDamage(data);
             break;
     }
 }
@@ -288,7 +300,9 @@ export function joinRoom(code, playerName) {
                     _handleHostData(data);
                 });
 
-                conn.send({ type: 'join', name: playerName || 'Guest', classKey: (loadAccount && loadAccount().classKey) || 'sage', x: 400, y: 300, hp: 100, maxHp: 100 });
+                const acc = loadAccount();
+                const classKey = (acc && acc.classKey) || 'sage';
+                conn.send({ type: 'join', name: playerName || 'Guest', classKey, x: 400, y: 300, hp: 100, maxHp: 100 });
 
                 if (!settled) {
                     settled = true;
@@ -304,12 +318,11 @@ export function joinRoom(code, playerName) {
 
             conn.on('error', (err) => {
                 console.warn('PeerJS guest conn error:', err);
-                if (!settled) {
-                    settled = true;
-                    clearTimeout(timer);
-                    reject(err);
-                }
             });
+        });
+
+        _peer.on('disconnected', () => {
+            if (_onDisconnect) _onDisconnect('peer_disconnected');
         });
 
         _peer.on('error', (err) => {
@@ -330,32 +343,29 @@ function _handleHostData(data) {
             if (data.players) {
                 Object.keys(data.players).forEach(id => {
                     if (id && id !== _myId) {
-                        _playerNames[id] = data.players[id];
+                        _playerNames[id] = data.players[id].name;
+                        if (data.players[id].classKey) {
+                            _players[id] = _players[id] || _makePlayerState(400, 300, 100, 100, data.players[id].classKey);
+                            _players[id].classKey = data.players[id].classKey;
+                        }
                     }
                 });
             }
             if (_onWelcome) _onWelcome();
             break;
 
-        case 'state':
-            if (_onStateUpdate) _onStateUpdate(data);
-            break;
-
-        case 'loot':
-            if (_onLoot) _onLoot(data);
-            break;
-
-        case 'key':
-            if (_onKey) _onKey(data);
-            break;
-
         case 'playerJoin':
             _playerNames[data.peerId] = data.name;
-            if (_onPlayerJoin) _onPlayerJoin(data.peerId, data.name);
+            if (data.classKey) {
+                _players[data.peerId] = _players[data.peerId] || _makePlayerState(400, 300, 100, 100, data.classKey);
+                _players[data.peerId].classKey = data.classKey;
+            }
+            if (_onPlayerJoin) _onPlayerJoin(data.peerId, data.name, data.classKey);
             break;
 
         case 'playerLeave':
             delete _playerNames[data.peerId];
+            delete _players[data.peerId];
             if (_onPlayerLeave) _onPlayerLeave(data.peerId);
             break;
 
@@ -375,12 +385,20 @@ function _handleHostData(data) {
             if (_onDifficulty) _onDifficulty(data.difficulty);
             break;
 
-        case 'mob_sync':
-            if (_onMobSync) _onMobSync(data);
+        case 'snapshot':
+            if (_onSnapshot) _onSnapshot(data);
             break;
 
-        case 'boss_update':
-            if (_onBossUpdate) _onBossUpdate(data);
+        case 'entity_spawn':
+            if (_onEntitySpawn) _onEntitySpawn(data);
+            break;
+
+        case 'entity_despawn':
+            if (_onEntityDespawn) _onEntityDespawn(data);
+            break;
+
+        case 'damage_event':
+            if (_onDamageEvent) _onDamageEvent(data);
             break;
 
         case 'chest_opened':
@@ -391,29 +409,24 @@ function _handleHostData(data) {
             if (_onLootCollected) _onLootCollected(data);
             break;
 
-        case 'mob_update':
-            if (_onMobUpdate) _onMobUpdate(data);
+        case 'zone_state':
+            if (_onZoneState) _onZoneState(data);
             break;
 
-        case 'player_update':
-            if (_players[data.peerId]) {
-                _players[data.peerId].x = data.x;
-                _players[data.peerId].y = data.y;
-                _players[data.peerId].facing = data.direction;
-            }
-            if (_onPlayerUpdate) _onPlayerUpdate(data);
+        case 'game_over':
+            if (_onGameOver) _onGameOver(data);
             break;
 
-        case 'zone_change':
-            if (_onZoneChange) _onZoneChange(data);
+        case 'player_downed':
+            if (_onPlayerDowned) _onPlayerDowned(data.peerId, data.isDowned);
             break;
 
-        case 'boss_killed':
-            if (_onBossKilled) _onBossKilled(data);
+        case 'revive':
+            if (_onRevive) _onRevive(data.peerId, data.targetId);
             break;
 
-        case 'mob_damage':
-            if (_onMobDamage) _onMobDamage(data);
+        case 'inventory_update':
+            if (_onInventoryUpdate) _onInventoryUpdate(data);
             break;
     }
 }
@@ -422,28 +435,46 @@ export function sendInput(inputData) {
     _sendToHost({ type: 'input', ...inputData });
 }
 
-export function sendGameState(state) {
-    _broadcastToGuests({ type: 'state', ...state });
+export function sendAttackAction(attackData) {
+    _sendToHost({ type: 'attack_action', ...attackData });
 }
 
-export function sendLootPickup(playerId, itemId, itemName) {
-    const msg = { type: 'loot', peerId: playerId, itemId, itemName };
+export function sendChestInteract(chestId) {
+    _sendToHost({ type: 'chest_interact', chestId });
+}
+
+export function sendLootPickup(lootId) {
+    _sendToHost({ type: 'loot_pickup', lootId });
+}
+
+export function sendDowned(isDowned) {
+    const data = { type: 'player_downed', isDowned };
     if (_isHost) {
-        _broadcastToGuests(msg);
-        if (_onLoot) _onLoot(msg);
+        _broadcastToGuests(data);
+        if (_onPlayerDowned) _onPlayerDowned(_myId, isDowned);
     } else {
-        _sendToHost(msg);
+        _sendToHost(data);
     }
 }
 
-export function sendKeyPickup(playerId) {
-    const msg = { type: 'key', peerId: playerId };
+export function sendRevive(targetId) {
+    const data = { type: 'revive', targetId };
     if (_isHost) {
-        _broadcastToGuests(msg);
-        if (_onKey) _onKey(msg);
+        _broadcastToGuests(data);
+        if (_onRevive) _onRevive(_myId, targetId);
     } else {
-        _sendToHost(msg);
+        _sendToHost(data);
     }
+}
+
+let _onPlayerDowned = null;
+let _onRevive = null;
+
+export function onPlayerDowned(cb) { _onPlayerDowned = cb; }
+export function onRevive(cb) { _onRevive = cb; }
+
+export function sendPortalEnter(portalData) {
+    _sendToHost({ type: 'portal_enter', ...portalData });
 }
 
 export function sendChat(msg) {
@@ -456,90 +487,50 @@ export function sendChat(msg) {
     }
 }
 
-export function sendMobSync(data) {
-    const msg = { type: 'mob_sync', ...data };
-    if (_isHost) {
-        _broadcastToGuests(msg);
-    } else {
-        _sendToHost(msg);
-    }
+export function broadcastSnapshot(snapshot) {
+    if (!_isHost) return;
+    _broadcastToGuests({ type: 'snapshot', ...snapshot });
 }
 
-export function sendBossUpdate(data) {
-    const msg = { type: 'boss_update', ...data };
-    if (_isHost) {
-        _broadcastToGuests(msg);
-    } else {
-        _sendToHost(msg);
-    }
+export function broadcastEntitySpawn(kind, def) {
+    if (!_isHost) return;
+    _broadcastToGuests({ type: 'entity_spawn', kind, def });
 }
 
-export function sendChestOpened(data) {
-    const msg = { type: 'chest_opened', ...data };
-    if (_isHost) {
-        _broadcastToGuests(msg);
-        if (_onChestOpened) _onChestOpened(msg);
-    } else {
-        _sendToHost(msg);
-    }
+export function broadcastEntityDespawn(kind, id) {
+    if (!_isHost) return;
+    _broadcastToGuests({ type: 'entity_despawn', kind, id });
 }
 
-export function sendLootCollected(data) {
-    const msg = { type: 'loot_collected', ...data };
-    if (_isHost) {
-        _broadcastToGuests(msg);
-        if (_onLootCollected) _onLootCollected(msg);
-    } else {
-        _sendToHost(msg);
-    }
+export function broadcastDamageEvent(event) {
+    if (!_isHost) return;
+    _broadcastToGuests({ type: 'damage_event', ...event });
 }
 
-export function sendMobUpdate(data) {
-    const msg = { type: 'mob_update', ...data };
-    if (_isHost) {
-        _broadcastToGuests(msg);
-    } else {
-        _sendToHost(msg);
-    }
+export function broadcastChestOpened(chestId, peerId) {
+    if (!_isHost) return;
+    _broadcastToGuests({ type: 'chest_opened', chestId, peerId });
 }
 
-export function sendPlayerUpdate(data) {
-    const msg = { type: 'player_update', peerId: _myId, ...data };
-    if (_isHost) {
-        if (_onPlayerUpdate) _onPlayerUpdate(msg);
-    } else {
-        _sendToHost(msg);
-    }
+export function broadcastLootCollected(lootId, peerId, gold) {
+    if (!_isHost) return;
+    _broadcastToGuests({ type: 'loot_collected', lootId, peerId, gold });
 }
 
-export function sendZoneChange(data) {
-    const msg = { type: 'zone_change', peerId: _myId, ...data };
-    if (_isHost) {
-        _broadcastToGuests(msg);
-        if (_onZoneChange) _onZoneChange(msg);
-    } else {
-        _sendToHost(msg);
-    }
+export function broadcastZoneState(flags) {
+    if (!_isHost) return;
+    _broadcastToGuests({ type: 'zone_state', flags });
 }
 
-export function sendBossKilled(bossType, loot) {
-    const msg = { type: 'boss_killed', bossType, loot };
-    if (_isHost) {
-        _broadcastToGuests(msg);
-        if (_onBossKilled) _onBossKilled(msg);
-    } else {
-        _sendToHost(msg);
-    }
+export function broadcastGameOver(reason) {
+    if (!_isHost) return;
+    _broadcastToGuests({ type: 'game_over', reason });
 }
 
-export function sendMobDamage(mobId, damage) {
-    const msg = { type: 'mob_damage', mobId, damage };
-    if (_isHost) {
-        _broadcastToGuests(msg);
-        if (_onMobDamage) _onMobDamage(msg);
-    } else {
-        _sendToHost(msg);
-    }
+export function sendInventoryUpdate(peerId, payload) {
+    if (!_isHost) return;
+    if (!peerId || peerId === _myId) return;
+    _sendToGuest(peerId, { type: 'inventory_update', ...payload });
 }
 
 export function kickPlayer(peerId) {
@@ -575,23 +566,24 @@ export function disconnect() {
     _players = {};
     _playerNames = {};
     _hostName = '';
-    _onStateUpdate = null;
     _onPlayerJoin = null;
     _onPlayerLeave = null;
-    _onLoot = null;
-    _onKey = null;
     _onChat = null;
     _onDisconnect = null;
     _onStartGame = null;
     _onWelcome = null;
     _onDifficulty = null;
-    _onMobSync = null;
-    _onBossUpdate = null;
+    _onSnapshot = null;
+    _onAttackAction = null;
+    _onChestInteract = null;
+    _onLootPickup = null;
+    _onPortalEnter = null;
+    _onEntitySpawn = null;
+    _onEntityDespawn = null;
+    _onDamageEvent = null;
     _onChestOpened = null;
     _onLootCollected = null;
-    _onMobUpdate = null;
-    _onPlayerUpdate = null;
-    _onZoneChange = null;
-    _onBossKilled = null;
-    _onMobDamage = null;
+    _onZoneState = null;
+    _onGameOver = null;
+    _onInventoryUpdate = null;
 }

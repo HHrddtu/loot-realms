@@ -95,7 +95,7 @@ export class VillageShop {
         }).setOrigin(0.5));
         s.shopGroup.push(crystalText);
 
-        const cap = { Normal: 200, Hard: 50, Expert: 75, Nightmare: 100, Hell: 150, Abyss: 200 }[s.difficulty] || 200;
+        const cap = 200;
         const capText = mk(s.add.text(540, 87, 'Cap: ' + (s.crystalsThisRun || 0) + '/' + cap, {
             fontSize: '9px', fill: '#888', fontFamily: 'Arial'
         }).setOrigin(0.5));
@@ -163,7 +163,7 @@ export class VillageShop {
         }).setOrigin(0.5));
         s.shopGroup.push(crystalText);
 
-        const cap = { Normal: 200, Hard: 50, Expert: 75, Nightmare: 100, Hell: 150, Abyss: 200 }[s.difficulty] || 200;
+        const cap = 200;
         const capText = mk(s.add.text(540, 87, 'Cap: ' + (s.crystalsThisRun || 0) + '/' + cap, {
             fontSize: '9px', fill: '#888', fontFamily: 'Arial'
         }).setOrigin(0.5));
@@ -204,7 +204,7 @@ export class VillageShop {
             const s = this.scene;
             if (goldText) goldText.setText('\u{1F4B0} ' + (s.gold || 0));
             if (crystalText) crystalText.setText('\u{1F48E} ' + (s.crystals || 0));
-            const cap = { Normal: 200, Hard: 50, Expert: 75, Nightmare: 100, Hell: 150, Abyss: 200 }[s.difficulty] || 200;
+        const cap = 200;
             if (capText) capText.setText('Cap: ' + (s.crystalsThisRun || 0) + '/' + cap);
         };
 

@@ -4,10 +4,10 @@
 
 > [!INFO] Связанные заметки
 > - [[REVIEW]] — код-ревью (основа для плана)
-> - [[TECHNICAL_DESIGN]] — архитектура (цель рефакторинга)
-> - [[TASK_QUEUE]] — текущие задачи
-> - [[PROJECT_STATE]] — текущее состояние
-> - [[README]] — карта содержимого
+> - [[01-tech/ARCHITECTURE|Architecture]] — архитектура (цель рефакторинга)
+> - [[12-plans/TASK_QUEUE|TASK QUEUE]] — текущие задачи
+> - [[12-plans/PROJECT_STATE|PROJECT STATE]] — текущее состояние
+> - [[index|MOC]] — карта содержимого
 
 ## Текущая оценка: ~6/10
 

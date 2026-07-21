@@ -151,6 +151,24 @@ export function drawEffectTextures(mk) {
 
     // === SHADOW DISTRICT EFFECTS ===
 
+    mk('scroll_item', 16, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#d4a574';
+        c.fillRect(3, 4, 10, 12);
+        c.fillStyle = '#c49464';
+        c.fillRect(4, 5, 8, 10);
+        c.fillStyle = '#8b4513';
+        c.fillRect(3, 2, 10, 3);
+        c.fillRect(3, 15, 10, 3);
+        c.fillStyle = '#a0522d';
+        c.fillRect(4, 3, 8, 1);
+        c.fillRect(4, 16, 8, 1);
+        c.fillStyle = '#fff';
+        c.fillRect(5, 7, 6, 1);
+        c.fillRect(5, 9, 5, 1);
+        c.fillRect(5, 11, 6, 1);
+    });
+
     // Screen distortion overlay — glitchy mirror effect (full screen)
     mk('shadow_distortion', 400, 300, (c) => {
         c.imageSmoothingEnabled = false;

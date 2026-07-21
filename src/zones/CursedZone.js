@@ -71,6 +71,8 @@ export class CursedZone extends BaseZone {
             s.cursedMinions.getChildren().forEach(e => {
                 if (e.hpBg) e.hpBg.destroy();
                 if (e.hpFill) e.hpFill.destroy();
+                if (e.shieldIcon) e.shieldIcon.destroy();
+                if (e.roleIcon) e.roleIcon.destroy();
             });
             s.cursedMinions.clear(true, true);
         }
@@ -105,7 +107,7 @@ export class CursedZone extends BaseZone {
 
     handleSpace() {
         const s = this.scene;
-        if (s.nearbyNpc) {
+        if (s.nearbyNpc && !s.menuOpen) {
             s.npc.interactWithNpc();
             return;
         }
@@ -152,15 +154,15 @@ export class CursedZone extends BaseZone {
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist < 250) {
-                let speed = 50;
+                let speed = e.stats.speed || 50;
                 let engageDist = 30;
 
                 switch (e.stats.role) {
-                    case 'tank':     speed = 40; engageDist = 25; break;
-                    case 'assassin': speed = 90; engageDist = 20; break;
-                    case 'archer':   speed = 45; engageDist = 150; break;
-                    case 'mage':     speed = 40; engageDist = 180; break;
-                    case 'healer':   speed = 45; engageDist = 120; break;
+                    case 'tank':     speed = (e.stats.speed || 50) * 0.8; engageDist = 25; break;
+                    case 'assassin': speed = (e.stats.speed || 50) * 1.8; engageDist = 20; break;
+                    case 'archer':   speed = (e.stats.speed || 50) * 0.9; engageDist = 150; break;
+                    case 'mage':     speed = (e.stats.speed || 50) * 0.8; engageDist = 180; break;
+                    case 'healer':   speed = (e.stats.speed || 50) * 0.9; engageDist = 120; break;
                 }
 
                 if (dist > engageDist) {

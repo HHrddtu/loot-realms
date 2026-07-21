@@ -17,10 +17,10 @@ export class HellBoss {
         this.zone.bossSpawned = true;
         const bt = HELL_BOSS_TYPE;
         const ox = s.hellOffsetX;
-        const hp = Math.floor(bt.hp[s.difficulty] || bt.hp.Normal);
-        const dmg = Math.floor(bt.dmg[s.difficulty] || bt.dmg.Normal);
-        const exp = Math.floor(bt.exp[s.difficulty] || bt.exp.Normal);
-        const spd = bt.speeds[s.difficulty] || bt.speeds.Normal;
+        const hp = Math.floor(bt.hp);
+        const dmg = Math.floor(bt.dmg);
+        const exp = Math.floor(bt.exp);
+        const spd = bt.speed;
 
         const bx = ox + HELL_WIDTH / 2;
         const by = HELL_HEIGHT / 2;
@@ -50,6 +50,7 @@ export class HellBoss {
         }).setOrigin(0.5).setDepth(12).setScrollFactor(0).setVisible(false);
 
         s.hellBoss = b;
+        s.hellBoss.bossHandler = () => { if (s.zones.hell) s.zones.hell.victoryHellBoss(); };
         s.hellBossFireWaveVfx = [];
         s.enemies.add(b);
         if (s.multiplayer && s.mpSync) {

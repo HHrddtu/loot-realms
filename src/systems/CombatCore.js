@@ -13,17 +13,38 @@ export class CombatCore {
         const walkAnimKey = t.key === 'skeleton_archer' ? 'skeleton_archer_walk_anim' :
                            t.key === 'skeleton_shaman' ? 'skeleton_shaman_walk_anim' :
                            t.key === 'skeleton_warrior' ? 'skeleton_walk' : t.key + '_walk';
-        const e = s.add.sprite(x, y, t.key + '_walk').setDepth(5);
+        const texKey = t.key + '_walk';
+        if (!s.textures.exists(texKey)) return null;
+        if (!s.anims.exists(walkAnimKey)) return null;
+        const e = s.add.sprite(x, y, texKey).setDepth(5);
         s.physics.add.existing(e, false);
         e.body.setSize(t.bw, t.bh);
         e.body.setCollideWorldBounds(true);
         e.walkAnimKey = walkAnimKey;
-        e.stats = { key: t.key, name: t.name, hp: Math.floor(t.hp * s.diffMulti.hp), maxHp: Math.floor(t.hp * s.diffMulti.hp), damage: Math.floor(t.dmg * s.diffMulti.dmg), exp: Math.floor(t.exp * s.diffMulti.exp), bw: t.bw, bh: t.bh, wTimer: 0, wDir: 0 };
+        if (t.scale) e.setScale(t.scale);
+        e.stats = { key: t.key, name: t.name, hp: Math.floor(t.hp * s.diffMulti.hp), maxHp: Math.floor(t.hp * s.diffMulti.hp), damage: Math.floor(t.dmg * s.diffMulti.dmg), exp: Math.floor(t.exp * s.diffMulti.exp), bw: t.bw, bh: t.bh, wTimer: 0, wDir: 0, role: t.role || 'dps', hasShield: t.hasShield || false };
         const hw = t.bw + 4;
         e.hpBg = s.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = s.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0xe74c3c).setOrigin(0.5).setDepth(11);
+        if (t.hasShield) {
+            e.shieldIcon = s.add.text(x, y - t.bh / 2 - 16, '\u{1F6E1}', { fontSize: '10px' }).setOrigin(0.5).setDepth(12);
+        }
+        if (t.invisible) {
+            e.stats.invisible = true;
+            if (!s.visionUnlocked) {
+                e.setAlpha(0.15);
+                e.setTint(0xffffff);
+                e.hpBg.setAlpha(0);
+                e.hpFill.setAlpha(0);
+                if (e.shieldIcon) e.shieldIcon.setAlpha(0);
+            }
+        }
+        const roleIcons = { healer: '\u{2764}', mage: '\u{2728}', assassin: '\u{1F5E1}', fire: '\u{1F525}', poison: '\u{2620}', necro: '\u{1F480}', swarm: '\u{1F41D}' };
+        if (roleIcons[t.role] && !t.hasShield) {
+            e.roleIcon = s.add.text(x, y - t.bh / 2 - 16, roleIcons[t.role], { fontSize: '10px' }).setOrigin(0.5).setDepth(12);
+        }
         s.enemies.add(e);
-        if (s.multiplayer && s.mpSync) s.mpSync.assignMobId(e, t.key);
+        if (s.multiplayer && s.mpSync) s.mpSync.assignMobId(e);
         return e;
     }
 
@@ -51,8 +72,40 @@ export class CombatCore {
         s.cameras.main.shake(100, 0.002);
         if (s.ui) s.ui.showDamageFlash();
         s.time.delayedCall(500, () => { s.player.clearTint(); s.player.setAlpha(1); s.invincible = false; });
-        if (s.playerHP <= 0) { s.playerHP = 0; this.respawnPlayer(); }
+        if (s.playerHP <= 0) {
+            s.playerHP = 0;
+            if (s.multiplayer && s.mpManager) {
+                this._enterDownedState();
+            } else {
+                this.respawnPlayer();
+            }
+        }
         s.updateUI();
+    }
+
+    _enterDownedState() {
+        const s = this.scene;
+        s.isDowned = true;
+        s.downedTimer = 10000;
+        s.player.setTint(0x666666);
+        s.player.setAlpha(0.6);
+        s.player.body.setVelocity(0);
+        s.floatingText(s.player.x, s.player.y - 40, 'DOWNED! Ally: SPACE to revive', '#e74c3c');
+        if (s.multiplayer && s.mpManager) s.mpManager.broadcastDowned(true);
+    }
+
+    revivePlayer() {
+        const s = this.scene;
+        s.isDowned = false;
+        s.downedTimer = 0;
+        s.player.clearTint();
+        s.player.setAlpha(1);
+        s.playerHP = Math.floor(s.playerMaxHP * 0.3);
+        s.invincible = true;
+        s.time.delayedCall(1000, () => { s.invincible = false; });
+        s.floatingText(s.player.x, s.player.y - 40, 'REVIVED!', '#2ecc71');
+        s.updateUI();
+        if (s.multiplayer && s.mpManager) s.mpManager.broadcastDowned(false);
     }
 
     respawnPlayer() {
@@ -70,23 +123,47 @@ export class CombatCore {
         const s = this.scene;
         if (s.attackCooldown || s.menuOpen || s.transitioning) return;
         if (s.zone === 'arena' && s.zones.arena.bossDefeated) return;
+        const pos = this._playAttackVisuals();
+        if (!pos) return;
+        this._dealAttackDamage(pos.ax, pos.ay, pos.attackDamage, pos.cls, {});
+        s.time.delayedCall(pos.cooldown, () => { s.attackCooldown = false; });
+    }
+
+    _playAttackVisuals() {
+        const s = this.scene;
+        if (s.attackCooldown || s.menuOpen || s.transitioning) return null;
+        if (s.zone === 'arena' && s.zones.arena.bossDefeated) return null;
         s.attackCooldown = true; s.playerAttacking = true;
         const cls = s.classData || getClassData(s.classKey);
         s.player.play(cls.attackAnim || 'sage_attack');
-        s.player.once('animationcomplete', () => { s.playerAttacking = false; });
+        s.player.once('animationcomplete', () => {
+            s.playerAttacking = false;
+            const walkKey = cls.walkTexKey || 'player_sage_walk';
+            s.player.setTexture(walkKey);
+        });
         const dmgMult = cls.meleeDmgMult || 1.0;
         const attackDamage = Math.floor(s.playerDamage * dmgMult);
+        const range = cls.meleeRange || 55;
+        let ax = s.player.x, ay = s.player.y;
+        if (s.facing === 'right') ax += range; else if (s.facing === 'left') ax -= range;
+        else if (s.facing === 'up') ay -= range; else if (s.facing === 'down') ay += range;
         if (cls.meleeRanged) {
             this._rangedAttack(cls, attackDamage);
         } else {
-            const range = cls.meleeRange || 55;
-            let ax = s.player.x, ay = s.player.y;
-            if (s.facing === 'right') ax += range; else if (s.facing === 'left') ax -= range;
-            else if (s.facing === 'up') ay -= range; else if (s.facing === 'down') ay += range;
             this._showSlash(ax, ay, cls.meleeColor || 0xaaddff);
-            this._dealAttackDamage(ax, ay, attackDamage, cls);
         }
-        s.time.delayedCall(cls.meleeCooldown || 280, () => { s.attackCooldown = false; });
+        return { ax, ay, attackDamage, cls, cooldown: cls.meleeCooldown || 280 };
+    }
+
+    applyAttackAt(ax, ay, attackDamage, cls, opts = {}) {
+        if (!cls.meleeRanged) {
+            this._showSlash(ax, ay, cls.meleeColor || 0xaaddff);
+        }
+        this._dealAttackDamage(ax, ay, attackDamage, cls, opts);
+    }
+
+    _attackerPeerId(opts) {
+        return (opts && opts.attackerPeerId) || null;
     }
 
     _rangedAttack(cls, attackDamage) {
@@ -124,23 +201,25 @@ export class CombatCore {
         return { x: dist, y: 0 };
     }
 
-    _dealAttackDamage(ax, ay, attackDamage, cls) {
+    _dealAttackDamage(ax, ay, attackDamage, cls, opts = {}) {
         const dmg = attackDamage || this.scene.playerDamage;
         const hitRadius = 45;
         const isAlchemist = cls && cls.key === 'alchemist';
-        this._forEachGroupInRange(this.scene.enemies, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg); if (isAlchemist) this._applyArmorShred(e); });
-        this._forEachGroupInRange(this.scene.stumps, ax, ay, hitRadius, (st) => { this.hitStump(st, dmg); });
-        this._forEachGroupInRange(this.scene.forestChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg); });
-        this._forEachGroupInRange(this.scene.caveExtraChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg); });
-        this._forEachGroupInRange(this.scene.mineChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg); });
-        this._forEachGroupInRange(this.scene.caveChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg); });
-        this._forEachGroupInRange(this.scene.depthsChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg); });
-        this._forEachGroupInRange(this.scene.cursedChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg); });
-        this._forEachGroupInRange(this.scene.shadowChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg); });
-        this._forEachGroupInRange(this.scene.towerChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg); });
-        this._forEachGroupInRange(this.scene.villageZombies, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg); if (isAlchemist) this._applyArmorShred(e); });
-        this._forEachGroupInRange(this.scene.hellImps, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg); if (isAlchemist) this._applyArmorShred(e); });
-        this._forEachGroupInRange(this.scene.caveSmallBats, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg); if (isAlchemist) this._applyArmorShred(e); });
+        const ap = this._attackerPeerId(opts);
+        const chestOpts = ap ? { attackerPeerId: ap } : {};
+        this._forEachGroupInRange(this.scene.enemies, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg, opts); if (isAlchemist) this._applyArmorShred(e); });
+        this._forEachGroupInRange(this.scene.stumps, ax, ay, hitRadius, (st) => { this.hitStump(st, dmg, chestOpts); });
+        this._forEachGroupInRange(this.scene.forestChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg, chestOpts); });
+        this._forEachGroupInRange(this.scene.caveExtraChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg, chestOpts); });
+        this._forEachGroupInRange(this.scene.mineChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg, chestOpts); });
+        this._forEachGroupInRange(this.scene.caveChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg, chestOpts); });
+        this._forEachGroupInRange(this.scene.depthsChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg, chestOpts); });
+        this._forEachGroupInRange(this.scene.cursedChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg, chestOpts); });
+        this._forEachGroupInRange(this.scene.shadowChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg, chestOpts); });
+        this._forEachGroupInRange(this.scene.towerChests, ax, ay, hitRadius, (ch) => { this.hitChest(ch, dmg, chestOpts); });
+        this._forEachGroupInRange(this.scene.villageZombies, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg, opts); if (isAlchemist) this._applyArmorShred(e); });
+        this._forEachGroupInRange(this.scene.hellImps, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg, opts); if (isAlchemist) this._applyArmorShred(e); });
+        this._forEachGroupInRange(this.scene.caveSmallBats, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg, opts); if (isAlchemist) this._applyArmorShred(e); });
         // Boss minion groups
         this._forEachGroupInRange(this.scene.depthsMinions, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg); if (isAlchemist) this._applyArmorShred(e); });
         this._forEachGroupInRange(this.scene.cursedMinions, ax, ay, hitRadius, (e) => { this.hitEnemy(e, dmg); if (isAlchemist) this._applyArmorShred(e); });
@@ -189,26 +268,70 @@ export class CombatCore {
         } else { enemy.armorShredTimer = 3; }
     }
 
-    hitEnemy(enemy, damage) {
+    hitEnemy(enemy, damage, opts = {}) {
+        if (!enemy || !enemy.stats) return;
         const s = this.scene;
+        if (opts.attackerPeerId) enemy._lastAttackerPeerId = opts.attackerPeerId;
         let finalDamage = damage;
-        if (s._consumableBonusDmg > 0) finalDamage = Math.floor(finalDamage * (1 + s._consumableBonusDmg));
-        const te = s.talentEffects || {}; const ae = s.accountEffects || {};
-        if (te.damagePercentVs && enemy.stats && enemy.stats.key && te.damagePercentVs[enemy.stats.key] > 0)
-            finalDamage = Math.floor(damage * (1 + te.damagePercentVs[enemy.stats.key] / 100));
-        if (enemy.stats && enemy.stats.key && s.bestiaryBonuses && s.bestiaryBonuses[enemy.stats.key]) {
-            const bb = s.bestiaryBonuses[enemy.stats.key];
-            if (bb.dmgBonus > 0) finalDamage = Math.floor(finalDamage * (1 + bb.dmgBonus / 100));
+
+        // Class synergy damage buff
+        if (s._synergyDmgBuff > 0) {
+            finalDamage = Math.floor(finalDamage * (1 + s._synergyDmgBuff));
         }
-        if (s.computedBossDamage && enemy.stats && this._isBoss(enemy))
-            finalDamage = Math.floor(finalDamage * (1 + s.computedBossDamage / 100));
-        if (s.playerHP <= s.playerMaxHP * 0.3) { const b = (te.damagePercentLowHp||0)+(ae.damagePercentLowHp||0); if (b>0) finalDamage = Math.floor(finalDamage*(1+b/100)); }
-        if (s.playerHP === s.playerMaxHP) { const b = (te.damagePercentFullHp||0)+(ae.damagePercentFullHp||0); if (b>0) finalDamage = Math.floor(finalDamage*(1+b/100)); }
-        if (s.computedCritChance && Math.random() * 100 < s.computedCritChance + (s._consumableBonusCrit || 0)) {
-            finalDamage = Math.floor(finalDamage * s.computedCritDamage);
-            s.floatingText(enemy.x, enemy.y - 30, 'CRIT!', '#f1c40f');
+
+        // Combo: if another player hit this enemy recently, ×1.5 damage
+        if (!opts.bypassModifiers && s.multiplayer) {
+            const now = Date.now();
+            if (enemy._lastHitByOther && now - enemy._lastHitByOther < 500 && enemy._lastHitter !== (opts.attackerPeerId || 'local')) {
+                finalDamage = Math.floor(finalDamage * 1.5);
+                s.floatingText(enemy.x, enemy.y - 40, 'COMBO!', '#f1c40f');
+            }
+            enemy._lastHitByOther = now;
+            enemy._lastHitter = opts.attackerPeerId || 'local';
         }
-        if (enemy.armorShredStacks && enemy.armorShredStacks > 0) finalDamage = Math.floor(finalDamage * (1 + enemy.armorShredStacks * 0.05));
+
+        // Shield check: reduce damage by 80% if hit from front
+        if (enemy.stats.hasShield && !opts.bypassModifiers) {
+            const facingX = enemy.flipX ? -1 : 1;
+            const dx = s.player.x - enemy.x;
+            const dy = s.player.y - enemy.y;
+            const len = Math.sqrt(dx * dx + dy * dy) || 1;
+            const dot = (dx / len) * facingX;
+            if (dot > 0.5) {
+                finalDamage = Math.floor(finalDamage * 0.2);
+                s.floatingText(enemy.x, enemy.y - 30, 'BLOCKED!', '#3498db');
+            }
+        }
+
+        // Invisible reveal: attack reveals invisible enemy
+        if (enemy.stats.invisible && enemy.alpha < 0.5) {
+            enemy.setAlpha(1);
+            enemy.clearTint();
+            if (enemy.hpBg) enemy.hpBg.setAlpha(1);
+            if (enemy.hpFill) enemy.hpFill.setAlpha(1);
+            if (enemy.shieldIcon) enemy.shieldIcon.setAlpha(1);
+            s.floatingText(enemy.x, enemy.y - 30, 'REVEALED!', '#ffffff');
+        }
+
+        if (!opts.bypassModifiers) {
+            if (s._consumableBonusDmg > 0) finalDamage = Math.floor(finalDamage * (1 + s._consumableBonusDmg));
+            const te = s.talentEffects || {}; const ae = s.accountEffects || {};
+            if (te.damagePercentVs && enemy.stats && enemy.stats.key && te.damagePercentVs[enemy.stats.key] > 0)
+                finalDamage = Math.floor(damage * (1 + te.damagePercentVs[enemy.stats.key] / 100));
+            if (enemy.stats && enemy.stats.key && s.bestiaryBonuses && s.bestiaryBonuses[enemy.stats.key]) {
+                const bb = s.bestiaryBonuses[enemy.stats.key];
+                if (bb.dmgBonus > 0) finalDamage = Math.floor(finalDamage * (1 + bb.dmgBonus / 100));
+            }
+            if (s.computedBossDamage && enemy.stats && this._isBoss(enemy))
+                finalDamage = Math.floor(finalDamage * (1 + s.computedBossDamage / 100));
+            if (s.playerHP <= s.playerMaxHP * 0.3) { const b = (te.damagePercentLowHp||0)+(ae.damagePercentLowHp||0); if (b>0) finalDamage = Math.floor(finalDamage*(1+b/100)); }
+            if (s.playerHP === s.playerMaxHP) { const b = (te.damagePercentFullHp||0)+(ae.damagePercentFullHp||0); if (b>0) finalDamage = Math.floor(finalDamage*(1+b/100)); }
+            if (s.computedCritChance && Math.random() * 100 < s.computedCritChance + (s._consumableBonusCrit || 0)) {
+                finalDamage = Math.floor(finalDamage * s.computedCritDamage);
+                s.floatingText(enemy.x, enemy.y - 30, 'CRIT!', '#f1c40f');
+            }
+            if (enemy.armorShredStacks && enemy.armorShredStacks > 0) finalDamage = Math.floor(finalDamage * (1 + enemy.armorShredStacks * 0.05));
+        }
 
         enemy.stats.hp -= finalDamage;
         enemy.setTint(0xffffff);
@@ -216,36 +339,39 @@ export class CombatCore {
         s.tweens.add({ targets: enemy, scaleX: 1.2, scaleY: 1.2, duration: 60, yoyo: true, onComplete: () => { if (enemy.active) { enemy.clearTint(); enemy.setScale(1); } } });
         s.floatingText(enemy.x, enemy.y - 20, '-' + finalDamage, '#e74c3c');
 
-        // Send damage to host in multiplayer
-        if (s.multiplayer && s.mpSync && enemy.mpId) {
-            s.mpSync.broadcastMobDamage(enemy.mpId, finalDamage);
-        }
-
         const totalLifeSteal = s.computedLifeSteal + ((s._consumableBonusLifesteal || 0) * 100);
-        if (totalLifeSteal > 0) {
+        if (totalLifeSteal > 0 && !opts.bypassLifeSteal) {
             const healAmount = Math.floor(finalDamage * totalLifeSteal / 100);
             if (healAmount > 0) { s.playerHP = Math.min(s.playerMaxHP, s.playerHP + healAmount); s.floatingText(s.player.x, s.player.y - 40, '+' + healAmount, '#2ecc71'); }
         }
 
-        if (enemy.stats.hp <= 0) { s.loot.handleEnemyDeath(enemy); }
+        if (enemy.stats.hp <= 0) { if (s.loot && s.loot.handleEnemyDeath) s.loot.handleEnemyDeath(enemy); }
         else { enemy.hpFill.width = enemy.hpBg.width * (enemy.stats.hp / enemy.stats.maxHp); }
     }
 
-    hitStump(stump, damage) {
+    hitStump(stump, damage, opts = {}) {
+        if (!stump || !stump.stats) return;
         const s = this.scene;
         stump.stats.hp -= damage; stump.setTint(0xffffff);
         s.tweens.add({ targets: stump, scaleX: 1.15, scaleY: 1.15, duration: 60, yoyo: true, onComplete: () => { if (stump.active) { stump.clearTint(); stump.setScale(1); } } });
         s.floatingText(stump.x, stump.y - 20, '-' + damage, '#f39c12');
-        if (stump.stats.hp <= 0) { s.loot.breakStump(stump); }
+        if (stump.stats.hp <= 0) {
+            const result = s.loot.breakStump(stump);
+            if (s._distributeLoot) s._distributeLoot(result, opts.attackerPeerId || null);
+        }
         else { stump.hpFill.width = stump.hpBg.width * (stump.stats.hp / stump.stats.maxHp); }
     }
 
-    hitChest(ch, damage) {
+    hitChest(ch, damage, opts = {}) {
+        if (!ch || !ch.stats) return;
         const s = this.scene;
         if (ch.broken) return; ch.stats.hp -= damage; ch.setTint(0xffffff);
         s.tweens.add({ targets: ch, scaleX: 1.15, scaleY: 1.15, duration: 60, yoyo: true, onComplete: () => { if (ch.active) { ch.clearTint(); ch.setScale(1); } } });
         s.floatingText(ch.x, ch.y - 20, '-' + damage, '#f39c12');
-        if (ch.stats.hp <= 0) { s.loot.breakChest(ch); }
+        if (ch.stats.hp <= 0) {
+            const result = s.loot.breakChest(ch);
+            if (s._distributeLoot) s._distributeLoot(result, opts.attackerPeerId || null);
+        }
         else { ch.hpFill.width = ch.hpBg.width * (ch.stats.hp / ch.stats.maxHp); }
     }
 

@@ -14,10 +14,7 @@ export const BOSS_TYPE = {
     key: 'treant', name: 'Ancient Treant', nameRu: 'Древний Трент', nameDe: 'Uralter Treant',
     texKey: 'treant_boss',
     bw: 48, bh: 60,
-    speeds: { Normal: 60, Hard: 65, Expert: 70, Nightmare: 80, Hell: 90, Abyss: 100 },
-    hp:  { Normal: 500,  Hard: 750,  Expert: 1250, Nightmare: 2000, Hell: 3500, Abyss: 6000 },
-    dmg: { Normal: 15,   Hard: 20,   Expert: 30,   Nightmare: 45,   Hell: 75,   Abyss: 120 },
-    exp: { Normal: 200,  Hard: 300,  Expert: 500,  Nightmare: 800,  Hell: 1400, Abyss: 2400 },
+    speed: 60, hp: 500, dmg: 15, exp: 200,
     aoeInterval: 5000,
     aoeDmgMul: 1.5,
     aoeRadius: 90
@@ -27,7 +24,8 @@ export const BOSS_TYPE = {
 export const MINE_ENEMY_TYPES = [
     { key: 'skeleton_warrior', name: 'Skeleton Warrior', nameRu: 'Скелет-Воин', nameDe: 'Skelettkrieger', hp: 160, dmg: 18, exp: 40, bw: 18, bh: 24 },
     { key: 'skeleton_archer',  name: 'Skeleton Archer',  nameRu: 'Скелет-Лучник', nameDe: 'Skelettbogenschütze', hp: 100, dmg: 14, exp: 35, bw: 18, bh: 24 },
-    { key: 'skeleton_shaman',  name: 'Skeleton Shaman',  nameRu: 'Скелет-Шаман', nameDe: 'Skelett-Schamane', hp: 120, dmg: 16, exp: 45, bw: 18, bh: 26 }
+    { key: 'skeleton_shaman',  name: 'Skeleton Shaman',  nameRu: 'Скелет-Шаман', nameDe: 'Skelett-Schamane', hp: 120, dmg: 16, exp: 45, bw: 18, bh: 26 },
+    { key: 'skeleton_shield', name: 'Skeleton Shield', nameRu: 'Скелет-Щитоносец', nameDe: 'Schild-Skelett', hp: 200, dmg: 12, exp: 50, bw: 18, bh: 26, hasShield: true }
 ];
 export const MINE_ENEMY_COUNT = 4;
 export const MINE_EQUIP_DROP_CHANCE = 0.12;
@@ -37,10 +35,7 @@ export const MINE_BOSS_TYPE = {
     key: 'skeleton_lord', name: 'Skeleton Lord', nameRu: 'Повелитель Скелетов', nameDe: 'Skelett-Lord',
     texKey: 'skeleton_lord',
     bw: 44, bh: 56,
-    speeds: { Normal: 65, Hard: 70, Expert: 75, Nightmare: 85, Hell: 95, Abyss: 110 },
-    hp:  { Normal: 700,  Hard: 1050,  Expert: 1750, Nightmare: 2800, Hell: 4900, Abyss: 8400 },
-    dmg: { Normal: 18,   Hard: 24,    Expert: 36,   Nightmare: 54,   Hell: 90,   Abyss: 144 },
-    exp: { Normal: 350,  Hard: 525,   Expert: 875,  Nightmare: 1400, Hell: 2450, Abyss: 4200 },
+    speed: 65, hp: 700, dmg: 18, exp: 350,
     aoeInterval: 6000,
     aoeDmgMul: 1.6,
     aoeRadius: 100
@@ -48,9 +43,9 @@ export const MINE_BOSS_TYPE = {
 
 // Cave enemies
 export const CAVE_ENEMY_TYPES = [
-    { key: 'cave_spider', name: 'Cave Spider', nameRu: 'Пещерный Паук', nameDe: 'Höhlenspinne', hp: 240, dmg: 24, exp: 55, bw: 16, bh: 14, role: 'dps' },
-    { key: 'cave_bat',    name: 'Cave Bat',    nameRu: 'Пещерная Летучая', nameDe: 'Höhlenfledermaus', hp: 160, dmg: 18, exp: 45, bw: 14, bh: 12, role: 'dps' },
-    { key: 'stone_golem', name: 'Stone Golem',  nameRu: 'Каменный Голем',  nameDe: 'Steingolem',     hp: 400, dmg: 30, exp: 70, bw: 22, bh: 26, role: 'tank' },
+    { key: 'cave_spider', name: 'Cave Spider', nameRu: 'Пещерный Паук', nameDe: 'Höhlenspinne', hp: 240, dmg: 24, exp: 55, bw: 16, bh: 14, role: 'poison' },
+    { key: 'cave_bat',    name: 'Cave Bat',    nameRu: 'Пещерная Летучая', nameDe: 'Höhlenfledermaus', hp: 160, dmg: 18, exp: 45, bw: 14, bh: 12, role: 'swarm' },
+    { key: 'stone_golem', name: 'Stone Golem',  nameRu: 'Каменный Голем',  nameDe: 'Steingolem',     hp: 400, dmg: 30, exp: 70, bw: 22, bh: 26, role: 'tank', hasShield: true },
     { key: 'earth_worm',  name: 'Earth Worm',   nameRu: 'Земляной Червь',  nameDe: 'Erdwurm',        hp: 350, dmg: 26, exp: 65, bw: 24, bh: 18, role: 'tank' }
 ];
 export const CAVE_ENEMY_COUNT = 20;
@@ -61,17 +56,14 @@ export const CAVE_SMALL_BAT = {
     bw: 18, bh: 14,
     hp: 60, dmg: 8, exp: 15
 };
-export const CAVE_BOSS_EXP = { Normal: 400, Hard: 600, Expert: 1000, Nightmare: 1600, Hell: 2800, Abyss: 4800 };
+export const CAVE_BOSS_EXP = 400;
 
 // Cave boss
 export const CAVE_BOSS_TYPE = {
     key: 'giant_bat', name: 'Giant Bat', nameRu: 'Гигантская Летучая', nameDe: 'Riesen-Fledermaus',
     texKey: 'giant_bat',
     bw: 48, bh: 36,
-    speeds: { Normal: 70, Hard: 75, Expert: 80, Nightmare: 90, Hell: 100, Abyss: 115 },
-    hp:  { Normal: 800,  Hard: 1200,  Expert: 2000, Nightmare: 3200, Hell: 5600, Abyss: 9600 },
-    dmg: { Normal: 20,   Hard: 26,    Expert: 40,   Nightmare: 60,   Hell: 100,  Abyss: 160 },
-    exp: { Normal: 400,  Hard: 600,   Expert: 1000, Nightmare: 1600, Hell: 2800, Abyss: 4800 },
+    speed: 70, hp: 800, dmg: 20, exp: 400,
     dashInterval: 6000,
     dashSpeed: 300,
     dashDmgMul: 1.5,
@@ -86,10 +78,10 @@ export const CAVE_BOSS_TYPE = {
 export const VILLAGE_CAMP_COUNT = 8;
 export const VILLAGE_MOBS_PER_CAMP = 4;
 export const VILLAGE_ENEMY_TYPES = {
-    tank:     { key: 'village_brute',  name: 'Infected Brute',  nameRu: 'Заражённый Брута',   nameDe: 'Infizierter Brutalo', texKey: 'village_brute',  hp: 500, dmg: 35, exp: 90,  bw: 20, bh: 22, role: 'tank' },
-    assassin: { key: 'village_stalker', name: 'Infected Stalker', nameRu: 'Заражённый Сталкер', nameDe: 'Infizierter Schleicher', texKey: 'village_stalker', hp: 220, dmg: 45, exp: 80,  bw: 14, bh: 14, role: 'assassin' },
-    archer:   { key: 'village_spitter', name: 'Infected Spitter', nameRu: 'Заражённый Плевок',  nameDe: 'Infizierter Spucker', texKey: 'village_spitter', hp: 280, dmg: 30, exp: 75,  bw: 16, bh: 16, role: 'archer' },
-    healer:   { key: 'village_curser', name: 'Infected Curser',  nameRu: 'Заражённый Проклятый', nameDe: 'Infizierter Flucher', texKey: 'village_curser', hp: 240, dmg: 22, exp: 85,  bw: 14, bh: 18, role: 'healer' }
+    tank:     { key: 'village_brute',  name: 'Infected Brute',  nameRu: 'Заражённый Брута',   nameDe: 'Infizierter Brutalo', texKey: 'village_brute',  hp: 500, dmg: 35, exp: 90,  bw: 20, bh: 22, role: 'tank', hasShield: true, scale: 1.2 },
+    assassin: { key: 'village_stalker', name: 'Infected Stalker', nameRu: 'Заражённый Сталкер', nameDe: 'Infizierter Schleicher', texKey: 'village_stalker', hp: 220, dmg: 45, exp: 80,  bw: 14, bh: 14, role: 'assassin', scale: 0.75 },
+    archer:   { key: 'village_spitter', name: 'Infected Spitter', nameRu: 'Заражённый Плевок',  nameDe: 'Infizierter Spucker', texKey: 'village_spitter', hp: 280, dmg: 30, exp: 75,  bw: 16, bh: 16, role: 'poison', scale: 0.85 },
+    healer:   { key: 'village_curser', name: 'Infected Curser',  nameRu: 'Заражённый Проклятый', nameDe: 'Infizierter Flucher', texKey: 'village_curser', hp: 240, dmg: 22, exp: 85,  bw: 14, bh: 18, role: 'healer', scale: 0.9 }
 };
 
 // Village boss
@@ -97,10 +89,7 @@ export const VILLAGE_BOSS_TYPE = {
     key: 'purple_demon', name: 'Purple Demon', nameRu: 'Фиолетовый Демон', nameDe: 'Lila Dämon',
     texKey: 'purple_demon',
     bw: 40, bh: 44,
-    speeds: { Normal: 60, Hard: 68, Expert: 78, Nightmare: 90, Hell: 110, Abyss: 130 },
-    hp:  { Normal: 3000, Hard: 4500, Expert: 7500, Nightmare: 12000, Hell: 21000, Abyss: 36000 },
-    dmg: { Normal: 35,   Hard: 48,   Expert: 75,   Nightmare: 120,  Hell: 200,  Abyss: 320 },
-    exp: { Normal: 800,  Hard: 1200, Expert: 2000, Nightmare: 3200, Hell: 5600, Abyss: 9600 },
+    speed: 60, hp: 3000, dmg: 35, exp: 800,
     meteorInterval: 5000,
     meteorRadius: 80,
     meteorDmgMul: 1.5,
@@ -119,11 +108,11 @@ export const VILLAGE_CORPSE_MINION = {
 export const HELL_CAMP_COUNT = 10;
 export const HELL_MOBS_PER_CAMP = 5;
 export const HELL_ENEMY_TYPES = {
-    tank:     { key: 'hell_guard',   name: 'Hell Guard',   nameRu: 'Адская Стража',   nameDe: 'Höllengarde',   hp: 650, dmg: 40, exp: 100, bw: 22, bh: 24, role: 'tank' },
-    assassin: { key: 'hell_stalker', name: 'Hell Stalker', nameRu: 'Адский Сталкер',  nameDe: 'Höllenschleicher', hp: 280, dmg: 55, exp: 85,  bw: 14, bh: 14, role: 'assassin' },
-    archer:   { key: 'hell_archer',  name: 'Hell Archer',  nameRu: 'Адский Лучник',   nameDe: 'Höllenbogenschütze', hp: 350, dmg: 35, exp: 80,  bw: 16, bh: 16, role: 'archer' },
-    mage:     { key: 'hell_mage',    name: 'Hell Mage',    nameRu: 'Адский Маг',      nameDe: 'Höllenmagier',  hp: 260, dmg: 60, exp: 90,  bw: 14, bh: 18, role: 'mage' },
-    healer:   { key: 'hell_priest',  name: 'Hell Priest',  nameRu: 'Адский Жрец',     nameDe: 'Höllenpriester', hp: 300, dmg: 25, exp: 85,  bw: 14, bh: 18, role: 'healer' }
+    tank:     { key: 'hell_guard',   name: 'Hell Guard',   nameRu: 'Адская Стража',   nameDe: 'Höllengarde',   hp: 650, dmg: 40, exp: 100, bw: 22, bh: 24, role: 'tank', hasShield: true, scale: 1.25 },
+    assassin: { key: 'hell_stalker', name: 'Hell Stalker', nameRu: 'Адский Сталкер',  nameDe: 'Höllenschleicher', hp: 280, dmg: 55, exp: 85,  bw: 14, bh: 14, role: 'assassin', scale: 0.8 },
+    archer:   { key: 'hell_archer',  name: 'Hell Archer',  nameRu: 'Адский Лучник',   nameDe: 'Höllenbogenschütze', hp: 350, dmg: 35, exp: 80,  bw: 16, bh: 16, role: 'fire', scale: 0.9 },
+    mage:     { key: 'hell_mage',    name: 'Hell Mage',    nameRu: 'Адский Маг',      nameDe: 'Höllenmagier',  hp: 260, dmg: 60, exp: 90,  bw: 14, bh: 18, role: 'mage', scale: 0.9 },
+    healer:   { key: 'hell_priest',  name: 'Hell Priest',  nameRu: 'Адский Жрец',     nameDe: 'Höllenpriester', hp: 300, dmg: 25, exp: 85,  bw: 14, bh: 18, role: 'healer', scale: 0.85 }
 };
 
 // Hell boss
@@ -131,10 +120,7 @@ export const HELL_BOSS_TYPE = {
     key: 'red_demon', name: 'Red Demon', nameRu: 'Красный Демон', nameDe: 'Roter Dämon',
     texKey: 'red_demon',
     bw: 44, bh: 48,
-    speeds: { Normal: 65, Hard: 75, Expert: 85, Nightmare: 100, Hell: 120, Abyss: 140 },
-    hp:  { Normal: 5000, Hard: 7500, Expert: 12500, Nightmare: 20000, Hell: 35000, Abyss: 60000 },
-    dmg: { Normal: 45,   Hard: 62,   Expert: 95,    Nightmare: 150,  Hell: 250,  Abyss: 400 },
-    exp: { Normal: 1500, Hard: 2250, Expert: 3750,  Nightmare: 6000, Hell: 10500, Abyss: 18000 },
+    speed: 65, hp: 5000, dmg: 45, exp: 1500,
     fireWaveInterval: 4000, fireWaveRadius: 100, fireWaveDmgMul: 1.8,
     meteorInterval: 6000, meteorRadius: 90, meteorDmgMul: 2.0,
     summonInterval: 10000, summonCount: 4
@@ -142,16 +128,16 @@ export const HELL_BOSS_TYPE = {
 export const HELL_BOSS_MINION = {
     key: 'hell_imp', name: 'Hell Imp', nameRu: 'Адский Имп', nameDe: 'Höllendämon',
     texKey: 'hell_imp',
-    bw: 12, bh: 14, hp: 80, dmg: 18, exp: 25
+    bw: 12, bh: 14, hp: 80, dmg: 18, exp: 25, role: 'swarm'
 };
 
 // Snowy Village enemies
 export const SNOWY_VILLAGE_ENEMY_TYPES = {
-    tank:     { key: 'ice_golem',    name: 'Ice Golem',     nameRu: 'Ледяной Голем',    nameDe: 'Eisgolem',     hp: 400, dmg: 28, exp: 90,  bw: 22, bh: 24, role: 'tank' },
-    assassin: { key: 'frost_wraith', name: 'Frost Wraith',  nameRu: 'Морозный Призрак', nameDe: 'Frostgespenst', hp: 170, dmg: 38, exp: 80,  bw: 14, bh: 16, role: 'assassin' },
-    archer:   { key: 'snow_wolf',    name: 'Snow Wolf',     nameRu: 'Снежный Волк',     nameDe: 'Schneewolf',   hp: 200, dmg: 24, exp: 75,  bw: 18, bh: 16, role: 'archer' },
-    healer:   { key: 'ice_elemental', name: 'Ice Elemental', nameRu: 'Ледяной Элементаль', nameDe: 'Icelemental', hp: 160, dmg: 18, exp: 85,  bw: 14, bh: 18, role: 'healer' },
-    mage:     { key: 'frost_mage',   name: 'Frost Mage',    nameRu: 'Морозный Маг',     nameDe: 'Frostmagier',  hp: 150, dmg: 45, exp: 90,  bw: 14, bh: 18, role: 'mage' }
+    tank:     { key: 'ice_golem',    name: 'Ice Golem',     nameRu: 'Ледяной Голем',    nameDe: 'Eisgolem',     hp: 400, dmg: 28, exp: 90,  bw: 22, bh: 24, role: 'tank', hasShield: true, scale: 1.3 },
+    assassin: { key: 'frost_wraith', name: 'Frost Wraith',  nameRu: 'Морозный Призрак', nameDe: 'Frostgespenst', hp: 170, dmg: 38, exp: 80,  bw: 14, bh: 16, role: 'assassin', scale: 0.8 },
+    archer:   { key: 'snow_wolf',    name: 'Snow Wolf',     nameRu: 'Снежный Волк',     nameDe: 'Schneewolf',   hp: 200, dmg: 24, exp: 75,  bw: 18, bh: 16, role: 'swarm', scale: 0.9 },
+    healer:   { key: 'ice_elemental', name: 'Ice Elemental', nameRu: 'Ледяной Элементаль', nameDe: 'Icelemental', hp: 160, dmg: 18, exp: 85,  bw: 14, bh: 18, role: 'healer', scale: 1.0 },
+    mage:     { key: 'frost_mage',   name: 'Frost Mage',    nameRu: 'Морозный Маг',     nameDe: 'Frostmagier',  hp: 150, dmg: 45, exp: 90,  bw: 14, bh: 18, role: 'mage', scale: 0.9 }
 };
 
 // Snowy boss
@@ -159,10 +145,7 @@ export const SNOWY_VILLAGE_BOSS_TYPE = {
     key: 'ice_spirit', name: 'Ice Spirit', nameRu: 'Ледяной Дух', nameDe: 'Eisgeist',
     texKey: 'ice_spirit',
     bw: 40, bh: 44,
-    speeds: { Normal: 55, Hard: 63, Expert: 73, Nightmare: 85, Hell: 105, Abyss: 125 },
-    hp:  { Normal: 4000, Hard: 6000, Expert: 10000, Nightmare: 16000, Hell: 28000, Abyss: 48000 },
-    dmg: { Normal: 40,   Hard: 55,   Expert: 85,    Nightmare: 135,  Hell: 225,  Abyss: 360 },
-    exp: { Normal: 1200, Hard: 1800, Expert: 3000,  Nightmare: 4800, Hell: 8400, Abyss: 14400 },
+    speed: 55, hp: 4000, dmg: 40, exp: 1200,
     frostWaveInterval: 5000, frostWaveRadius: 90, frostWaveDmgMul: 1.6,
     blizzardInterval: 8000, blizzardRadius: 120, blizzardDmgMul: 1.2,
     summonInterval: 12000, summonCount: 3
@@ -175,9 +158,9 @@ export const SNOWY_BOSS_MINION = {
 
 // Castle enemies (Bandits)
 export const BANDIT_TYPES = {
-    melee:   { key: 'bandit_melee',   name: 'Bandit Thug',     nameRu: 'Бандит Головорез',    nameDe: 'Banditen-Schläger',    hp: 300, dmg: 20, exp: 75,  bw: 18, bh: 22, role: 'melee' },
-    ranger:  { key: 'bandit_ranger',  name: 'Bandit Archer',   nameRu: 'Бандит Лучник',       nameDe: 'Banditen-Bogenschütze', hp: 180, dmg: 25, exp: 70,  bw: 16, bh: 20, role: 'ranger' },
-    elite:   { key: 'bandit_elite',   name: 'Bandit Enforcer', nameRu: 'Бандит Каратель',      nameDe: 'Banditen-Vollstrecker', hp: 400, dmg: 30, exp: 100, bw: 22, bh: 26, role: 'elite' }
+    melee:   { key: 'bandit_melee',   name: 'Bandit Thug',     nameRu: 'Бандит Головорез',    nameDe: 'Banditen-Schläger',    hp: 300, dmg: 20, exp: 75,  bw: 18, bh: 22, role: 'tank', hasShield: true },
+    ranger:  { key: 'bandit_ranger',  name: 'Bandit Archer',   nameRu: 'Бандит Лучник',       nameDe: 'Banditen-Bogenschütze', hp: 180, dmg: 25, exp: 70,  bw: 16, bh: 20, role: 'archer' },
+    elite:   { key: 'bandit_elite',   name: 'Bandit Enforcer', nameRu: 'Бандит Каратель',      nameDe: 'Banditen-Vollstrecker', hp: 400, dmg: 30, exp: 100, bw: 22, bh: 26, role: 'tank', hasShield: true }
 };
 export const CASTLE_CHEST_COUNT = 6;
 export const CASTLE_CHEST_DROP_CHANCE = 0.40;
@@ -187,10 +170,7 @@ export const BANDIT_LEADER_BOSS = {
     key: 'bandit_leader', name: 'Bandit Leader', nameRu: 'Лидер Бандитов', nameDe: 'Banditenanführer',
     texKey: 'bandit_leader',
     bw: 50, bh: 60,
-    speeds: { Normal: 55, Hard: 62, Expert: 70, Nightmare: 80, Hell: 95, Abyss: 110 },
-    hp:  { Normal: 4000, Hard: 6000, Expert: 10000, Nightmare: 16000, Hell: 28000, Abyss: 48000 },
-    dmg: { Normal: 40,   Hard: 55,   Expert: 85,    Nightmare: 135,  Hell: 225,  Abyss: 360 },
-    exp: { Normal: 1200, Hard: 1800, Expert: 3000,  Nightmare: 4800, Hell: 8400, Abyss: 14400 },
+    speed: 55, hp: 4000, dmg: 40, exp: 1200,
     windupTime: 1500,
     strikeTime: 300,
     strikeDmgMul: 2.5,
@@ -205,11 +185,11 @@ export const BANDIT_LEADER_BOSS = {
 export const DEPTHS_CAMP_COUNT = 10;
 export const DEPTHS_MOBS_PER_CAMP = 5;
 export const DEPTHS_ENEMY_TYPES = {
-    tank:     { key: 'crypt_soldier',  name: 'Crypt Soldier',  nameRu: 'Криптовый Солдат',  nameDe: 'Kryptsoldat',     texKey: 'crypt_soldier',  hp: 700, dmg: 42, exp: 110, bw: 22, bh: 24, role: 'tank' },
-    assassin: { key: 'shadow_assassin', name: 'Shadow Assassin', nameRu: 'Теневой Убийца',   nameDe: 'Schattenmeuchler', texKey: 'shadow_assassin', hp: 340, dmg: 58, exp: 105, bw: 14, bh: 14, role: 'assassin' },
-    archer:   { key: 'bone_archer',    name: 'Bone Archer',    nameRu: 'Костяной Лучник',   nameDe: 'Knochenbogenschütze', texKey: 'bone_archer', hp: 370, dmg: 38, exp: 95,  bw: 16, bh: 16, role: 'archer' },
-    mage:     { key: 'necro_mage',     name: 'Necro Mage',     nameRu: 'Некромаг',          nameDe: 'Nekromagier',     texKey: 'necro_mage',     hp: 280, dmg: 65, exp: 110, bw: 14, bh: 18, role: 'mage' },
-    healer:   { key: 'dark_priest',    name: 'Dark Priest',    nameRu: 'Тёмный Жрец',       nameDe: 'Dunkelpriester',  texKey: 'dark_priest',    hp: 320, dmg: 30, exp: 98,  bw: 14, bh: 18, role: 'healer' }
+    tank:     { key: 'crypt_soldier',  name: 'Crypt Soldier',  nameRu: 'Криптовый Солдат',  nameDe: 'Kryptsoldat',     texKey: 'crypt_soldier',  hp: 700, dmg: 42, exp: 110, bw: 22, bh: 24, role: 'tank', hasShield: true, scale: 1.2 },
+    assassin: { key: 'shadow_assassin', name: 'Shadow Assassin', nameRu: 'Теневой Убийца',   nameDe: 'Schattenmeuchler', texKey: 'shadow_assassin', hp: 340, dmg: 58, exp: 105, bw: 14, bh: 14, role: 'assassin', scale: 0.8 },
+    archer:   { key: 'bone_archer',    name: 'Bone Archer',    nameRu: 'Костяной Лучник',   nameDe: 'Knochenbogenschütze', texKey: 'bone_archer', hp: 370, dmg: 38, exp: 95,  bw: 16, bh: 16, role: 'archer', scale: 0.9 },
+    mage:     { key: 'necro_mage',     name: 'Necro Mage',     nameRu: 'Некромаг',          nameDe: 'Nekromagier',     texKey: 'necro_mage',     hp: 280, dmg: 65, exp: 110, bw: 14, bh: 18, role: 'necro', scale: 0.9 },
+    healer:   { key: 'dark_priest',    name: 'Dark Priest',    nameRu: 'Тёмный Жрец',       nameDe: 'Dunkelpriester',  texKey: 'dark_priest',    hp: 320, dmg: 30, exp: 98,  bw: 14, bh: 18, role: 'healer', scale: 0.85 }
 };
 
 // Depths boss
@@ -217,10 +197,7 @@ export const DEPTHS_BOSS_TYPE = {
     key: 'lich_king', name: 'Lich King', nameRu: 'Король Лич', nameDe: 'Lichkönig',
     texKey: 'lich_king',
     bw: 44, bh: 52,
-    speeds: { Normal: 60, Hard: 68, Expert: 78, Nightmare: 95, Hell: 115, Abyss: 135 },
-    hp:  { Normal: 6000, Hard: 9000, Expert: 15000, Nightmare: 24000, Hell: 42000, Abyss: 72000 },
-    dmg: { Normal: 50,   Hard: 68,   Expert: 105,   Nightmare: 165,  Hell: 275,  Abyss: 440 },
-    exp: { Normal: 1800, Hard: 2700, Expert: 4500,  Nightmare: 7200, Hell: 12600, Abyss: 21600 },
+    speed: 60, hp: 6000, dmg: 50, exp: 1800,
     deathWaveInterval: 4500, deathWaveRadius: 100, deathWaveDmgMul: 1.7,
     soulStormInterval: 7000, soulStormRadius: 120, soulStormDmgMul: 1.3,
     summonInterval: 9000, summonCount: 4,
@@ -236,11 +213,11 @@ export const DEPTHS_BOSS_MINION = {
 export const CURSED_CAMP_COUNT = 15;
 export const CURSED_MOBS_PER_CAMP = 5;
 export const CURSED_ENEMY_TYPES = {
-    tank:     { key: 'swamp_thug',       name: 'Swamp Thug',       nameRu: 'Болотный Головорез',  nameDe: 'Sumpf-Schläger',      texKey: 'swamp_sludge',       hp: 750, dmg: 45, exp: 115, bw: 22, bh: 24, role: 'tank' },
-    assassin: { key: 'venom_spider',     name: 'Venom Spider',     nameRu: 'Ядовитый Паук',       nameDe: 'Giftspinne',          texKey: 'venom_spider',     hp: 320, dmg: 60, exp: 100, bw: 16, bh: 14, role: 'assassin' },
-    archer:   { key: 'thorn_walker',     name: 'Thorn Walker',     nameRu: 'Терновый Странник',   nameDe: 'Dornenwanderer',      texKey: 'cursed_treant',     hp: 380, dmg: 40, exp: 92,  bw: 18, bh: 20, role: 'archer' },
-    mage:     { key: 'necro_mage',       name: 'Necro Mage',       nameRu: 'Некромаг',            nameDe: 'Nekromagier',        texKey: 'corrupted_druid',     hp: 280, dmg: 65, exp: 105, bw: 14, bh: 18, role: 'mage' },
-    healer:   { key: 'dark_priest',      name: 'Dark Priest',      nameRu: 'Тёмный Жрец',         nameDe: 'Dunkelpriester',     texKey: 'bog_witch',     hp: 320, dmg: 30, exp: 98,  bw: 14, bh: 18, role: 'healer' }
+    tank:     { key: 'swamp_thug',       name: 'Swamp Thug',       nameRu: 'Болотный Головорез',  nameDe: 'Sumpf-Schläger',      texKey: 'swamp_sludge',       hp: 750, dmg: 45, exp: 115, bw: 22, bh: 24, role: 'tank', hasShield: true, scale: 1.3 },
+    assassin: { key: 'venom_spider',     name: 'Venom Spider',     nameRu: 'Ядовитый Паук',       nameDe: 'Giftspinne',          texKey: 'venom_spider',     hp: 320, dmg: 60, exp: 100, bw: 16, bh: 14, role: 'poison', scale: 0.7 },
+    archer:   { key: 'thorn_walker',     name: 'Thorn Walker',     nameRu: 'Терновый Странник',   nameDe: 'Dornenwanderer',      texKey: 'cursed_treant',     hp: 380, dmg: 40, exp: 92,  bw: 18, bh: 20, role: 'archer', scale: 1.1 },
+    mage:     { key: 'necro_mage',       name: 'Necro Mage',       nameRu: 'Некромаг',            nameDe: 'Nekromagier',        texKey: 'corrupted_druid',     hp: 280, dmg: 65, exp: 105, bw: 14, bh: 18, role: 'necro', scale: 0.9 },
+    healer:   { key: 'dark_priest',      name: 'Dark Priest',      nameRu: 'Тёмный Жрец',         nameDe: 'Dunkelpriester',     texKey: 'bog_witch',     hp: 320, dmg: 30, exp: 98,  bw: 14, bh: 18, role: 'healer', scale: 0.85 }
 };
 
 // Cursed Lands boss
@@ -248,10 +225,7 @@ export const CURSED_BOSS_TYPE = {
     key: 'ancient_evil', name: 'Ancient Evil', nameRu: 'Древнее Зло', nameDe: 'Uraltes Übel',
     texKey: 'ancient_evil',
     bw: 48, bh: 56,
-    speeds: { Normal: 55, Hard: 63, Expert: 73, Nightmare: 90, Hell: 110, Abyss: 130 },
-    hp:  { Normal: 7000, Hard: 10500, Expert: 17500, Nightmare: 28000, Hell: 49000, Abyss: 84000 },
-    dmg: { Normal: 55,   Hard: 75,   Expert: 115,   Nightmare: 180,  Hell: 300,  Abyss: 480 },
-    exp: { Normal: 2200, Hard: 3300, Expert: 5500,  Nightmare: 8800, Hell: 15400, Abyss: 26400 },
+    speed: 55, hp: 7000, dmg: 55, exp: 2200,
     poisonAuraInterval: 3000, poisonAuraRadius: 100, poisonAuraDmgMul: 0.8,
     deathWaveInterval: 5000, deathWaveRadius: 110, deathWaveDmgMul: 1.6,
     summonInterval: 8000, summonCount: 4,
@@ -267,11 +241,11 @@ export const CURSED_BOSS_MINION = {
 export const SHADOW_CAMP_COUNT = 12;
 export const SHADOW_MOBS_PER_CAMP = 5;
 export const SHADOW_ENEMY_TYPES = {
-    tank:     { key: 'abyss_watcher',    name: 'Abyss Watcher',    nameRu: 'Страж Бездны',      nameDe: 'Abgrundwächter',     texKey: 'void_knight',    hp: 800, dmg: 48, exp: 120, bw: 22, bh: 24, role: 'tank' },
-    assassin: { key: 'shadow_stalker',    name: 'Shadow Stalker',   nameRu: 'Тень-Следопыт',     nameDe: 'Schattenpirscher',   texKey: 'shadow_hound',    hp: 340, dmg: 58, exp: 105, bw: 14, bh: 14, role: 'assassin' },
-    archer:   { key: 'rift_walker',       name: 'Rift Walker',      nameRu: 'Скиталец Разлома',  nameDe: 'Risswanderer',       texKey: 'rift_crawler',     hp: 400, dmg: 42, exp: 95,  bw: 16, bh: 18, role: 'archer' },
-    mage:     { key: 'shadow_mage',       name: 'Shadow Mage',      nameRu: 'Теневой Маг',       nameDe: 'Schattenmagier',     texKey: 'phantom_knight',     hp: 280, dmg: 65, exp: 110, bw: 14, bh: 18, role: 'mage' },
-    healer:   { key: 'reality_breaker',   name: 'Reality Breaker',  nameRu: 'Разрушитель Реальности', nameDe: 'Realitätsbrecher', texKey: 'shadow_mimic', hp: 350, dmg: 32, exp: 100, bw: 14, bh: 18, role: 'healer' }
+    tank:     { key: 'abyss_watcher',    name: 'Abyss Watcher',    nameRu: 'Страж Бездны',      nameDe: 'Abgrundwächter',     texKey: 'void_knight',    hp: 800, dmg: 48, exp: 120, bw: 22, bh: 24, role: 'tank', hasShield: true, scale: 1.25 },
+    assassin: { key: 'shadow_stalker',    name: 'Shadow Stalker',   nameRu: 'Тень-Следопыт',     nameDe: 'Schattenpirscher',   texKey: 'shadow_hound',    hp: 340, dmg: 58, exp: 105, bw: 14, bh: 14, role: 'assassin', scale: 0.75, invisible: true },
+    archer:   { key: 'rift_walker',       name: 'Rift Walker',      nameRu: 'Скиталец Разлома',  nameDe: 'Risswanderer',       texKey: 'rift_crawler',     hp: 400, dmg: 42, exp: 95,  bw: 16, bh: 18, role: 'archer', scale: 0.85 },
+    mage:     { key: 'shadow_mage',       name: 'Shadow Mage',      nameRu: 'Теневой Маг',       nameDe: 'Schattenmagier',     texKey: 'phantom_knight',     hp: 280, dmg: 65, exp: 110, bw: 14, bh: 18, role: 'mage', scale: 0.9 },
+    healer:   { key: 'reality_breaker',   name: 'Reality Breaker',  nameRu: 'Разрушитель Реальности', nameDe: 'Realitätsbrecher', texKey: 'shadow_mimic', hp: 350, dmg: 32, exp: 100, bw: 14, bh: 18, role: 'poison', scale: 0.85, invisible: true }
 };
 
 // Shadow Dimension boss
@@ -279,10 +253,7 @@ export const SHADOW_BOSS_TYPE = {
     key: 'shadow_king', name: 'Shadow King', nameRu: 'Король Теней', nameDe: 'Schattenkönig',
     texKey: 'shadow_king',
     bw: 48, bh: 56,
-    speeds: { Normal: 60, Hard: 68, Expert: 78, Nightmare: 95, Hell: 115, Abyss: 135 },
-    hp:  { Normal: 8000, Hard: 12000, Expert: 20000, Nightmare: 32000, Hell: 56000, Abyss: 96000 },
-    dmg: { Normal: 60,   Hard: 82,   Expert: 125,   Nightmare: 200,  Hell: 330,  Abyss: 530 },
-    exp: { Normal: 2800, Hard: 4200, Expert: 7000,  Nightmare: 11200, Hell: 19600, Abyss: 33600 },
+    speed: 60, hp: 8000, dmg: 60, exp: 2800,
     teleportInterval: 4000, teleportDmgMul: 1.5,
     darkBoltInterval: 3000, darkBoltCount: 5, darkBoltDmgMul: 1.2,
     cloneInterval: 10000, cloneCount: 3,
@@ -299,11 +270,11 @@ export const SHADOW_BOSS_MINION = {
 export const TOWER_CAMP_COUNT = 14;
 export const TOWER_MOBS_PER_CAMP = 3;
 export const TOWER_ENEMY_TYPES = {
-    tank:     { key: 'tower_knight',    name: 'Tower Knight',    nameRu: 'Башенный Рыцарь',    nameDe: 'Turmritter',       texKey: 'tower_knight',    hp: 500, dmg: 25, exp: 130, bw: 22, bh: 28, role: 'tank' },
-    assassin: { key: 'tower_assassin',  name: 'Tower Assassin',  nameRu: 'Башенный Ассассин',  nameDe: 'Turmmeuchler',     texKey: 'tower_assassin',  hp: 280, dmg: 40, exp: 115, bw: 16, bh: 24, role: 'assassin' },
-    archer:   { key: 'tower_archer',    name: 'Tower Archer',    nameRu: 'Башенный Лучник',    nameDe: 'Turmbogenschütze', texKey: 'tower_archer',    hp: 250, dmg: 32, exp: 105, bw: 18, bh: 26, role: 'archer' },
-    mage:     { key: 'tower_mage',      name: 'Tower Mage',      nameRu: 'Башенный Маг',       nameDe: 'Turmmagier',       texKey: 'tower_mage',      hp: 220, dmg: 45, exp: 110, bw: 16, bh: 26, role: 'mage' },
-    healer:   { key: 'tower_healer',    name: 'Tower Healer',    nameRu: 'Башенный Жрец',      nameDe: 'Turmheiler',       texKey: 'tower_healer',    hp: 200, dmg: 18, exp: 100, bw: 16, bh: 26, role: 'healer' }
+    tank:     { key: 'tower_knight',    name: 'Tower Knight',    nameRu: 'Башенный Рыцарь',    nameDe: 'Turmritter',       texKey: 'tower_knight',    hp: 500, dmg: 25, exp: 130, bw: 22, bh: 28, role: 'tank', hasShield: true, scale: 1.3 },
+    assassin: { key: 'tower_assassin',  name: 'Tower Assassin',  nameRu: 'Башенный Ассассин',  nameDe: 'Turmmeuchler',     texKey: 'tower_assassin',  hp: 280, dmg: 40, exp: 115, bw: 16, bh: 24, role: 'assassin', scale: 0.8 },
+    archer:   { key: 'tower_archer',    name: 'Tower Archer',    nameRu: 'Башенный Лучник',    nameDe: 'Turmbogenschütze', texKey: 'tower_archer',    hp: 250, dmg: 32, exp: 105, bw: 18, bh: 26, role: 'archer', scale: 0.9 },
+    mage:     { key: 'tower_mage',      name: 'Tower Mage',      nameRu: 'Башенный Маг',       nameDe: 'Turmmagier',       texKey: 'tower_mage',      hp: 220, dmg: 45, exp: 110, bw: 16, bh: 26, role: 'necro', scale: 0.85 },
+    healer:   { key: 'tower_healer',    name: 'Tower Healer',    nameRu: 'Башенный Жрец',      nameDe: 'Turmheiler',       texKey: 'tower_healer',    hp: 200, dmg: 18, exp: 100, bw: 16, bh: 26, role: 'healer', scale: 0.85 }
 };
 
 // Tower of the Fallen King boss
@@ -311,10 +282,7 @@ export const TOWER_BOSS_TYPE = {
     key: 'fallen_king', name: 'Fallen King', nameRu: 'Павший Король', nameDe: 'Gefallener König',
     texKey: 'fallen_king',
     bw: 48, bh: 56,
-    speeds: { Normal: 55, Hard: 63, Expert: 73, Nightmare: 90, Hell: 110, Abyss: 130 },
-    hp:  { Normal: 10000, Hard: 15000, Expert: 25000, Nightmare: 40000, Hell: 70000, Abyss: 120000 },
-    dmg: { Normal: 65,   Hard: 88,   Expert: 135,   Nightmare: 215,  Hell: 360,  Abyss: 580 },
-    exp: { Normal: 3500, Hard: 5250, Expert: 8750,  Nightmare: 14000, Hell: 24500, Abyss: 42000 },
+    speed: 55, hp: 10000, dmg: 65, exp: 3500,
     shieldInterval: 12000, shieldDuration: 3000,
     bloodlustThreshold: 0.50, bloodlustDmgMul: 1.5,
     berserkThreshold: 0.25, berserkSpeedMul: 1.5, berserkDmgMul: 2.0,
@@ -327,15 +295,19 @@ export const TOWER_BOSS_MINION = {
     bw: 20, bh: 28, hp: 100, dmg: 12, exp: 30
 };
 
+// Prestige-only enemies (appear at Prestige 3+)
+export const PRESTIGE_ENEMIES = {
+    chaos_elemental: { key: 'chaos_elemental', name: 'Chaos Elemental', nameRu: 'Элементаль Хаоса', nameDe: 'Chaos-Elementar', hp: 500, dmg: 45, exp: 150, bw: 20, bh: 24, role: 'mage', prestigeReq: 3 },
+    void_wraith: { key: 'void_wraith', name: 'Void Wraith', nameRu: 'Призрак Пустоты', nameDe: 'Leerengeist', hp: 350, dmg: 55, exp: 130, bw: 14, bh: 16, role: 'assassin', prestigeReq: 3, invisible: true },
+    blood_golem: { key: 'blood_golem', name: 'Blood Golem', nameRu: 'Кровавый Голем', nameDe: 'Blutgolem', hp: 800, dmg: 35, exp: 180, bw: 24, bh: 28, role: 'tank', hasShield: true, prestigeReq: 5 }
+};
+
 // Throne of Eternity boss
 export const THRONE_BOSS_TYPE = {
     key: 'eternity_lord', name: 'Eternity Lord', nameRu: 'Повелитель Вечности', nameDe: 'Herr der Ewigkeit',
     texKey: 'eternity_lord',
     bw: 50, bh: 64,
-    speeds: { Normal: 50, Hard: 58, Expert: 68, Nightmare: 85, Hell: 105, Abyss: 125 },
-    hp:  { Normal: 12000, Hard: 18000, Expert: 30000, Nightmare: 48000, Hell: 84000, Abyss: 144000 },
-    dmg: { Normal: 70,   Hard: 95,   Expert: 145,   Nightmare: 230,  Hell: 385,  Abyss: 620 },
-    exp: { Normal: 5000, Hard: 7500, Expert: 12500, Nightmare: 20000, Hell: 35000, Abyss: 60000 },
+    speed: 50, hp: 12000, dmg: 70, exp: 5000,
     healThreshold: 0.50, healAmount: 0.50,
     auraInterval: 2000, auraRadius: 120, auraDmgMul: 0.6,
     summonPhase2: { tank: 3, mage: 3 },
@@ -369,12 +341,7 @@ export const BESTIARY_LEVELS = [
 ];
 
 export const BESTIARY_DIFF_MULT = {
-    Normal: 1.0,
-    Hard: 1.5,
-    Expert: 2.0,
-    Nightmare: 3.0,
-    Hell: 5.0,
-    Abyss: 8.0
+    Normal: 1.0
 };
 
 export const BESTIARY_ENEMIES = {
@@ -413,6 +380,12 @@ export const BESTIARY_ENEMIES = {
         weaknesses: ['physical'], resistances: ['magic'], abilities: ['Dark magic', 'Curse', 'Soul drain'],
         description: 'Undead spellcasters wreathed in violet flame. They hurl bolts of dark energy and weave curses that weaken the living. Physical attacks are their bane.',
         lore: 'The shamans were once wise elders who delved too deep into forbidden knowledge. Their spirits were consumed, leaving only hollow vessels of dark magic.'
+    },
+    skeleton_shield: {
+        name: 'Skeleton Shield', texKey: 'skeleton_shield', biome: 'mine',
+        weaknesses: ['magic', 'flank'], resistances: ['physical'], abilities: ['Shield block', 'Shield bash', 'Undead resilience'],
+        description: 'An armored skeleton bearing a heavy iron shield. Its frontal defense is nearly impenetrable — strike from the sides or behind.',
+        lore: 'These warriors were the mine\'s last line of defense. They trained to hold the line against any threat. Even in death, they refuse to lower their shields.'
     },
     ancient_treant: {
         name: 'Ancient Treant', texKey: 'treant_boss', biome: 'arena',
@@ -786,6 +759,12 @@ export const SOUL_BOOK_ENTRIES = {
         essence: 'Arcane resonance. Shaman essence amplifies spell power but destabilizes the mind.',
         purification: 'Purifying a shaman soul releases centuries of accumulated knowledge. Overwhelming for the unprepared.',
         lore: 'The shamans sought to understand corruption itself. They succeeded — and became it. Their knowledge remains, buried in their hollow skulls.' },
+    skeleton_shield:  { name: 'Skeleton Shield',  texKey: 'skeleton_shield', biome: 'mine',
+        description: 'A steadfast soul, bound to duty and shield. It guards the living and the dead with equal resolve.',
+        weakness: 'Flanking bypasses the shield. The soul falters when attacked from behind.',
+        essence: 'Guardian energy. Shield souls enhance physical defense and damage absorption.',
+        purification: 'Purifying a shield soul releases the binding oath. The shield crumbles, revealing a faint, fading light.',
+        lore: 'These warriors swore to hold the line. The corruption gave them eternity, but forgot to give them peace.' },
     ancient_treant:    { name: 'Ancient Treant',     texKey: 'treant_boss',    biome: 'arena',
         description: 'A primal soul, ancient beyond measure. It is not evil — it simply IS, like a storm or an earthquake.',
         weakness: 'Fire weakens the vessel but the soul endures. Only time can truly destroy a treant.',

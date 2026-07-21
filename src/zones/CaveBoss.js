@@ -20,10 +20,10 @@ export class CaveBoss extends BaseBossAI {
     spawnCaveBoss() {
         const s = this.scene;
         const bt = CAVE_BOSS_TYPE;
-        const hp = Math.floor(bt.hp[s.difficulty] || bt.hp.Normal);
-        const dmg = Math.floor(bt.dmg[s.difficulty] || bt.dmg.Normal);
-        const exp = Math.floor(bt.exp[s.difficulty] || bt.exp.Normal);
-        const spd = bt.speeds[s.difficulty] || bt.speeds.Normal;
+        const hp = Math.floor(bt.hp);
+        const dmg = Math.floor(bt.dmg);
+        const exp = Math.floor(bt.exp);
+        const spd = bt.speed;
 
         s.caveBoss = s.add.sprite(s.caveOffsetX + CAVE_WIDTH / 2, CAVE_HEIGHT - 150, 'giant_bat_walk').setDepth(5);
         s.physics.add.existing(s.caveBoss, false);

@@ -58,6 +58,41 @@ export class SpellSystem {
         else if (slot === 'divine_blessing') this.effects._castDivineBlessing(spell);
         else if (slot === 'archangel_form') this.effects._castArchangelForm(spell);
         else if (slot === 'purify') this.effects._castPurify(spell);
+
+        this._checkClassSynergy(slot);
+    }
+
+    _checkClassSynergy(slot) {
+        const s = this.scene;
+        if (!s.multiplayer || !s.mpManager) return;
+        const rpm = s.mpManager.remotePlayers;
+        const spell = SPELLS[slot];
+        if (!spell) return;
+
+        const isHeal = slot === 'heal' || slot === 'holy_nova' || slot === 'divine_blessing' || slot === 'healing_potion';
+        const isDamage = slot === 'fireball' || slot === 'acid_flask' || slot === 'soul_strike' || slot === 'smite';
+
+        for (const id in rpm) {
+            const rp = rpm[id];
+            if (!rp || !rp.sprite || !rp.sprite.active) continue;
+            const dist = Phaser.Math.Distance.Between(s.player.x, s.player.y, rp.sprite.x, rp.sprite.y);
+            if (dist > 150) continue;
+
+            if (isHeal) {
+                s.floatingText(rp.sprite.x, rp.sprite.y - 40, 'SYNERGY HEAL!', '#f1c40f');
+                if (s.playerHP < s.playerMaxHP) {
+                    const heal = Math.floor(s.playerMaxHP * 0.15);
+                    s.playerHP = Math.min(s.playerMaxHP, s.playerHP + heal);
+                    s.floatingText(s.player.x, s.player.y - 40, '+' + heal + ' SYNERGY', '#2ecc71');
+                }
+            }
+
+            if (isDamage) {
+                s.floatingText(rp.sprite.x, rp.sprite.y - 40, 'SYNERGY DMG!', '#f1c40f');
+                s._synergyDmgBuff = 0.3;
+                s._synergyDmgTimer = 5000;
+            }
+        }
     }
 
     _updateSpells(delta) {

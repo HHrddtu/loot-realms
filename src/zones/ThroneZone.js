@@ -7,6 +7,7 @@ import {
 import { rollEquip, rollAccountEquip, rollZoneAccountEquip } from '../utils.js';
 import { rollBossCrystals } from '../config/pets.js';
 import { playBossDeath, playLoot, playPortal } from '../sound.js';
+import { LORE } from '../config/lore.js';
 
 import { BaseZone } from '../systems/BaseZone.js';
 import { ThroneBoss } from './ThroneBoss.js';
@@ -69,6 +70,8 @@ export class ThroneZone extends BaseZone {
             s.throneMinions.getChildren().forEach(e => {
                 if (e.hpBg) e.hpBg.destroy();
                 if (e.hpFill) e.hpFill.destroy();
+                if (e.shieldIcon) e.shieldIcon.destroy();
+                if (e.roleIcon) e.roleIcon.destroy();
             });
             s.throneMinions.clear(true, true);
         }
@@ -92,7 +95,7 @@ export class ThroneZone extends BaseZone {
 
     handleSpace() {
         const s = this.scene;
-        if (s.nearbyNpc) {
+        if (s.nearbyNpc && !s.menuOpen) {
             s.npc.interactWithNpc();
             return;
         }
@@ -143,7 +146,10 @@ export class ThroneZone extends BaseZone {
         const s = this.scene;
         if (this.bossDefeated) return;
         this.bossDefeated = true;
+        s.timeSlowUnlocked = true;
+        s.doSave();
         playBossDeath();
+        s.tutorialMgr.showAbilityTutorial('timeSlow');
         const ox = s.throneOffsetX;
 
         if (s.throneBoss) {
@@ -169,7 +175,6 @@ export class ThroneZone extends BaseZone {
         s.time.delayedCall(3000, () => {
             if (s.zone === 'throne') {
                 const lang = localStorage.getItem('game_lang') || 'en';
-                const { LORE } = require('../config/lore.js');
                 const finaleText = lang === 'ru' ? LORE.finale.textRu : lang === 'de' ? LORE.finale.textDe : LORE.finale.text;
                 const cutsceneText = s.add.text(ox + THRONE_WIDTH / 2, 250, finaleText, {
                     fontSize: '16px', fill: '#f1c40f', fontFamily: 'Georgia', fontStyle: 'italic',
@@ -178,6 +183,11 @@ export class ThroneZone extends BaseZone {
                 s.tweens.add({
                     targets: cutsceneText, alpha: 0, duration: 12000,
                     onComplete: () => { if (cutsceneText) cutsceneText.destroy(); }
+                });
+                // Show choice panel after 15 seconds
+                s.time.delayedCall(15000, () => {
+                    if (s.zone !== 'throne') return;
+                    this._showFinaleChoice();
                 });
             }
         });
@@ -269,6 +279,103 @@ export class ThroneZone extends BaseZone {
             s.cameras.main.fadeIn(500, 0, 0, 0);
             s.transitioning = false;
         });
+    }
+
+    _showFinaleChoice() {
+        const s = this.scene;
+        if (s.menuOpen) return;
+        s.menuOpen = true;
+        s.physics.pause();
+
+        const ox = s.throneOffsetX;
+        const cx = ox + THRONE_WIDTH / 2;
+        const lang = localStorage.getItem('game_lang') || 'en';
+        const txts = {
+            journeyComplete: { en: 'YOUR JOURNEY IS COMPLETE', ru: 'ТВОЁ ПУТЕШЕСТВИЕ ЗАВЕРШЕНО', de: 'DEINE REISE IST ABGESCHLOSSEN' },
+            prestige: { en: '[P] PRESTIGE — New Game+', ru: '[P] PRESTIGE — Новая Игра+', de: '[P] PRESTIGE — Neues Spiel+' },
+            continue: { en: '[C] CONTINUE — Explore the world', ru: '[C] ПРОДОЛЖИТЬ — Исследовать мир', de: '[C] WEITER — Die Welt erkunden' },
+            menu: { en: '[M] MENU — Return to main menu', ru: '[M] МЕНЮ — Вернуться в главное меню', de: '[M] MENÜ — Zurück zum Hauptmenü' },
+            hint: { en: 'Press P / C / M', ru: 'Нажми P / C / M', de: 'Drücke P / C / M' },
+            prestigeUnlocked: { en: 'PRESTIGE UNLOCKED! Press P in Village', ru: 'PRESTIGE РАЗБЛОКИРОВАН! Нажми P в деревне', de: 'PRESTIGE FREIGESCHALTET! Drücke P im Dorf' },
+            worldIsYours: { en: 'The world is yours. Press P in Village for Prestige.', ru: 'Мир твой. Нажми P в деревне для Prestige.', de: 'Die Welt gehört dir. Drücke P im Dorf für Prestige.' }
+        };
+        const ts = (key) => txts[key]?.[lang] || txts[key]?.en || '';
+
+        const panel = s.add.rectangle(cx, 350, 400, 200, 0x000000, 0.85)
+            .setDepth(100).setScrollFactor(0);
+        const border = s.add.rectangle(cx, 350, 402, 202)
+            .setDepth(99).setStrokeStyle(2, 0xf1c40f).setScrollFactor(0).setFillStyle();
+
+        const title = s.add.text(cx, 280, ts('journeyComplete'), {
+            fontSize: '18px', fill: '#f1c40f', fontFamily: 'Georgia', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 3
+        }).setOrigin(0.5).setDepth(101).setScrollFactor(0);
+
+        const btnBase = {
+            fontSize: '14px', fill: '#ccc', fontFamily: 'Arial',
+            padding: { x: 16, y: 10 }, backgroundColor: '#2a2a2a'
+        };
+
+        const prestigeBtn = s.add.text(cx, 330, ts('prestige'), btnBase)
+            .setOrigin(0.5).setDepth(101).setInteractive({ useHandCursor: true }).setScrollFactor(0);
+        const continueBtn = s.add.text(cx, 370, ts('continue'), btnBase)
+            .setOrigin(0.5).setDepth(101).setInteractive({ useHandCursor: true }).setScrollFactor(0);
+        const menuBtn = s.add.text(cx, 410, ts('menu'), btnBase)
+            .setOrigin(0.5).setDepth(101).setInteractive({ useHandCursor: true }).setScrollFactor(0);
+        const hint = s.add.text(cx, 440, ts('hint'), {
+            fontSize: '11px', fill: '#666', fontFamily: 'Arial'
+        }).setOrigin(0.5).setDepth(101).setScrollFactor(0);
+
+        const cleanup = () => {
+            s.input.keyboard.off('keydown', onChoiceKey);
+            [panel, border, title, prestigeBtn, continueBtn, menuBtn, hint]
+                .forEach(el => { if (el && el.destroy) el.destroy(); });
+            s.menuOpen = false;
+            s.physics.resume();
+        };
+
+        prestigeBtn.on('pointerover', () => prestigeBtn.setStyle({ fill: '#ffd700' }));
+        prestigeBtn.on('pointerout', () => prestigeBtn.setStyle({ fill: '#ccc' }));
+        prestigeBtn.on('pointerdown', () => {
+            cleanup();
+            s.floatingText(s.player.x, s.player.y - 60, ts('prestigeUnlocked'), '#ffd700');
+        });
+
+        continueBtn.on('pointerover', () => continueBtn.setStyle({ fill: '#3498db' }));
+        continueBtn.on('pointerout', () => continueBtn.setStyle({ fill: '#ccc' }));
+        continueBtn.on('pointerdown', () => {
+            cleanup();
+            s.floatingText(s.player.x, s.player.y - 60, ts('worldIsYours'), '#3498db');
+        });
+
+        menuBtn.on('pointerover', () => menuBtn.setStyle({ fill: '#e74c3c' }));
+        menuBtn.on('pointerout', () => menuBtn.setStyle({ fill: '#ccc' }));
+        menuBtn.on('pointerdown', () => {
+            cleanup();
+            s.cameras.main.fadeOut(800, 0, 0, 0);
+            s.time.delayedCall(800, () => {
+                s._cleanupMultiplayer();
+                s.scene.start('Menu');
+            });
+        });
+
+        function onChoiceKey(event) {
+            if (s.zone !== 'throne') {
+                s.input.keyboard.off('keydown', onChoiceKey);
+                return;
+            }
+            if (event.key === 'p' || event.key === 'P') {
+                s.input.keyboard.off('keydown', onChoiceKey);
+                prestigeBtn.emit('pointerdown');
+            } else if (event.key === 'c' || event.key === 'C') {
+                s.input.keyboard.off('keydown', onChoiceKey);
+                continueBtn.emit('pointerdown');
+            } else if (event.key === 'm' || event.key === 'M') {
+                s.input.keyboard.off('keydown', onChoiceKey);
+                menuBtn.emit('pointerdown');
+            }
+        }
+        s.input.keyboard.on('keydown', onChoiceKey);
     }
 
     checkReturnPortal() {
