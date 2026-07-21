@@ -41,6 +41,8 @@
 | 2026-07-21 | convention | [Buff/Modifier lifecycle](convention-buff-lifecycle.md) | SET → CONSUME: любой бафф должен читаться в формуле, иначе косметика |
 | 2026-07-21 | convention | [Структура файлов зоны](convention-zone-file-structure.md) | Zone + Spawner + Boss + (Projectiles), наследование BaseZone |
 | 2026-07-21 | convention | [Config-driven design](convention-config-driven.md) | Все параметры в src/config/*.js, без магических чисел в коде |
+| 2026-07-21 | log | [Session Log](SESSION_LOG.md) | Журнал сессий — хронология разработки из git history |
+| ~2026-07-19 | failed | [Zoom/Fullscreen эксперимент](FAILED_EXPERIMENTS.md) | Увеличение зон ×1.5 + camera zoom — откат из-за абсолютных NPC-координат |
 
 ---
 
@@ -53,6 +55,9 @@
 | `convention` | Паттерн кода, правило именования | `_templates/convention-template.md` |
 | `gotcha` | Ловушка API, тонкость окружения | `_templates/gotcha-template.md` |
 | `bug` | Найденный и исправленный баг | `_templates/bug-template.md` |
+| `review` | Ревью кода/геймдизайна | — |
+| `failed` | Неудачный эксперимент (откат) | — |
+| `log` | Журнал сессий | — |
 
 ## Категории ресурсов
 
