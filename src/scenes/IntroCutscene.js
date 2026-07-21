@@ -31,7 +31,7 @@ export default class IntroCutscene extends Phaser.Scene {
         });
 
         this.time.delayedCall(400, () => {
-            this._runBeat(1);
+            this._runBeat(0);
         });
     }
 
@@ -42,6 +42,7 @@ export default class IntroCutscene extends Phaser.Scene {
         this.cameras.main.setScroll(0, 0);
 
         switch (index) {
+            case 0: this._beat0_prologue(); break;
             case 1: this._beat1_tavern(); break;
             case 2: this._beat2_jump(); break;
             case 3: this._beat3_village(); break;
@@ -49,7 +50,7 @@ export default class IntroCutscene extends Phaser.Scene {
             case 5: this._beat5_toGame(); break;
         }
 
-        if (index !== 2) {
+        if (index !== 0 && index !== 2) {
             this.cameras.main.fadeIn(CUTSCENE.fadeIn, 0, 0, 0);
         }
     }
@@ -114,6 +115,19 @@ export default class IntroCutscene extends Phaser.Scene {
         this.beatGroup.push(bg);
         const ground = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT * 0.8, GAME_WIDTH, GAME_HEIGHT * 0.25, Phaser.Display.Color.ValueToColor(color).darken(15).color).setDepth(1);
         this.beatGroup.push(ground);
+    }
+
+    // ===== BEAT 0: Prologue — "Long ago..." =====
+    _beat0_prologue() {
+        this._setBg(CUTSCENE.beat0.bg);
+
+        this._showText(t('cutscene.prologue'), {
+            color: '#888',
+            y: GAME_HEIGHT / 2,
+            duration: CUTSCENE.beat0.duration - 1200
+        });
+
+        this._delayThen(1, CUTSCENE.beat0.duration);
     }
 
     // ===== BEAT 1: Tavern — hero drinking =====

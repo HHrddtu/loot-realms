@@ -66,20 +66,6 @@ export const NPC_DB = {
         hideName: true,
         condition: 'isThriving'
     },
-    village_merchant: {
-        name: 'Merchant',
-        nameRu: 'Торговец',
-        nameDe: 'Händler',
-        texKey: 'npc_elder',
-        biome: 'village',
-        x: 450, y: 750,
-        greeting: 'Welcome to my shop! I have wares from all lands.',
-        greetingRu: 'Добро пожаловать в мой магазин! У меня товары со всех земель.',
-        greetingDe: 'Willkommen in meinem Laden! Ich habe Waren aus allen Landen.',
-        quests: [],
-        hideName: true,
-        condition: 'isRestored'
-    },
     village_child2: {
         name: 'Village Child',
         nameRu: 'Деревенский Ребёнок',

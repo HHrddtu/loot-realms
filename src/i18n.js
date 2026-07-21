@@ -301,6 +301,7 @@ const LOCALES = {
         // === CUTSCENE ===
         'cutscene.father': 'Portal... the last one we have. Run, child.\nGrow strong — and come back for us.',
         'cutscene.elder': 'Don\'t leave us! Please...\ncome back and save us!',
+        'cutscene.prologue': 'Long ago, a hero saved the village...\nBut beneath the foundation, darkness grew.\nNow it awakens.',
 
         // === KEYBINDS ===
         'keybind.title': 'CONTROLS',
@@ -587,6 +588,7 @@ const LOCALES = {
         // === CUTSCENE ===
         'cutscene.father': 'Портал... последний, что у нас есть. Беги, дитя.\nСтань сильнее — и вернись за нами.',
         'cutscene.elder': 'Не оставляй нас! Пожалуйста...\nвернись и спаси нас!',
+        'cutscene.prologue': 'Давным-давно герой спас деревню...\nНо под фундаментом росла тьма.\nТеперь она пробуждается.',
 
         // === KEYBINDS ===
         'keybind.title': 'УПРАВЛЕНИЕ',
@@ -873,6 +875,7 @@ const LOCALES = {
         // === CUTSCENE ===
         'cutscene.father': 'Das letzte Portal, das wir haben. Lauf, Kind.\nWerde stark — und komm für uns zurück.',
         'cutscene.elder': 'Verlass uns nicht! Bitte...\nkomm zurück und rette uns!',
+        'cutscene.prologue': 'Vor langer Zeit rettete ein Held das Dorf...\nDoch unter dem Fundament wuchs die Dunkelheit.\nJetzt erwacht sie.',
 
         // === KEYBINDS ===
         'keybind.title': 'STEUERUNG',

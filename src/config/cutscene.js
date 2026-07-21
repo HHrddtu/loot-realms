@@ -1,4 +1,5 @@
 export const CUTSCENE = {
+    beat0: { duration: 4000, bg: 0x000000 },
     beat1: { duration: 3000, bg: 0x1a0800 },
     beat2: { duration: 2500, bg: 0x2a0800 },
     beat3: { duration: 3500, bg: 0x0a0000 },
