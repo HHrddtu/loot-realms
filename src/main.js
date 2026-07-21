@@ -25,6 +25,7 @@ const LAZY_SCENES = [
     { key: 'Lobby', path: () => import('./scenes/LobbyScene.js') },
     { key: 'ClassSelect', path: () => import('./scenes/ClassSelectScene.js') },
     { key: 'Intro', path: () => import('./scenes/IntroScene.js') },
+    { key: 'IntroCutscene', path: () => import('./scenes/IntroCutscene.js') },
     { key: 'Map', path: () => import('./scenes/MapScene.js') },
     { key: 'Game', path: () => import('./scenes/GameScene.js') },
     { key: 'TalentTree', path: () => import('./scenes/TalentScene.js') },

@@ -219,6 +219,17 @@ export function drawEffectTextures(mk) {
         c.fillRect(2, 0, 398, 300);
     });
 
+    // Portal glow (used by intro cutscene and zone portals)
+    mk('portal_glow', 80, 80, (c) => {
+        const g = c.createRadialGradient(40, 40, 0, 40, 40, 40);
+        g.addColorStop(0, 'rgba(255,255,255,0.2)');
+        g.addColorStop(0.2, 'rgba(255,200,100,0.12)');
+        g.addColorStop(0.5, 'rgba(150,80,255,0.06)');
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+        c.fillStyle = g;
+        c.fillRect(0, 0, 80, 80);
+    });
+
     // Portal trap — swirling void gateway (64x64)
     mk('portal_trap', 64, 64, (c) => {
         c.imageSmoothingEnabled = false;

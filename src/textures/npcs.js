@@ -1821,4 +1821,45 @@ export function drawNpcTextures(mk) {
         c.fillRect(6, 44, 6, 4);
         c.fillRect(20, 44, 6, 4);
     });
+
+    // Elder Father — отец старца, более старая/тёмная версия npc_elder
+    mk('npc_elder_father', 32, 48, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#d4b896';
+        c.fillRect(10, 2, 12, 10);
+        c.fillRect(8, 4, 16, 8);
+        c.fillStyle = '#2c3e50';
+        c.fillRect(12, 6, 2, 2);
+        c.fillRect(18, 6, 2, 2);
+        c.fillStyle = '#7f8c8d';
+        c.fillRect(10, 4, 12, 1);
+        c.fillStyle = '#ecf0f1';
+        c.fillRect(12, 10, 8, 3);
+        c.fillRect(11, 12, 10, 2);
+        c.fillRect(12, 14, 8, 2);
+        c.fillStyle = '#34495e';
+        c.fillRect(6, 14, 20, 18);
+        c.fillRect(4, 20, 24, 10);
+        c.fillStyle = '#2c3e50';
+        c.fillRect(8, 16, 16, 14);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(6, 14, 20, 2);
+        c.fillRect(6, 28, 20, 1);
+        c.fillStyle = '#f5cba7';
+        c.fillRect(2, 16, 4, 8);
+        c.fillRect(26, 16, 4, 8);
+        c.fillStyle = '#8b4513';
+        c.fillRect(0, 8, 2, 34);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(0, 6, 2, 3);
+        c.fillRect(0, 4, 1, 3);
+        c.fillStyle = '#d4ac0d';
+        c.fillRect(0, 2, 2, 3);
+        c.fillStyle = '#4a2d10';
+        c.fillRect(10, 32, 5, 12);
+        c.fillRect(17, 32, 5, 12);
+        c.fillStyle = '#3e2723';
+        c.fillRect(9, 42, 6, 4);
+        c.fillRect(17, 42, 6, 4);
+    });
 }

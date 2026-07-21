@@ -298,6 +298,10 @@ const LOCALES = {
         'zone.mine': 'Mine',
         'zone.arena': 'Arena',
 
+        // === CUTSCENE ===
+        'cutscene.father': 'Portal... the last one we have. Run, child.\nGrow strong — and come back for us.',
+        'cutscene.elder': 'Don\'t leave us! Please...\ncome back and save us!',
+
         // === KEYBINDS ===
         'keybind.title': 'CONTROLS',
         'keybind.hint': 'Click a key to rebind. ESC to cancel.',
@@ -580,6 +584,10 @@ const LOCALES = {
         'zone.mine': 'Шахта',
         'zone.arena': 'Арена',
 
+        // === CUTSCENE ===
+        'cutscene.father': 'Портал... последний, что у нас есть. Беги, дитя.\nСтань сильнее — и вернись за нами.',
+        'cutscene.elder': 'Не оставляй нас! Пожалуйста...\nвернись и спаси нас!',
+
         // === KEYBINDS ===
         'keybind.title': 'УПРАВЛЕНИЕ',
         'keybind.hint': 'Нажмите на клавишу для переназначения. ESC для отмены.',
@@ -861,6 +869,10 @@ const LOCALES = {
         'zone.forest': 'Wald',
         'zone.mine': 'Mine',
         'zone.arena': 'Arena',
+
+        // === CUTSCENE ===
+        'cutscene.father': 'Das letzte Portal, das wir haben. Lauf, Kind.\nWerde stark — und komm für uns zurück.',
+        'cutscene.elder': 'Verlass uns nicht! Bitte...\nkomm zurück und rette uns!',
 
         // === KEYBINDS ===
         'keybind.title': 'STEUERUNG',

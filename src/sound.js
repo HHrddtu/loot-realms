@@ -55,6 +55,87 @@ function noise(dur, vol) {
     s.start(c.currentTime);
 }
 
+export function playScream() {
+    if (muted) return;
+    const c = getCtx();
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(600, c.currentTime);
+    o.frequency.exponentialRampToValueAtTime(1200, c.currentTime + 0.15);
+    o.frequency.exponentialRampToValueAtTime(400, c.currentTime + 0.5);
+    o.frequency.exponentialRampToValueAtTime(800, c.currentTime + 0.8);
+    g.gain.setValueAtTime(0.07, c.currentTime);
+    g.gain.linearRampToValueAtTime(0.04, c.currentTime + 0.3);
+    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.9);
+    o.connect(g); g.connect(c.destination);
+    o.start(c.currentTime); o.stop(c.currentTime + 0.9);
+    const o2 = c.createOscillator();
+    const g2 = c.createGain();
+    o2.type = 'square';
+    o2.frequency.setValueAtTime(400, c.currentTime);
+    o2.frequency.exponentialRampToValueAtTime(300, c.currentTime + 0.4);
+    g2.gain.setValueAtTime(0.03, c.currentTime);
+    g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.4);
+    o2.connect(g2); g2.connect(c.destination);
+    o2.start(c.currentTime); o2.stop(c.currentTime + 0.4);
+    noise(0.3, 0.04);
+}
+
+export function playFireCrackle() {
+    if (muted) return;
+    for (let i = 0; i < 6; i++) {
+        const delay = i * 300 + Math.random() * 150;
+        setTimeout(() => {
+            noise(0.15 + Math.random() * 0.2, 0.03 + Math.random() * 0.04);
+            const o = getCtx().createOscillator();
+            const g = getCtx().createGain();
+            o.type = 'sine';
+            o.frequency.value = 100 + Math.random() * 200;
+            g.gain.setValueAtTime(0.02, getCtx().currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, getCtx().currentTime + 0.15);
+            o.connect(g); g.connect(getCtx().destination);
+            o.start(getCtx().currentTime); o.stop(getCtx().currentTime + 0.15);
+        }, delay);
+    }
+    const o = getCtx().createOscillator();
+    const g = getCtx().createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(80, getCtx().currentTime);
+    o.frequency.linearRampToValueAtTime(60, getCtx().currentTime + 3);
+    g.gain.setValueAtTime(0.04, getCtx().currentTime);
+    g.gain.linearRampToValueAtTime(0.02, getCtx().currentTime + 2);
+    g.gain.exponentialRampToValueAtTime(0.001, getCtx().currentTime + 3.5);
+    o.connect(g); g.connect(getCtx().destination);
+    o.start(getCtx().currentTime); o.stop(getCtx().currentTime + 3.5);
+}
+
+export function playMeteorImpact() {
+    if (muted) return;
+    const c = getCtx();
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(200, c.currentTime);
+    o.frequency.exponentialRampToValueAtTime(30, c.currentTime + 0.8);
+    g.gain.setValueAtTime(0.12, c.currentTime);
+    g.gain.linearRampToValueAtTime(0.06, c.currentTime + 0.2);
+    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 1.0);
+    o.connect(g); g.connect(c.destination);
+    o.start(c.currentTime); o.stop(c.currentTime + 1.0);
+    const o2 = c.createOscillator();
+    const g2 = c.createGain();
+    o2.type = 'sawtooth';
+    o2.frequency.setValueAtTime(120, c.currentTime);
+    o2.frequency.exponentialRampToValueAtTime(20, c.currentTime + 0.6);
+    g2.gain.setValueAtTime(0.06, c.currentTime);
+    g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.7);
+    o2.connect(g2); g2.connect(c.destination);
+    o2.start(c.currentTime); o2.stop(c.currentTime + 0.7);
+    noise(0.5, 0.08);
+    noise(0.25, 0.04);
+}
+
 export function playAttack() {}
 
 export function playHit() {
