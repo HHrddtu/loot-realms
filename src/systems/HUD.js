@@ -153,11 +153,13 @@ export class HUD {
             { icon: 'nav_hammer', label: 'C', cb: () => this.ui._openCrafting() },
             { icon: 'nav_star', label: 'T', cb: () => this.ui._openTalentTree() },
             { icon: 'nav_paw', label: 'P', cb: () => this.ui._openPets() },
-            { icon: 'nav_sound', label: 'M', cb: () => this._toggleMute() },
+            { icon: 'nav_map', label: 'M', hidden: true, cb: () => this.scene._openMap() },
+            { icon: 'nav_sound', label: 'S', cb: () => this._toggleMute() },
         ];
-        const bg = s(this.scene.add.rectangle(startX + 10, startY + (navItems.length * gap) / 2 - gap / 2 + 4, 24, navItems.length * gap + 4, 0x0a0a1a, 0.75).setStrokeStyle(1, 0x333333));
+        const visibleItems = navItems.filter(item => !item.hidden || this.scene.mapUnlocked);
+        const bg = s(this.scene.add.rectangle(startX + 10, startY + (visibleItems.length * gap) / 2 - gap / 2 + 4, 24, visibleItems.length * gap + 4, 0x0a0a1a, 0.75).setStrokeStyle(1, 0x333333));
         navBtns.push(bg);
-        navItems.forEach((item, i) => {
+        visibleItems.forEach((item, i) => {
             const y = startY + i * gap;
             const btnBg = s(this.scene.add.rectangle(startX + 10, y, 20, 20, 0x1a1a2e).setStrokeStyle(1, 0x444444));
             const icon = s(this.scene.add.sprite(startX + 10, y, item.icon).setScale(1));

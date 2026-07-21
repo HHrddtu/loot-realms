@@ -174,7 +174,7 @@ export default class MapScene extends Phaser.Scene {
         const btn = this.add.text(GAME_WIDTH - 40, 20, 'X', {
             fontSize: '20px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        btn.on('pointerdown', () => this.scene.stop());
+        btn.on('pointerdown', () => { const g = this.scene.get('Game'); if (g) { g.menuOpen = false; g.physics.resume(); } this.scene.stop(); });
         btn.on('pointerover', () => btn.setColor('#fff'));
         btn.on('pointerout', () => btn.setColor('#e74c3c'));
         this.elements.push(btn);

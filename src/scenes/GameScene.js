@@ -603,6 +603,7 @@ export default class GameScene extends Phaser.Scene {
     toggleInventory() { if (this.ui) this.ui.toggleInventory(); }
     openInventory() { if (this.ui) this.ui.openInventory(); }
     closeInventory() { if (this.ui) this.ui.closeInventory(); }
+    _openMap() { if (!this.menuOpen && !this.transitioning) { this.scene.launch('Map'); this.menuOpen = true; this.physics.pause(); } }
     togglePause() { if (this.ui) this.ui.togglePause(); }
     openPause() { if (this.ui) this.ui.openPause(); }
     closePause() { if (this.ui) this.ui.closePause(); }
