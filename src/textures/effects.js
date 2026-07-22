@@ -1330,66 +1330,76 @@ export function drawEffectTextures(mk) {
         c.stroke();
     });
 
-    // === OBSTACLES ===
-    mk('obstacle_rock', 32, 32, (c) => {
-        c.fillStyle = '#5a5a5a';
-        c.fillRect(4, 6, 24, 22);
-        c.fillRect(6, 4, 20, 24);
-        c.fillRect(8, 2, 16, 26);
+    // === OBSTACLES (48×48 base, zone-themed) ===
+    mk('obstacle_rock', 48, 48, (c) => {
         c.fillStyle = '#6a6a6a';
-        c.fillRect(8, 4, 16, 22);
-        c.fillStyle = '#4a4a4a';
-        c.fillRect(6, 22, 20, 4);
-        c.fillRect(4, 24, 24, 4);
+        c.fillRect(6, 8, 36, 32);
+        c.fillRect(10, 4, 28, 36);
+        c.fillStyle = '#5a5a5a';
+        c.fillRect(4, 10, 40, 30);
+        c.fillRect(8, 6, 32, 34);
         c.fillStyle = '#7a7a7a';
-        c.fillRect(12, 8, 4, 6);
-        c.fillRect(18, 12, 4, 4);
+        c.fillRect(12, 10, 8, 8);
+        c.fillRect(28, 16, 8, 6);
+        c.fillStyle = '#4a4a4a';
+        c.fillRect(6, 36, 36, 8);
+        c.fillRect(4, 40, 40, 6);
     });
-    mk('obstacle_ruins', 48, 32, (c) => {
+    mk('obstacle_ruins', 64, 48, (c) => {
         c.fillStyle = '#4a4a52';
-        c.fillRect(4, 0, 12, 28);
-        c.fillRect(32, 0, 12, 28);
-        c.fillRect(16, 2, 16, 24);
+        c.fillRect(6, 0, 16, 40);
+        c.fillRect(42, 0, 16, 40);
+        c.fillRect(22, 4, 20, 32);
         c.fillStyle = '#5a5a62';
-        c.fillRect(6, 2, 8, 24);
-        c.fillRect(34, 2, 8, 24);
+        c.fillRect(8, 2, 12, 36);
+        c.fillRect(44, 2, 12, 36);
         c.fillStyle = '#3a3a42';
-        c.fillRect(14, 24, 20, 6);
+        c.fillRect(18, 34, 28, 10);
+        c.fillStyle = '#6a6a72';
+        c.fillRect(14, 8, 4, 4);
+        c.fillRect(46, 12, 4, 4);
     });
-    mk('obstacle_bush', 24, 24, (c) => {
+    mk('obstacle_bush', 32, 32, (c) => {
         c.fillStyle = '#2a5a1a';
-        c.fillRect(6, 8, 12, 12);
-        c.fillRect(4, 10, 16, 10);
+        c.fillRect(8, 10, 16, 16);
+        c.fillRect(6, 12, 20, 14);
         c.fillStyle = '#1e6b31';
-        c.fillRect(8, 6, 8, 14);
-        c.fillRect(6, 8, 12, 10);
+        c.fillRect(10, 8, 12, 18);
+        c.fillRect(8, 10, 16, 14);
         c.fillStyle = '#27ae60';
-        c.fillRect(10, 8, 4, 4);
-        c.fillRect(8, 12, 4, 4);
-        c.fillRect(14, 10, 4, 4);
+        c.fillRect(12, 10, 8, 6);
+        c.fillRect(10, 16, 6, 6);
+        c.fillRect(18, 14, 6, 4);
+        c.fillStyle = '#2ecc71';
+        c.fillRect(12, 8, 4, 4);
+        c.fillRect(18, 10, 4, 4);
     });
-    mk('obstacle_fence', 64, 16, (c) => {
+    mk('obstacle_fence', 80, 24, (c) => {
         c.fillStyle = '#6d4c2a';
-        c.fillRect(2, 2, 60, 12);
+        c.fillRect(2, 4, 76, 18);
         c.fillStyle = '#8b4513';
-        c.fillRect(4, 4, 56, 8);
+        c.fillRect(4, 6, 72, 14);
         c.fillStyle = '#5a3d1a';
-        c.fillRect(6, 2, 4, 12);
-        c.fillRect(54, 2, 4, 12);
-        c.fillRect(16, 2, 4, 12);
-        c.fillRect(28, 2, 4, 12);
-        c.fillRect(40, 2, 4, 12);
+        c.fillRect(8, 4, 6, 18);
+        c.fillRect(22, 4, 6, 18);
+        c.fillRect(36, 4, 6, 18);
+        c.fillRect(50, 4, 6, 18);
+        c.fillRect(64, 4, 6, 18);
+        c.fillStyle = '#a0522d';
+        c.fillRect(2, 4, 76, 3);
     });
-    mk('obstacle_spike', 16, 16, (c) => {
+    mk('obstacle_spike', 24, 24, (c) => {
         c.fillStyle = '#cc2222';
         c.beginPath();
-        c.moveTo(8, 0); c.lineTo(14, 14); c.lineTo(2, 14); c.closePath();
+        c.moveTo(12, 0); c.lineTo(22, 22); c.lineTo(2, 22); c.closePath();
         c.fill();
         c.fillStyle = '#ff4444';
         c.beginPath();
-        c.moveTo(8, 2); c.lineTo(12, 12); c.lineTo(4, 12); c.closePath();
+        c.moveTo(12, 4); c.lineTo(18, 18); c.lineTo(6, 18); c.closePath();
         c.fill();
         c.fillStyle = '#880000';
-        c.fillRect(6, 14, 4, 2);
+        c.fillRect(8, 22, 8, 2);
+        c.fillStyle = '#ff6666';
+        c.fillRect(11, 6, 2, 4);
     });
 }
