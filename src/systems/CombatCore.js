@@ -202,19 +202,34 @@ export class CombatCore {
     }
 
     _attackThrust(ax, ay, range, dmg, color, cls) {
-        this._showSlash(ax, ay, color);
-        this._hitAt(ax, ay, 20, dmg, cls);
+        const s = this.scene;
+        const proj = s.add.sprite(s.player.x, s.player.y, 'attack_arrow').setDepth(15).setTint(color || 0xe74c3c);
+        const angle = s.facing === 'left' ? 180 : s.facing === 'up' ? -90 : s.facing === 'down' ? 90 : 0;
+        proj.setAngle(angle);
+        const speed = 500;
+        s.tweens.add({
+            targets: proj, x: ax, y: ay, alpha: 0, duration: range / speed * 1000,
+            onComplete: () => proj.destroy()
+        });
+        this._hitAt(ax, ay, 18, dmg, cls);
+        s.player.setTint(color || 0xe74c3c);
+        s.time.delayedCall(80, () => { if (s.player.active) s.player.clearTint(); });
     }
 
     _attackCleave(ax, ay, range, dmg, color, cls) {
         const s = this.scene;
-        this._showSlash(ax, ay, color);
+        for (let i = -1; i <= 1; i++) {
+            const sl = s.add.sprite(ax + i * 8, ay + i * 4, 'slash').setAlpha(0.8).setTint(color || 0xaaddff);
+            s.tweens.add({ targets: sl, alpha: 0, scaleX: 1.6, scaleY: 1.6, duration: 200, delay: Math.abs(i) * 30, onComplete: () => sl.destroy() });
+        }
         const enemies = [];
         this._collectInRange(s.enemies, ax, ay, range, (e) => {
             if (this._inArc(s.player, e, 120)) enemies.push(e);
         });
         enemies.forEach(e => this.hitEnemy(e, dmg, {}));
         if (cls && cls.key === 'alchemist') enemies.forEach(e => this._applyArmorShred(e));
+        s.player.setTint(color || 0xaaddff);
+        s.time.delayedCall(120, () => { if (s.player.active) s.player.clearTint(); });
     }
 
     _attackBurst(ax, ay, dmg, cls) {
@@ -239,19 +254,26 @@ export class CombatCore {
     }
 
     _attackBash(ax, ay, dmg, color, cls) {
-        this._showSlash(ax, ay, color);
+        const s = this.scene;
+        const bash = s.add.sprite(ax, ay, 'attack_bash').setAlpha(0.9).setTint(color || 0x3498db);
+        s.tweens.add({ targets: bash, alpha: 0, scaleX: 1.5, scaleY: 1.5, duration: 250, onComplete: () => bash.destroy() });
         this._hitAt(ax, ay, 35, dmg, cls);
-        this.scene.cameras.main.shake(80, 0.005);
+        s.cameras.main.shake(120, 0.008);
+        s.player.setTint(color || 0x3498db);
+        s.time.delayedCall(150, () => { if (s.player.active) s.player.clearTint(); });
     }
 
     _attackSpin(ax, ay, dmg, color, cls) {
         const s = this.scene;
-        const slash = s.add.sprite(ax, ay, 'slash').setAlpha(0.8);
-        if (color && color !== 0xaaddff) slash.setTint(color);
-        s.tweens.add({ targets: slash, alpha: 0, scaleX: 2, scaleY: 2, angle: 360, duration: 300 });
+        for (let i = 0; i < 4; i++) {
+            const sl = s.add.sprite(ax, ay, 'slash').setAlpha(0.6).setTint(color || 0xaaddff);
+            sl.setAngle(i * 90);
+            s.tweens.add({ targets: sl, alpha: 0, scaleX: 1.8, scaleY: 1.8, duration: 350, delay: i * 60, onComplete: () => sl.destroy() });
+        }
         this._hitAllAround(s.player.x, s.player.y, 55, dmg, cls);
+        s.cameras.main.shake(80, 0.005);
         s.player.setTint(color || 0xaaddff);
-        s.time.delayedCall(150, () => { if (s.player.active) s.player.clearTint(); });
+        s.time.delayedCall(200, () => { if (s.player.active) s.player.clearTint(); });
     }
 
     _showSlash(ax, ay, color) {
