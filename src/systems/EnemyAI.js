@@ -6,6 +6,11 @@ export class EnemyAI {
     static CHASE_RANGE = 200;
     static WANDER_TICK = 60;
 
+    static _detectRange(scene) {
+        const noise = scene._materialSensors?.moveNoise || 0;
+        return this.CHASE_RANGE * (1 + noise);
+    }
+
     static updateWanderChase(e, player, scene) {
         if (!e.active || !e.stats) return;
         this._updateHpBar(e);
@@ -43,7 +48,7 @@ export class EnemyAI {
     }
 
     static _defaultBehavior(e, player, dist, scene) {
-        if (dist < this.CHASE_RANGE) {
+        if (dist < this._detectRange(scene)) {
             this._chase(e, player, dist);
         } else {
             this._wander(e);

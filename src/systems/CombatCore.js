@@ -129,6 +129,14 @@ export class CombatCore {
         s.time.delayedCall(pos.cooldown, () => { s.attackCooldown = false; });
     }
 
+    _getAttackType() {
+        const s = this.scene;
+        const weapon = s.equipment?.weapon;
+        if (weapon?.attackType) return weapon.attackType;
+        const cls = s.classData || getClassData(s.classKey);
+        return cls.defaultAttack || 'thrust';
+    }
+
     _playAttackVisuals() {
         const s = this.scene;
         if (s.attackCooldown || s.menuOpen || s.transitioning) return null;
@@ -143,16 +151,24 @@ export class CombatCore {
         });
         const dmgMult = cls.meleeDmgMult || 1.0;
         const attackDamage = Math.floor(s.playerDamage * dmgMult);
-        const range = cls.meleeRange || 55;
+        const weapon = s.equipment?.weapon;
+        const atkType = this._getAttackType();
+        const range = weapon?.attackRange || cls.meleeRange || 55;
+        const color = weapon?.color || cls.meleeColor || 0xaaddff;
+        const cooldown = cls.meleeCooldown || 280;
         let ax = s.player.x, ay = s.player.y;
         if (s.facing === 'right') ax += range; else if (s.facing === 'left') ax -= range;
         else if (s.facing === 'up') ay -= range; else if (s.facing === 'down') ay += range;
-        if (cls.meleeRanged) {
-            this._rangedAttack(cls, attackDamage);
-        } else {
-            this._showSlash(ax, ay, cls.meleeColor || 0xaaddff);
+        switch (atkType) {
+            case 'thrust': this._attackThrust(ax, ay, range, attackDamage, color, cls); break;
+            case 'cleave': this._attackCleave(ax, ay, range, attackDamage, color, cls); break;
+            case 'shot': this._rangedAttack(cls, attackDamage); break;
+            case 'burst': this._attackBurst(ax, ay, attackDamage, cls); break;
+            case 'bash': this._attackBash(ax, ay, attackDamage, color, cls); break;
+            case 'spin': this._attackSpin(ax, ay, attackDamage, color, cls); break;
+            default: this._attackThrust(ax, ay, range, attackDamage, color, cls); break;
         }
-        return { ax, ay, attackDamage, cls, cooldown: cls.meleeCooldown || 280 };
+        return { ax, ay, attackDamage, cls, cooldown };
     }
 
     applyAttackAt(ax, ay, attackDamage, cls, opts = {}) {
@@ -185,6 +201,59 @@ export class CombatCore {
         s.tweens.add({ targets: fb, scaleX: 1.2, scaleY: 1.2, duration: 80, yoyo: true, repeat: -1 });
     }
 
+    _attackThrust(ax, ay, range, dmg, color, cls) {
+        this._showSlash(ax, ay, color);
+        this._hitAt(ax, ay, 20, dmg, cls);
+    }
+
+    _attackCleave(ax, ay, range, dmg, color, cls) {
+        const s = this.scene;
+        this._showSlash(ax, ay, color);
+        const enemies = [];
+        this._collectInRange(s.enemies, ax, ay, range, (e) => {
+            if (this._inArc(s.player, e, 120)) enemies.push(e);
+        });
+        enemies.forEach(e => this.hitEnemy(e, dmg, {}));
+        if (cls && cls.key === 'alchemist') enemies.forEach(e => this._applyArmorShred(e));
+    }
+
+    _attackBurst(ax, ay, dmg, cls) {
+        const s = this.scene;
+        const dirs = [];
+        if (s.facing === 'right') { dirs.push(0, -15, 15); }
+        else if (s.facing === 'left') { dirs.push(180, 165, 195); }
+        else if (s.facing === 'up') { dirs.push(-90, -105, -75); }
+        else { dirs.push(90, 75, 105); }
+        dirs.forEach(angle => {
+            const rad = angle * Math.PI / 180;
+            const px = s.player.x + Math.cos(rad) * 30;
+            const py = s.player.y + Math.sin(rad) * 30;
+            const fb = s.add.sprite(px, py, 'attack_spell').setDepth(15).setTint(cls?.meleeColor || 0x27ae60);
+            s.physics.add.existing(fb);
+            fb.body.setVelocity(Math.cos(rad) * 300, Math.sin(rad) * 300);
+            fb.damage = Math.floor(dmg * 0.6);
+            fb.lifespan = 0.5;
+            fb.isMeleeProjectile = true;
+            s.fireballs.push(fb);
+        });
+    }
+
+    _attackBash(ax, ay, dmg, color, cls) {
+        this._showSlash(ax, ay, color);
+        this._hitAt(ax, ay, 35, dmg, cls);
+        this.scene.cameras.main.shake(80, 0.005);
+    }
+
+    _attackSpin(ax, ay, dmg, color, cls) {
+        const s = this.scene;
+        const slash = s.add.sprite(ax, ay, 'slash').setAlpha(0.8);
+        if (color && color !== 0xaaddff) slash.setTint(color);
+        s.tweens.add({ targets: slash, alpha: 0, scaleX: 2, scaleY: 2, angle: 360, duration: 300 });
+        this._hitAllAround(s.player.x, s.player.y, 55, dmg, cls);
+        s.player.setTint(color || 0xaaddff);
+        s.time.delayedCall(150, () => { if (s.player.active) s.player.clearTint(); });
+    }
+
     _showSlash(ax, ay, color) {
         const s = this.scene.add.sprite(ax, ay, 'slash').setAlpha(0.9);
         if (color && color !== 0xaaddff) s.setTint(color);
@@ -199,6 +268,41 @@ export class CombatCore {
         if (this.scene.facing === 'up') return { x: 0, y: -dist };
         if (this.scene.facing === 'down') return { x: 0, y: dist };
         return { x: dist, y: 0 };
+    }
+
+    _hitAt(ax, ay, radius, dmg, cls) {
+        this._dealAttackDamage(ax, ay, dmg, cls, {});
+    }
+
+    _collectInRange(group, ax, ay, range, fn) {
+        if (!group || !group.scene) return;
+        let children;
+        try { children = group.getChildren(); } catch (e) { return; }
+        children.forEach(child => {
+            if (!child.active || !child.stats || child.broken) return;
+            if (Phaser.Math.Distance.Between(ax, ay, child.x, child.y) <= range) fn(child);
+        });
+    }
+
+    _inArc(player, enemy, arcDeg) {
+        const dx = enemy.x - player.x, dy = enemy.y - player.y;
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        let facingAngle = 0;
+        if (this.scene.facing === 'right') facingAngle = 0;
+        else if (this.scene.facing === 'left') facingAngle = 180;
+        else if (this.scene.facing === 'up') facingAngle = -90;
+        else if (this.scene.facing === 'down') facingAngle = 90;
+        let diff = angle - facingAngle;
+        while (diff < -180) diff += 360;
+        while (diff > 180) diff -= 360;
+        return Math.abs(diff) <= arcDeg / 2;
+    }
+
+    _hitAllAround(cx, cy, radius, dmg, cls) {
+        const enemies = [];
+        this._collectInRange(this.scene.enemies, cx, cy, radius, (e) => enemies.push(e));
+        enemies.forEach(e => this.hitEnemy(e, dmg, {}));
+        if (cls && cls.key === 'alchemist') enemies.forEach(e => this._applyArmorShred(e));
     }
 
     _dealAttackDamage(ax, ay, attackDamage, cls, opts = {}) {
@@ -345,7 +449,15 @@ export class CombatCore {
             if (healAmount > 0) { s.playerHP = Math.min(s.playerMaxHP, s.playerHP + healAmount); s.floatingText(s.player.x, s.player.y - 40, '+' + healAmount, '#2ecc71'); }
         }
 
-        if (enemy.stats.hp <= 0) { if (s.loot && s.loot.handleEnemyDeath) s.loot.handleEnemyDeath(enemy); }
+        if (enemy.stats.hp <= 0) {
+            const healOnKill = s._materialSensors?.healOnKill || 0;
+            if (healOnKill > 0) {
+                const healAmt = Math.floor(s.playerMaxHP * healOnKill);
+                s.playerHP = Math.min(s.playerMaxHP, s.playerHP + healAmt);
+                s.floatingText(s.player.x, s.player.y - 40, '+' + healAmt + ' HP', '#2ecc71');
+            }
+            if (s.loot && s.loot.handleEnemyDeath) s.loot.handleEnemyDeath(enemy);
+        }
         else { enemy.hpFill.width = enemy.hpBg.width * (enemy.stats.hp / enemy.stats.maxHp); }
     }
 

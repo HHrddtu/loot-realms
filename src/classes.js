@@ -18,7 +18,7 @@ export const CLASS_DB = {
         rSpell: 'meteor',
         stats: {
             hp: 80,
-            damage: 15,
+            damage: 18,
             speed: 170,
             corruptionMax: 100,
             corruptionDecay: 0.08,
@@ -26,9 +26,10 @@ export const CLASS_DB = {
         },
         growth: {
             hpPerLevel: 8,
-            dmgPerLevel: 4,
+            dmgPerLevel: 5,
             speedPerLevel: 0
-        }
+        },
+        defaultAttack: 'thrust'
     },
     alchemist: {
         key: 'alchemist',
@@ -49,7 +50,7 @@ export const CLASS_DB = {
         rSpell: 'chemical_cloud',
         stats: {
             hp: 90,
-            damage: 14,
+            damage: 18,
             speed: 160,
             corruptionMax: 80,
             corruptionDecay: 0.08,
@@ -57,9 +58,10 @@ export const CLASS_DB = {
         },
         growth: {
             hpPerLevel: 10,
-            dmgPerLevel: 3,
+            dmgPerLevel: 4,
             speedPerLevel: 0
-        }
+        },
+        defaultAttack: 'burst'
     },
     angel: {
         key: 'angel',
@@ -82,7 +84,7 @@ export const CLASS_DB = {
         rSpell: 'divine_blessing',
         stats: {
             hp: 75,
-            damage: 12,
+            damage: 15,
             speed: 180,
             corruptionMax: 120,
             corruptionDecay: 0.10,
@@ -90,9 +92,10 @@ export const CLASS_DB = {
         },
         growth: {
             hpPerLevel: 6,
-            dmgPerLevel: 2,
+            dmgPerLevel: 3,
             speedPerLevel: 1
-        }
+        },
+        defaultAttack: 'shot'
     }
 };
 

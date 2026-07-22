@@ -1,41 +1,41 @@
 export const MATERIAL_DB = [
-    { id: 'wood',      name: 'Wood',      nameRu: 'Древесина',  nameDe: 'Holz',      rarity: 'common',   texKey: 'item_stick',  chance: 0.30, stats: { hp: 5 } },
-    { id: 'stone',     name: 'Stone',     nameRu: 'Камень',     nameDe: 'Stein',     rarity: 'common',   texKey: 'item_stone',  chance: 0.28, stats: { dmg: 2 } },
-    { id: 'leaf',      name: 'Leaf',      nameRu: 'Лист',       nameDe: 'Blatt',     rarity: 'common',   texKey: 'item_leaf',   chance: 0.22, stats: { speed: 10 } },
-    { id: 'mushroom',  name: 'Mushroom',  nameRu: 'Гриб',       nameDe: 'Pilz',      rarity: 'uncommon', texKey: 'item_mush',   chance: 0.12, stats: { hp: 12, regen: 1 } },
-    { id: 'herb',      name: 'Herb',      nameRu: 'Трава',      nameDe: 'Kraut',     rarity: 'uncommon', texKey: 'item_herb',   chance: 0.06, stats: { hp: 8, dmg: 3 } },
-    { id: 'gem_shard', name: 'Gem Shard', nameRu: 'Осколок',    nameDe: 'Edelstein', rarity: 'rare',     texKey: 'item_ruby',   chance: 0.02, stats: { dmg: 5, hp: 10 } },
-    { id: 'cave_silk',   name: 'Cave Silk',   nameRu: 'Пещерный Шёлк',   nameDe: 'Höhlenseide',      rarity: 'common',   texKey: 'item_leaf',   chance: 0.00, stats: { hp: 8 } },
-    { id: 'cave_moss',   name: 'Cave Moss',   nameRu: 'Пещерный Мох',    nameDe: 'Höhlenmoos',       rarity: 'common',   texKey: 'item_mush',   chance: 0.00, stats: { regen: 2 } },
-    { id: 'bat_wing',    name: 'Bat Wing',    nameRu: 'Крыло Летучей',   nameDe: 'Fledermausflügel', rarity: 'uncommon', texKey: 'item_leaf',   chance: 0.00, stats: { speed: 8 } },
-    { id: 'dark_crystal', name: 'Dark Crystal', nameRu: 'Тёмный Кристалл', nameDe: 'Dunkler Kristall', rarity: 'rare',     texKey: 'item_ruby',   chance: 0.00, stats: { dmg: 8, hp: 15 } }
+    { id: 'wood',      name: 'Wood',      nameRu: 'Древесина',  nameDe: 'Holz',      rarity: 'common',   texKey: 'item_stick',  chance: 0.30, stats: { regen: 2 } },
+    { id: 'stone',     name: 'Stone',     nameRu: 'Камень',     nameDe: 'Stein',     rarity: 'common',   texKey: 'item_stone',  chance: 0.28, stats: { pickupRadius: 15 } },
+    { id: 'leaf',      name: 'Leaf',      nameRu: 'Лист',       nameDe: 'Blatt',     rarity: 'common',   texKey: 'item_leaf',   chance: 0.22, stats: { moveNoise: -0.12 } },
+    { id: 'mushroom',  name: 'Mushroom',  nameRu: 'Гриб',       nameDe: 'Pilz',      rarity: 'uncommon', texKey: 'item_mush',   chance: 0.12, stats: { regen: 5 } },
+    { id: 'herb',      name: 'Herb',      nameRu: 'Трава',      nameDe: 'Kraut',     rarity: 'uncommon', texKey: 'item_herb',   chance: 0.06, stats: { healOnKill: 0.04 } },
+    { id: 'gem_shard', name: 'Gem Shard', nameRu: 'Осколок',    nameDe: 'Edelstein', rarity: 'rare',     texKey: 'item_ruby',   chance: 0.02, stats: { detectRange: 50 } },
+    { id: 'cave_silk',   name: 'Cave Silk',   nameRu: 'Пещерный Шёлк',   nameDe: 'Höhlenseide',      rarity: 'common',   texKey: 'item_leaf',   chance: 0.00, stats: { moveNoise: -0.2 } },
+    { id: 'cave_moss',   name: 'Cave Moss',   nameRu: 'Пещерный Мох',    nameDe: 'Höhlenmoos',       rarity: 'common',   texKey: 'item_mush',   chance: 0.00, stats: { regen: 4 } },
+    { id: 'bat_wing',    name: 'Bat Wing',    nameRu: 'Крыло Летучей',   nameDe: 'Fledermausflügel', rarity: 'uncommon', texKey: 'item_leaf',   chance: 0.00, stats: { moveNoise: -0.25 } },
+    { id: 'dark_crystal', name: 'Dark Crystal', nameRu: 'Тёмный Кристалл', nameDe: 'Dunkler Kristall', rarity: 'rare',     texKey: 'item_ruby',   chance: 0.00, stats: { detectRange: 80 } }
 ];
 
 export const CAVE_MATERIALS = [
-    { id: 'cave_silk',     name: 'Cave Silk',     nameRu: 'Пещерный Шёлк',      nameDe: 'Höhlenseide',      rarity: 'common',   texKey: 'item_leaf',   chance: 0.30, stats: { hp: 8 } },
-    { id: 'cave_moss',     name: 'Cave Moss',     nameRu: 'Пещерный Мох',       nameDe: 'Höhlenmoos',       rarity: 'common',   texKey: 'item_mush',  chance: 0.25, stats: { regen: 2 } },
-    { id: 'bat_wing',      name: 'Bat Wing',      nameRu: 'Крыло Летучей',      nameDe: 'Fledermausflügel', rarity: 'uncommon', texKey: 'item_leaf',   chance: 0.15, stats: { speed: 8 } },
-    { id: 'dark_crystal',  name: 'Dark Crystal',  nameRu: 'Тёмный Кристалл',    nameDe: 'Dunkler Kristall', rarity: 'rare',     texKey: 'item_ruby',   chance: 0.05, stats: { dmg: 8, hp: 15 } }
+    { id: 'cave_silk',     name: 'Cave Silk',     nameRu: 'Пещерный Шёлк',      nameDe: 'Höhlenseide',      rarity: 'common',   texKey: 'item_leaf',   chance: 0.30, stats: { moveNoise: -0.2 } },
+    { id: 'cave_moss',     name: 'Cave Moss',     nameRu: 'Пещерный Мох',       nameDe: 'Höhlenmoos',       rarity: 'common',   texKey: 'item_mush',  chance: 0.25, stats: { regen: 4 } },
+    { id: 'bat_wing',      name: 'Bat Wing',      nameRu: 'Крыло Летучей',      nameDe: 'Fledermausflügel', rarity: 'uncommon', texKey: 'item_leaf',   chance: 0.15, stats: { moveNoise: -0.25 } },
+    { id: 'dark_crystal',  name: 'Dark Crystal',  nameRu: 'Тёмный Кристалл',    nameDe: 'Dunkler Kristall', rarity: 'rare',     texKey: 'item_ruby',   chance: 0.05, stats: { detectRange: 80 } }
 ];
 
 export const VILLAGE_MATERIALS = [
-    { id: 'village_wood',     name: 'Corrupted Wood',  nameRu: 'Заражённое Древо',   nameDe: 'Verdorbenes Holz',   rarity: 'common',   texKey: 'item_stick', chance: 0.30, stats: { hp: 10 } },
-    { id: 'village_bone',     name: 'Village Bone',    nameRu: 'Кость Жителя',       nameDe: 'Dorfknochen',        rarity: 'common',   texKey: 'item_stone', chance: 0.25, stats: { dmg: 4 } },
-    { id: 'village_essence',  name: 'Hell Essence',    nameRu: 'Адская Эссенция',    nameDe: 'Höllen-Essenz',      rarity: 'uncommon', texKey: 'item_ruby',  chance: 0.12, stats: { dmg: 6, hp: 10 } },
-    { id: 'village_soul',     name: 'Cursed Soul',     nameRu: 'Проклятая Душа',     nameDe: 'Verfluchte Seele',   rarity: 'rare',     texKey: 'item_ruby',  chance: 0.04, stats: { hp: 20, dmg: 10 } }
+    { id: 'village_wood',     name: 'Corrupted Wood',  nameRu: 'Заражённое Древо',   nameDe: 'Verdorbenes Holz',   rarity: 'common',   texKey: 'item_stick', chance: 0.30, stats: { regen: 3 } },
+    { id: 'village_bone',     name: 'Village Bone',    nameRu: 'Кость Жителя',       nameDe: 'Dorfknochen',        rarity: 'common',   texKey: 'item_stone', chance: 0.25, stats: { pickupRadius: 20 } },
+    { id: 'village_essence',  name: 'Hell Essence',    nameRu: 'Адская Эссенция',    nameDe: 'Höllen-Essenz',      rarity: 'uncommon', texKey: 'item_ruby',  chance: 0.12, stats: { healOnKill: 0.06 } },
+    { id: 'village_soul',     name: 'Cursed Soul',     nameRu: 'Проклятая Душа',     nameDe: 'Verfluchte Seele',   rarity: 'rare',     texKey: 'item_ruby',  chance: 0.04, stats: { detectRange: 70 } }
 ];
 
 export const EQUIP_DB = [
-    { id: 'rusty_sword',    name: 'Rusty Sword',     nameRu: 'Ржавый Меч',      nameDe: 'Rostiges Schwert',   rarity: 'common',    slot: 'weapon',    texKey: 'item_stick',  chance: 0.30, stats: { dmg: 3 } },
-    { id: 'iron_sword',     name: 'Iron Sword',      nameRu: 'Железный Меч',    nameDe: 'Eisenschwert',       rarity: 'uncommon',  slot: 'weapon',    texKey: 'item_iron',   chance: 0.18, stats: { dmg: 6 } },
-    { id: 'leather_armor',  name: 'Leather Armor',   nameRu: 'Кожаная Броня',   nameDe: 'Lederpanzer',        rarity: 'common',    slot: 'armor',     texKey: 'item_leather',chance: 0.25, stats: { hp: 8 } },
-    { id: 'iron_armor',     name: 'Iron Armor',      nameRu: 'Железная Броня',  nameDe: 'Eisenpanzer',        rarity: 'uncommon',  slot: 'armor',     texKey: 'item_stone',  chance: 0.15, stats: { hp: 15 } },
-    { id: 'wood_ring',      name: 'Wood Ring',       nameRu: 'Деревянное Кольцо', nameDe: 'Holzring',         rarity: 'common',    slot: 'accessory', texKey: 'item_leaf',   chance: 0.22, stats: { hp: 5, speed: 2 } },
-    { id: 'ruby_ring',      name: 'Ruby Ring',       nameRu: 'Рубиновое Кольцо', nameDe: 'Rubinring',        rarity: 'rare',      slot: 'accessory', texKey: 'item_ruby',   chance: 0.08, stats: { hp: 10, dmg: 5 } },
-    { id: 'flame_blade',    name: 'Flame Blade',     nameRu: 'Пламенный Клинок', nameDe: 'Flammenklinge',     rarity: 'epic',      slot: 'weapon',    texKey: 'item_flame',  chance: 0.04, stats: { dmg: 12, crit: 3 } },
-    { id: 'dragon_scale',   name: 'Dragon Scale',    nameRu: 'Чешуя Дракона',   nameDe: 'Drachenschuppe',     rarity: 'epic',      slot: 'armor',     texKey: 'item_dscale', chance: 0.03, stats: { hp: 25, dmg: 5 } },
-    { id: 'sapphire_ring',  name: 'Sapphire Ring',   nameRu: 'Сапфировое Кольцо', nameDe: 'Saphirring',      rarity: 'rare',      slot: 'accessory', texKey: 'item_sapph',  chance: 0.06, stats: { hp: 8, dmg: 8, speed: 5 } },
-    { id: 'crown',          name: 'Ancient Crown',   nameRu: 'Древняя Корона',  nameDe: 'Alte Krone',         rarity: 'legendary', slot: 'accessory', texKey: 'item_crown',  chance: 0.01, stats: { hp: 15, dmg: 10, speed: 10 } }
+    { id: 'rusty_sword',    name: 'Rusty Sword',     nameRu: 'Ржавый Меч',      nameDe: 'Rostiges Schwert',   rarity: 'common',    slot: 'weapon',    texKey: 'item_stick',  chance: 0.30, attackType: 'cleave', attackRange: 50 },
+    { id: 'iron_sword',     name: 'Iron Sword',      nameRu: 'Железный Меч',    nameDe: 'Eisenschwert',       rarity: 'uncommon',  slot: 'weapon',    texKey: 'item_iron',   chance: 0.18, attackType: 'cleave', attackRange: 55 },
+    { id: 'leather_armor',  name: 'Leather Armor',   nameRu: 'Кожаная Броня',   nameDe: 'Lederpanzer',        rarity: 'common',    slot: 'armor',     texKey: 'item_leather',chance: 0.25 },
+    { id: 'iron_armor',     name: 'Iron Armor',      nameRu: 'Железная Броня',  nameDe: 'Eisenpanzer',        rarity: 'uncommon',  slot: 'armor',     texKey: 'item_stone',  chance: 0.15 },
+    { id: 'wood_ring',      name: 'Wood Ring',       nameRu: 'Деревянное Кольцо', nameDe: 'Holzring',         rarity: 'common',    slot: 'accessory', texKey: 'item_leaf',   chance: 0.22, stats: { speed: 4 } },
+    { id: 'ruby_ring',      name: 'Ruby Ring',       nameRu: 'Рубиновое Кольцо', nameDe: 'Rubinring',        rarity: 'rare',      slot: 'accessory', texKey: 'item_ruby',   chance: 0.08, stats: { speed: 8 } },
+    { id: 'flame_blade',    name: 'Flame Blade',     nameRu: 'Пламенный Клинок', nameDe: 'Flammenklinge',     rarity: 'epic',      slot: 'weapon',    texKey: 'item_flame',  chance: 0.04, attackType: 'cleave', attackRange: 60, color: 0xff4400 },
+    { id: 'dragon_scale',   name: 'Dragon Scale',    nameRu: 'Чешуя Дракона',   nameDe: 'Drachenschuppe',     rarity: 'epic',      slot: 'armor',     texKey: 'item_dscale', chance: 0.03 },
+    { id: 'sapphire_ring',  name: 'Sapphire Ring',   nameRu: 'Сапфировое Кольцо', nameDe: 'Saphirring',      rarity: 'rare',      slot: 'accessory', texKey: 'item_sapph',  chance: 0.06, stats: { speed: 12 } },
+    { id: 'crown',          name: 'Ancient Crown',   nameRu: 'Древняя Корона',  nameDe: 'Alte Krone',         rarity: 'legendary', slot: 'accessory', texKey: 'item_crown',  chance: 0.01, stats: { speed: 15 } }
 ];
 
 export const ACCOUNT_EQUIP_DB = [

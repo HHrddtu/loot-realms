@@ -41,19 +41,23 @@ export class PlayerSystem {
         const growth = cls.growth;
         let bonusHP = 0, bonusDmg = 0, bonusSpeed = 0;
 
+        this.scene._materialSensors = { regen: 0, pickupRadius: 0, moveNoise: 0, healOnKill: 0, detectRange: 0 };
         this.scene.materials.forEach(m => {
             if (m.stats) {
-                bonusHP += m.stats.hp || 0;
-                bonusDmg += m.stats.dmg || 0;
-                bonusSpeed += m.stats.speed || 0;
+                bonusHP += 0;
+                bonusDmg += 0;
+                bonusSpeed += (m.stats.speed || 0);
+                if (m.stats.regen) this.scene._materialSensors.regen += m.stats.regen;
+                if (m.stats.pickupRadius) this.scene._materialSensors.pickupRadius += m.stats.pickupRadius;
+                if (m.stats.moveNoise) this.scene._materialSensors.moveNoise += m.stats.moveNoise;
+                if (m.stats.healOnKill) this.scene._materialSensors.healOnKill += m.stats.healOnKill;
+                if (m.stats.detectRange) this.scene._materialSensors.detectRange += m.stats.detectRange;
             }
         });
 
         const diffMult = DIFF_MULT[this.scene.difficulty] || DIFF_MULT.Normal;
         [this.scene.equipment.weapon, this.scene.equipment.armor, this.scene.equipment.accessory].forEach(item => {
             if (item && item.stats) {
-                bonusHP += (item.stats.hp || 0) * diffMult.hp;
-                bonusDmg += (item.stats.dmg || 0) * diffMult.dmg;
                 bonusSpeed += (item.stats.speed || 0) * diffMult.hp;
             }
         });
@@ -161,7 +165,7 @@ export class PlayerSystem {
         this.scene.computedAreaDamage = (te.areaDamage || 0) + (ae.areaDamage || 0);
         this.scene.computedBossDamage = (te.bossDamagePercent || 0) + (ae.bossDamagePercent || 0);
         this.scene.computedSpellDamage = (te.spellDamage || 0) + accSpellPercent;
-        this.scene.computedRegenFlat = (te.regenFlat || 0) + boostRegenFlat + upgRegen + (setBonuses.regenFlat || 0);
+        this.scene.computedRegenFlat = (te.regenFlat || 0) + boostRegenFlat + upgRegen + (setBonuses.regenFlat || 0) + (this.scene._materialSensors?.regen || 0);
 
         this.scene.relicEffects = {};
         Object.values(this.scene.accountEquipment).forEach(item => {
