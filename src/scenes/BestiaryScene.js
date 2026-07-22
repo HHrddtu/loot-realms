@@ -269,9 +269,8 @@ export default class BestiaryScene extends Phaser.Scene {
         const lvlNames = ['Unknown', 'Observed', 'Studied', 'Experienced', 'Mastered', 'Scholar'];
         const lvlText = lvlNames[entry.level] || 'Unknown';
         const baseBonus = BESTIARY_LEVELS[entry.level] || BESTIARY_LEVELS[0];
-        const dmgB = Math.floor(baseBonus.dmgBonus * diffMult * 100);
         const expB = Math.floor(baseBonus.expBonus * diffMult * 100);
-        const bonusText = dmgB > 0 ? ` (+${dmgB}% DMG, +${expB}% EXP)` : '';
+        const bonusText = expB > 0 ? ` (+${expB}% EXP)` : '';
         this.detailLevel.setText(`${t('bestiary.level')}: ${entry.level}/5 — ${lvlText}${bonusText}`).setVisible(true);
         this.detailLevel.setPosition(px + 15, py + 38);
 
@@ -337,10 +336,10 @@ export default class BestiaryScene extends Phaser.Scene {
             curY += this.detailDesc.height + 10;
 
             let weakText = '';
-            if (entry.weaknesses.length > 0) weakText += t('bestiary.weaknesses') + ': ' + entry.weaknesses.join(', ');
+            if (entry.weaknesses.length > 0) weakText += t('bestiary.weaknesses') + ': ' + entry.weaknesses.map(w => w + ' (×1.25)').join(', ');
             if (entry.resistances.length > 0) {
                 if (weakText) weakText += '\n';
-                weakText += t('bestiary.resistances') + ': ' + entry.resistances.join(', ');
+                weakText += t('bestiary.resistances') + ': ' + entry.resistances.map(r => r + ' (×0.75)').join(', ');
             }
             this.detailWeakness.setText(weakText).setVisible(weakText.length > 0);
             this.detailWeakness.setPosition(px + 15, curY);

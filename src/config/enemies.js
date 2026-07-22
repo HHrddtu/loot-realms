@@ -332,12 +332,12 @@ export const THRONE_BOSS_MINION_ASSASSIN = {
 
 // Bestiary
 export const BESTIARY_LEVELS = [
-    { level: 0, killsRequired: 0,   dmgBonus: 0,   expBonus: 0,   info: 'description' },
-    { level: 1, killsRequired: 1,   dmgBonus: 0,   expBonus: 0,   info: 'stats' },
-    { level: 2, killsRequired: 10,  dmgBonus: 0.05, expBonus: 0.05, info: 'weaknesses' },
-    { level: 3, killsRequired: 30,  dmgBonus: 0.10, expBonus: 0.10, info: 'abilities' },
-    { level: 4, killsRequired: 60,  dmgBonus: 0.15, expBonus: 0.15, info: 'full' },
-    { level: 5, killsRequired: 100, dmgBonus: 0.20, expBonus: 0.20, info: 'lore' }
+    { level: 0, killsRequired: 0,   expBonus: 0,   info: 'description' },
+    { level: 1, killsRequired: 1,   expBonus: 0,   info: 'stats' },
+    { level: 2, killsRequired: 10,  expBonus: 0.05, info: 'weaknesses' },
+    { level: 3, killsRequired: 30,  expBonus: 0.10, info: 'abilities' },
+    { level: 4, killsRequired: 60,  expBonus: 0.15, info: 'full' },
+    { level: 5, killsRequired: 100, expBonus: 0.20, info: 'lore' }
 ];
 
 export const BESTIARY_DIFF_MULT = {

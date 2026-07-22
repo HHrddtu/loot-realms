@@ -32,7 +32,7 @@ export const EQUIP_DB = [
     { id: 'iron_armor',     name: 'Iron Armor',      nameRu: 'Железная Броня',  nameDe: 'Eisenpanzer',        rarity: 'uncommon',  slot: 'armor',     texKey: 'item_stone',  chance: 0.15 },
     { id: 'wood_ring',      name: 'Wood Ring',       nameRu: 'Деревянное Кольцо', nameDe: 'Holzring',         rarity: 'common',    slot: 'accessory', texKey: 'item_leaf',   chance: 0.22, stats: { speed: 4 } },
     { id: 'ruby_ring',      name: 'Ruby Ring',       nameRu: 'Рубиновое Кольцо', nameDe: 'Rubinring',        rarity: 'rare',      slot: 'accessory', texKey: 'item_ruby',   chance: 0.08, stats: { speed: 8 } },
-    { id: 'flame_blade',    name: 'Flame Blade',     nameRu: 'Пламенный Клинок', nameDe: 'Flammenklinge',     rarity: 'epic',      slot: 'weapon',    texKey: 'item_flame',  chance: 0.04, attackType: 'cleave', attackRange: 60, color: 0xff4400 },
+    { id: 'flame_blade',    name: 'Flame Blade',     nameRu: 'Пламенный Клинок', nameDe: 'Flammenklinge',     rarity: 'epic',      slot: 'weapon',    texKey: 'item_flame',  chance: 0.04, attackType: 'cleave', attackRange: 60, color: 0xff4400, damageType: 'fire' },
     { id: 'dragon_scale',   name: 'Dragon Scale',    nameRu: 'Чешуя Дракона',   nameDe: 'Drachenschuppe',     rarity: 'epic',      slot: 'armor',     texKey: 'item_dscale', chance: 0.03 },
     { id: 'sapphire_ring',  name: 'Sapphire Ring',   nameRu: 'Сапфировое Кольцо', nameDe: 'Saphirring',      rarity: 'rare',      slot: 'accessory', texKey: 'item_sapph',  chance: 0.06, stats: { speed: 12 } },
     { id: 'crown',          name: 'Ancient Crown',   nameRu: 'Древняя Корона',  nameDe: 'Alte Krone',         rarity: 'legendary', slot: 'accessory', texKey: 'item_crown',  chance: 0.01, stats: { speed: 15 } }

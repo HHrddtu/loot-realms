@@ -68,9 +68,17 @@ export function getStudyLevel(enemyKey) {
 export function getStudyBonus(enemyKey, difficulty) {
     const lvl = getStudyLevel(enemyKey);
     const cfg = BESTIARY_LEVELS.find(l => l.level === lvl);
-    if (!cfg) return { dmgBonus: 0, expBonus: 0 };
+    if (!cfg) return { expBonus: 0 };
     const diffMult = BESTIARY_DIFF_MULT[difficulty] || 1.0;
-    return { dmgBonus: cfg.dmgBonus * diffMult, expBonus: cfg.expBonus * diffMult };
+    return { expBonus: cfg.expBonus * diffMult };
+}
+
+export function getWeaknessMultiplier(attackType, enemyKey) {
+    const meta = BESTIARY_ENEMIES[enemyKey];
+    if (!meta || !meta.weaknesses || !attackType) return 1.0;
+    if (meta.weaknesses.includes(attackType)) return 1.25;
+    if (meta.resistances && meta.resistances.includes(attackType)) return 0.75;
+    return 1.0;
 }
 
 export function getInfoLevel(enemyKey) {
@@ -97,7 +105,7 @@ export function getBestiaryEntry(enemyKey) {
         level: level,
         firstSeen: entry.firstSeen,
         lastSeen: entry.lastSeen,
-        dmgBonus: bonus.dmgBonus,
+        weaknessMult: 1.25,
         expBonus: bonus.expBonus,
         infoLevel: infoLevel,
         weaknesses: infoLevel === 'weaknesses' || infoLevel === 'abilities' || infoLevel === 'full' || infoLevel === 'lore' ? (meta.weaknesses || []) : [],
@@ -141,6 +149,15 @@ export function getAllBestiaryBonuses(difficulty) {
         bonuses[key] = getStudyBonus(key, difficulty);
     });
     return bonuses;
+}
+
+export function getPlayerAttackType(scene) {
+    const weapon = scene.equipment?.weapon;
+    if (weapon?.damageType) return weapon.damageType;
+    const cls = scene.classData;
+    if (!cls) return 'physical';
+    const typeMap = { sage: 'magic', alchemist: 'fire', angel: 'holy' };
+    return typeMap[cls.key] || 'physical';
 }
 
 export function setBestiaryData(data) {

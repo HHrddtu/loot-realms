@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { MINE_RETURN_POS, FOREST_RETURN_POS, CAVE_WIDTH } from '../config/index.js';
 import { getClassData } from '../classes.js';
-import { recordKill } from '../bestiary.js';
+import { recordKill, getWeaknessMultiplier, getPlayerAttackType } from '../bestiary.js';
 
 export class CombatCore {
     constructor(scene) {
@@ -203,9 +203,8 @@ export class CombatCore {
 
     _attackThrust(ax, ay, range, dmg, color, cls) {
         const s = this.scene;
-        const proj = s.add.sprite(s.player.x, s.player.y, 'attack_arrow').setDepth(15).setTint(color || 0xe74c3c);
-        const angle = s.facing === 'left' ? 180 : s.facing === 'up' ? -90 : s.facing === 'down' ? 90 : 0;
-        proj.setAngle(angle);
+        const thrustAngle = s.facing === 'left' ? 180 : s.facing === 'up' ? -90 : s.facing === 'down' ? 90 : 0;
+        const proj = s.add.sprite(s.player.x, s.player.y, 'attack_arrow').setDepth(15).setTint(color || 0xe74c3c).setAngle(thrustAngle);
         const speed = 500;
         s.tweens.add({
             targets: proj, x: ax, y: ay, alpha: 0, duration: range / speed * 1000,
@@ -218,8 +217,13 @@ export class CombatCore {
 
     _attackCleave(ax, ay, range, dmg, color, cls) {
         const s = this.scene;
+        const perpX = s.facing === 'up' || s.facing === 'down' ? 1 : 0;
+        const perpY = s.facing === 'left' || s.facing === 'right' ? 1 : 0;
+        const angle = s.facing === 'left' ? 180 : s.facing === 'up' ? -90 : s.facing === 'down' ? 90 : 0;
         for (let i = -1; i <= 1; i++) {
-            const sl = s.add.sprite(ax + i * 8, ay + i * 4, 'slash').setAlpha(0.8).setTint(color || 0xaaddff);
+            const sx = ax + i * 10 * perpX;
+            const sy = ay + i * 10 * perpY;
+            const sl = s.add.sprite(sx, sy, 'slash').setAlpha(0.8).setTint(color || 0xaaddff).setAngle(angle);
             s.tweens.add({ targets: sl, alpha: 0, scaleX: 1.6, scaleY: 1.6, duration: 200, delay: Math.abs(i) * 30, onComplete: () => sl.destroy() });
         }
         const enemies = [];
@@ -444,9 +448,10 @@ export class CombatCore {
             const te = s.talentEffects || {}; const ae = s.accountEffects || {};
             if (te.damagePercentVs && enemy.stats && enemy.stats.key && te.damagePercentVs[enemy.stats.key] > 0)
                 finalDamage = Math.floor(damage * (1 + te.damagePercentVs[enemy.stats.key] / 100));
-            if (enemy.stats && enemy.stats.key && s.bestiaryBonuses && s.bestiaryBonuses[enemy.stats.key]) {
-                const bb = s.bestiaryBonuses[enemy.stats.key];
-                if (bb.dmgBonus > 0) finalDamage = Math.floor(finalDamage * (1 + bb.dmgBonus / 100));
+            if (enemy.stats && enemy.stats.key) {
+                const atkType = getPlayerAttackType(s);
+                const weakMult = getWeaknessMultiplier(atkType, enemy.stats.key);
+                if (weakMult !== 1.0) finalDamage = Math.floor(finalDamage * weakMult);
             }
             if (s.computedBossDamage && enemy.stats && this._isBoss(enemy))
                 finalDamage = Math.floor(finalDamage * (1 + s.computedBossDamage / 100));
@@ -457,16 +462,14 @@ export class CombatCore {
                 s.floatingText(enemy.x, enemy.y - 30, 'CRIT!', '#f1c40f');
             }
             if (s._luckyHitCounter === undefined) s._luckyHitCounter = 0;
-            const luckyChance = 5 + s._luckyHitCounter * 2;
-            const luckyThreshold = s._lastLuckyHitThreshold !== undefined ? s._lastLuckyHitThreshold : luckyChance;
-            const procRoll = Math.random() * 100;
-            if (procRoll < luckyChance) {
-                s._luckyHitCounter = 0;
-                const luckyMult = 1.5 + s._luckyHitCounter * 0.1;
+            const luckyChance = 3 + s._luckyHitCounter;
+            if (Math.random() * 100 < luckyChance) {
+                const luckyMult = 1.5 + Math.min(s._luckyHitCounter, 10) * 0.05;
                 finalDamage = Math.floor(finalDamage * luckyMult);
                 s.floatingText(enemy.x, enemy.y - 40, 'LUCKY!', '#ff6600');
+                s._luckyHitCounter = 0;
             } else {
-                s._luckyHitCounter = (s._luckyHitCounter || 0) + 1;
+                s._luckyHitCounter = Math.min((s._luckyHitCounter || 0) + 1, 50);
             }
             if (enemy.armorShredStacks && enemy.armorShredStacks > 0) finalDamage = Math.floor(finalDamage * (1 + enemy.armorShredStacks * 0.05));
         }
