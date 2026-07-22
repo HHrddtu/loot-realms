@@ -365,6 +365,32 @@ export class CombatCore {
             this.hitEnemy(this.scene.snowyIceSpirit, dmg);
             if (isAlchemist) this._applyArmorShred(this.scene.snowyIceSpirit);
         }
+
+        // Obstacles: hit bushes and fences
+        this._hitObstacles(ax, ay, hitRadius, dmg);
+    }
+
+    _hitObstacles(ax, ay, radius, dmg) {
+        const s = this.scene;
+        if (!s.obstacles) return;
+        s.obstacles.getChildren().forEach(obs => {
+            if (!obs.active) return;
+            const d = Phaser.Math.Distance.Between(ax, ay, obs.x, obs.y);
+            if (d > radius) return;
+            if (obs._isBush) {
+                obs.hp--;
+                s.floatingText(obs.x, obs.y - 20, '!', '#27ae60');
+                if (obs.hp <= 0) {
+                    obs.destroy();
+                    s.floatingText(obs.x, obs.y, 'Bush broken', '#27ae60');
+                }
+            } else if (obs._isFence) {
+                obs.hp--;
+                obs.setTint(0xffffff);
+                s.floatingText(obs.x, obs.y - 20, '!', '#8b4513');
+                if (obs.hp <= 0) { obs.destroy(); s.floatingText(obs.x, obs.y, 'Fence broken', '#8b4513'); }
+            }
+        });
     }
 
     _forEachGroup(group, fn) {

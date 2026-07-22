@@ -532,6 +532,7 @@ export default class GameScene extends Phaser.Scene {
             } else {
                 zone.setup(...args);
             }
+            if (zone.spawnObstacles) zone.spawnObstacles();
             this.tutorialMgr.cleanupZoneIntro();
             onExplore(zoneName);
             this.tutorialMgr.showZoneIntro(zoneName);
@@ -672,6 +673,20 @@ export default class GameScene extends Phaser.Scene {
         this.doSave();
     }
 
+    _checkSpikeDamage(delta) {
+        if (!this.obstacles || this.menuOpen || this.transitioning) return;
+        this._spikeTimer = (this._spikeTimer || 0) - delta;
+        if (this._spikeTimer > 0) return;
+        this._spikeTimer = 500;
+        this.obstacles.getChildren().forEach(obs => {
+            if (!obs.active || obs.texture?.key !== 'obstacle_spike') return;
+            if (Phaser.Math.Distance.Between(this.player.x, this.player.y, obs.x, obs.y) < 18) {
+                this.combat.takeDamage(5);
+                this.floatingText(this.player.x, this.player.y - 30, '-5 SPIKE', '#ff4444');
+            }
+        });
+    }
+
     /* ===== GAME LOOP ===== */
 
     update(time, delta) {
@@ -708,6 +723,7 @@ export default class GameScene extends Phaser.Scene {
         this._updateSpells(delta);
         this._updateConsumableBonuses(delta);
         this._updateRegen(delta);
+        this._checkSpikeDamage(delta);
         this.petSys.updateFollow();
         this.petSys.updateCombat(delta);
 

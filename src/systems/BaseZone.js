@@ -1,6 +1,27 @@
+import { ZONE_OBSTACLES } from '../config/index.js';
+
 export class BaseZone {
     constructor(scene) {
         this.scene = scene;
+    }
+
+    spawnObstacles() {
+        const s = this.scene;
+        const data = ZONE_OBSTACLES[s.zone];
+        if (!data || data.length === 0) return;
+        if (s.obstacles) { s.obstacles.clear(true, true); s.obstacles = null; }
+        s.obstacles = s.physics.add.staticGroup();
+        data.forEach(o => {
+            const spr = s.add.sprite(o.x, o.y, 'obstacle_' + o.type).setDepth(3);
+            s.physics.add.existing(spr, true);
+            spr.body.setSize(o.w, o.h);
+            spr.body.setOffset(0, 0);
+            if (o.type === 'bush') { spr.hp = 1; spr._isBush = true; }
+            if (o.type === 'fence') { spr.hp = 2; spr._isFence = true; }
+            s.obstacles.add(spr);
+        });
+        s.physics.add.collider(s.player, s.obstacles);
+        s.physics.add.collider(s.enemies, s.obstacles);
     }
 
     /**
@@ -62,6 +83,7 @@ export class BaseZone {
         if (s.villageZombies) { s.villageZombies.clear(true, true); s.villageZombies.destroy(); s.villageZombies = null; }
         if (s.villageDecor) { s.villageDecor.forEach(d => { if (d && d.destroy) d.destroy(); }); s.villageDecor = null; }
         if (s.shopGroup) { s.shopGroup.forEach(e => { if (e && e.destroy) e.destroy(); }); s.shopGroup = []; }
+        if (s.obstacles) { s.obstacles.clear(true, true); s.obstacles = null; }
         // Kill all timers
         s.time.removeAllEvents();
     }
