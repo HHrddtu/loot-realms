@@ -1330,7 +1330,58 @@ export function drawEffectTextures(mk) {
         c.stroke();
     });
 
-    // === OBSTACLES (48×48 base, zone-themed) ===
+    // === OBSTACLES (48×48 base, zone variants) ===
+    mk('obstacle_crystal', 48, 48, (c) => {
+        c.fillStyle = '#4a2a8a';
+        c.fillRect(10, 2, 28, 40);
+        c.fillRect(14, 0, 20, 44);
+        c.fillStyle = '#6a4aaa';
+        c.fillRect(14, 4, 20, 36);
+        c.fillStyle = '#8a6acc';
+        c.fillRect(18, 8, 12, 24);
+        c.fillStyle = '#aa8aee';
+        c.fillRect(20, 12, 6, 12);
+        c.fillRect(14, 20, 4, 8);
+        c.fillRect(30, 16, 4, 6);
+        c.fillStyle = '#3a1a7a';
+        c.fillRect(10, 40, 28, 6);
+        c.fillRect(8, 42, 32, 4);
+    });
+    mk('obstacle_bone', 48, 48, (c) => {
+        c.fillStyle = '#c4b494';
+        c.fillRect(6, 8, 36, 6);
+        c.fillRect(4, 12, 40, 8);
+        c.fillRect(6, 18, 36, 10);
+        c.fillRect(10, 26, 28, 6);
+        c.fillStyle = '#d4c4a4';
+        c.fillRect(8, 10, 32, 4);
+        c.fillRect(10, 14, 28, 6);
+        c.fillRect(12, 20, 24, 4);
+        c.fillStyle = '#a49474';
+        c.fillRect(4, 8, 6, 16);
+        c.fillRect(38, 8, 6, 16);
+        c.fillRect(2, 12, 44, 6);
+        c.fillStyle = '#e4d4b4';
+        c.fillRect(18, 10, 12, 4);
+        c.fillRect(4, 38, 40, 6);
+        c.fillRect(6, 42, 36, 4);
+    });
+    mk('obstacle_ice', 48, 48, (c) => {
+        c.fillStyle = '#8ab4d4';
+        c.fillRect(8, 4, 32, 36);
+        c.fillRect(12, 0, 24, 42);
+        c.fillStyle = '#a8d4e8';
+        c.fillRect(12, 4, 24, 34);
+        c.fillStyle = '#c8ecf8';
+        c.fillRect(16, 8, 16, 24);
+        c.fillStyle = '#6a94b4';
+        c.fillRect(8, 38, 32, 6);
+        c.fillRect(6, 42, 36, 4);
+        c.fillStyle = '#ffffff';
+        c.fillRect(18, 10, 4, 6);
+        c.fillRect(26, 16, 4, 4);
+        c.fillRect(18, 22, 6, 4);
+    });
     mk('obstacle_rock', 48, 48, (c) => {
         c.fillStyle = '#6a6a6a';
         c.fillRect(6, 8, 36, 32);

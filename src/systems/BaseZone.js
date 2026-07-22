@@ -5,6 +5,14 @@ export class BaseZone {
         this.scene = scene;
     }
 
+    _obstacleTex(type, zone) {
+        if (type === 'rock') {
+            const map = { cave: 'crystal', depths: 'crystal', shadow: 'crystal', hell: 'bone', cursed: 'bone', snowy: 'ice' };
+            return 'obstacle_' + (map[zone] || 'rock');
+        }
+        return 'obstacle_' + type;
+    }
+
     spawnObstacles() {
         const s = this.scene;
         const data = ZONE_OBSTACLES[s.zone];
@@ -12,10 +20,11 @@ export class BaseZone {
         if (s.obstacles) { s.obstacles.clear(true, true); s.obstacles = null; }
         s.obstacles = s.physics.add.staticGroup();
         data.forEach(o => {
-            const spr = s.add.sprite(o.x, o.y, 'obstacle_' + o.type).setDepth(3);
+            const tex = this._obstacleTex(o.type, s.zone);
+            const spr = s.add.sprite(o.x, o.y, tex).setDepth(3).setOrigin(0.5, 1);
             s.physics.add.existing(spr, true);
             spr.body.setSize(o.w, o.h);
-            spr.body.setOffset(0, 0);
+            spr.body.setOffset(-o.w/2 + spr.width/2, -o.h + spr.height);
             if (o.type === 'bush') { spr.hp = 1; spr._isBush = true; }
             if (o.type === 'fence') { spr.hp = 2; spr._isFence = true; }
             s.obstacles.add(spr);
