@@ -6,6 +6,13 @@ export const PET_TYPES = {
     collector: { name: 'Collector', nameRu: 'Собиратель', desc: 'Auto-picks loot' }
 };
 
+export const ABILITY_DESC = {
+    rush:   { name: 'Rush',   nameRu: 'Рывок',   desc: 'Charges at enemy dealing double damage', descRu: 'Рывок к врагу с двойным уроном' },
+    taunt:  { name: 'Taunt',  nameRu: 'Провокация', desc: 'Taunts all enemies in range for 3s', descRu: 'Провоцирует врагов в радиусе на 3 сек' },
+    vacuum: { name: 'Vacuum', nameRu: 'Вакуум',   desc: 'Pulls all ground loot to player', descRu: 'Притягивает весь лут к игроку' },
+    buff:   { name: 'Inspire', nameRu: 'Вдохновение', desc: 'Grants +20% damage to player for 5s', descRu: 'Даёт +20% урона игроку на 5 сек' }
+};
+
 export const PET_RARITY = {
     common:    { color: 0xaaaaaa, name: 'Common',    nameRu: 'Обычный',   dropChance: 1.0 },
     uncommon:  { color: 0x2ecc71, name: 'Uncommon',  nameRu: 'Необычный', dropChance: 1.0 },

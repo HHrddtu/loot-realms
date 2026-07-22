@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { PET_DB, PET_RARITY, PET_TYPES, getPetStats, getPetLevelUpReq, CASE_DB, rollCaseDrop } from '../config/pets.js';
+import { PET_DB, PET_RARITY, PET_TYPES, ABILITY_DESC, getPetStats, getPetLevelUpReq, CASE_DB, rollCaseDrop } from '../config/pets.js';
 import { lighten } from '../utils.js';
 import { loadAccount, saveAccount } from '../save.js';
 import { t } from '../i18n.js';
@@ -132,6 +132,7 @@ export default class PetScene extends Phaser.Scene {
 
     _showPetDetail(pet, level) {
         this._clearPanel();
+        const lang = localStorage.getItem('game_lang') || 'en';
         const py = 280;
         const backdrop = this._add(this.add.rectangle(400, 300, 800, 600, 0x000000, 0.85)
             .setInteractive());
@@ -174,6 +175,20 @@ export default class PetScene extends Phaser.Scene {
             fontSize: '10px', fill: '#2ecc71', fontFamily: 'Arial', lineSpacing: 2
         }));
         this._panelEls.push(statsText);
+
+        // Ability info
+        if (pet.abilityKey) {
+            const ab = ABILITY_DESC[pet.abilityKey];
+            const abName = ab ? (lang === 'ru' ? ab.nameRu : ab.name) : pet.abilityKey;
+            const abDesc = ab ? (lang === 'ru' ? ab.descRu : ab.desc) : '';
+            const cdSec = (pet.abilityCd || 12000) / 1000;
+            this._add(this.add.text(220, py - 40, 'Ability: ' + abName + ' (CD: ' + cdSec + 's)', {
+                fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold'
+            }));
+            this._add(this.add.text(220, py - 28, abDesc, {
+                fontSize: '9px', fill: '#aaa', fontFamily: 'Arial', wordWrap: { width: 150 }
+            }));
+        }
 
         if (level < 5) {
             const expText = this._add(this.add.text(220, py - 5, 'Level up: feed duplicates', {
