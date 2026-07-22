@@ -150,7 +150,7 @@ export class HUD {
         const navItems = [
             { icon: 'nav_quest', label: 'Q', cb: () => this.scene._openQuestLog() },
             { icon: 'nav_book', label: 'B', cb: () => this.ui._openBestiary() },
-            { icon: 'nav_hammer', label: 'C', cb: () => this.ui._openCrafting() },
+            { icon: 'nav_hammer', label: 'C', cb: () => { const s = this.scene; if (s._vendorUnlocked?.blacksmith) s.floatingText(s.player.x, s.player.y - 30, 'Craft at the blacksmith!', '#9b59b6'); else s.floatingText(s.player.x, s.player.y - 30, 'Crafting locked (progress to village boss)', '#e74c3c'); } },
             { icon: 'nav_star', label: 'T', cb: () => this.ui._openTalentTree() },
             { icon: 'nav_paw', label: 'P', cb: () => this.ui._openPets() },
             { icon: 'nav_map', label: 'M', hidden: true, cb: () => this.scene._openMap() },

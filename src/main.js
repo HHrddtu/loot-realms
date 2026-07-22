@@ -32,7 +32,7 @@ const LAZY_SCENES = [
     { key: 'Bestiary', path: () => import('./scenes/BestiaryScene.js') },
     { key: 'MaterialBook', path: () => import('./scenes/MaterialBookScene.js') },
     { key: 'SoulBook', path: () => import('./scenes/SoulBookScene.js') },
-    { key: 'Craft', path: () => import('./scenes/CraftScene.js') },
+
     { key: 'Pet', path: () => import('./scenes/PetScene.js') },
     { key: 'Keybinds', path: () => import('./scenes/KeybindScene.js') }
 ];

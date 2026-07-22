@@ -5,7 +5,6 @@ import { AccountEquipUI } from './AccountEquipUI.js';
 import { loadAccount, saveAccount } from '../save.js';
 import { getTalentEffects } from '../talents.js';
 import { getAccountTalentEffects } from '../accountTalents.js';
-import { initMaterialBook, getMaterialBookData } from '../materialBook.js';
 import { SPELLS } from '../config/spells.js';
 
 export class UISystem {
@@ -48,8 +47,9 @@ export class UISystem {
     }
 
     _openCrafting() {
-        initMaterialBook();
-        this._pauseAndLaunch('Craft', { materials: this.scene.materials, equipBag: this.scene.equipBag, maxEquipBag: this.scene.maxEquipBag, isAlchemist: this.scene.classKey === 'alchemist', classKey: this.scene.classKey, difficulty: this.scene.difficulty, materialBookData: getMaterialBookData(), hasRelicCraftBonus: !!(this.scene.relicEffects && this.scene.relicEffects.craft_bonus), onCraftResult: (result) => { if (result.items) result.items.forEach(item => { if (this.scene.addEquip(item)) this.hud.floatingText(this.scene.player.x, this.scene.player.y - 40, '+' + item.name, '#2ecc71'); }); this.scene.materials = result.materials || this.scene.materials; } });
+        const s = this.scene;
+        if (s._vendorUnlocked?.blacksmith) s.floatingText(s.player.x, s.player.y - 30, 'Craft at the blacksmith!', '#9b59b6');
+        else s.floatingText(s.player.x, s.player.y - 30, 'Crafting locked (progress to village boss)', '#e74c3c');
     }
 
     _openPets() {
