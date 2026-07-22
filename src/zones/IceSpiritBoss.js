@@ -34,6 +34,17 @@ export class IceSpiritBoss {
         const st = e.stats;
         if (s.menuOpen || s.transitioning) { e.body.setVelocity(0); return; }
         if (st.hp <= 0) { this.iceSpiritDied(); return; }
+
+        // Phase check
+        BossAI.checkPhase(e, [
+            { hp: 0.65, phase: 2, text: 'BLIZZARD!', color: '#3498db',
+              onEnter: () => { e.stats.frostInterval = 3000; e.stats.blizzardInterval = 5000; } },
+            { hp: 0.30, phase: 3, text: 'ABSOLUTE ZERO!', color: '#88ddff',
+              onEnter: () => { e.stats.frostInterval = 2000; e.stats.blizzardInterval = 3000; } }
+        ], s);
+
+        if (st.transitioning || st.invulnerable) { e.body.setVelocity(0); return; }
+
         if (st.hp > 0) {
             BossAI.updateHpBar(e, {
                 x: 400, y: 110, width: 80, fillOffsetX: -40,

@@ -1,4 +1,5 @@
 import { GAME_WIDTH, GAME_HEIGHT } from '../config/index.js';
+import { playBossAoE } from '../sound.js';
 
 export class BossAI {
     static updateHpBar(boss, options = {}) {
@@ -31,6 +32,26 @@ export class BossAI {
         const w = width !== undefined ? width : bg.width;
         const ratio = boss.stats.hp / boss.stats.maxHp;
         fill.width = w * ratio;
+    }
+
+    static checkPhase(boss, triggers, scene) {
+        const st = boss.stats;
+        const hpPct = st.hp / st.maxHp;
+        const currentPhase = boss._phase || 1;
+        // triggers: [{ hp: 0.5, phase: 2, text: 'SHIELD!', color: '#3498db', onEnter: (s,b) => {} }]
+        for (let i = triggers.length - 1; i >= 0; i--) {
+            if (hpPct <= triggers[i].hp && currentPhase < triggers[i].phase) {
+                boss._phase = triggers[i].phase;
+                st.phase = triggers[i].phase;
+                this.phaseTransition(scene, boss, triggers[i].text || 'PHASE ' + triggers[i].phase, triggers[i].color || '#f1c40f');
+                if (triggers[i].onEnter) {
+                    scene.time.delayedCall(1300, () => {
+                        if (boss.active) triggers[i].onEnter(scene, boss);
+                    });
+                }
+                break;
+            }
+        }
     }
 
     static phaseTransition(scene, boss, phaseText, phaseColor) {

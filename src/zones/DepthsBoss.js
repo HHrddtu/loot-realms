@@ -81,13 +81,21 @@ export class DepthsBoss {
         }
 
         // Phase transitions
-        const hpPct = st.hp / st.maxHp;
-        if (this.phase < 2 && hpPct <= DEPTHS_BOSS_TYPE.phaseThresholds[this.phase]) {
-            this.phase++;
-            s.floatingText(b.x, b.y - 60, 'PHASE ' + (this.phase + 1) + '!', '#ff00ff');
-            st.damage = Math.floor(st.damage * 1.2);
-            st.speed = Math.floor(st.speed * 1.1);
-        }
+        if (!b._phase) b._phase = 1;
+        BossAI.checkPhase(b, [
+            { hp: 0.70, phase: 2, text: 'RAISE DEAD!', color: '#8e44ad',
+              onEnter: (scene, boss) => { boss.stats.summonInterval = 6000; scene.floatingText(boss.x, boss.y - 60, 'Faster summons!', '#8e44ad'); } },
+            { hp: 0.40, phase: 3, text: 'MANA SHIELD!', color: '#3498db',
+              onEnter: (scene, boss) => {
+                  boss.stats.deathWaveInterval = 4000;
+                  const shield = scene.add.circle(boss.x, boss.y, 45, 0x3498db, 0.2).setDepth(6);
+                  shield.hp = 10; boss._manaShield = shield;
+                  boss.stats.invulnerable = true;
+              } },
+            { hp: 0.10, phase: 4, text: 'SOUL STORM!', color: '#e74c3c',
+              onEnter: (scene, boss) => { boss.stats.soulStormInterval = 2000; } }
+        ], s);
+        if (st.transitioning || st.invulnerable) { b.body.setVelocity(0); return; }
 
         const dx = s.player.x - b.x;
         const dy = s.player.y - b.y;

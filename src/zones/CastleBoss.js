@@ -170,6 +170,14 @@ export class CastleBoss {
             return;
         }
 
+        // Phase check — enrage at 40% HP
+        BossAI.checkPhase(b, [
+            { hp: 0.40, phase: 2, text: 'BERSERK!', color: '#ff4400',
+              onEnter: (scene, boss) => { boss.stats.speed = Math.floor(boss.stats.speed * 1.5); boss.stats.damage = Math.floor(boss.stats.damage * 1.3); } }
+        ], this.scene);
+
+        if (s.transitioning || s.invulnerable) { b.body.setVelocity(0); return; }
+
         if (s.hp <= 0) {
             this._banditLeaderDied();
             return;
