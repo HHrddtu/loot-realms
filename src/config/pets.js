@@ -16,23 +16,23 @@ export const PET_RARITY = {
 export const PET_DB = [
     // Common
     { id: 'pet_slime',     name: 'Slime',      nameRu: 'Слайм',      type: 'companion', rarity: 'common',   texKey: 'pet_slime',     stats: { hpPercent: 2 },              desc: 'A bouncy companion that adds a bit of health.' },
-    { id: 'pet_rat',       name: 'Rat',         nameRu: 'Крыса',      type: 'collector', rarity: 'common',   texKey: 'pet_rat',       stats: { lootPercent: 3 },             desc: 'Sniffs out nearby treasures.' },
-    { id: 'pet_bat',       name: 'Bat',         nameRu: 'Летучая',    type: 'attacker',  rarity: 'common',   texKey: 'pet_bat',       stats: { damagePercent: 2 },           desc: 'A tiny fanged friend.' },
+    { id: 'pet_rat',       name: 'Rat',         nameRu: 'Крыса',      type: 'collector', rarity: 'common',   texKey: 'pet_rat',       stats: { lootPercent: 3 },             desc: 'Sniffs out nearby treasures.', abilityKey: 'vacuum', abilityCd: 12000 },
+    { id: 'pet_bat',       name: 'Bat',         nameRu: 'Летучая',    type: 'attacker',  rarity: 'common',   texKey: 'pet_bat',       stats: { damagePercent: 2 },           desc: 'A tiny fanged friend.', abilityKey: 'rush', abilityCd: 10000 },
 
     // Uncommon
-    { id: 'pet_wolf',      name: 'Wolf Pup',    nameRu: 'Волчонок',   type: 'attacker',  rarity: 'uncommon', texKey: 'pet_wolf',      stats: { damagePercent: 4, critPercent: 2 }, desc: 'A fierce pup with sharp instincts.' },
-    { id: 'pet_spider',    name: 'Spider',      nameRu: 'Паук',       type: 'collector', rarity: 'uncommon', texKey: 'pet_spider',    stats: { lootPercent: 5, speedPercent: 2 }, desc: 'Weaves webs that catch shiny things.' },
-    { id: 'pet_imp',       name: 'Imp',         nameRu: 'Имп',        type: 'companion', rarity: 'uncommon', texKey: 'pet_imp',       stats: { spellPercent: 4, hpPercent: 3 }, desc: 'A mischievous magical familiar.' },
+    { id: 'pet_wolf',      name: 'Wolf Pup',    nameRu: 'Волчонок',   type: 'attacker',  rarity: 'uncommon', texKey: 'pet_wolf',      stats: { damagePercent: 4, critPercent: 2 }, desc: 'A fierce pup with sharp instincts.', abilityKey: 'rush', abilityCd: 9000 },
+    { id: 'pet_spider',    name: 'Spider',      nameRu: 'Паук',       type: 'collector', rarity: 'uncommon', texKey: 'pet_spider',    stats: { lootPercent: 5, speedPercent: 2 }, desc: 'Weaves webs that catch shiny things.', abilityKey: 'vacuum', abilityCd: 11000 },
+    { id: 'pet_imp',       name: 'Imp',         nameRu: 'Имп',        type: 'companion', rarity: 'uncommon', texKey: 'pet_imp',       stats: { spellPercent: 4, hpPercent: 3 }, desc: 'A mischievous magical familiar.', abilityKey: 'buff', abilityCd: 15000 },
 
     // Rare
-    { id: 'pet_golem',     name: 'Golem',       nameRu: 'Голем',      type: 'tank',      rarity: 'rare',     texKey: 'pet_golem',     stats: { hpPercent: 8, damageReduction: 3 }, desc: 'A stone guardian that absorbs hits.' },
-    { id: 'pet_wraith',    name: 'Wraith',      nameRu: 'Призрак',    type: 'attacker',  rarity: 'rare',     texKey: 'pet_wraith',    stats: { damagePercent: 7, critPercent: 4 }, desc: 'A spectral assassin.' },
-    { id: 'pet_drake',     name: 'Baby Drake',  nameRu: 'Детёныш',    type: 'companion', rarity: 'rare',     texKey: 'pet_drake',     stats: { damagePercent: 5, hpPercent: 5, spellPercent: 3 }, desc: 'A tiny dragon with big potential.' },
+    { id: 'pet_golem',     name: 'Golem',       nameRu: 'Голем',      type: 'tank',      rarity: 'rare',     texKey: 'pet_golem',     stats: { hpPercent: 8, damageReduction: 3 }, desc: 'A stone guardian that absorbs hits.', abilityKey: 'taunt', abilityCd: 12000 },
+    { id: 'pet_wraith',    name: 'Wraith',      nameRu: 'Призрак',    type: 'attacker',  rarity: 'rare',     texKey: 'pet_wraith',    stats: { damagePercent: 7, critPercent: 4 }, desc: 'A spectral assassin.', abilityKey: 'rush', abilityCd: 8000 },
+    { id: 'pet_drake',     name: 'Baby Drake',  nameRu: 'Детёныш',    type: 'companion', rarity: 'rare',     texKey: 'pet_drake',     stats: { damagePercent: 5, hpPercent: 5, spellPercent: 3 }, desc: 'A tiny dragon with big potential.', abilityKey: 'buff', abilityCd: 14000 },
 
     // Legendary
-    { id: 'pet_phoenix',   name: 'Phoenix',     nameRu: 'Феникс',     type: 'companion', rarity: 'legendary', texKey: 'pet_phoenix',   stats: { damagePercent: 8, regenPercent: 5, spellPercent: 5 }, desc: 'Reborn from ash, radiates power.' },
-    { id: 'pet_dragon',    name: 'Dragon',      nameRu: 'Дракон',     type: 'attacker',  rarity: 'legendary', texKey: 'pet_dragon',    stats: { damagePercent: 12, critPercent: 6, hpPercent: 6 }, desc: 'The apex predator of the skies.' },
-    { id: 'pet_celestial', name: 'Celestial',   nameRu: 'Небесный',   type: 'tank',      rarity: 'legendary', texKey: 'pet_celestial', stats: { hpPercent: 12, damageReduction: 8, regenPercent: 4 }, desc: 'A divine being of pure light.' }
+    { id: 'pet_phoenix',   name: 'Phoenix',     nameRu: 'Феникс',     type: 'companion', rarity: 'legendary', texKey: 'pet_phoenix',   stats: { damagePercent: 8, regenPercent: 5, spellPercent: 5 }, desc: 'Reborn from ash, radiates power.', abilityKey: 'buff', abilityCd: 12000 },
+    { id: 'pet_dragon',    name: 'Dragon',      nameRu: 'Дракон',     type: 'attacker',  rarity: 'legendary', texKey: 'pet_dragon',    stats: { damagePercent: 12, critPercent: 6, hpPercent: 6 }, desc: 'The apex predator of the skies.', abilityKey: 'rush', abilityCd: 7000 },
+    { id: 'pet_celestial', name: 'Celestial',   nameRu: 'Небесный',   type: 'tank',      rarity: 'legendary', texKey: 'pet_celestial', stats: { hpPercent: 12, damageReduction: 8, regenPercent: 4 }, desc: 'A divine being of pure light.', abilityKey: 'taunt', abilityCd: 10000 }
 ];
 
 // Scale stats by pet level (1-5)
