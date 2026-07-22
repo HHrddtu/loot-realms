@@ -456,6 +456,18 @@ export class CombatCore {
                 finalDamage = Math.floor(finalDamage * s.computedCritDamage);
                 s.floatingText(enemy.x, enemy.y - 30, 'CRIT!', '#f1c40f');
             }
+            if (s._luckyHitCounter === undefined) s._luckyHitCounter = 0;
+            const luckyChance = 5 + s._luckyHitCounter * 2;
+            const luckyThreshold = s._lastLuckyHitThreshold !== undefined ? s._lastLuckyHitThreshold : luckyChance;
+            const procRoll = Math.random() * 100;
+            if (procRoll < luckyChance) {
+                s._luckyHitCounter = 0;
+                const luckyMult = 1.5 + s._luckyHitCounter * 0.1;
+                finalDamage = Math.floor(finalDamage * luckyMult);
+                s.floatingText(enemy.x, enemy.y - 40, 'LUCKY!', '#ff6600');
+            } else {
+                s._luckyHitCounter = (s._luckyHitCounter || 0) + 1;
+            }
             if (enemy.armorShredStacks && enemy.armorShredStacks > 0) finalDamage = Math.floor(finalDamage * (1 + enemy.armorShredStacks * 0.05));
         }
 

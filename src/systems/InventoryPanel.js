@@ -1,5 +1,5 @@
 import { RARITY_COLORS } from '../config/index.js';
-import { getSetInfo } from '../config/sets.js';
+import { getSetInfo, EQUIPMENT_SETS } from '../config/sets.js';
 
 export class InventoryPanel {
     constructor(scene, ui) {
@@ -35,10 +35,12 @@ export class InventoryPanel {
         // Item stats
         if (item.type === 'material' || item.type === 'equip') {
             const s = item.stats || {};
-            if (s.hp) lines.push({ text: '+' + s.hp + ' HP', color: '#2ecc71', size: '11px', bold: false });
-            if (s.dmg) lines.push({ text: '+' + s.dmg + ' DMG', color: '#2ecc71', size: '11px', bold: false });
             if (s.speed) lines.push({ text: '+' + s.speed + ' SPD', color: '#2ecc71', size: '11px', bold: false });
-            if (s.crit) lines.push({ text: '+' + s.crit + '% Crit', color: '#2ecc71', size: '11px', bold: false });
+            if (s.regen) lines.push({ text: '+' + s.regen + ' Regen/s', color: '#2ecc71', size: '11px', bold: false });
+            if (s.pickupRadius) lines.push({ text: '+' + s.pickupRadius + ' Pickup Range', color: '#2ecc71', size: '11px', bold: false });
+            if (s.moveNoise) lines.push({ text: 'Stealth ' + Math.round(s.moveNoise * 100) + '%', color: '#3498db', size: '11px', bold: false });
+            if (s.healOnKill) lines.push({ text: '+' + Math.round(s.healOnKill * 100) + '% HP on Kill', color: '#2ecc71', size: '11px', bold: false });
+            if (s.detectRange) lines.push({ text: 'Detect +' + s.detectRange, color: '#3498db', size: '11px', bold: false });
         }
         if (item.type === 'accountEquip') {
             const s = item.stats || {};
@@ -53,34 +55,26 @@ export class InventoryPanel {
             if (s.corruptionMax) lines.push({ text: '+' + s.corruptionMax + ' CorrMax', color: '#2ecc71', size: '11px' });
         }
         
-        // Item comparison (if hovering over bag item and something is equipped)
-        if (item.type === 'equip' && item.slot) {
-            const equipped = this.scene.equipment[item.slot];
+        // Weapon comparison: show attack type change
+        if (item.type === 'equip' && item.slot === 'weapon') {
+            const equipped = this.scene.equipment?.weapon;
             if (equipped && equipped !== item) {
                 lines.push({ text: '--- vs Equipped ---', color: '#f39c12', size: '10px', bold: true });
-                const newStats = item.stats || {};
-                const oldStats = equipped.stats || {};
-                const statNames = { hp: 'HP', dmg: 'DMG', speed: 'SPD', crit: 'Crit' };
-                for (const [key, label] of Object.entries(statNames)) {
-                    const oldVal = oldStats[key] || 0;
-                    const newVal = newStats[key] || 0;
-                    const diff = newVal - oldVal;
-                    if (oldVal > 0 || newVal > 0) {
-                        const diffText = diff > 0 ? '+' + diff : diff.toString();
-                        const diffColor = diff > 0 ? '#2ecc71' : diff < 0 ? '#e74c3c' : '#888';
-                        lines.push({ text: label + ': ' + oldVal + ' -> ' + newVal + ' (' + diffText + ')', color: diffColor, size: '10px', bold: false });
-                    }
-                }
+                const newAtk = item.attackType || 'default';
+                const oldAtk = equipped.attackType || 'default';
+                if (newAtk !== oldAtk) lines.push({ text: 'Attack: ' + oldAtk + ' -> ' + newAtk, color: '#f1c40f', size: '10px', bold: false });
             }
         }
         
         if (item.effect) lines.push({ text: 'Effect: ' + item.effect, color: '#f39c12', size: '10px' });
         
-        // Set info
+        // Set info (only for sets this item belongs to)
         if (item.id) {
             const setInfo = getSetInfo(this.scene.equipment, this.scene.accountEquipment);
+            const itemSets = Object.values(EQUIPMENT_SETS).filter(s => s.pieces.includes(item.id));
             setInfo.forEach(set => {
-                if (set.equipped > 0) {
+                const match = itemSets.find(s => s.name === set.name);
+                if (match && set.equipped > 0) {
                     const progress = set.equipped + '/' + set.total;
                     lines.push({ text: set.name + ' (' + progress + ')', color: '#9b59b6', size: '10px', bold: true });
                     set.bonuses.forEach(bonus => {

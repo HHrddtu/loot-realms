@@ -1,17 +1,14 @@
 export function drawEffectTextures(mk) {
-    mk('slash', 40, 40, (c) => {
-        c.fillStyle = 'rgba(255,255,255,0.3)';
+    mk('slash', 48, 48, (c) => {
+        c.strokeStyle = 'rgba(255,255,255,0.9)';
+        c.lineWidth = 4;
         c.beginPath();
-        c.arc(20, 20, 18, 0, Math.PI * 2);
-        c.fill();
-        c.fillStyle = 'rgba(255,255,255,0.7)';
+        c.arc(24, 24, 20, -0.6, 1.0);
+        c.stroke();
+        c.strokeStyle = 'rgba(200,220,255,0.6)';
+        c.lineWidth = 6;
         c.beginPath();
-        c.arc(20, 20, 10, 0, Math.PI * 2);
-        c.fill();
-        c.strokeStyle = 'rgba(200,220,255,0.9)';
-        c.lineWidth = 2;
-        c.beginPath();
-        c.arc(20, 20, 14, -0.8, 1.2);
+        c.arc(24, 24, 20, -0.4, 0.8);
         c.stroke();
     });
 
