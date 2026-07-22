@@ -14,6 +14,7 @@ export class PetSystem {
         this.petAbilityTimer = 0;
         this.petAttackCount = 0;
         this.petLevel = 1;
+        this.petManualMode = false;
     }
 
     destroy() {
@@ -128,11 +129,26 @@ export class PetSystem {
             s.tweens.add({ targets: this.petSprite, alpha: 0.6, duration: 80, yoyo: true, repeat: 4 });
         }
 
-        // Active ability
-        if (this.petTarget && this.petAbilityTimer <= 0 && this.petData.abilityKey) {
+        // Active ability (auto mode only)
+        if (!this.petManualMode && this.petTarget && this.petAbilityTimer <= 0 && this.petData.abilityKey) {
             this.petAbilityTimer = this.petData.abilityCd || 12000;
             this._useAbility(this.petData.abilityKey, s);
         }
+    }
+
+    _manualCommand(s) {
+        if (!this.petData || !this.petData.abilityKey) return;
+        if (!this.petTarget) {
+            s.floatingText(s.player.x, s.player.y - 30, 'No target!', '#e74c3c');
+            return;
+        }
+        this._useAbility(this.petData.abilityKey, s);
+        this.petAbilityTimer = this.petData.abilityCd || 12000;
+        s.floatingText(this.petSprite.x, this.petSprite.y - 30, '[G] ' + this.petData.abilityKey.toUpperCase(), '#ff8800');
+    }
+
+    toggleMode() {
+        this.petManualMode = !this.petManualMode;
     }
 
     _useAbility(key, s) {

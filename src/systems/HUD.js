@@ -43,7 +43,7 @@ export class HUD {
         this.scene.goldText = sx(this.scene.add.text(185, 86, '', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0));
         this.scene.crystalText = sx(this.scene.add.text(185, 98, '', { fontSize: '11px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0));
         this.scene.petBtnText = sx(this.scene.add.text(185, 114, '', { fontSize: '11px', fill: '#e67e22', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0).setInteractive({ useHandCursor: true }));
-        this.scene.petBtnText.on('pointerdown', () => { this.ui._openPets(); });
+        this.scene.petBtnText.on('pointerdown', (p) => { if (p.event.shiftKey) { if (this.scene.petSys) this.scene.petSys.toggleMode(); } else { this.ui._openPets(); } });
         this.scene.petBtnText.on('pointerover', () => this.scene.petBtnText.setStyle({ fill: '#f39c12' }));
         this.scene.petBtnText.on('pointerout', () => this.scene.petBtnText.setStyle({ fill: '#e67e22' }));
 
@@ -245,7 +245,17 @@ export class HUD {
         if (this.scene.crystalText) this.scene.crystalText.setText('\u{1F48E} ' + (this.scene.crystals || 0));
         if (this.scene.petBtnText) {
             const eqPet = this.scene.equippedPet;
-            this.scene.petBtnText.setText(eqPet ? '\u{1F43E} ' + (PET_DB.find(p => p.id === eqPet)?.name || eqPet) : '\u{1F43E} Pets');
+            const petData = PET_DB.find(p => p.id === eqPet);
+            if (eqPet && petData) {
+                const ps = this.scene.petSys;
+                const mode = ps?.petManualMode ? 'MAN' : 'AUTO';
+                const cd = ps?.petAbilityTimer || 0;
+                const abName = petData.abilityKey ? petData.abilityKey.toUpperCase() : '';
+                const cdText = cd > 0 ? ' ' + (cd / 1000).toFixed(1) : ' READY';
+                this.scene.petBtnText.setText('\u{1F43E} ' + petData.name + ' [' + mode + '] ' + abName + cdText);
+            } else {
+                this.scene.petBtnText.setText('\u{1F43E} Pets');
+            }
         }
         ['fireball', 'shield', 'heal', 'purify', 'meteor', 'chemical_cloud', 'divine_blessing', 'acid_flask', 'iron_skin', 'healing_potion', 'life_link', 'soul_strike', 'toxic_puddle', 'burrow', 'holy_shield', 'holy_nova'].forEach(key => {
             const s = this.scene.spellSlots[key];

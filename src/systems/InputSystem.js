@@ -45,6 +45,7 @@ export class InputSystem {
         s.cKey = resolveKey('crafting');
         s.xKey = resolveKey('spell_assign');
         s.mKey = resolveKey('mute');
+        s.gKey = kb.addKey(Phaser.Input.Keyboard.KeyCodes.G);
 
         s.input.on('pointerdown', (pointer) => {
             if (s.menuOpen || s.transitioning || s.invOpen) return;
@@ -163,6 +164,7 @@ export class InputSystem {
         if (JustDown(s.nKey)) s._openQuestLog();
         if (JustDown(s.cKey)) s._openCrafting();
         if (JustDown(s.xKey)) s._openSpellAssign();
+        if (JustDown(s.gKey) && s.petSys && s.petSys.petData) s.petSys._manualCommand(s);
 
         const spells = s._getClassSpells();
         if (JustDown(s.qKey)) s._castSpell(spells.q);
