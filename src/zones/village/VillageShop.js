@@ -169,11 +169,13 @@ export class VillageShop {
         }).setOrigin(0.5));
         s.shopGroup.push(capText);
 
-        const tabs = ['Potions', 'Boosts', 'Upgrades', 'Cases'];
+        const shopTabs = ['Potions', 'Boosts', 'Upgrades', 'Cases'];
         const tabColors = ['#27ae60', '#3498db', '#e74c3c', '#f1c40f'];
-        tabs.forEach((tab, i) => {
-            const tx = 175 + i * 95;
-            const tbg = mk(s.add.rectangle(tx, 108, 85, 20, i === tabIndex ? 0x2c3e50 : 0x1a1a2e)
+        const isBlacksmithUnlocked = s._vendorUnlocked && s._vendorUnlocked.blacksmith;
+        if (isBlacksmithUnlocked) { shopTabs.push('Craft'); tabColors.push('#9b59b6'); }
+        shopTabs.forEach((tab, i) => {
+            const tx = 130 + i * 88;
+            const tbg = mk(s.add.rectangle(tx, 108, 78, 20, i === tabIndex ? 0x2c3e50 : 0x1a1a2e)
                 .setStrokeStyle(1, i === tabIndex ? parseInt(tabColors[i].slice(1), 16) : 0x555));
             const ttl = mk(s.add.text(tx, 108, tab, {
                 fontSize: '10px', fill: i === tabIndex ? tabColors[i] : '#888', fontFamily: 'Arial', fontStyle: 'bold'
@@ -212,6 +214,7 @@ export class VillageShop {
         else if (tabIndex === 1) this._renderBoostsTab(mk, updateCurrency);
         else if (tabIndex === 2) this._renderUpgradesTab(mk, updateCurrency);
         else if (tabIndex === 3) this._renderCasesTab(mk, updateCurrency);
+        else if (tabIndex === 4) this._renderCraftTab(mk, updateCurrency);
     }
 
     _renderPotionsTab(mk, updateCurrency) {
@@ -535,6 +538,63 @@ export class VillageShop {
             pet.rarity === 'legendary' ? '#f39c12' : pet.rarity === 'rare' ? '#3498db' : '#fff'
         );
         playLoot();
+    }
+
+    _renderCraftTab(mk, updateCurrency) {
+        const s = this.scene;
+        const mats = s.materials || [];
+        const recipeCost = 5;
+
+        // Group materials by stat type
+        const craftTypes = [
+            { id: 'salve', label: 'Healing Salve', effect: 'heal', value: 0.3, desc: 'Restore 30% HP', matFilter: (m) => m.stats?.regen },
+            { id: 'elixir', label: 'Power Elixir', effect: 'damage_boost', value: 0.2, duration: 30000, desc: '+20% DMG 30s', matFilter: (m) => m.stats?.healOnKill },
+            { id: 'dust', label: 'Stealth Dust', effect: 'speed_boost', value: 0.25, duration: 30000, desc: '+25% SPD 30s', matFilter: (m) => m.stats?.moveNoise },
+            { id: 'lens', label: 'Detection Lens', effect: 'crit_boost', value: 10, duration: 30000, desc: '+10% Crit 30s', matFilter: (m) => m.stats?.detectRange }
+        ];
+
+        s.shopGroup.push(mk(s.add.text(400, 145, '5 materials → 1 consumable', { fontSize: '10px', fill: '#888', fontFamily: 'Arial' }).setOrigin(0.5)));
+
+        craftTypes.forEach((ct, i) => {
+            const available = mats.filter(ct.matFilter).reduce((sum, m) => sum + (m.count || 1), 0);
+            const canCraft = available >= recipeCost;
+            const y = 175 + i * 55;
+
+            const bg = mk(s.add.rectangle(400, y, 440, 44, canCraft ? 0x1a1a2e : 0x111118, 0.8).setStrokeStyle(1, canCraft ? 0x9b59b6 : 0x333333));
+            s.shopGroup.push(bg);
+
+            s.shopGroup.push(mk(s.add.text(210, y - 8, ct.label, { fontSize: '12px', fill: canCraft ? '#f1c40f' : '#555', fontFamily: 'Arial', fontStyle: 'bold' })));
+            s.shopGroup.push(mk(s.add.text(210, y + 8, ct.desc, { fontSize: '9px', fill: '#888', fontFamily: 'Arial' })));
+            s.shopGroup.push(mk(s.add.text(540, y, 'x' + available, { fontSize: '11px', fill: canCraft ? '#2ecc71' : '#555', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5)));
+
+            if (canCraft) {
+                const btn = mk(s.add.rectangle(540, y + 20, 60, 18, 0x27ae60).setStrokeStyle(1, 0x2ecc71).setInteractive({ useHandCursor: true }));
+                const btnTxt = mk(s.add.text(540, y + 20, 'CRAFT', { fontSize: '9px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5));
+                s.shopGroup.push(btn, btnTxt);
+                btn.on('pointerdown', () => {
+                    let remaining = recipeCost;
+                    for (let mi = mats.length - 1; mi >= 0 && remaining > 0; mi--) {
+                        const m = mats[mi];
+                        if (ct.matFilter(m)) {
+                            const take = Math.min(remaining, m.count || 1);
+                            remaining -= take;
+                            if ((m.count || 1) > take) m.count -= take;
+                            else mats.splice(mi, 1);
+                        }
+                    }
+                    const consumable = { id: 'craft_' + ct.id, name: ct.label, texKey: 'potion_heal_small', effect: ct.effect, value: ct.value, duration: ct.duration || 60000 };
+                    s.consumable = consumable;
+                    if (s.playerSys) s.playerSys.recalcStats();
+                    s.floatingText(s.player.x, s.player.y - 40, 'Crafted: ' + ct.label, '#9b59b6');
+                    playLoot();
+                    updateCurrency();
+                    this.closeShop();
+                    s.menuOpen = false;
+                    s.physics.resume();
+                    this.openShopTab(4);
+                });
+            }
+        });
     }
 
     closeShop() {
