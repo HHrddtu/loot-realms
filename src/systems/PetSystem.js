@@ -18,6 +18,7 @@ export class PetSystem {
     }
 
     destroy() {
+        if (this.petAbilityLabel) { this.petAbilityLabel.destroy(); this.petAbilityLabel = null; }
         if (this.petSprite) { this.petSprite.destroy(); this.petSprite = null; }
         this.petData = null; this.petTarget = null;
     }
@@ -34,7 +35,25 @@ export class PetSystem {
         this.petData = petData;
         this.petLevel = (acc.petLevels || {})[equippedPet] || 1;
         this.petSprite = this.scene.add.sprite(this.scene.player.x + 20, this.scene.player.y + 10, petData.texKey).setDepth(9).setScale(1.5);
+        this.petAbilityLabel = this.scene.add.text(this.scene.player.x + 20, this.scene.player.y - 20, '', {
+            fontSize: '9px', fill: '#ff8800', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
+        }).setOrigin(0.5).setDepth(10);
         this.scene.tweens.add({ targets: this.petSprite, scaleY: 1.6, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    }
+
+    _updateAbilityLabel() {
+        if (!this.petSprite || !this.petAbilityLabel) return;
+        this.petAbilityLabel.setPosition(this.petSprite.x, this.petSprite.y - 28);
+        if (!this.petData || !this.petData.abilityKey) { this.petAbilityLabel.setText(''); return; }
+        const cd = this.petAbilityTimer;
+        if (cd <= 0) {
+            this.petAbilityLabel.setText('[' + this.petData.abilityKey.toUpperCase() + ']');
+            this.petAbilityLabel.setColor(this.petManualMode ? '#ff8800' : '#2ecc71');
+        } else {
+            this.petAbilityLabel.setText((cd / 1000).toFixed(1));
+            this.petAbilityLabel.setColor('#555');
+        }
     }
 
     updateFollow() {
@@ -69,6 +88,7 @@ export class PetSystem {
             else { this.petSprite.x += dx * 0.12; this.petSprite.y += dy * 0.12; }
             this.petSprite.setFlipX(s.facing === 'left');
         }
+        this._updateAbilityLabel();
     }
 
     updateCombat(delta) {
