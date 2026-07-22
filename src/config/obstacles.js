@@ -35,17 +35,15 @@ export const ZONE_OBSTACLES = {
     ],
 
     village: [
-        { x: 150, y: 250, type: 'rock', w: 44, h: 44 },
-        { x: 650, y: 400, type: 'ruins', w: 60, h: 44 },
-        { x: 400, y: 700, type: 'fence', w: 76, h: 20 },
-        { x: 200, y: 1000, type: 'rock', w: 44, h: 44 },
-        { x: 550, y: 1300, type: 'ruins', w: 60, h: 44 },
-        { x: 300, y: 1600, type: 'fence', w: 76, h: 20 },
-        { x: 400, y: 1900, type: 'rock', w: 44, h: 44 },
-        { x: 200, y: 2200, type: 'spike', w: 20, h: 20 },
-        // Purple Demon boss arena (y~200)
+        // Boss arena (y~200) — только для боя
         { x: 300, y: 180, type: 'ruins', w: 60, h: 44 },
-        { x: 500, y: 180, type: 'ruins', w: 60, h: 44 }
+        { x: 500, y: 180, type: 'ruins', w: 60, h: 44 },
+        // Ниже по деревне — редко
+        { x: 200, y: 700, type: 'rock', w: 44, h: 44 },
+        { x: 600, y: 1100, type: 'ruins', w: 60, h: 44 },
+        { x: 400, y: 1500, type: 'fence', w: 76, h: 20 },
+        { x: 150, y: 1900, type: 'rock', w: 44, h: 44 },
+        { x: 500, y: 2200, type: 'spike', w: 20, h: 20 }
     ],
 
     hell: [
