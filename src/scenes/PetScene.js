@@ -14,13 +14,10 @@ export default class PetScene extends Phaser.Scene {
     }
 
     create() {
-        this.cameras.main.setBackgroundColor('#1a1408');
+        this.cameras.main.setBackgroundColor('#0a0a1a');
         this.cameras.main.setBounds(0, 0, 800, 600);
         this.elements = [];
 
-        // Debug: bright background to confirm visibility
-        this.add.rectangle(400, 300, 800, 600, 0x1a1408).setDepth(0);
-        this.add.text(400, 300, 'PET SCENE', { fontSize: '48px', fill: '#f1c40f' }).setOrigin(0.5).setDepth(1000);
         this._panel = null;
         this._panelEls = [];
 

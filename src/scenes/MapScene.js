@@ -9,7 +9,7 @@ export default class MapScene extends Phaser.Scene {
     }
 
     create() {
-        this.cameras.main.setBackgroundColor('#0a0a18');
+        this.cameras.main.setBackgroundColor('#0a0a1a');
         this.currentView = 'chapters';
         this.currentChapter = null;
         this.elements = [];
@@ -29,8 +29,7 @@ export default class MapScene extends Phaser.Scene {
         this.currentView = 'chapters';
 
         const title = this.add.text(GAME_WIDTH / 2, 40, 'WORLD MAP', {
-            fontSize: '24px', fill: '#f1c40f', fontFamily: 'Georgia', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 3
+            fontSize: '24px', fill: '#f1c40f', fontFamily: 'Georgia', fontStyle: 'bold'
         }).setOrigin(0.5);
         this.elements.push(title);
 
@@ -99,7 +98,7 @@ export default class MapScene extends Phaser.Scene {
 
         const title = this.add.text(GAME_WIDTH / 2, 40, chName, {
             fontSize: '22px', fill: '#' + chapter.color.toString(16).padStart(6, '0'),
-            fontFamily: 'Georgia', fontStyle: 'bold', stroke: '#000', strokeThickness: 3
+            fontFamily: 'Georgia', fontStyle: 'bold'
         }).setOrigin(0.5);
         this.elements.push(title);
 
