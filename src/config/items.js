@@ -108,17 +108,17 @@ export const ACCOUNT_EQUIP_DB_CAVE = [
 export const CAVE_RELIC_CLASSES = ['sage', 'alchemist', 'angel'];
 
 export const DEPTHS_MATERIALS = [
-    { id: 'bone_dust',       name: 'Bone Dust',       nameRu: 'Костяная Пыль',      nameDe: 'Knochenstaub',       rarity: 'common',   texKey: 'item_stone',  chance: 0.28, stats: { hp: 10 } },
-    { id: 'grave_moss',      name: 'Grave Moss',      nameRu: 'Могильный Мох',      nameDe: 'Grabmoos',           rarity: 'common',   texKey: 'item_mush',  chance: 0.24, stats: { regen: 3 } },
-    { id: 'shadow_essence',  name: 'Shadow Essence',  nameRu: 'Теневая Эссенция',   nameDe: 'Schattenessenz',     rarity: 'uncommon', texKey: 'item_ruby',  chance: 0.14, stats: { speed: 10 } },
-    { id: 'cursed_iron',     name: 'Cursed Iron',     nameRu: 'Проклятое Железо',   nameDe: 'Verfluchtes Eisen',  rarity: 'uncommon', texKey: 'item_stone', chance: 0.12, stats: { dmg: 6, hp: 8 } },
-    { id: 'necrotic_flesh',  name: 'Necrotic Flesh',  nameRu: 'Некротическая Плоть', nameDe: 'Nekrotisches Fleisch', rarity: 'uncommon', texKey: 'item_mush', chance: 0.10, stats: { hp: 12, dmg: 4 } },
-    { id: 'spectral_silk',   name: 'Spectral Silk',   nameRu: 'Спектральный Шёлк',  nameDe: 'Spektralseide',      rarity: 'uncommon', texKey: 'item_leaf',  chance: 0.08, stats: { speed: 8, dodge: 2 } },
-    { id: 'dark_rune',       name: 'Dark Rune',       nameRu: 'Тёмная Руна',        nameDe: 'Dunkle Rune',        rarity: 'rare',     texKey: 'item_ruby',  chance: 0.05, stats: { dmg: 8, spellPercent: 3 } },
-    { id: 'death_cap',       name: 'Death Cap',       nameRu: 'Шляпка Смерти',      nameDe: 'Todespilz',          rarity: 'uncommon', texKey: 'item_mush',  chance: 0.08, stats: { hp: 10, regen: 2 } },
-    { id: 'soul_shard',      name: 'Soul Shard',      nameRu: 'Осколок Души',       nameDe: 'Seelescherbe',       rarity: 'rare',     texKey: 'item_ruby',  chance: 0.04, stats: { dmg: 10, hp: 15 } },
-    { id: 'blood_crystal',   name: 'Blood Crystal',   nameRu: 'Кровавый Кристалл',  nameDe: 'Blutkristall',       rarity: 'rare',     texKey: 'item_ruby',  chance: 0.03, stats: { hp: 18, dmg: 8 } },
-    { id: 'void_essence',    name: 'Void Essence',    nameRu: 'Эссенция Пустоты',   nameDe: 'Leereessenz',        rarity: 'rare',     texKey: 'item_ruby',  chance: 0.02, stats: { dmg: 12, speed: 5 } }
+    { id: 'bone_dust',       name: 'Bone Dust',       nameRu: 'Костяная Пыль',      nameDe: 'Knochenstaub',       rarity: 'common',   texKey: 'item_stone',  chance: 0.28, stats: { regen: 3 } },
+    { id: 'grave_moss',      name: 'Grave Moss',      nameRu: 'Могильный Мох',      nameDe: 'Grabmoos',           rarity: 'common',   texKey: 'item_mush',  chance: 0.24, stats: { regen: 5 } },
+    { id: 'shadow_essence',  name: 'Shadow Essence',  nameRu: 'Теневая Эссенция',   nameDe: 'Schattenessenz',     rarity: 'uncommon', texKey: 'item_ruby',  chance: 0.14, stats: { moveNoise: -0.15 } },
+    { id: 'cursed_iron',     name: 'Cursed Iron',     nameRu: 'Проклятое Железо',   nameDe: 'Verfluchtes Eisen',  rarity: 'uncommon', texKey: 'item_stone', chance: 0.12, stats: { pickupRadius: 25 } },
+    { id: 'necrotic_flesh',  name: 'Necrotic Flesh',  nameRu: 'Некротическая Плоть', nameDe: 'Nekrotisches Fleisch', rarity: 'uncommon', texKey: 'item_mush', chance: 0.10, stats: { healOnKill: 0.05 } },
+    { id: 'spectral_silk',   name: 'Spectral Silk',   nameRu: 'Спектральный Шёлк',  nameDe: 'Spektralseide',      rarity: 'uncommon', texKey: 'item_leaf',  chance: 0.08, stats: { moveNoise: -0.2 } },
+    { id: 'dark_rune',       name: 'Dark Rune',       nameRu: 'Тёмная Руна',        nameDe: 'Dunkle Rune',        rarity: 'rare',     texKey: 'item_ruby',  chance: 0.05, stats: { detectRange: 60 } },
+    { id: 'death_cap',       name: 'Death Cap',       nameRu: 'Шляпка Смерти',      nameDe: 'Todespilz',          rarity: 'uncommon', texKey: 'item_mush',  chance: 0.08, stats: { regen: 6 } },
+    { id: 'soul_shard',      name: 'Soul Shard',      nameRu: 'Осколок Души',       nameDe: 'Seelescherbe',       rarity: 'rare',     texKey: 'item_ruby',  chance: 0.04, stats: { healOnKill: 0.08 } },
+    { id: 'blood_crystal',   name: 'Blood Crystal',   nameRu: 'Кровавый Кристалл',  nameDe: 'Blutkristall',       rarity: 'rare',     texKey: 'item_ruby',  chance: 0.03, stats: { healOnKill: 0.1 } },
+    { id: 'void_essence',    name: 'Void Essence',    nameRu: 'Эссенция Пустоты',   nameDe: 'Leereessenz',        rarity: 'rare',     texKey: 'item_ruby',  chance: 0.02, stats: { detectRange: 100 } }
 ];
 
 export const ACCOUNT_EQUIP_DB_DEPTHS = [
@@ -135,18 +135,18 @@ export const DEPTHS_CHEST_DROP_ITEMS = [
 ];
 
 export const CURSED_MATERIALS = [
-    { id: 'swamp_moss',     name: 'Swamp Moss',     nameRu: 'Болотный Мох',       nameDe: 'Sumpfmoos',         rarity: 'common',   texKey: 'item_mush',  chance: 0.26, stats: { regen: 3 } },
-    { id: 'poison_sac',     name: 'Poison Sac',     nameRu: 'Ядовитый Мешок',     nameDe: 'Giftsack',          rarity: 'common',   texKey: 'item_mush',  chance: 0.22, stats: { dmg: 5 } },
-    { id: 'bog_iron',       name: 'Bog Iron',       nameRu: 'Болотная Руда',      nameDe: 'Moorerz',           rarity: 'uncommon', texKey: 'item_stone', chance: 0.14, stats: { hp: 12, dmg: 4 } },
-    { id: 'venom_sac',      name: 'Venom Sac',      nameRu: 'Ядовитая Железа',    nameDe: 'Giftsack',          rarity: 'uncommon', texKey: 'item_mush',  chance: 0.12, stats: { dmg: 8 } },
-    { id: 'thorn_wood',     name: 'Thorn Wood',     nameRu: 'Терновое Древо',     nameDe: 'Dornholz',          rarity: 'uncommon', texKey: 'item_stick', chance: 0.10, stats: { hp: 10, speed: 5 } },
-    { id: 'cursed_sap',     name: 'Cursed Sap',     nameRu: 'Проклятый Сок',      nameDe: 'Verfluchter Saft',  rarity: 'uncommon', texKey: 'item_mush',  chance: 0.08, stats: { hp: 15, regen: 2 } },
-    { id: 'death_dust',     name: 'Death Dust',     nameRu: 'Пыль Смерти',        nameDe: 'Todesstaub',        rarity: 'rare',     texKey: 'item_ruby',  chance: 0.05, stats: { dmg: 10, spellPercent: 3 } },
-    { id: 'grave_iron',     name: 'Grave Iron',     nameRu: 'Могильное Железо',   nameDe: 'Grabeseisen',       rarity: 'rare',     texKey: 'item_stone', chance: 0.04, stats: { hp: 18, damageReduction: 2 } },
-    { id: 'soul_essence',   name: 'Soul Essence',   nameRu: 'Эссенция Души',      nameDe: 'Seelessenz',        rarity: 'rare',     texKey: 'item_ruby',  chance: 0.03, stats: { dmg: 12, hp: 12 } },
-    { id: 'holy_shard',     name: 'Holy Shard',     nameRu: 'Священный Осколок',  nameDe: 'Heiliger Splitter', rarity: 'rare',     texKey: 'item_ruby',  chance: 0.03, stats: { hp: 20, regenPercent: 2 } },
-    { id: 'corrupt_essence', name: 'Corrupt Essence', nameRu: 'Тёмная Эссенция',  nameDe: 'Dunkle Essenz',     rarity: 'rare',     texKey: 'item_ruby',  chance: 0.02, stats: { dmg: 14, spellPercent: 4 } },
-    { id: 'ancient_idol',   name: 'Ancient Idol',   nameRu: 'Древний Идол',       nameDe: 'Uraltes Idol',      rarity: 'rare',     texKey: 'item_ruby',  chance: 0.02, stats: { hp: 25, dmg: 10, speed: 5 } }
+    { id: 'swamp_moss',     name: 'Swamp Moss',     nameRu: 'Болотный Мох',       nameDe: 'Sumpfmoos',         rarity: 'common',   texKey: 'item_mush',  chance: 0.26, stats: { regen: 4 } },
+    { id: 'poison_sac',     name: 'Poison Sac',     nameRu: 'Ядовитый Мешок',     nameDe: 'Giftsack',          rarity: 'common',   texKey: 'item_mush',  chance: 0.22, stats: { moveNoise: -0.1 } },
+    { id: 'bog_iron',       name: 'Bog Iron',       nameRu: 'Болотная Руда',      nameDe: 'Moorerz',           rarity: 'uncommon', texKey: 'item_stone', chance: 0.14, stats: { pickupRadius: 30 } },
+    { id: 'venom_sac',      name: 'Venom Sac',      nameRu: 'Ядовитая Железа',    nameDe: 'Giftsack',          rarity: 'uncommon', texKey: 'item_mush',  chance: 0.12, stats: { healOnKill: 0.04 } },
+    { id: 'thorn_wood',     name: 'Thorn Wood',     nameRu: 'Терновое Древо',     nameDe: 'Dornholz',          rarity: 'uncommon', texKey: 'item_stick', chance: 0.10, stats: { regen: 5 } },
+    { id: 'cursed_sap',     name: 'Cursed Sap',     nameRu: 'Проклятый Сок',      nameDe: 'Verfluchter Saft',  rarity: 'uncommon', texKey: 'item_mush',  chance: 0.08, stats: { healOnKill: 0.06 } },
+    { id: 'death_dust',     name: 'Death Dust',     nameRu: 'Пыль Смерти',        nameDe: 'Todesstaub',        rarity: 'rare',     texKey: 'item_ruby',  chance: 0.05, stats: { detectRange: 60 } },
+    { id: 'grave_iron',     name: 'Grave Iron',     nameRu: 'Могильное Железо',   nameDe: 'Grabeseisen',       rarity: 'rare',     texKey: 'item_stone', chance: 0.04, stats: { pickupRadius: 40 } },
+    { id: 'soul_essence',   name: 'Soul Essence',   nameRu: 'Эссенция Души',      nameDe: 'Seelessenz',        rarity: 'rare',     texKey: 'item_ruby',  chance: 0.03, stats: { healOnKill: 0.1 } },
+    { id: 'holy_shard',     name: 'Holy Shard',     nameRu: 'Священный Осколок',  nameDe: 'Heiliger Splitter', rarity: 'rare',     texKey: 'item_ruby',  chance: 0.03, stats: { regen: 8 } },
+    { id: 'corrupt_essence', name: 'Corrupt Essence', nameRu: 'Тёмная Эссенция',  nameDe: 'Dunkle Essenz',     rarity: 'rare',     texKey: 'item_ruby',  chance: 0.02, stats: { moveNoise: -0.3 } },
+    { id: 'ancient_idol',   name: 'Ancient Idol',   nameRu: 'Древний Идол',       nameDe: 'Uraltes Idol',      rarity: 'rare',     texKey: 'item_ruby',  chance: 0.02, stats: { detectRange: 120 } }
 ];
 
 export const ACCOUNT_EQUIP_DB_CURSED = [
@@ -163,18 +163,18 @@ export const CURSED_CHEST_DROP_ITEMS = [
 ];
 
 export const SHADOW_MATERIALS = [
-    { id: 'void_dust',       name: 'Void Dust',       nameRu: 'Пыль Пустоты',      nameDe: 'Leerenstaub',        rarity: 'common',   texKey: 'item_stone',  chance: 0.24, stats: { dmg: 5 } },
-    { id: 'shadow_essence',  name: 'Shadow Essence',  nameRu: 'Теневая Эссенция',  nameDe: 'Schattenessenz',     rarity: 'common',   texKey: 'item_ruby',  chance: 0.20, stats: { speed: 8 } },
-    { id: 'abyss_shard',     name: 'Abyss Shard',     nameRu: 'Осколок Бездны',    nameDe: 'Abgrundsplitter',    rarity: 'uncommon', texKey: 'item_ruby',  chance: 0.14, stats: { dmg: 8, hp: 10 } },
-    { id: 'dark_ink',        name: 'Dark Ink',        nameRu: 'Чёрнила Тьмы',      nameDe: 'Dunkle Tinte',       rarity: 'uncommon', texKey: 'item_stone', chance: 0.12, stats: { spellPercent: 3 } },
-    { id: 'forbidden_page',  name: 'Forbidden Page',  nameRu: 'Запретная Страница', nameDe: 'Verbotene Seite',   rarity: 'uncommon', texKey: 'item_leaf',  chance: 0.10, stats: { spellPercent: 4, critPercent: 2 } },
-    { id: 'shadow_crystal',  name: 'Shadow Crystal',  nameRu: 'Теневой Кристалл',  nameDe: 'Schattenkristall',   rarity: 'uncommon', texKey: 'item_ruby',  chance: 0.08, stats: { hp: 15, dmg: 6 } },
-    { id: 'mirror_fragment', name: 'Mirror Fragment', nameRu: 'Осколок Зеркала',   nameDe: 'Spiegelscherbe',     rarity: 'rare',     texKey: 'item_ruby',  chance: 0.05, stats: { dodgePercent: 3, speed: 5 } },
-    { id: 'shade_essence',   name: 'Shade Essence',   nameRu: 'Эссенция Призрака', nameDe: 'Schattenessenz',     rarity: 'rare',     texKey: 'item_ruby',  chance: 0.04, stats: { dmg: 10, spellPercent: 4 } },
-    { id: 'cracked_gem',     name: 'Cracked Gem',     nameRu: 'Треснувший Самоцвет', nameDe: 'Rissiger Edelstein', rarity: 'rare',  texKey: 'item_ruby',  chance: 0.03, stats: { hp: 20, dmg: 8 } },
-    { id: 'rift_core',       name: 'Rift Core',       nameRu: 'Ядро Разлома',      nameDe: 'Risskern',           rarity: 'rare',     texKey: 'item_ruby',  chance: 0.03, stats: { dmg: 12, speed: 8 } },
-    { id: 'portal_stone',    name: 'Portal Stone',    nameRu: 'Камень Портала',    nameDe: 'Portalstein',        rarity: 'rare',     texKey: 'item_ruby',  chance: 0.02, stats: { hp: 25, spellPercent: 5 } },
-    { id: 'dimension_essence', name: 'Dimension Essence', nameRu: 'Эссенция Измерения', nameDe: 'Dimensionsessenz', rarity: 'rare', texKey: 'item_ruby', chance: 0.02, stats: { hp: 30, dmg: 12, speed: 5 } }
+    { id: 'void_dust',       name: 'Void Dust',       nameRu: 'Пыль Пустоты',      nameDe: 'Leerenstaub',        rarity: 'common',   texKey: 'item_stone',  chance: 0.24, stats: { moveNoise: -0.15 } },
+    { id: 'shadow_essence',  name: 'Shadow Essence',  nameRu: 'Теневая Эссенция',  nameDe: 'Schattenessenz',     rarity: 'common',   texKey: 'item_ruby',  chance: 0.20, stats: { regen: 4 } },
+    { id: 'abyss_shard',     name: 'Abyss Shard',     nameRu: 'Осколок Бездны',    nameDe: 'Abgrundsplitter',    rarity: 'uncommon', texKey: 'item_ruby',  chance: 0.14, stats: { detectRange: 50 } },
+    { id: 'dark_ink',        name: 'Dark Ink',        nameRu: 'Чёрнила Тьмы',      nameDe: 'Dunkle Tinte',       rarity: 'uncommon', texKey: 'item_stone', chance: 0.12, stats: { moveNoise: -0.2 } },
+    { id: 'forbidden_page',  name: 'Forbidden Page',  nameRu: 'Запретная Страница', nameDe: 'Verbotene Seite',   rarity: 'uncommon', texKey: 'item_leaf',  chance: 0.10, stats: { detectRange: 70 } },
+    { id: 'shadow_crystal',  name: 'Shadow Crystal',  nameRu: 'Теневой Кристалл',  nameDe: 'Schattenkristall',   rarity: 'uncommon', texKey: 'item_ruby',  chance: 0.08, stats: { pickupRadius: 35 } },
+    { id: 'mirror_fragment', name: 'Mirror Fragment', nameRu: 'Осколок Зеркала',   nameDe: 'Spiegelscherbe',     rarity: 'rare',     texKey: 'item_ruby',  chance: 0.05, stats: { moveNoise: -0.35 } },
+    { id: 'shade_essence',   name: 'Shade Essence',   nameRu: 'Эссенция Призрака', nameDe: 'Schattenessenz',     rarity: 'rare',     texKey: 'item_ruby',  chance: 0.04, stats: { healOnKill: 0.08 } },
+    { id: 'cracked_gem',     name: 'Cracked Gem',     nameRu: 'Треснувший Самоцвет', nameDe: 'Rissiger Edelstein', rarity: 'rare',  texKey: 'item_ruby',  chance: 0.03, stats: { regen: 7 } },
+    { id: 'rift_core',       name: 'Rift Core',       nameRu: 'Ядро Разлома',      nameDe: 'Risskern',           rarity: 'rare',     texKey: 'item_ruby',  chance: 0.03, stats: { detectRange: 90 } },
+    { id: 'portal_stone',    name: 'Portal Stone',    nameRu: 'Камень Портала',    nameDe: 'Portalstein',        rarity: 'rare',     texKey: 'item_ruby',  chance: 0.02, stats: { pickupRadius: 50 } },
+    { id: 'dimension_essence', name: 'Dimension Essence', nameRu: 'Эссенция Измерения', nameDe: 'Dimensionsessenz', rarity: 'rare', texKey: 'item_ruby', chance: 0.02, stats: { regen: 10 } }
 ];
 
 export const ACCOUNT_EQUIP_DB_SHADOW = [
@@ -191,16 +191,16 @@ export const SHADOW_CHEST_DROP_ITEMS = [
 ];
 
 export const TOWER_MATERIALS = [
-    { id: 'ancient_steel',      name: 'Ancient Steel',      nameRu: 'Древняя Сталь',       nameDe: 'Uralter Stahl',       rarity: 'common',   texKey: 'item_stone',  chance: 0.22, stats: { hp: 8, dmg: 4 } },
-    { id: 'royal_dust',         name: 'Royal Dust',         nameRu: 'Королевская Пыль',    nameDe: 'Königlicher Staub',   rarity: 'common',   texKey: 'item_stone',  chance: 0.18, stats: { dmg: 6 } },
-    { id: 'crown_jewel',        name: 'Crown Jewel',        nameRu: 'Корона Самоцвет',     nameDe: 'Kronjuwel',           rarity: 'uncommon', texKey: 'item_ruby',   chance: 0.14, stats: { hp: 12, spellPercent: 3 } },
-    { id: 'tower_rune',         name: 'Tower Rune',         nameRu: 'Башенная Руна',      nameDe: 'Turmrune',            rarity: 'uncommon', texKey: 'item_ruby',   chance: 0.12, stats: { spellPercent: 4, critPercent: 2 } },
-    { id: 'dark_counsel_ink',   name: 'Dark Counsel Ink',   nameRu: 'Чёрнила Тёмного Совета', nameDe: 'Dunkle Ratstinte',  rarity: 'uncommon', texKey: 'item_stone', chance: 0.10, stats: { spellPercent: 5 } },
-    { id: 'noble_blood',        name: 'Noble Blood',        nameRu: 'Кровь Аристократа',   nameDe: 'Adelsblut',           rarity: 'uncommon', texKey: 'item_ruby',   chance: 0.08, stats: { hp: 15, regenPercent: 2 } },
-    { id: 'shadow_advisor_essence', name: 'Shadow Advisor Essence', nameRu: 'Эссенция Тень-Советника', nameDe: 'Schattenratsessenz', rarity: 'rare', texKey: 'item_ruby', chance: 0.05, stats: { dmg: 10, spellPercent: 4 } },
-    { id: 'paladin_oath',       name: 'Paladin Oath',       nameRu: 'Клятва Паладина',    nameDe: 'Paladin Eid',          rarity: 'rare',     texKey: 'item_ruby',   chance: 0.04, stats: { hp: 20, damageReduction: 3 } },
-    { id: 'kings_tear',         name: 'King\'s Tear',       nameRu: 'Слеза Короля',       nameDe: 'Träne des Königs',    rarity: 'rare',     texKey: 'item_ruby',   chance: 0.03, stats: { hp: 25, dmg: 10, regenPercent: 3 } },
-    { id: 'tower_heart',        name: 'Tower Heart',        nameRu: 'Сердце Башни',       nameDe: 'Turmherz',            rarity: 'rare',     texKey: 'item_ruby',   chance: 0.02, stats: { hp: 30, dmg: 12, spellPercent: 5 } }
+    { id: 'ancient_steel',      name: 'Ancient Steel',      nameRu: 'Древняя Сталь',       nameDe: 'Uralter Stahl',       rarity: 'common',   texKey: 'item_stone',  chance: 0.22, stats: { pickupRadius: 25 } },
+    { id: 'royal_dust',         name: 'Royal Dust',         nameRu: 'Королевская Пыль',    nameDe: 'Königlicher Staub',   rarity: 'common',   texKey: 'item_stone',  chance: 0.18, stats: { regen: 5 } },
+    { id: 'crown_jewel',        name: 'Crown Jewel',        nameRu: 'Корона Самоцвет',     nameDe: 'Kronjuwel',           rarity: 'uncommon', texKey: 'item_ruby',   chance: 0.14, stats: { detectRange: 70 } },
+    { id: 'tower_rune',         name: 'Tower Rune',         nameRu: 'Башенная Руна',      nameDe: 'Turmrune',            rarity: 'uncommon', texKey: 'item_ruby',   chance: 0.12, stats: { regen: 6 } },
+    { id: 'dark_counsel_ink',   name: 'Dark Counsel Ink',   nameRu: 'Чёрнила Тёмного Совета', nameDe: 'Dunkle Ratstinte',  rarity: 'uncommon', texKey: 'item_stone', chance: 0.10, stats: { moveNoise: -0.2 } },
+    { id: 'noble_blood',        name: 'Noble Blood',        nameRu: 'Кровь Аристократа',   nameDe: 'Adelsblut',           rarity: 'uncommon', texKey: 'item_ruby',   chance: 0.08, stats: { healOnKill: 0.06 } },
+    { id: 'shadow_advisor_essence', name: 'Shadow Advisor Essence', nameRu: 'Эссенция Тень-Советника', nameDe: 'Schattenratsessenz', rarity: 'rare', texKey: 'item_ruby', chance: 0.05, stats: { moveNoise: -0.3 } },
+    { id: 'paladin_oath',       name: 'Paladin Oath',       nameRu: 'Клятва Паладина',    nameDe: 'Paladin Eid',          rarity: 'rare',     texKey: 'item_ruby',   chance: 0.04, stats: { healOnKill: 0.1 } },
+    { id: 'kings_tear',         name: 'King\'s Tear',       nameRu: 'Слеза Короля',       nameDe: 'Träne des Königs',    rarity: 'rare',     texKey: 'item_ruby',   chance: 0.03, stats: { regen: 9 } },
+    { id: 'tower_heart',        name: 'Tower Heart',        nameRu: 'Сердце Башни',       nameDe: 'Turmherz',            rarity: 'rare',     texKey: 'item_ruby',   chance: 0.02, stats: { detectRange: 150 } }
 ];
 
 export const ACCOUNT_EQUIP_DB_TOWER = [

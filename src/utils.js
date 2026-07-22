@@ -1,4 +1,4 @@
-import { MATERIAL_DB, EQUIP_DB, ACCOUNT_EQUIP_DB, CAVE_MATERIALS, ACCOUNT_EQUIP_DB_CAVE, VILLAGE_MATERIALS, ACCOUNT_EQUIP_DB_VILLAGE, ACCOUNT_EQUIP_DB_DEPTHS, ACCOUNT_EQUIP_DB_CURSED, ACCOUNT_EQUIP_DB_SHADOW, ACCOUNT_EQUIP_DB_TOWER, ACCOUNT_EQUIP_DB_THRONE, VILLAGE_CHEST_DROP_ITEMS } from './config/index.js';
+import { MATERIAL_DB, EQUIP_DB, ACCOUNT_EQUIP_DB, CAVE_MATERIALS, ACCOUNT_EQUIP_DB_CAVE, VILLAGE_MATERIALS, DEPTHS_MATERIALS, CURSED_MATERIALS, SHADOW_MATERIALS, TOWER_MATERIALS, ACCOUNT_EQUIP_DB_VILLAGE, ACCOUNT_EQUIP_DB_DEPTHS, ACCOUNT_EQUIP_DB_CURSED, ACCOUNT_EQUIP_DB_SHADOW, ACCOUNT_EQUIP_DB_TOWER, ACCOUNT_EQUIP_DB_THRONE, VILLAGE_CHEST_DROP_ITEMS } from './config/index.js';
 import { ZONE_LOOT_TABLES } from './config/gold.js';
 
 export function lighten(color, amt) {
@@ -87,8 +87,13 @@ export function rollZoneEquip(zone) {
 }
 
 export function rollZoneMaterial(zone) {
-    if (zone === 'mine') return { ...weightedRoll(MATERIAL_DB), type: 'material' };
+    if (zone === 'mine' || zone === 'forest' || zone === 'arena') return { ...weightedRoll(MATERIAL_DB), type: 'material' };
     if (zone === 'cave') return { ...weightedRoll(CAVE_MATERIALS), type: 'material' };
     if (zone === 'village' || zone === 'snowy') return { ...weightedRoll(VILLAGE_MATERIALS), type: 'material' };
+    if (zone === 'depths' || zone === 'cemetery') return { ...weightedRoll(DEPTHS_MATERIALS), type: 'material' };
+    if (zone === 'cursed') return { ...weightedRoll(CURSED_MATERIALS), type: 'material' };
+    if (zone === 'shadow') return { ...weightedRoll(SHADOW_MATERIALS), type: 'material' };
+    if (zone === 'tower' || zone === 'castle') return { ...weightedRoll(TOWER_MATERIALS), type: 'material' };
+    if (zone === 'throne') return { ...weightedRoll(TOWER_MATERIALS), type: 'material' };
     return { ...weightedRoll(MATERIAL_DB), type: 'material' };
 }
