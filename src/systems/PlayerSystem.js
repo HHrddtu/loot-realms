@@ -43,11 +43,10 @@ export class PlayerSystem {
 
         this.scene._materialSensors = { regen: 0, pickupRadius: 0, moveNoise: 0, healOnKill: 0, detectRange: 0 };
         this.scene.materials.forEach(m => {
+            const cnt = m.count || 1;
             if (m.stats) {
-                bonusHP += 0;
-                bonusDmg += 0;
-                bonusSpeed += (m.stats.speed || 0);
-                if (m.stats.regen) this.scene._materialSensors.regen += m.stats.regen;
+                bonusSpeed += (m.stats.speed || 0) * cnt;
+                if (m.stats.regen) this.scene._materialSensors.regen += m.stats.regen * cnt;
                 if (m.stats.pickupRadius) this.scene._materialSensors.pickupRadius += m.stats.pickupRadius;
                 if (m.stats.moveNoise) this.scene._materialSensors.moveNoise += m.stats.moveNoise;
                 if (m.stats.healOnKill) this.scene._materialSensors.healOnKill += m.stats.healOnKill;
@@ -209,12 +208,18 @@ export class PlayerSystem {
     }
 
     addMaterial(item) {
+        const existing = this.scene.materials.find(m => m.id === item.id);
+        if (existing) {
+            existing.count = (existing.count || 1) + 1;
+            if (item.id) { recordMaterialCollect(item.id); onCollect(item.id); }
+            this.recalcStats();
+            return true;
+        }
         if (this.scene.materials.length >= this.scene.maxMaterials) return false;
-        const copy = { ...item };
+        const copy = { ...item, count: 1 };
         if (copy.locked === undefined) copy.locked = false;
         this.scene.materials.push(copy);
-        if (copy.id) recordMaterialCollect(copy.id);
-        if (copy.id) onCollect(copy.id);
+        if (copy.id) { recordMaterialCollect(copy.id); onCollect(copy.id); }
         this.recalcStats();
         return true;
     }
@@ -340,7 +345,9 @@ export class PlayerSystem {
             item = this.scene.materials[idx];
             if (!item) return 0;
             if (item.locked) return -1;
-            this.scene.materials.splice(idx, 1);
+            const cnt = item.count || 1;
+            if (cnt > 1) { item.count = cnt - 1; }
+            else { this.scene.materials.splice(idx, 1); }
         } else if (type === 'equip') {
             item = this.scene.equipBag[idx];
             if (!item) return 0;

@@ -1,5 +1,4 @@
 import { HUD } from './HUD.js';
-import { InventoryPanel } from './InventoryPanel.js';
 import { PauseMenu } from './PauseMenu.js';
 import { InventoryUI } from './InventoryUI.js';
 import { AccountEquipUI } from './AccountEquipUI.js';
@@ -15,7 +14,6 @@ export class UISystem {
         this.inventory = new InventoryUI(scene, this);
         this.accountEquip = new AccountEquipUI(scene, this);
         this.hud = new HUD(scene, this);
-        this.invPanel = new InventoryPanel(scene, this);
         this.pause = new PauseMenu(scene, this);
     }
 
@@ -232,15 +230,11 @@ export class UISystem {
         // For now, the grid is rebuilt when the UI is opened
     }
 
-    toggleInventory() { this.invPanel.toggleInventory(); }
-    openInventory() { this.invPanel.openInventory(); }
-    closeInventory() { this.invPanel.closeInventory(); }
-    _showItemTooltip(x, y, item) { this.invPanel._showItemTooltip(x, y, item); }
-    _hideItemTooltip() { this.invPanel._hideItemTooltip(); }
-    _drawEquippedPanel() { this.invPanel._drawEquippedPanel(); }
-    _drawMaterialsPanel() { this.invPanel._drawMaterialsPanel(); }
-    _drawEquipmentBagPanel() { this.invPanel._drawEquipmentBagPanel(); }
-    _drawCloseButton() { this.invPanel._drawCloseButton(); }
+    toggleInventory() { this.inventory.toggleInventory(); }
+    openInventory() { this.inventory.openInventory(); }
+    closeInventory() { this.inventory.closeInventory(); }
+    _showItemTooltip(x, y, item) { /* handled by InventoryUI grid hover */ }
+    _hideItemTooltip() { /* handled by InventoryUI grid hover */ }
 
     togglePause() { this.pause.togglePause(); }
     openPause() { this.pause.openPause(); }
