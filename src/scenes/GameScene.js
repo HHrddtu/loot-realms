@@ -13,6 +13,7 @@ import { initBestiary, recordEncounter } from '../bestiary.js';
 import { initMaterialBook } from '../materialBook.js';
 import { initSoulBook } from '../soulBook.js';
 import { initQuests, onExplore, setGameScene } from '../quests.js';
+import { MAP_CHAPTERS } from '../config/mapData.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { CombatFacade } from '../systems/CombatFacade.js';
 import { PlayerSystem } from '../systems/PlayerSystem.js';
@@ -508,6 +509,23 @@ export default class GameScene extends Phaser.Scene {
 
     /* ===== ZONE DELEGATION ===== */
 
+    _getChapterForZone(zoneName) {
+        for (const ch of MAP_CHAPTERS) {
+            if (ch.zones.some(z => z.key === zoneName)) return ch;
+        }
+        return null;
+    }
+
+    _hasItem(itemId) {
+        if (this.equipBag?.some(i => i.id === itemId)) return true;
+        if (this.materials?.some(m => m.id === itemId)) return true;
+        if (this.accountEquipBag?.some(i => i.id === itemId)) return true;
+        for (const slot of ['weapon', 'armor', 'accessory']) {
+            if (this.equipment[slot]?.id === itemId) return true;
+        }
+        return false;
+    }
+
     _setupZone(zoneName, ...args) {
         if (this.particles) this.particles.stopEnvironment();
         this.petTarget = null;
@@ -516,6 +534,14 @@ export default class GameScene extends Phaser.Scene {
         }
         const zone = this.zones[zoneName];
         if (zone) {
+            // Zone gating: check if chapter requires an item
+            const chapter = (zoneName === 'forest' || zoneName === 'arena' || zoneName === 'mine') ? null : this._getChapterForZone(zoneName);
+            const required = chapter && chapter.requireItem;
+            if (required && !this._hasItem(required)) {
+                const itemName = required.replace(/_/g, ' ');
+                this.floatingText(this.player.x, this.player.y - 30, 'Need: ' + itemName, '#e74c3c');
+                return;
+            }
             this.currentZone = zone;
             this.zone = zoneName;
             startZoneMusic(zoneName);

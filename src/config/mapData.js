@@ -30,6 +30,7 @@ export const MAP_CHAPTERS = [
         nameRu: 'Огонь и Лёд',
         nameDe: 'Feuer und Eis',
         color: 0xe74c3c,
+        requireItem: 'magma_armor',
         zones: [
             { key: 'hell', name: 'Hell', nameRu: 'Ад', nameDe: 'Hölle', x: 0, y: 0 },
             { key: 'snowy', name: 'Snowy Village', nameRu: 'Замёрзшая Деревня', nameDe: 'Gefrorenes Dorf', x: 1, y: 0 }
@@ -41,6 +42,7 @@ export const MAP_CHAPTERS = [
         nameRu: 'Крепость',
         nameDe: 'Die Festung',
         color: 0x9b59b6,
+        requireItem: 'warmth_core',
         zones: [
             { key: 'castle', name: 'Castle', nameRu: 'Замок', nameDe: 'Burg', x: 0, y: 0 },
             { key: 'depths', name: 'Depths', nameRu: 'Глубины', nameDe: 'Tiefen', x: 1, y: 0 }
@@ -52,6 +54,7 @@ export const MAP_CHAPTERS = [
         nameRu: 'Тьма и Вечность',
         nameDe: 'Dunkelheit und Ewigkeit',
         color: 0x2c3e50,
+        requireItem: 'castle_key',
         zones: [
             { key: 'cursed', name: 'Cursed Lands', nameRu: 'Проклятые Земли', nameDe: 'Verfluchte Lande', x: 0, y: 0 },
             { key: 'shadow', name: 'Shadow Realm', nameRu: 'Теневой Мир', nameDe: 'Schattenreich', x: 1, y: 0 },

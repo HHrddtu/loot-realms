@@ -43,28 +43,35 @@ export default class MapScene extends Phaser.Scene {
             const x = startX + i * (chapterW + gap);
             const isUnlocked = this._isChapterUnlocked(ch);
             const isCompleted = this._isChapterCompleted(ch);
+            const isLockedByItem = ch.requireItem && !this.completedZones[ch.zones[0]?.key] && !this._hasItem(ch.requireItem);
 
-            const bg = this.add.rectangle(x, y, chapterW, 70, isUnlocked ? ch.color : 0x333333, isUnlocked ? 0.3 : 0.15)
-                .setStrokeStyle(2, isUnlocked ? ch.color : 0x555555)
-                .setInteractive({ useHandCursor: isUnlocked });
+            const effectiveUnlock = isUnlocked && !isLockedByItem;
+            const bg = this.add.rectangle(x, y, chapterW, 70, effectiveUnlock ? ch.color : 0x333333, effectiveUnlock ? 0.3 : 0.15)
+                .setStrokeStyle(2, effectiveUnlock ? ch.color : 0x555555)
+                .setInteractive({ useHandCursor: effectiveUnlock });
             this.elements.push(bg);
 
             const lang = localStorage.getItem('game_lang') || 'en';
             const name = lang === 'ru' ? (ch.nameRu || ch.name) : lang === 'de' ? (ch.nameDe || ch.name) : ch.name;
 
             const label = this.add.text(x, y - 8, name, {
-                fontSize: '11px', fill: isUnlocked ? '#fff' : '#666', fontFamily: 'Arial', fontStyle: 'bold',
+                fontSize: '11px', fill: effectiveUnlock ? '#fff' : '#666', fontFamily: 'Arial', fontStyle: 'bold',
                 wordWrap: { width: chapterW - 10 }, align: 'center'
             }).setOrigin(0.5);
             this.elements.push(label);
 
-            const status = this.add.text(x, y + 18, isCompleted ? '✓' : (isUnlocked ? (i + 1).toString() : '🔒'), {
-                fontSize: '16px', fill: isCompleted ? '#2ecc71' : (isUnlocked ? '#f1c40f' : '#555'),
+            let statusText = '';
+            if (isCompleted) statusText = '✓';
+            else if (isLockedByItem) statusText = '🔒 ' + ch.requireItem.replace(/_/g, ' ');
+            else if (effectiveUnlock) statusText = (i + 1).toString();
+            else statusText = '🔒';
+            const status = this.add.text(x, y + 18, statusText, {
+                fontSize: isLockedByItem ? '8px' : '16px', fill: isCompleted ? '#2ecc71' : (effectiveUnlock ? '#f1c40f' : '#555'),
                 fontFamily: 'Arial'
             }).setOrigin(0.5);
             this.elements.push(status);
 
-            if (isUnlocked) {
+            if (effectiveUnlock) {
                 bg.on('pointerdown', () => this._showZones(ch));
                 bg.on('pointerover', () => bg.setFillStyle(ch.color, 0.5));
                 bg.on('pointerout', () => bg.setFillStyle(ch.color, 0.3));
@@ -167,6 +174,19 @@ export default class MapScene extends Phaser.Scene {
 
     _isChapterCompleted(chapter) {
         return chapter.zones.every(z => this.completedZones[z.key]);
+    }
+
+    _hasItem(itemId) {
+        const save = loadGame() || {};
+        try {
+            const bag = save.equipBag || [];
+            if (bag.some(i => i.id === itemId)) return true;
+            const mats = save.materials || [];
+            if (mats.some(m => m.id === itemId)) return true;
+            const eq = save.equipment || {};
+            for (const s of Object.values(eq)) { if (s && s.id === itemId) return true; }
+        } catch (e) {}
+        return false;
     }
 
     _addCloseButton() {
