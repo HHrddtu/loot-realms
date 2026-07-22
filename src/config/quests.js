@@ -323,6 +323,8 @@ export const QUEST_DB = {
         descriptionDe: 'Der Uralte Treant bewacht den Weg nach vorn. Nur durch seinen Besieg gelangst du zu den Minen.',
         rewards: { exp: 300, accountExp: 100, talentPoints: 1 },
         rewardItems: ['flame_blade'],
+        rewardType: 'slot_unlock',
+        rewardValue: 1,
         prerequisite: null
     },
     cave_spiders: {
@@ -428,6 +430,8 @@ export const QUEST_DB = {
         descriptionDe: 'Der Lila Dämon kontrolliert das Dorf. Besiege ihn, um die Seelen zu befreien.',
         rewards: { exp: 600, accountExp: 250, talentPoints: 2 },
         rewardItems: ['flame_blade'],
+        rewardType: 'vendor_access',
+        rewardValue: 'blacksmith',
         prerequisite: 'clear_village_camps'
     },
     depths_catacombs: {
@@ -503,6 +507,8 @@ export const QUEST_DB = {
         descriptionDe: 'Der Lichkönig herrscht über die Toten. Beende seine ewige Herrschaft.',
         rewards: { exp: 2000, accountExp: 500, talentPoints: 3 },
         rewardItems: ['crown'],
+        rewardType: 'pet_unlock',
+        rewardValue: 'healer',
         prerequisite: 'depths_judgment'
     },
     depths_exploration: {
