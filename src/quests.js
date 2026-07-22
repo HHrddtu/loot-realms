@@ -4,6 +4,9 @@ import { loadAccount, saveAccount, loadGame, saveGame } from './save.js';
 let activeQuests = [];
 let completedQuests = [];
 let questProgress = {};
+let _gameScene = null;
+
+export function setGameScene(s) { _gameScene = s; }
 
 export function initQuests() {
     const acc = loadAccount() || {};
@@ -120,6 +123,31 @@ export function completeQuest(qKey) {
     if (!isQuestComplete(qKey)) return null;
     const quest = QUEST_DB[qKey];
     if (!quest) return null;
+    const s = _gameScene;
+
+    const rewardType = quest.rewardType || 'item';
+    const rewardVal = quest.rewardValue || null;
+
+    switch (rewardType) {
+        case 'pet_unlock':
+            if (rewardVal && s.addPet) s.addPet(rewardVal);
+            break;
+        case 'slot_unlock':
+            if (s.increaseSlots) s.increaseSlots(rewardVal || 1);
+            break;
+        case 'vendor_access':
+            if (s.unlockVendor) s.unlockVendor(rewardVal || 'blacksmith');
+            break;
+        case 'item':
+            if (quest.rewardItems) {
+                quest.rewardItems.forEach(itemId => {
+                    const fromDb = [...(s.constructor?.EQUIP_DB || []), ...(s.constructor?.MATERIAL_DB || [])].find(i => i.id === itemId);
+                    if (fromDb && s.addEquip) s.addEquip({ ...fromDb, type: 'equip' });
+                });
+            }
+            break;
+    }
+
     activeQuests = activeQuests.filter(k => k !== qKey);
     completedQuests.push(qKey);
     delete questProgress[qKey];

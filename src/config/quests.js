@@ -833,6 +833,8 @@ export const QUEST_DB = {
         descriptionRu: 'Странные звуки эхом разносятся из-под шахты. Исследуйте тёмные пещеры.',
         descriptionDe: 'Seltsame Geräusche hallen aus unterhalb der Mine. Untersuche die dunklen Höhlen.',
         rewards: { exp: 80, accountExp: 30 },
+        rewardType: 'slot_unlock',
+        rewardValue: 2,
         prerequisite: 'explore_mine'
     },
 

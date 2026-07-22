@@ -5,14 +5,14 @@ import {
     GAME_WIDTH, GAME_HEIGHT
 } from '../config/index.js';
 import { stopMusic, startZoneMusic } from '../sound.js';
-import { loadAccount } from '../save.js';
+import { loadAccount, saveAccount } from '../save.js';
 import { getClassData, getClassStats } from '../classes.js';
 import { getTalentEffects } from '../talents.js';
 import { getAccountTalentEffects } from '../accountTalents.js';
 import { initBestiary, recordEncounter } from '../bestiary.js';
 import { initMaterialBook } from '../materialBook.js';
 import { initSoulBook } from '../soulBook.js';
-import { initQuests, onExplore } from '../quests.js';
+import { initQuests, onExplore, setGameScene } from '../quests.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { CombatFacade } from '../systems/CombatFacade.js';
 import { PlayerSystem } from '../systems/PlayerSystem.js';
@@ -126,6 +126,7 @@ export default class GameScene extends Phaser.Scene {
         initMaterialBook();
         initSoulBook();
         initQuests();
+        setGameScene(this);
         this.bestiarySeen = {};
         this.npcSprites = [];
         this.questIcons = [];
@@ -591,6 +592,23 @@ export default class GameScene extends Phaser.Scene {
     _updateSpells(delta) { if (this.spellSys) this.spellSys._updateSpells(delta); }
 
     /* ===== UI DELEGATION ===== */
+
+    addPet(petId) {
+        const acc = loadAccount() || {};
+        if (!acc.ownedPets) acc.ownedPets = [];
+        if (!acc.ownedPets.includes(petId)) acc.ownedPets.push(petId);
+        saveAccount(acc);
+        this.floatingText(this.player.x, this.player.y - 40, 'Pet unlocked!', '#9b59b6');
+    }
+    increaseSlots(amount) {
+        this.maxMaterials = (this.maxMaterials || 10) + amount;
+        this.floatingText(this.player.x, this.player.y - 40, '+' + amount + ' material slot', '#f1c40f');
+    }
+    unlockVendor(vendorId) {
+        this._vendorUnlocked = this._vendorUnlocked || {};
+        this._vendorUnlocked[vendorId] = true;
+        this.floatingText(this.player.x, this.player.y - 40, vendorId + ' unlocked!', '#2ecc71');
+    }
 
     _createUI() { if (this.ui) this.ui._createUI(); }
     _createTopBar() { if (this.ui) this.ui._createTopBar(); }
