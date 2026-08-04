@@ -207,10 +207,13 @@ while ($true) {
         try {
             Push-Location $ProjectDir
             & git add -A
+            $addExit = $LASTEXITCODE
             & git diff --cached --quiet
             if ($LASTEXITCODE -eq 1) {
-                & git commit -m "autopilot: $($task.Text)"
-                if ($LASTEXITCODE -eq 0) { Write-Log "Коммит создан" } else { Write-Log "git commit failed: $LASTEXITCODE" }
+                $commitMsg = "autopilot: " + ($task.Text -replace '"', "'" -replace "[`r`n]", " ")
+                $commitOut = (& git commit -m $commitMsg 2>&1) -join " "
+                $commitExit = $LASTEXITCODE
+                if ($commitExit -eq 0) { Write-Log "Коммит создан" } else { Write-Log "git commit failed: $commitExit | $commitOut | add=$addExit" }
             } else {
                 Write-Log "Изменений нет — коммит пропущен"
             }
