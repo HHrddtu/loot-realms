@@ -263,9 +263,9 @@ export class CursedZone extends BaseZone {
 
         if (s.cursedBoss) {
             if (s.particles) s.particles.spawnBossDeath(s.cursedBoss.x, s.cursedBoss.y);
-            if (s.cursedBoss.hpBg) s.cursedBoss.hpBg.destroy();
-            if (s.cursedBoss.hpFill) s.cursedBoss.hpFill.destroy();
-            if (s.cursedBossNameText) s.cursedBossNameText.destroy();
+            if (s.cursedBoss.hpBg) { s.cursedBoss.hpBg.destroy(); s.cursedBoss.hpBg = null; }
+            if (s.cursedBoss.hpFill) { s.cursedBoss.hpFill.destroy(); s.cursedBoss.hpFill = null; }
+            if (s.cursedBossNameText) { s.cursedBossNameText.destroy(); s.cursedBossNameText = null; }
             s.cursedBoss.destroy();
             s.cursedBoss = null;
         }

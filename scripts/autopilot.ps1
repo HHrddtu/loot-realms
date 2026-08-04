@@ -130,10 +130,10 @@ Write-Log "=== AutoPilot START (interval=${IntervalSec}s, server=${ServerUrl}) =
 
 # убеждаемся что мы в ветке autopilot
 Push-Location $ProjectDir
-$currentBranch = git rev-parse --abbrev-ref HEAD 2>$null
+$currentBranch = (cmd /c "git rev-parse --abbrev-ref HEAD 2>nul") -join ""
 if ($currentBranch -ne "autopilot") {
-    $existing = git branch --list autopilot 2>$null
-    if ($existing) { git checkout autopilot 2>&1 | Out-Null } else { git checkout -b autopilot 2>&1 | Out-Null }
+    $existing = (cmd /c "git branch --list autopilot 2>nul") -join ""
+    if ($existing) { cmd /c "git checkout autopilot 2>nul" } else { cmd /c "git checkout -b autopilot 2>nul" }
     Write-Log "Switched to branch: autopilot"
 }
 Pop-Location
@@ -200,10 +200,12 @@ while ($true) {
 
         # коммит результата
         Push-Location $ProjectDir
-        git add -A 2>&1 | Out-Null
-        $dirty = git diff --cached --quiet; if ($LASTEXITCODE -eq 1) {
-            git commit -m "autopilot: $($task.Text)" 2>&1 | Out-Null
-            Write-Log "Коммит создан"
+        cmd /c "git add -A 2>nul"
+        if ($LASTEXITCODE -ne 0) { Write-Log "git add failed: $LASTEXITCODE" }
+        cmd /c "git diff --cached --quiet 2>nul"
+        if ($LASTEXITCODE -eq 1) {
+            cmd /c "git commit -m `"autopilot: $($task.Text)`" 2>nul"
+            if ($LASTEXITCODE -eq 0) { Write-Log "Коммит создан" } else { Write-Log "git commit failed: $LASTEXITCODE" }
         } else {
             Write-Log "Изменений нет — коммит пропущен"
         }
@@ -214,7 +216,7 @@ while ($true) {
         Start-Sleep -Seconds $IntervalSec
     }
     catch {
-        Write-Log "Ошибка: $($_.Exception.Message)"
+        Write-Log "Ошибка: $($_.Exception.Message) | at $($_.InvocationInfo.ScriptLineNumber):$($_.InvocationInfo.OffsetInLine)"
         Start-Sleep -Seconds 60
     }
 }

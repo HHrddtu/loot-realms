@@ -286,9 +286,9 @@ export class DepthsZone extends BaseZone {
             // Flash screen
             s.cameras.main.flash(500, 136, 0, 255, true);
 
-            if (s.depthsBoss.hpBg) s.depthsBoss.hpBg.destroy();
-            if (s.depthsBoss.hpFill) s.depthsBoss.hpFill.destroy();
-            if (s.depthsBossNameText) s.depthsBossNameText.destroy();
+            if (s.depthsBoss.hpBg) { s.depthsBoss.hpBg.destroy(); s.depthsBoss.hpBg = null; }
+            if (s.depthsBoss.hpFill) { s.depthsBoss.hpFill.destroy(); s.depthsBoss.hpFill = null; }
+            if (s.depthsBossNameText) { s.depthsBossNameText.destroy(); s.depthsBossNameText = null; }
             s.depthsBoss.destroy();
             s.depthsBoss = null;
 

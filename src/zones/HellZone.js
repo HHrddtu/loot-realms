@@ -131,9 +131,9 @@ export class HellZone extends BaseZone {
             s.hellLavaSafes = null;
         }
         if (s.hellBoss) {
-            if (s.hellBoss.hpBg) s.hellBoss.hpBg.destroy();
-            if (s.hellBoss.hpFill) s.hellBoss.hpFill.destroy();
-            if (s.hellBossNameText) s.hellBossNameText.destroy();
+            if (s.hellBoss.hpBg) { s.hellBoss.hpBg.destroy(); s.hellBoss.hpBg = null; }
+            if (s.hellBoss.hpFill) { s.hellBoss.hpFill.destroy(); s.hellBoss.hpFill = null; }
+            if (s.hellBossNameText) { s.hellBossNameText.destroy(); s.hellBossNameText = null; }
             s.hellBoss.destroy();
             s.hellBoss = null;
         }
@@ -357,9 +357,9 @@ export class HellZone extends BaseZone {
 
         if (s.hellBoss) {
             if (s.particles) s.particles.spawnBossDeath(s.hellBoss.x, s.hellBoss.y);
-            if (s.hellBoss.hpBg) s.hellBoss.hpBg.destroy();
-            if (s.hellBoss.hpFill) s.hellBoss.hpFill.destroy();
-            if (s.hellBossNameText) s.hellBossNameText.destroy();
+            if (s.hellBoss.hpBg) { s.hellBoss.hpBg.destroy(); s.hellBoss.hpBg = null; }
+            if (s.hellBoss.hpFill) { s.hellBoss.hpFill.destroy(); s.hellBoss.hpFill = null; }
+            if (s.hellBossNameText) { s.hellBossNameText.destroy(); s.hellBossNameText = null; }
             s.hellBoss.destroy();
             s.hellBoss = null;
         }

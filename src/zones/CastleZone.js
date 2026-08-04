@@ -110,9 +110,9 @@ export class CastleZone extends BaseZone {
         if (s.castleBossDoor) { if (s.castleBossDoor.destroy) s.castleBossDoor.destroy(); s.castleBossDoor = null; }
         if (s.castleBossDoorHint) { if (s.castleBossDoorHint.destroy) s.castleBossDoorHint.destroy(); s.castleBossDoorHint = null; }
         if (s.castleBoss) {
-            if (s.castleBoss.hpBg) s.castleBoss.hpBg.destroy();
-            if (s.castleBoss.hpFill) s.castleBoss.hpFill.destroy();
-            if (s.castleBossNameText) s.castleBossNameText.destroy();
+            if (s.castleBoss.hpBg) { s.castleBoss.hpBg.destroy(); s.castleBoss.hpBg = null; }
+            if (s.castleBoss.hpFill) { s.castleBoss.hpFill.destroy(); s.castleBoss.hpFill = null; }
+            if (s.castleBossNameText) { s.castleBossNameText.destroy(); s.castleBossNameText = null; }
             s.castleBoss.destroy();
             s.castleBoss = null;
         }

@@ -119,9 +119,9 @@ export class IceSpiritBoss {
         const ox = s.villageOffsetX;
         if (s.snowyIceSpirit) {
             if (s.particles) s.particles.spawnBossDeath(s.snowyIceSpirit.x, s.snowyIceSpirit.y);
-            if (s.snowyIceSpirit.hpBg) s.snowyIceSpirit.hpBg.destroy();
-            if (s.snowyIceSpirit.hpFill) s.snowyIceSpirit.hpFill.destroy();
-            if (s.snowyIceSpiritNameText) s.snowyIceSpiritNameText.destroy();
+            if (s.snowyIceSpirit.hpBg) { s.snowyIceSpirit.hpBg.destroy(); s.snowyIceSpirit.hpBg = null; }
+            if (s.snowyIceSpirit.hpFill) { s.snowyIceSpirit.hpFill.destroy(); s.snowyIceSpirit.hpFill = null; }
+            if (s.snowyIceSpiritNameText) { s.snowyIceSpiritNameText.destroy(); s.snowyIceSpiritNameText = null; }
             s.snowyIceSpirit.destroy(); s.snowyIceSpirit = null;
         }
         s.defeatedText = s.add.text(ox + VILLAGE_WIDTH / 2, 230, 'ICE SPIRIT DEFEATED!', { fontSize: '26px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 4 }).setOrigin(0.5).setScrollFactor(0);

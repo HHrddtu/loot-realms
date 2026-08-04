@@ -258,9 +258,9 @@ export class VillageZone extends BaseZone {
         s.villageChildNPC = kill(s.villageChildNPC);
         s.villageChildHint = kill(s.villageChildHint);
         if (s.villageBoss) {
-            if (s.villageBoss.hpBg) s.villageBoss.hpBg.destroy();
-            if (s.villageBoss.hpFill) s.villageBoss.hpFill.destroy();
-            if (s.villageBossNameText) s.villageBossNameText.destroy();
+            if (s.villageBoss.hpBg) { s.villageBoss.hpBg.destroy(); s.villageBoss.hpBg = null; }
+            if (s.villageBoss.hpFill) { s.villageBoss.hpFill.destroy(); s.villageBoss.hpFill = null; }
+            if (s.villageBossNameText) { s.villageBossNameText.destroy(); s.villageBossNameText = null; }
             s.villageBoss.destroy(); s.villageBoss = null;
         }
         this.bossClones = null;
@@ -279,9 +279,9 @@ export class VillageZone extends BaseZone {
         if (s.shopGroup) { s.shopGroup.forEach(e => { if (e?.destroy) e.destroy(); }); s.shopGroup = []; }
 
         if (s.snowyIceSpirit) {
-            if (s.snowyIceSpirit.hpBg) s.snowyIceSpirit.hpBg.destroy();
-            if (s.snowyIceSpirit.hpFill) s.snowyIceSpirit.hpFill.destroy();
-            if (s.snowyIceSpiritNameText) s.snowyIceSpiritNameText.destroy();
+            if (s.snowyIceSpirit.hpBg) { s.snowyIceSpirit.hpBg.destroy(); s.snowyIceSpirit.hpBg = null; }
+            if (s.snowyIceSpirit.hpFill) { s.snowyIceSpirit.hpFill.destroy(); s.snowyIceSpirit.hpFill = null; }
+            if (s.snowyIceSpiritNameText) { s.snowyIceSpiritNameText.destroy(); s.snowyIceSpiritNameText = null; }
             s.snowyIceSpirit.destroy(); s.snowyIceSpirit = null;
         }
         if (s.snowyIceShards) {

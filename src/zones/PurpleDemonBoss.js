@@ -148,7 +148,7 @@ export class PurpleDemonBoss {
             s.zones.village.bossClones.push(clone);
         }
         s.floatingText(boss.x, boss.y - 50, 'SPLIT!', '#9b59b6');
-        s.tweens.add({ targets: boss, alpha: 0, duration: 500, onComplete: () => { boss.hpBg.destroy(); boss.hpFill.destroy(); s.villageBossNameText.destroy(); boss.destroy(); s.villageBoss = null; } });
+        s.tweens.add({ targets: boss, alpha: 0, duration: 500, onComplete: () => { boss.hpBg.destroy(); boss.hpBg = null; boss.hpFill.destroy(); boss.hpFill = null; s.villageBossNameText.destroy(); s.villageBossNameText = null; boss.destroy(); s.villageBoss = null; } });
     }
 
     killBossClone(clone) {
@@ -158,7 +158,7 @@ export class PurpleDemonBoss {
             const idx = clones.indexOf(clone);
             if (idx !== -1) clones.splice(idx, 1);
         }
-        clone.hpBg.destroy(); clone.hpFill.destroy(); clone.destroy();
+        clone.hpBg.destroy(); clone.hpBg = null; clone.hpFill.destroy(); clone.hpFill = null; clone.destroy();
         if (!clones || clones.length === 0) {
             s.zones.village.bossDefeated = true;
             this._victoryBossClone();

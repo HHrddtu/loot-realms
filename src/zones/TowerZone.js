@@ -378,9 +378,9 @@ export class TowerZone extends BaseZone {
 
         if (s.towerBoss) {
             if (s.particles) s.particles.spawnBossDeath(s.towerBoss.x, s.towerBoss.y);
-            if (s.towerBoss.hpBg) s.towerBoss.hpBg.destroy();
-            if (s.towerBoss.hpFill) s.towerBoss.hpFill.destroy();
-            if (s.towerBossNameText) s.towerBossNameText.destroy();
+            if (s.towerBoss.hpBg) { s.towerBoss.hpBg.destroy(); s.towerBoss.hpBg = null; }
+            if (s.towerBoss.hpFill) { s.towerBoss.hpFill.destroy(); s.towerBoss.hpFill = null; }
+            if (s.towerBossNameText) { s.towerBossNameText.destroy(); s.towerBossNameText = null; }
             s.towerBoss.destroy();
             s.towerBoss = null;
         }

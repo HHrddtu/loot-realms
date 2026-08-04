@@ -281,9 +281,9 @@ export class CastleBoss {
         const b = this.scene.castleBoss;
 
         if (this.scene.particles) this.scene.particles.spawnBossDeath(b.x, b.y);
-        if (this.scene.castleBoss.hpBg) this.scene.castleBoss.hpBg.destroy();
-        if (this.scene.castleBoss.hpFill) this.scene.castleBoss.hpFill.destroy();
-        if (this.scene.castleBossNameText) this.scene.castleBossNameText.destroy();
+        if (this.scene.castleBoss.hpBg) { this.scene.castleBoss.hpBg.destroy(); this.scene.castleBoss.hpBg = null; }
+        if (this.scene.castleBoss.hpFill) { this.scene.castleBoss.hpFill.destroy(); this.scene.castleBoss.hpFill = null; }
+        if (this.scene.castleBossNameText) { this.scene.castleBossNameText.destroy(); this.scene.castleBossNameText = null; }
 
         this.zone.bossDefeated = true;
         this.zone.bossAlive = false;

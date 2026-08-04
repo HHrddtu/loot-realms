@@ -70,9 +70,9 @@ export class ArenaZone extends BaseZone {
     _destroyZoneSpecific() {
         const s = this.scene;
         if (s.boss) {
-            if (s.boss.hpBg) s.boss.hpBg.destroy();
-            if (s.boss.hpFill) s.boss.hpFill.destroy();
-            if (s.bossNameText) s.bossNameText.destroy();
+            if (s.boss.hpBg) { s.boss.hpBg.destroy(); s.boss.hpBg = null; }
+            if (s.boss.hpFill) { s.boss.hpFill.destroy(); s.boss.hpFill = null; }
+            if (s.bossNameText) { s.bossNameText.destroy(); s.bossNameText = null; }
             if (s.boss.aoeRing) { s.boss.aoeRing.destroy(); s.boss.aoeRing = null; }
             if (s.boss.aoeRing2) { s.boss.aoeRing2.destroy(); s.boss.aoeRing2 = null; }
             if (s.boss.telegraph) { s.boss.telegraph.destroy(); s.boss.telegraph = null; }

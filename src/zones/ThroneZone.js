@@ -156,9 +156,9 @@ export class ThroneZone extends BaseZone {
 
         if (s.throneBoss) {
             if (s.particles) s.particles.spawnBossDeath(s.throneBoss.x, s.throneBoss.y);
-            if (s.throneBoss.hpBg) s.throneBoss.hpBg.destroy();
-            if (s.throneBoss.hpFill) s.throneBoss.hpFill.destroy();
-            if (s.throneBossNameText) s.throneBossNameText.destroy();
+            if (s.throneBoss.hpBg) { s.throneBoss.hpBg.destroy(); s.throneBoss.hpBg = null; }
+            if (s.throneBoss.hpFill) { s.throneBoss.hpFill.destroy(); s.throneBoss.hpFill = null; }
+            if (s.throneBossNameText) { s.throneBossNameText.destroy(); s.throneBossNameText = null; }
             s.throneBoss.destroy();
             s.throneBoss = null;
         }

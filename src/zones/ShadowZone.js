@@ -278,9 +278,9 @@ export class ShadowZone extends BaseZone {
 
         if (s.shadowBoss) {
             if (s.particles) s.particles.spawnBossDeath(s.shadowBoss.x, s.shadowBoss.y);
-            if (s.shadowBoss.hpBg) s.shadowBoss.hpBg.destroy();
-            if (s.shadowBoss.hpFill) s.shadowBoss.hpFill.destroy();
-            if (s.shadowBossNameText) s.shadowBossNameText.destroy();
+            if (s.shadowBoss.hpBg) { s.shadowBoss.hpBg.destroy(); s.shadowBoss.hpBg = null; }
+            if (s.shadowBoss.hpFill) { s.shadowBoss.hpFill.destroy(); s.shadowBoss.hpFill = null; }
+            if (s.shadowBossNameText) { s.shadowBossNameText.destroy(); s.shadowBossNameText = null; }
             s.shadowBoss.destroy();
             s.shadowBoss = null;
         }

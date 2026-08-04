@@ -279,9 +279,9 @@ export class SnowyZone extends BaseZone {
         playBossDeath();
         const ox = this.scene.villageOffsetX;
 
-        if (this.scene.snowyIceSpirit.hpBg) this.scene.snowyIceSpirit.hpBg.destroy();
-        if (this.scene.snowyIceSpirit.hpFill) this.scene.snowyIceSpirit.hpFill.destroy();
-        if (this.scene.snowyIceSpiritNameText) this.scene.snowyIceSpiritNameText.destroy();
+        if (this.scene.snowyIceSpirit.hpBg) { this.scene.snowyIceSpirit.hpBg.destroy(); this.scene.snowyIceSpirit.hpBg = null; }
+        if (this.scene.snowyIceSpirit.hpFill) { this.scene.snowyIceSpirit.hpFill.destroy(); this.scene.snowyIceSpirit.hpFill = null; }
+        if (this.scene.snowyIceSpiritNameText) { this.scene.snowyIceSpiritNameText.destroy(); this.scene.snowyIceSpiritNameText = null; }
         this.scene.snowyIceSpirit.destroy();
         this.scene.snowyIceSpirit = null;
 

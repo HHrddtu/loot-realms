@@ -157,16 +157,16 @@ export class MineBoss extends BaseBossAI {
     clearArena() {
         const s = this.scene;
         if (s.mineBoss) {
-            if (s.mineBoss.hpBg) s.mineBoss.hpBg.destroy();
-            if (s.mineBoss.hpFill) s.mineBoss.hpFill.destroy();
-            if (s.mineBossNameText) s.mineBossNameText.destroy();
+            if (s.mineBoss.hpBg) { s.mineBoss.hpBg.destroy(); s.mineBoss.hpBg = null; }
+            if (s.mineBoss.hpFill) { s.mineBoss.hpFill.destroy(); s.mineBoss.hpFill = null; }
+            if (s.mineBossNameText) { s.mineBossNameText.destroy(); s.mineBossNameText = null; }
             if (s.mineBoss.aoeRing) { s.mineBoss.aoeRing.destroy(); s.mineBoss.aoeRing = null; }
             if (s.mineBoss.aoeRing2) { s.mineBoss.aoeRing2.destroy(); s.mineBoss.aoeRing2 = null; }
             if (s.mineBoss.telegraph) { s.mineBoss.telegraph.destroy(); s.mineBoss.telegraph = null; }
             if (s.mineBoss.auraRing) { s.mineBoss.auraRing.destroy(); s.mineBoss.auraRing = null; }
             s.mineBoss.destroy(); s.mineBoss = null;
         }
-        if (s.bossTimer) s.bossTimer.destroy();
+        if (s.bossTimer) { s.bossTimer.destroy(); s.bossTimer = null; }
         if (s.mineArenaExit) { s.mineArenaExit.destroy(); s.mineArenaExit = null; }
         if (s.mineArenaExitHint) { s.mineArenaExitHint.destroy(); s.mineArenaExitHint = null; }
         this.zone.bossAlive = false;
