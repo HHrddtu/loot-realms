@@ -7,7 +7,6 @@ export const ENEMY_TYPES = [
 export const ENEMY_COUNT = 3;
 export const EQUIP_DROP_CHANCE = 0.05;
 export const BOSS_DROP_CHANCE = 0.50;
-export const ACCOUNT_EQUIP_DROP_CHANCE = 0.001;
 
 // Forest boss
 export const BOSS_TYPE = {

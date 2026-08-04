@@ -276,7 +276,14 @@ export class HUD {
                 this.scene.questTrackerBg.setVisible(true);
                 this.scene.questTracker.setVisible(true);
             } else {
-                const zoneHints = { meadow: 'Enter the Forest', forest: 'Find the Portal to Arena', arena: 'Defeat the Treant', mine: 'Find the Skeleton Lord', cave: 'Defeat the Giant Bat', village: 'Clear the camps' };
+                const zoneHints = {
+                    meadow: 'Enter the Forest', forest: 'Find the Portal to Arena', arena: 'Defeat the Treant',
+                    mine: 'Find the Skeleton Lord', cave: 'Defeat the Giant Bat', village: 'Clear the camps',
+                    hell: 'Defeat the Red Demon', depths: 'Defeat the Lich King', cursed: 'Defeat the Ancient Evil',
+                    shadow: 'Defeat the Shadow King', tower: 'Climb the Tower', throne: 'Defeat the Eternal Lord',
+                    snowy: 'Defeat the Ice Spirit', castle: 'Save the Castle', cemetery: 'Enter the Cemetery',
+                    mine_boss: 'Defeat the Skeleton Lord'
+                };
                 const hint = zoneHints[this.scene.zone];
                 if (hint) {
                     this.scene.questTracker.setText('\u25b6 ' + hint);

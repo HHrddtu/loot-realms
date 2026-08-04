@@ -38,6 +38,38 @@ function osc(freq, dur, type, vol) {
     o.stop(c.currentTime + dur);
 }
 
+const SFX_CACHE = {};
+const SFX_LOADING = {};
+
+async function _loadSfx(name) {
+    if (SFX_CACHE[name]) return SFX_CACHE[name];
+    if (SFX_LOADING[name]) return SFX_LOADING[name];
+    const base = 'sound/';
+    const url = base + name + '.ogg';
+    const p = fetch(url)
+        .then(r => { if (!r.ok) throw new Error('sfx 404: ' + name); return r.arrayBuffer(); })
+        .then(buf => getCtx().decodeAudioData(buf))
+        .then(decoded => { SFX_CACHE[name] = decoded; SFX_LOADING[name] = null; return decoded; })
+        .catch(e => { console.warn('Sfx load failed:', name, e.message); SFX_LOADING[name] = null; return null; });
+    SFX_LOADING[name] = p;
+    return p;
+}
+
+function sfx(name, vol, pitchVar) {
+    if (muted) return;
+    const c = getCtx();
+    _loadSfx(name).then(buf => {
+        if (!buf) return;
+        const s = c.createBufferSource();
+        s.buffer = buf;
+        if (pitchVar) s.playbackRate.value = 1 + (Math.random() - 0.5) * pitchVar;
+        const g = c.createGain();
+        g.gain.value = vol || 0.5;
+        s.connect(g); g.connect(c.destination);
+        s.start(c.currentTime);
+    });
+}
+
 function noise(dur, vol) {
     if (muted) return;
     const c = getCtx();
@@ -84,98 +116,43 @@ export function playScream() {
 
 export function playFireCrackle() {
     if (muted) return;
-    for (let i = 0; i < 6; i++) {
-        const delay = i * 300 + Math.random() * 150;
-        setTimeout(() => {
-            noise(0.15 + Math.random() * 0.2, 0.03 + Math.random() * 0.04);
-            const o = getCtx().createOscillator();
-            const g = getCtx().createGain();
-            o.type = 'sine';
-            o.frequency.value = 100 + Math.random() * 200;
-            g.gain.setValueAtTime(0.02, getCtx().currentTime);
-            g.gain.exponentialRampToValueAtTime(0.001, getCtx().currentTime + 0.15);
-            o.connect(g); g.connect(getCtx().destination);
-            o.start(getCtx().currentTime); o.stop(getCtx().currentTime + 0.15);
-        }, delay);
-    }
-    const o = getCtx().createOscillator();
-    const g = getCtx().createGain();
-    o.type = 'sine';
-    o.frequency.setValueAtTime(80, getCtx().currentTime);
-    o.frequency.linearRampToValueAtTime(60, getCtx().currentTime + 3);
-    g.gain.setValueAtTime(0.04, getCtx().currentTime);
-    g.gain.linearRampToValueAtTime(0.02, getCtx().currentTime + 2);
-    g.gain.exponentialRampToValueAtTime(0.001, getCtx().currentTime + 3.5);
-    o.connect(g); g.connect(getCtx().destination);
-    o.start(getCtx().currentTime); o.stop(getCtx().currentTime + 3.5);
+    sfx('fire_crackle', 0.25, 0.2);
 }
 
 export function playMeteorImpact() {
-    if (muted) return;
-    const c = getCtx();
-    const o = c.createOscillator();
-    const g = c.createGain();
-    o.type = 'sine';
-    o.frequency.setValueAtTime(200, c.currentTime);
-    o.frequency.exponentialRampToValueAtTime(30, c.currentTime + 0.8);
-    g.gain.setValueAtTime(0.12, c.currentTime);
-    g.gain.linearRampToValueAtTime(0.06, c.currentTime + 0.2);
-    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 1.0);
-    o.connect(g); g.connect(c.destination);
-    o.start(c.currentTime); o.stop(c.currentTime + 1.0);
-    const o2 = c.createOscillator();
-    const g2 = c.createGain();
-    o2.type = 'sawtooth';
-    o2.frequency.setValueAtTime(120, c.currentTime);
-    o2.frequency.exponentialRampToValueAtTime(20, c.currentTime + 0.6);
-    g2.gain.setValueAtTime(0.06, c.currentTime);
-    g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.7);
-    o2.connect(g2); g2.connect(c.destination);
-    o2.start(c.currentTime); o2.stop(c.currentTime + 0.7);
-    noise(0.5, 0.08);
+    sfx('meteor_impact', 0.55, 0.1);
     noise(0.25, 0.04);
 }
 
 export function playAttack() {}
 
 export function playHit() {
-    osc(180, 0.1, 'sine', 0.1);
-    noise(0.06, 0.05);
+    sfx('hit_punch', 0.4, 0.2);
 }
 
 export function playLevelUp() {
-    const notes = [523, 659, 784, 1047];
-    notes.forEach((f, i) => {
-        setTimeout(() => osc(f, 0.2, 'sine', 0.07), i * 100);
-    });
+    sfx('levelup_bell', 0.55);
 }
 
 export function playLoot() {
-    osc(520, 0.12, 'sine', 0.04);
-    setTimeout(() => osc(660, 0.15, 'sine', 0.03), 80);
+    sfx('loot_pickup', 0.5);
 }
 
 export function playBossHit() {
-    osc(120, 0.12, 'sine', 0.08);
-    noise(0.08, 0.04);
+    sfx('boss_hit_metal', 0.45, 0.2);
 }
 
 export function playBossAoE() {
-    noise(0.35, 0.08);
-    osc(80, 0.3, 'sine', 0.09);
-    osc(60, 0.35, 'sine', 0.06);
+    sfx('boss_aoe', 0.5, 0.15);
 }
 
 export function playBossDeath() {
-    osc(350, 0.2, 'sine', 0.08);
-    setTimeout(() => osc(280, 0.25, 'sine', 0.06), 120);
-    setTimeout(() => osc(200, 0.35, 'sine', 0.05), 250);
-    setTimeout(() => noise(0.3, 0.05), 350);
+    sfx('boss_death_plate', 0.6);
+    noise(0.3, 0.05);
 }
 
 export function playEnemyDeath() {
-    osc(400, 0.06, 'sine', 0.05);
-    osc(250, 0.08, 'sine', 0.04);
+    sfx('hit_punch_light', 0.4, 0.25);
 }
 
 export function playPortal() {
@@ -185,8 +162,7 @@ export function playPortal() {
 }
 
 export function playBreak() {
-    osc(400, 0.06, 'sine', 0.05);
-    osc(250, 0.08, 'sine', 0.04);
+    sfx('break_wood', 0.5, 0.2);
 }
 
 export function playPetAttack(type) {

@@ -1,4 +1,3 @@
-import Peer from 'peerjs';
 import { loadAccount } from './save.js';
 
 let _peer = null;
@@ -102,7 +101,8 @@ export function onZoneState(cb) { _onZoneState = cb; }
 export function onGameOver(cb) { _onGameOver = cb; }
 export function onInventoryUpdate(cb) { _onInventoryUpdate = cb; }
 
-export function createRoom(playerName) {
+export async function createRoom(playerName) {
+    const { default: Peer } = await import('peerjs');
     return new Promise((resolve, reject) => {
         let settled = false;
         _roomCode = _genCode();
@@ -268,7 +268,8 @@ function _handleGuestData(peerId, data) {
     }
 }
 
-export function joinRoom(code, playerName) {
+export async function joinRoom(code, playerName) {
+    const { default: Peer } = await import('peerjs');
     return new Promise((resolve, reject) => {
         _isHost = false;
         _roomCode = code.toUpperCase();

@@ -44,8 +44,6 @@ import { ThroneZone } from '../zones/ThroneZone.js';
 import { SnowyZone } from '../zones/SnowyZone.js';
 import { CastleZone } from '../zones/CastleZone.js';
 import { MeadowZone } from '../zones/MeadowZone.js';
-import { MultiplayerManager } from '../systems/MultiplayerManager.js';
-import { disconnect as mpDisconnect } from '../network.js';
 import { CRYSTAL_RUN_CAPS } from '../config/pets.js';
 import { createAllAnimations } from '../config/animations.js';
 
@@ -248,9 +246,11 @@ export default class GameScene extends Phaser.Scene {
         }
 
         if (this.multiplayer) {
-            this.mpManager = new MultiplayerManager(this);
-            this.mpManager.setup();
-            this.mpSync = this.mpManager.mpSync;
+            import('../systems/MultiplayerManager.js').then(({ MultiplayerManager }) => {
+                this.mpManager = new MultiplayerManager(this);
+                this.mpManager.setup();
+                this.mpSync = this.mpManager.mpSync;
+            }).catch(err => console.error('Multiplayer init failed:', err));
         }
 
         this.events.on('shutdown', () => {
@@ -354,7 +354,7 @@ export default class GameScene extends Phaser.Scene {
             }
         } catch (e) { /* ignore */ }
         s.time.delayedCall(400, () => {
-            try { mpDisconnect(); } catch (e) { /* ignore */ }
+            import('../network.js').then(({ disconnect }) => { try { disconnect(); } catch (e) { /* ignore */ } });
             s.scene.start('Menu');
         });
     }

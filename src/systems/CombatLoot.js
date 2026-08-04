@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { DIFF_MULT, ENEMY_TYPES, RARITY_COLORS, EQUIP_DROP_CHANCE, ACCOUNT_EQUIP_DROP_CHANCE, BOSS_DROP_CHANCE,
+import { DIFF_MULT, ENEMY_TYPES, RARITY_COLORS, EQUIP_DROP_CHANCE, BOSS_DROP_CHANCE,
          MINE_ENEMY_TYPES, MINE_CHEST_DROP_CHANCE, SECRET_KEY_ITEM, VILLAGE_CHEST_OPEN_KEY,
          CAVE_CHEST_OPEN_KEY, CAVE_WIDTH, VILLAGE_BOSS_TYPE, CAVE_HEIGHT } from '../config/index.js';
 import { rollZoneEquip, rollZoneMaterial, rollEquip, rollMaterial, rollAccountEquip, rollCaveRelic } from '../utils.js';
