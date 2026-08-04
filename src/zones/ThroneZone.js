@@ -10,6 +10,7 @@ import { playBossDeath, playLoot, playPortal } from '../sound.js';
 import { LORE } from '../config/lore.js';
 
 import { BaseZone } from '../systems/BaseZone.js';
+import { CombatLoot } from '../systems/CombatLoot.js';
 import { ThroneBoss } from './ThroneBoss.js';
 
 export class ThroneZone extends BaseZone {
@@ -68,18 +69,18 @@ export class ThroneZone extends BaseZone {
         const s = this.scene;
         if (s.throneMinions && s.throneMinions.getLength && s.throneMinions.getLength() > 0) {
             s.throneMinions.getChildren().forEach(e => {
-                if (e.hpBg) e.hpBg.destroy();
-                if (e.hpFill) e.hpFill.destroy();
-                if (e.shieldIcon) e.shieldIcon.destroy();
-                if (e.roleIcon) e.roleIcon.destroy();
+                if (e.hpBg) { e.hpBg.destroy(); e.hpBg = null; }
+                if (e.hpFill) { e.hpFill.destroy(); e.hpFill = null; }
+                if (e.shieldIcon) { e.shieldIcon.destroy(); e.shieldIcon = null; }
+                if (e.roleIcon) { e.roleIcon.destroy(); e.roleIcon = null; }
             });
             s.throneMinions.clear(true, true);
         }
         if (s.throneMinions) { s.throneMinions.destroy(); s.throneMinions = null; }
         if (s.throneBoss) {
-            if (s.throneBoss.hpBg) s.throneBoss.hpBg.destroy();
-            if (s.throneBoss.hpFill) s.throneBoss.hpFill.destroy();
-            if (s.throneBossNameText) s.throneBossNameText.destroy();
+            if (s.throneBoss.hpBg) { s.throneBoss.hpBg.destroy(); s.throneBoss.hpBg = null; }
+            if (s.throneBoss.hpFill) { s.throneBoss.hpFill.destroy(); s.throneBoss.hpFill = null; }
+            if (s.throneBossNameText) { s.throneBossNameText.destroy(); s.throneBossNameText = null; }
             s.throneBoss.destroy();
             s.throneBoss = null;
         }
@@ -149,6 +150,7 @@ export class ThroneZone extends BaseZone {
         s.timeSlowUnlocked = true;
         s.doSave();
         playBossDeath();
+        CombatLoot.celebrateBossKill(s);
         s.tutorialMgr.showAbilityTutorial('timeSlow');
         const ox = s.throneOffsetX;
 

@@ -8,7 +8,8 @@ import {
     VILLAGE_BOSS_TYPE, VILLAGE_CORPSE_MINION, MAGMA_ARMOR,
     SNOWY_VILLAGE_ENEMY_TYPES, SNOWY_VILLAGE_CAMP_POSITIONS, SNOWY_VILLAGE_BOSS_TYPE,
     SNOWY_BOSS_MINION, WARMTH_CORE, SNOWY_VILLAGE_CHEST_COUNT, SNOWY_VILLAGE_CHEST_DROP_CHANCE,
-    BOSS_DROP_CHANCE, GAME_WIDTH, GAME_HEIGHT, RARITY_COLORS, DIFF_COLORS
+    BOSS_DROP_CHANCE, GAME_WIDTH, GAME_HEIGHT, RARITY_COLORS, DIFF_COLORS,
+    RANGED_INTERVAL_DEFAULT
 } from '../config/index.js';
 import { rollBossCrystals } from '../config/pets.js';
 import { playPortal, startZoneMusic } from '../sound.js';
@@ -72,8 +73,6 @@ export class VillageZone extends BaseZone {
         this.scene.snowyIceSpiritNameText = null;
         this.scene.snowyIceSpiritAbilities = null;
         this.scene.snowyIceShards = null;
-        this.scene.campfire = null;
-        this.scene.campfireHint = null;
         if (this.scene.campfire) { if (this.scene.campfire.destroy) this.scene.campfire.destroy(); this.scene.campfire = null; }
         if (this.scene.campfireHint) { if (this.scene.campfireHint.destroy) this.scene.campfireHint.destroy(); this.scene.campfireHint = null; }
         this.scene.castleChildNPC = null;
@@ -211,30 +210,32 @@ export class VillageZone extends BaseZone {
 
     _destroyZoneSpecific() {
         const s = this.scene;
+        const kill = (obj) => { if (obj) { if (obj.destroy) obj.destroy(); return null; } return null; };
+        const clearGroup = (g) => { if (g) { if (g.getLength && g.getLength() > 0) g.clear(true, true); g.destroy(); } return null; };
+
         if (this._snowyCheckTimer) { this._snowyCheckTimer.destroy(); this._snowyCheckTimer = null; }
-        if (s.particles) { s.particles.stopEnvironment(); }
+        if (s.particles) s.particles.stopEnvironment();
+
         if (s.villageChests && s.villageChests.getLength && s.villageChests.getLength() > 0) {
             s.villageChests.getChildren().forEach(ch => {
-                if (ch.hintText) ch.hintText.destroy();
-                if (ch.hpBg) ch.hpBg.destroy();
-                if (ch.hpFill) ch.hpFill.destroy();
+                if (ch.hintText) { ch.hintText.destroy(); ch.hintText = null; }
+                if (ch.hpBg) { ch.hpBg.destroy(); ch.hpBg = null; }
+                if (ch.hpFill) { ch.hpFill.destroy(); ch.hpFill = null; }
             });
-            s.villageChests.clear(true, true);
         }
-        if (s.villageChests) { s.villageChests.destroy(); s.villageChests = null; }
-        if (s.villageCorpses) { s.villageCorpses.clear(true, true); s.villageCorpses.destroy(); s.villageCorpses = null; }
+        s.villageChests = clearGroup(s.villageChests);
+        s.villageCorpses = clearGroup(s.villageCorpses);
+
         if (s.villageZombies && s.villageZombies.getLength && s.villageZombies.getLength() > 0) {
             s.villageZombies.getChildren().forEach(e => {
-                if (e.hpBg) e.hpBg.destroy();
-                if (e.hpFill) e.hpFill.destroy();
+                if (e.hpBg) { e.hpBg.destroy(); e.hpBg = null; }
+                if (e.hpFill) { e.hpFill.destroy(); e.hpFill = null; }
             });
-            s.villageZombies.clear(true, true);
         }
-        if (s.villageZombies) { s.villageZombies.destroy(); s.villageZombies = null; }
+        s.villageZombies = clearGroup(s.villageZombies);
+
         if (s.villageDecor) {
-            // Destroy ALL objects including fresh ones (houses, gardens, etc.)
-            const decorCopy = [...s.villageDecor];
-            decorCopy.forEach(d => {
+            [...s.villageDecor].forEach(d => {
                 if (d && !d.destroyed) {
                     if (d.hpBg) { d.hpBg.destroy(); d.hpBg = null; }
                     if (d.hpFill) { d.hpFill.destroy(); d.hpFill = null; }
@@ -244,65 +245,62 @@ export class VillageZone extends BaseZone {
             });
             s.villageDecor = null;
         }
-        // Also remove from scene's display list if any objects remain
         if (s.children) {
             const toRemove = [];
             s.children.list.forEach(child => {
-                if (child && child.texture && child.texture.key &&
-                    (child.texture.key.includes('village') || child.texture.key.includes('house'))) {
+                if (child?.texture?.key && (child.texture.key.includes('village') || child.texture.key.includes('house')))
                     toRemove.push(child);
-                }
             });
             toRemove.forEach(child => child.destroy());
         }
-        if (s.villageBg) { s.villageBg.destroy(); s.villageBg = null; }
-        if (s.villageChildNPC) { if (s.villageChildNPC.destroy) s.villageChildNPC.destroy(); s.villageChildNPC = null; }
-        if (s.villageChildHint) { s.villageChildHint.destroy(); s.villageChildHint = null; }
+
+        s.villageBg = kill(s.villageBg);
+        s.villageChildNPC = kill(s.villageChildNPC);
+        s.villageChildHint = kill(s.villageChildHint);
         if (s.villageBoss) {
             if (s.villageBoss.hpBg) s.villageBoss.hpBg.destroy();
             if (s.villageBoss.hpFill) s.villageBoss.hpFill.destroy();
             if (s.villageBossNameText) s.villageBossNameText.destroy();
-            s.villageBoss.destroy();
-            s.villageBoss = null;
+            s.villageBoss.destroy(); s.villageBoss = null;
         }
         this.bossClones = null;
-        if (s.villageCemeteryGate) { s.villageCemeteryGate.destroy(); s.villageCemeteryGate = null; }
-        if (s.hellPortal) { if (s.hellPortal.destroy) s.hellPortal.destroy(); s.hellPortal = null; }
-        if (s.hellPortalGlow) { if (s.hellPortalGlow.destroy) s.hellPortalGlow.destroy(); s.hellPortalGlow = null; }
-        if (s.hellPortalHint) { if (s.hellPortalHint.destroy) s.hellPortalHint.destroy(); s.hellPortalHint = null; }
-        if (s.campfire) { if (s.campfire.destroy) s.campfire.destroy(); s.campfire = null; }
-        if (s.campfireHint) { if (s.campfireHint.destroy) s.campfireHint.destroy(); s.campfireHint = null; }
-        if (s.castleChildNPC) { if (s.castleChildNPC.destroy) s.castleChildNPC.destroy(); s.castleChildNPC = null; }
-        if (s.castleChildHint) { if (s.castleChildHint.destroy) s.castleChildHint.destroy(); s.castleChildHint = null; }
-        if (s.villageMerchantNPC) { if (s.villageMerchantNPC.destroy) s.villageMerchantNPC.destroy(); s.villageMerchantNPC = null; }
-        if (s.villageMerchantHint) { if (s.villageMerchantHint.destroy) s.villageMerchantHint.destroy(); s.villageMerchantHint = null; }
-        if (s.villageInn) { if (s.villageInn.destroy) s.villageInn.destroy(); s.villageInn = null; }
-        if (s.villageInnHint) { if (s.villageInnHint.destroy) s.villageInnHint.destroy(); s.villageInnHint = null; }
-        if (s.shopGroup) { s.shopGroup.forEach(e => { if (e && e.destroy) e.destroy(); }); s.shopGroup = []; }
+        s.villageCemeteryGate = kill(s.villageCemeteryGate);
+        s.hellPortal = kill(s.hellPortal);
+        s.hellPortalGlow = kill(s.hellPortalGlow);
+        s.hellPortalHint = kill(s.hellPortalHint);
+        s.campfire = kill(s.campfire);
+        s.campfireHint = kill(s.campfireHint);
+        s.castleChildNPC = kill(s.castleChildNPC);
+        s.castleChildHint = kill(s.castleChildHint);
+        s.villageMerchantNPC = kill(s.villageMerchantNPC);
+        s.villageMerchantHint = kill(s.villageMerchantHint);
+        s.villageInn = kill(s.villageInn);
+        s.villageInnHint = kill(s.villageInnHint);
+        if (s.shopGroup) { s.shopGroup.forEach(e => { if (e?.destroy) e.destroy(); }); s.shopGroup = []; }
+
         if (s.snowyIceSpirit) {
             if (s.snowyIceSpirit.hpBg) s.snowyIceSpirit.hpBg.destroy();
             if (s.snowyIceSpirit.hpFill) s.snowyIceSpirit.hpFill.destroy();
             if (s.snowyIceSpiritNameText) s.snowyIceSpiritNameText.destroy();
-            s.snowyIceSpirit.destroy();
-            s.snowyIceSpirit = null;
+            s.snowyIceSpirit.destroy(); s.snowyIceSpirit = null;
         }
         if (s.snowyIceShards) {
-            s.snowyIceShards.getChildren().forEach(s => {
-                if (s.hpBg) s.hpBg.destroy();
-                if (s.hpFill) s.hpFill.destroy();
+            s.snowyIceShards.getChildren().forEach(sh => {
+                if (sh.hpBg) sh.hpBg.destroy();
+                if (sh.hpFill) sh.hpFill.destroy();
             });
             s.snowyIceShards.clear(true, true);
-            s.snowyIceShards.destroy();
-            s.snowyIceShards = null;
+            s.snowyIceShards.destroy(); s.snowyIceShards = null;
         }
         s.zones.village.snowyAllCleared = false;
         s.zones.village.snowyBossDefeated = false;
         this.isFrozen = false;
-        if (s.cursedPortalVillage) { if (s.cursedPortalVillage.destroy) s.cursedPortalVillage.destroy(); s.cursedPortalVillage = null; }
-        if (s.cursedPortalVillageHint) { if (s.cursedPortalVillageHint.destroy) s.cursedPortalVillageHint.destroy(); s.cursedPortalVillageHint = null; }
-        if (s.depthsPortal) { if (s.depthsPortal.destroy) s.depthsPortal.destroy(); s.depthsPortal = null; }
-        if (s.depthsPortalGlow) { if (s.depthsPortalGlow.destroy) s.depthsPortalGlow.destroy(); s.depthsPortalGlow = null; }
-        if (s.depthsPortalHint) { if (s.depthsPortalHint.destroy) s.depthsPortalHint.destroy(); s.depthsPortalHint = null; }
+
+        s.cursedPortalVillage = kill(s.cursedPortalVillage);
+        s.cursedPortalVillageHint = kill(s.cursedPortalVillageHint);
+        s.depthsPortal = kill(s.depthsPortal);
+        s.depthsPortalGlow = kill(s.depthsPortalGlow);
+        s.depthsPortalHint = kill(s.depthsPortalHint);
         this._destroyDefeatedUI();
     }
 
@@ -490,6 +488,7 @@ export class VillageZone extends BaseZone {
 
             const dots = ['...', '....', '.....', 'The castle looms ahead...'];
             let dotIdx = 0;
+            if (!this.scene._spellTimers) this.scene._spellTimers = [];
             const dotTimer = this.scene.time.addEvent({
                 delay: 800, repeat: dots.length - 1,
                 callback: () => {
@@ -497,6 +496,7 @@ export class VillageZone extends BaseZone {
                     if (dotIdx < dots.length) cartText.setText(dots[dotIdx]);
                 }
             });
+            this.scene._spellTimers.push(dotTimer);
 
             this.scene.cameras.main.fadeIn(500, 0, 0, 0);
 
@@ -765,13 +765,13 @@ export class VillageZone extends BaseZone {
 
                 if (e.stats.role === 'archer' && dist < 200 && dist > 40) {
                     e.stats.rangedTimer = (e.stats.rangedTimer || 0) + delta;
-                    if (e.stats.rangedTimer >= (e.stats.rangedInterval || 1800)) {
+                    if (e.stats.rangedTimer >= (e.stats.rangedInterval || RANGED_INTERVAL_DEFAULT)) {
                         e.stats.rangedTimer = 0;
                         this._fireEnemyProjectile(e, dx, dy, 'arrow');
                     }
                 } else if (e.stats.role === 'healer' && dist < 150) {
                     e.stats.rangedTimer = (e.stats.rangedTimer || 0) + delta;
-                    if (e.stats.rangedTimer >= (e.stats.rangedInterval || 2500)) {
+                    if (e.stats.rangedTimer >= (e.stats.rangedInterval || RANGED_INTERVAL_DEFAULT)) {
                         e.stats.rangedTimer = 0;
                         this.scene.enemies.getChildren().forEach(ally => {
                             if (ally !== e && ally.active && ally.stats && ally.stats.hp < ally.stats.maxHp) {

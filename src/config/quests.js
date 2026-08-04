@@ -271,15 +271,60 @@ export const NPC_DB = {
         texKey: 'npc_elder',
         biome: 'meadow',
         x: 400, y: 350,
-        greeting: 'The path ahead leads to the cave. Be careful — darkness lurks below.',
-        greetingRu: 'Путь ведёт в пещеру. Будь осторожен — внизу таится тьма.',
-        greetingDe: 'Der Weg führt zur Höhle. Sei vorsichtig — unten lauert Dunkelheit.',
-        quests: [],
+        greeting: 'You look lost, traveler. Take this sword — you will need it. Beyond the gate lies the Corrupted Forest. Clear it and find the Arena.',
+        greetingRu: 'Ты выглядишь потерянным, странник. Возьми этот меч — он тебе понадобится. За воротами — Проклятый Лес. Очисти его и найди Арену.',
+        greetingDe: 'Du siehst verloren aus, Reisender. Nimm dieses Schwert — du wirst es brauchen. Jenseits des Tores liegt der Verfluchte Wald. Reinige ihn und finde die Arena.',
+        postArenaGreeting: 'The Arena is yours! The Amulet of Return is charged. Now you must enter the Mine. Skeleton Lord holds the key to the Village Gate.',
+        postArenaGreetingRu: 'Арена твоя! Амулет Возврата заряжен. Теперь ты должен войти в Шахту. Скелет-Лорд держит ключ от Врат Деревни.',
+        postArenaGreetingDe: 'Die Arena gehört dir! Das Amulett der Rückkehr ist aufgeladen. Jetzt musst du die Mine betreten. Der Skelettlord hat den Schlüssel zum Dorftor.',
+        quests: ['meadow_intro', 'arena_conquered', 'quest_mine'],
         hideName: false
     }
 };
 
 export const QUEST_DB = {
+    meadow_intro: {
+        name: 'First Steps',
+        nameRu: 'Первые Шаги',
+        nameDe: 'Erste Schritte',
+        type: 'kill',
+        target: 'goblin',
+        count: 3,
+        biome: 'forest',
+        description: 'The forest ahead is dangerous. Defeat 3 goblins to prove you are ready.',
+        descriptionRu: 'Лес впереди опасен. Победи 3 гоблинов чтобы доказать свою готовность.',
+        descriptionDe: 'Der Wald vor dir ist gefährlich. Besiege 3 Goblinen um deine Bereitschaft zu beweisen.',
+        rewards: { exp: 50, gold: 30 },
+        prerequisite: null
+    },
+    arena_conquered: {
+        name: 'The Arena Beckons',
+        nameRu: 'Арена Ждёт',
+        nameDe: 'Die Arena Ruft',
+        type: 'kill',
+        target: 'ancient_treant',
+        count: 1,
+        biome: 'arena',
+        description: 'The Treant blocks the path forward. Defeat it to unlock the Mine.',
+        descriptionRu: 'Трент преграждает путь. Победи его, чтобы открыть Шахту.',
+        descriptionDe: 'Der Treant versperrt den Weg. Besiege ihn, um die Mine zu öffnen.',
+        rewards: { exp: 100, gold: 50 },
+        prerequisite: null
+    },
+    quest_mine: {
+        name: 'The Mine Key',
+        nameRu: 'Ключ Шахты',
+        nameDe: 'Der Minenschlüssel',
+        type: 'kill',
+        target: 'skeleton_lord',
+        count: 1,
+        biome: 'mine',
+        description: 'The Skeleton Lord in the Mine holds the key to the Village Gate. Defeat him.',
+        descriptionRu: 'Скелет-Лорд в Шахте держит ключ от Врат Деревни. Победи его.',
+        descriptionDe: 'Der Skelettlord in der Mine hat den Schlüssel zum Dorftor. Besiege ihn.',
+        rewards: { exp: 150, gold: 80, crystals: 5 },
+        prerequisite: 'arena_conquered'
+    },
     kill_goblins: {
         name: 'Goblin Trouble',
         nameRu: 'Проблемы с Гоблинами',

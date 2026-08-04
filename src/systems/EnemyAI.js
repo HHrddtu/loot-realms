@@ -83,6 +83,19 @@ export class EnemyAI {
         if (!e.active || !e.stats) return;
         this._updateHpBar(e);
 
+        // Decrement slow timer
+        if (e.stats._slowed && e.stats._slowTimer !== undefined) {
+            e.stats._slowTimer -= scene.game.loop.delta;
+            if (e.stats._slowTimer <= 0) {
+                e.stats._slowed = false;
+                e.stats._slowPct = 0;
+                e.stats._slowTimer = 0;
+                e.clearTint();
+            } else {
+                e.setTint(0x6688ff);
+            }
+        }
+
         if (scene.menuOpen || scene.transitioning) { e.body.setVelocity(0); return; }
         if (e.stats.tutorial && e.stats.hp >= e.stats.maxHp) { e.body.setVelocity(0); return; }
         if (e.stats.patrol && e.stats.patrol.length > 0 && e.stats.hp >= e.stats.maxHp) { this._patrol(e, scene); return; }
@@ -288,7 +301,11 @@ export class EnemyAI {
 
     static _chase(e, player, dist) {
         const dx = player.x - e.x, dy = player.y - e.y;
-        const spd = e.stats.speed || 50;
+        let spd = e.stats.speed || 50;
+        // Apply slow debuff from spells
+        if (e.stats._slowed && e.stats._slowPct) {
+            spd = Math.floor(spd * (1 - e.stats._slowPct / 100));
+        }
         const engageDist = e.stats.engageDist || 30;
         if (dist > engageDist) { const chaseSpd = dist < 80 ? spd * 1.4 : spd; e.body.setVelocity((dx / dist) * chaseSpd, (dy / dist) * chaseSpd); e.setFlipX(dx < 0); }
         else e.body.setVelocity(0);

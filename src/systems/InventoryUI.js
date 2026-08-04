@@ -96,7 +96,7 @@ export class InventoryUI {
         this._infoGroup = [];
         const _mkInfo = (el) => { el.setScrollFactor(0).setDepth(200); this._infoGroup.push(el); this.scene.invGroup.push(el); return el; };
 
-        const pw = 180, ph = 220;
+        const pw = 180, ph = 260;
         _mkInfo(this.scene.add.rectangle(px + pw / 2, py + ph / 2, pw, ph, 0x0a0a1a, 0.7).setStrokeStyle(1, 0x333355));
         _mkInfo(this.scene.add.text(px + pw / 2, py + 12, 'ITEM INFO', { fontSize: '9px', fill: '#555', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5));
 
@@ -131,6 +131,21 @@ export class InventoryUI {
             } else {
                 _mkInfo(this.scene.add.text(px + 6, iy, 'Armor piece', { fontSize: '9px', fill: '#888', fontFamily: 'Arial' })); iy += lh;
             }
+
+            if (item.slot && this.scene.equipment[item.slot]) {
+                const equipped = this.scene.equipment[item.slot];
+                if (equipped && equipped.id !== item.id) {
+                    iy += 4;
+                    _mkInfo(this.scene.add.text(px + 6, iy, '--- vs Equipped ---', { fontSize: '8px', fill: '#666', fontFamily: 'Arial', fontStyle: 'bold' })); iy += lh;
+                    _mkInfo(this.scene.add.text(px + 6, iy, equipped.name || 'None', { fontSize: '8px', fill: '#888', fontFamily: 'Arial' })); iy += lh;
+                    const diffs = this._compareItems(item, equipped);
+                    diffs.forEach(d => {
+                        const color = d.delta > 0 ? '#2ecc71' : d.delta < 0 ? '#e74c3c' : '#888';
+                        const sign = d.delta > 0 ? '+' : '';
+                        _mkInfo(this.scene.add.text(px + 6, iy, d.label + ': ' + sign + d.delta, { fontSize: '9px', fill: color, fontFamily: 'Arial', fontStyle: 'bold' })); iy += lh - 2;
+                    });
+                }
+            }
         }
 
         if (item.id) {
@@ -150,6 +165,25 @@ export class InventoryUI {
                 });
             }
         }
+    }
+
+    _compareItems(newItem, equipped) {
+        const diffs = [];
+        const ns = newItem.stats || {};
+        const es = equipped.stats || {};
+        const labels = { hp: 'HP', damage: 'DMG', speed: 'SPD', crit: 'Crit', hpPercent: 'HP%', damagePercent: 'DMG%', speedPercent: 'SPD%', critPercent: 'Crit%', spellPercent: 'Spell%', dodgePercent: 'Dodge%', expPercent: 'EXP%', lootPercent: 'Loot%', regenPercent: 'Regen%' };
+        Object.keys(labels).forEach(k => {
+            const nv = ns[k] || 0, ev = es[k] || 0;
+            if (nv !== ev) diffs.push({ label: labels[k], delta: nv - ev });
+        });
+        if (newItem.attackRange && equipped.attackRange && newItem.attackRange !== equipped.attackRange) {
+            diffs.push({ label: 'Range', delta: newItem.attackRange - equipped.attackRange });
+        }
+        if (newItem.attackType && equipped.attackType && newItem.attackType !== equipped.attackType) {
+            diffs.push({ label: 'Type', delta: 0, text: newItem.attackType + ' vs ' + equipped.attackType });
+        }
+        if (diffs.length === 0) diffs.push({ label: 'Stats', delta: 0 });
+        return diffs;
     }
 
     _drawTabs(cx, cy) {
@@ -232,6 +266,16 @@ export class InventoryUI {
         this.scene.equipBag.splice(idx, 1);
         if (old) this.scene.equipBag.push(old);
         if (this.scene.playerSys) this.scene.playerSys.recalcStats();
+        this._drawAll();
+    }
+
+    _deleteMaterial(idx) {
+        const mats = this.scene.materials || [];
+        if (idx < 0 || idx >= mats.length) return;
+        const m = mats[idx];
+        if (m && m.locked) return;
+        mats.splice(idx, 1);
+        this.scene.recalcStats();
         this._drawAll();
     }
 

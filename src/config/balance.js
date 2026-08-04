@@ -29,6 +29,7 @@ export const COIN_ANIM_STAGGER = 80;
 export const BOSS_SECOND_DROP_CHANCE_FOREST = 0.5;
 export const BOSS_SECOND_DROP_CHANCE_MINE = 0.6;
 export const BOSS_SECOND_DROP_CHANCE_CAVE = 0.6;
+export const ZONE_BOSS_SECOND_DROP_CHANCE = 0.6;
 
 export const ENEMY_DROP_MATERIAL_COUNT = 2;
 export const CHEST_DROP_MATERIAL_COUNT = 2;
@@ -83,9 +84,6 @@ export const UPGRADE_SPD_PER_LVL = 3;
 export const UPGRADE_CRIT_PER_LVL = 2;
 export const UPGRADE_REGEN_PER_LVL = 1;
 
-export const INVENTORY_SLOTS = 30;
-export const EQUIP_BAG_DIVISOR = 2;
-
 export const CONSUMABLE_DURATION_MS = 60000;
 export const CONSUMABLE_LIFESTEAL_DURATION_MS = 45000;
 
@@ -100,8 +98,6 @@ export const ARENA_RESPAWN_X = 400;
 export const ARENA_RESPAWN_Y = 500;
 
 // ── Enemy Behavior ──
-export const ENEMY_WANDER_SPEED = 50;
-export const ENEMY_WANDER_TICK_THRESHOLD = 60;
 export const BOSS_CLONE_BASE_SPEED = 60;
 export const BOSS_CLONE_CLOSE_RANGE_SPEED_MULT = 1.4;
 export const BOSS_CLONE_MIN_DISTANCE = 16;
@@ -121,3 +117,8 @@ export const MP_MOB_SYNC_INTERVAL = 100;
 // ── Timers ──
 export const AUTO_SAVE_INTERVAL = 300000;
 export const BOSS_DEFEATED_TEXT_DURATION = 5000;
+
+// ── Enemy Ranged Intervals ──
+export const RANGED_INTERVALS = { archer: 1500, mage: 2000, healer: 2200 };
+export const RANGED_INTERVAL_DEFAULT = 2000;
+export const VILLAGE_RANGED_INTERVALS = { archer: 1800, healer: 2500 };

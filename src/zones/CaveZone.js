@@ -45,7 +45,7 @@ export class CaveZone extends BaseZone {
         this.spawner.spawnCaveChests();
         this.spawner.spawnCaveTorches();
 
-        s.caveDarkness = s.add.image(caveOffsetX + CAVE_WIDTH / 2, 300, 'mine_darkness')
+        s.caveDarkness = s.add.image(caveOffsetX + CAVE_WIDTH / 2, GAME_HEIGHT / 2, 'mine_darkness')
             .setScale(CAVE_WIDTH / 800, CAVE_HEIGHT / 600)
             .setDepth(13).setAlpha(0.92).setScrollFactor(0);
 
@@ -134,9 +134,9 @@ export class CaveZone extends BaseZone {
         if (s.groundLootGroup) { s.groundLootGroup.clear(true, true); s.groundLootGroup.destroy(); s.groundLootGroup = null; }
         if (s.caveExtraChests) {
             s.caveExtraChests.getChildren().forEach(ch => {
-                if (ch.hintText) ch.hintText.destroy();
-                if (ch.hpBg) ch.hpBg.destroy();
-                if (ch.hpFill) ch.hpFill.destroy();
+                if (ch.hintText) { ch.hintText.destroy(); ch.hintText = null; }
+                if (ch.hpBg) { ch.hpBg.destroy(); ch.hpBg = null; }
+                if (ch.hpFill) { ch.hpFill.destroy(); ch.hpFill = null; }
             });
             s.caveExtraChests.clear(true, true);
             s.caveExtraChests.destroy();
@@ -144,28 +144,28 @@ export class CaveZone extends BaseZone {
         }
         if (s.caveChests && s.caveChests.getLength && s.caveChests.getLength() > 0) {
             s.caveChests.getChildren().forEach(ch => {
-                if (ch.hintText) ch.hintText.destroy();
-                if (ch.hpBg) ch.hpBg.destroy();
-                if (ch.hpFill) ch.hpFill.destroy();
+                if (ch.hintText) { ch.hintText.destroy(); ch.hintText = null; }
+                if (ch.hpBg) { ch.hpBg.destroy(); ch.hpBg = null; }
+                if (ch.hpFill) { ch.hpFill.destroy(); ch.hpFill = null; }
             });
             s.caveChests.clear(true, true);
         }
         if (s.caveChests) { s.caveChests.destroy(); s.caveChests = null; }
         if (s.caveSmallBats && s.caveSmallBats.getLength && s.caveSmallBats.getLength() > 0) {
             s.caveSmallBats.getChildren().forEach(e => {
-                if (e.hpBg) e.hpBg.destroy();
-                if (e.hpFill) e.hpFill.destroy();
+                if (e.hpBg) { e.hpBg.destroy(); e.hpBg = null; }
+                if (e.hpFill) { e.hpFill.destroy(); e.hpFill = null; }
             });
             s.caveSmallBats.clear(true, true);
         }
         if (s.caveSmallBats) { s.caveSmallBats.destroy(); s.caveSmallBats = null; }
         if (s.caveBoss) {
-            if (s.caveBoss.hpBg) s.caveBoss.hpBg.destroy();
-            if (s.caveBoss.hpFill) s.caveBoss.hpFill.destroy();
-            if (s.caveBoss.aoeRing) s.caveBoss.aoeRing.destroy();
-            if (s.caveBoss.aoeRing2) s.caveBoss.aoeRing2.destroy();
-            if (s.caveBoss.telegraph) s.caveBoss.telegraph.destroy();
-            if (s.caveBoss.auraRing) s.caveBoss.auraRing.destroy();
+            if (s.caveBoss.hpBg) { s.caveBoss.hpBg.destroy(); s.caveBoss.hpBg = null; }
+            if (s.caveBoss.hpFill) { s.caveBoss.hpFill.destroy(); s.caveBoss.hpFill = null; }
+            if (s.caveBoss.aoeRing) { s.caveBoss.aoeRing.destroy(); s.caveBoss.aoeRing = null; }
+            if (s.caveBoss.aoeRing2) { s.caveBoss.aoeRing2.destroy(); s.caveBoss.aoeRing2 = null; }
+            if (s.caveBoss.telegraph) { s.caveBoss.telegraph.destroy(); s.caveBoss.telegraph = null; }
+            if (s.caveBoss.auraRing) { s.caveBoss.auraRing.destroy(); s.caveBoss.auraRing = null; }
             s.caveBoss.destroy();
             s.caveBoss = null;
         }

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Экспорт промо-изображений — Loot Realms</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        #app {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #f1c40f;
+            text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+        }
+        
+        p {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #bdc3c7;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        #btn-sage {
+            background: linear-gradient(135deg, #7d3c98 0%, #5b2c6f 100%);
+            color: #fff;
+        }
+        
+        #btn-sage:hover {
+            background: linear-gradient(135deg, #9b59b6 0%, #7d3c98 100%);
+        }
+        
+        #btn-alchemist {
+            background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+            color: #fff;
+        }
+        
+        #btn-alchemist:hover {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        }
+        
+        #btn-angel {
+            background: linear-gradient(135deg, #f1c40f 0%, #d4ac0d 100%);
+            color: #1a1a2e;
+        }
+        
+        #btn-angel:hover {
+            background: linear-gradient(135deg, #f4d03f 0%, #f1c40f 100%);
+        }
+        
+        #btn-all {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: #fff;
+        }
+        
+        #btn-all:hover {
+            background: linear-gradient(135deg, #ec7063 0%, #e74c3c 100%);
+        }
+        
+        .preview {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .preview img {
+            width: 256px;
+            height: 384px;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            border: 3px solid #34495e;
+            border-radius: 12px;
+            background: #0a0a1a;
+            padding: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .preview img:hover {
+            border-color: #f1c40f;
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(241, 196, 15, 0.3);
+        }
+        
+        .preview img[alt="player_sage"] {
+            border-color: #7d3c98;
+        }
+        
+        .preview img[alt="player_alchemist"] {
+            border-color: #27ae60;
+        }
+        
+        .preview img[alt="player_angel"] {
+            border-color: #f1c40f;
+        }
+        
+        .info {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .info h3 {
+            color: #f1c40f;
+            margin-bottom: 10px;
+        }
+        
+        .info ul {
+            margin-left: 20px;
+            color: #bdc3c7;
+        }
+        
+        .info li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>Загрузка...</h1>
+    </div>
+    
+    <script src="export-promo.js"></script>
+    
+    <div class="info">
+        <h3>Информация</h3>
+        <ul>
+            <li>Изображения генерируются с увеличением 8x (256×384 px)</li>
+            <li>Формат: PNG с прозрачным фоном</li>
+            <li>Рендеринг: nearest-neighbor (сохраняет пиксель-арт стиль)</li>
+            <li>Для сохранения нажмите кнопку или кликните по изображению</li>
+        </ul>
+    </div>
+</body>
+</html>

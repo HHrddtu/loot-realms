@@ -4,7 +4,7 @@ import {
     SNOWY_VILLAGE_ENEMY_TYPES, SNOWY_VILLAGE_BOSS_TYPE, SNOWY_BOSS_MINION,
     WARMTH_CORE,
     SNOWY_VILLAGE_CAMP_POSITIONS, SNOWY_VILLAGE_CHEST_COUNT, SNOWY_VILLAGE_CHEST_DROP_CHANCE,
-    VILLAGE_CHEST_EQUIP_DROP_CHANCE, DIFF_COLORS
+    VILLAGE_CHEST_EQUIP_DROP_CHANCE, DIFF_COLORS, VILLAGE_RANGED_INTERVALS, RANGED_INTERVAL_DEFAULT
 } from '../config/index.js';
 import { playBossDeath, playLoot } from '../sound.js';
 import { rollVillageEquip, rollEquip } from '../utils.js';
@@ -16,6 +16,10 @@ export class SnowyZone extends BaseZone {
     }
 
     setup() {} /* no-op — used as utility via VillageZone */
+
+    _destroyZoneSpecific() {
+        this.scene.snowyIceSpiritAbilities = null;
+    }
 
     _spawnSnowyVillageCamps() {
         const ox = this.scene.villageOffsetX;
@@ -42,7 +46,7 @@ export class SnowyZone extends BaseZone {
         e.body.setCollideWorldBounds(true);
         if (this.scene.anims.exists(animKey)) e.play(animKey);
 
-        const rangedInterval = t.role === 'archer' ? 1800 : t.role === 'healer' ? 2500 : 2000;
+        const rangedInterval = VILLAGE_RANGED_INTERVALS[t.role] || RANGED_INTERVAL_DEFAULT;
         e.stats = {
             key: t.key, name: t.name,
             hp: Math.floor(t.hp * this.scene.diffMulti.hp),
@@ -52,6 +56,7 @@ export class SnowyZone extends BaseZone {
             bw: t.bw, bh: t.bh, role: t.role,
             campIndex: campIndex,
             wTimer: 0, wDir: 0,
+            hasShield: t.hasShield || false,
             rangedTimer: 0, rangedInterval
         };
 
@@ -129,13 +134,12 @@ export class SnowyZone extends BaseZone {
         if (this.scene.anims.exists(animKey)) e.play(animKey);
 
         const bt = SNOWY_VILLAGE_BOSS_TYPE;
-        const diffKey = this.scene.difficulty || 'Normal';
         e.stats = {
             key: bt.key, name: bt.name,
-            hp: Math.floor((bt.hp[diffKey] || bt.hp.Normal)),
-            maxHp: Math.floor((bt.hp[diffKey] || bt.hp.Normal)),
-            damage: Math.floor((bt.dmg[diffKey] || bt.dmg.Normal)),
-            exp: Math.floor((bt.exp[diffKey] || bt.exp.Normal)),
+            hp: Math.floor(bt.hp),
+            maxHp: Math.floor(bt.hp),
+            damage: Math.floor(bt.dmg),
+            exp: Math.floor(bt.exp),
             bw: bt.bw, bh: bt.bh,
             frostTimer: 0, frostInterval: bt.frostWaveInterval,
             blizzardTimer: 0, blizzardInterval: bt.blizzardInterval,
@@ -152,6 +156,7 @@ export class SnowyZone extends BaseZone {
         }).setOrigin(0.5).setDepth(20).setScrollFactor(0).setVisible(false);
 
         this.scene.snowyIceSpirit = e;
+        this.scene.enemies.add(e);
         this.scene.snowyIceSpiritAbilities = { frostWaveTimer: 0, blizzardTimer: 0, summonTimer: 0 };
         this.scene.snowyIceShards = this.scene.physics.add.group();
         if (this.scene.multiplayer && this.scene.mpSync) {

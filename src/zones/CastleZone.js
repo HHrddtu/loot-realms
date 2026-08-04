@@ -91,9 +91,9 @@ export class CastleZone extends BaseZone {
         const s = this.scene;
         if (s.villageChests && s.villageChests.getLength && s.villageChests.getLength() > 0) {
             s.villageChests.getChildren().forEach(ch => {
-                if (ch.hintText) ch.hintText.destroy();
-                if (ch.hpBg) ch.hpBg.destroy();
-                if (ch.hpFill) ch.hpFill.destroy();
+                if (ch.hintText) { ch.hintText.destroy(); ch.hintText = null; }
+                if (ch.hpBg) { ch.hpBg.destroy(); ch.hpBg = null; }
+                if (ch.hpFill) { ch.hpFill.destroy(); ch.hpFill = null; }
             });
             s.villageChests.clear(true, true);
         }
@@ -265,6 +265,7 @@ export class CastleZone extends BaseZone {
                 '"Bless you, brave one!"'
             ];
             let idx = 0;
+            if (!this.scene._spellTimers) this.scene._spellTimers = [];
             const thankTimer = this.scene.time.addEvent({
                 delay: 1500, repeat: thankTexts.length - 1,
                 callback: () => {
@@ -278,6 +279,7 @@ export class CastleZone extends BaseZone {
                     }
                 }
             });
+            this.scene._spellTimers.push(thankTimer);
 
             this.scene.time.delayedCall(thankTexts.length * 1500 + 500, () => {
                 const boyX = cx - 60;
@@ -442,18 +444,18 @@ export class CastleZone extends BaseZone {
             this.scene.physics.world.colliders.destroy();
             if (this.scene.enemies) {
                 this.scene.enemies.getChildren().forEach(e => {
-                    if (e.hpBg) e.hpBg.destroy();
-                    if (e.hpFill) e.hpFill.destroy();
-                    if (e.shieldIcon) e.shieldIcon.destroy();
-                    if (e.roleIcon) e.roleIcon.destroy();
+                    if (e.hpBg) { e.hpBg.destroy(); e.hpBg = null; }
+                    if (e.hpFill) { e.hpFill.destroy(); e.hpFill = null; }
+                    if (e.shieldIcon) { e.shieldIcon.destroy(); e.shieldIcon = null; }
+                    if (e.roleIcon) { e.roleIcon.destroy(); e.roleIcon = null; }
                 });
                 this.scene.enemies.clear(true, true);
             }
             if (this.scene.villageChests) {
                 this.scene.villageChests.getChildren().forEach(ch => {
-                    if (ch.hintText) ch.hintText.destroy();
-                    if (ch.hpBg) ch.hpBg.destroy();
-                    if (ch.hpFill) ch.hpFill.destroy();
+                    if (ch.hintText) { ch.hintText.destroy(); ch.hintText = null; }
+                    if (ch.hpBg) { ch.hpBg.destroy(); ch.hpBg = null; }
+                    if (ch.hpFill) { ch.hpFill.destroy(); ch.hpFill = null; }
                 });
                 this.scene.villageChests.clear(true, true);
             }
@@ -496,18 +498,18 @@ export class CastleZone extends BaseZone {
             this.scene.physics.world.colliders.destroy();
             if (this.scene.enemies) {
                 this.scene.enemies.getChildren().forEach(e => {
-                    if (e.hpBg) e.hpBg.destroy();
-                    if (e.hpFill) e.hpFill.destroy();
-                    if (e.shieldIcon) e.shieldIcon.destroy();
-                    if (e.roleIcon) e.roleIcon.destroy();
+                    if (e.hpBg) { e.hpBg.destroy(); e.hpBg = null; }
+                    if (e.hpFill) { e.hpFill.destroy(); e.hpFill = null; }
+                    if (e.shieldIcon) { e.shieldIcon.destroy(); e.shieldIcon = null; }
+                    if (e.roleIcon) { e.roleIcon.destroy(); e.roleIcon = null; }
                 });
                 this.scene.enemies.clear(true, true);
             }
             if (this.scene.villageChests) {
                 this.scene.villageChests.getChildren().forEach(ch => {
-                    if (ch.hintText) ch.hintText.destroy();
-                    if (ch.hpBg) ch.hpBg.destroy();
-                    if (ch.hpFill) ch.hpFill.destroy();
+                    if (ch.hintText) { ch.hintText.destroy(); ch.hintText = null; }
+                    if (ch.hpBg) { ch.hpBg.destroy(); ch.hpBg = null; }
+                    if (ch.hpFill) { ch.hpFill.destroy(); ch.hpFill = null; }
                 });
                 this.scene.villageChests.clear(true, true);
             }

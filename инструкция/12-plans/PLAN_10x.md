@@ -3,7 +3,7 @@
 #plan #review #tasks
 
 > [!INFO] Связанные заметки
-> - [[REVIEW]] — код-ревью (основа для плана)
+> - [[archive/REVIEW]] — код-ревью (основа для плана)
 > - [[01-tech/ARCHITECTURE|Architecture]] — архитектура (цель рефакторинга)
 > - [[12-plans/TASK_QUEUE|TASK QUEUE]] — текущие задачи
 > - [[12-plans/PROJECT_STATE|PROJECT STATE]] — текущее состояние

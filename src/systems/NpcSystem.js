@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { NPC_DB, QUEST_DB, CART_DRIVER_NPC, GAME_WIDTH, GAME_HEIGHT } from '../config/index.js';
-import { getNpcQuestStatus, getActiveQuests, getAvailableQuests, acceptQuest, completeQuest, isQuestComplete, saveQuests, getQuestProgress, getQuestNpc } from '../quests.js';
+import { getNpcQuestStatus, getActiveQuests, getAvailableQuests, acceptQuest, completeQuest, isQuestComplete, saveQuests, getQuestProgress, getQuestNpc, onTalk } from '../quests.js';
 import { rollEquip } from '../utils.js';
 import { getLang } from '../i18n.js';
 import { t } from '../i18n.js';
@@ -150,6 +150,27 @@ export class NpcSystem {
         const npc = NPC_DB[npcKey];
         if (!npc) return;
 
+        // Old Traveler gives the Rusty Sword through dialog (not auto)
+        if (npcKey === 'meadow_elder' && !s.equipment.weapon && !s._meadowSwordGiven) {
+            const lang = getLang();
+            const text = lang === 'ru'
+                ? 'Ты выглядишь потерянным, странник. Возьми этот меч — он тебе понадобится. За воротами — Проклятый Лес. Очисти его и найди Арену.'
+                : lang === 'de'
+                ? 'Du siehst verloren aus, Reisender. Nimm dieses Schwert — du wirst es brauchen. Jenseits des Tores liegt der Verfluchte Wald. Reinige ihn und finde die Arena.'
+                : 'You look lost, traveler. Take this sword — you will need it. Beyond the gate lies the Corrupted Forest. Clear it and find the Arena.';
+            const label = lang === 'ru' ? 'Взять меч' : lang === 'de' ? 'Schwert nehmen' : 'Take the sword';
+            this._showDialog(npc, npc.name, text, '#f1c40f', () => {
+                const rustySword = { id: 'rusty_sword', name: 'Rusty Sword', nameRu: 'Ржавый Меч', nameDe: 'Rostiges Schwert', rarity: 'common', slot: 'weapon', texKey: 'item_stick', attackType: 'cleave', attackRange: 50, stats: {} };
+                s.equipment.weapon = rustySword;
+                s._meadowSwordGiven = true;
+                s.recalcStats();
+                s.floatingText(s.player.x, s.player.y - 40, 'Got Rusty Sword!', '#f1c40f');
+            }, label);
+            return;
+        }
+
+        onTalk(npcKey);
+
         const status = getNpcQuestStatus(npcKey);
 
         if (status === 'quest_complete') {
@@ -198,10 +219,20 @@ export class NpcSystem {
                 saveQuests();
             }, t('quest.npc.talk'));
         } else {
-            const greeting = getLang() === 'ru' && npc.greetingRu ? npc.greetingRu
-                : getLang() === 'de' && npc.greetingDe ? npc.greetingDe
-                : npc.greeting;
-            this._showDialog(npc, npc.name, greeting, '#aaa', null);
+            const s = this.scene;
+            let greeting = npc.greeting;
+            let greetingRu = npc.greetingRu;
+            let greetingDe = npc.greetingDe;
+            if (npcKey === 'meadow_elder' && s._arenaBossJustKilled && npc.postArenaGreeting) {
+                greeting = npc.postArenaGreeting;
+                greetingRu = npc.postArenaGreetingRu || greeting;
+                greetingDe = npc.postArenaGreetingDe || greeting;
+                s._arenaBossJustKilled = false;
+            }
+            const display = getLang() === 'ru' && greetingRu ? greetingRu
+                : getLang() === 'de' && greetingDe ? greetingDe
+                : greeting;
+            this._showDialog(npc, npc.name, display, '#aaa', null);
         }
     }
 
@@ -328,7 +359,7 @@ export class NpcSystem {
                 s.currentZone.clear();
 
                 s.cameras.main.setBackgroundColor('#1a0e05');
-                s.add.image(400, 300, 'cart_ride').setDepth(0);
+                s.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'cart_ride').setDepth(0);
 
                 const cartText = s.add.text(400, 280, '...', {
                     fontSize: '20px', fill: '#f5cba7', fontFamily: 'Georgia', fontStyle: 'italic'
@@ -350,7 +381,7 @@ export class NpcSystem {
                     s.cameras.main.fadeOut(800, 0, 0, 0);
                     s.time.delayedCall(800, () => {
                         cartText.destroy();
-                        s._setupZone('meadow');
+                        s._setupZone('cave');
                         s.cameras.main.fadeIn(500, 0, 0, 0);
                         s.transitioning = false;
                         s.menuOpen = false;
@@ -373,7 +404,7 @@ export class NpcSystem {
         s.questLogGroup = [];
         const mk = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
 
-        s.questLogGroup.push(mk(s.add.rectangle(400, 300, 800, 600, 0x0a0a1a, 0.97)
+        s.questLogGroup.push(mk(s.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, 800, 600, 0x0a0a1a, 0.97)
             .setStrokeStyle(2, 0x8b4513).setInteractive()));
 
         s.questLogGroup.push(mk(s.add.text(400, 35, t('quest.title'), {
@@ -382,7 +413,7 @@ export class NpcSystem {
 
         const active = getActiveQuests();
         if (active.length === 0) {
-            s.questLogGroup.push(mk(s.add.text(400, 300, t('quest.noQuests'), {
+            s.questLogGroup.push(mk(s.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, t('quest.noQuests'), {
                 fontSize: '16px', fill: '#8b4513', fontFamily: 'Georgia, serif', align: 'center'
             }).setOrigin(0.5)));
         } else {

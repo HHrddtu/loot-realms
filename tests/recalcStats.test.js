@@ -61,6 +61,10 @@ vi.mock('../src/config/pets.js', () => ({
     getPetStats: () => ({})
 }));
 
+vi.mock('../src/config/sets.js', () => ({
+    getSetBonuses: () => ({})
+}));
+
 import { PlayerSystem } from '../src/systems/PlayerSystem.js';
 
 function createMockScene(overrides = {}) {
@@ -108,76 +112,75 @@ describe('PlayerSystem.recalcStats', () => {
     });
 
     it('sets base stats for level 1 sage', () => {
-        scene.accountLevel = 1; // +2 HP, +1 DMG, +1 SPD
+        scene.accountLevel = 1;
         system.recalcStats();
-        expect(scene.playerMaxHP).toBe(102); // 100 + 2 account
-        expect(scene.playerDamage).toBe(21); // 20 + 1 account
-        expect(scene.playerSpeed).toBe(151); // 150 + 1 account
+        expect(scene.playerMaxHP).toBe(102);
+        expect(scene.playerDamage).toBe(21);
+        expect(scene.playerSpeed).toBe(151);
         expect(scene.corruptionMax).toBe(100);
     });
 
     it('increases stats per level', () => {
         scene.playerLevel = 10;
-        scene.accountLevel = 1; // +2 HP, +1 DMG, +1 SPD
+        scene.accountLevel = 1;
         system.recalcStats();
         expect(scene.playerMaxHP).toBe(100 + 9 * 15 + 2);
         expect(scene.playerDamage).toBe(20 + 9 * 4 + 1);
         expect(scene.playerSpeed).toBe(150 + 9 * 2 + 1);
     });
 
-    it('applies material stat bonuses', () => {
+    it('material items contribute speed only (HP/DMG from MaterialBook)', () => {
         scene.materials = [
             { stats: { hp: 10, dmg: 5, speed: 3 } },
-            { stats: { hp: 5, dmg: 2 } }
+            { stats: { hp: 5, dmg: 2, speed: 1 } }
         ];
-        scene.accountLevel = 1; // +2 HP, +1 DMG, +1 SPD
+        scene.accountLevel = 1;
         system.recalcStats();
-        expect(scene.playerMaxHP).toBe(100 + 15 + 2);
-        expect(scene.playerDamage).toBe(20 + 7 + 1);
-        expect(scene.playerSpeed).toBe(150 + 3 + 1);
+        expect(scene.playerMaxHP).toBe(102);
+        expect(scene.playerDamage).toBe(21);
+        expect(scene.playerSpeed).toBe(150 + 3 + 1 + 1);
     });
 
-    it('applies equipment stat bonuses with difficulty multiplier', () => {
+    it('equipment contributes speed scaled by diffMult (HP/DMG from other sources)', () => {
         scene.equipment = {
             weapon: { stats: { hp: 20, dmg: 10, speed: 5 }, rarity: 'rare' },
             armor: null,
             accessory: null
         };
-        scene.accountLevel = 1; // +2 HP, +1 DMG, +1 SPD
-        const diffMult = { hp: 1, dmg: 1 };
+        scene.accountLevel = 1;
         system.recalcStats();
-        expect(scene.playerMaxHP).toBe(100 + 20 * diffMult.hp + 2);
-        expect(scene.playerDamage).toBe(20 + 10 * diffMult.dmg + 1);
+        expect(scene.playerMaxHP).toBe(102);
+        expect(scene.playerDamage).toBe(21);
+        expect(scene.playerSpeed).toBe(150 + 5 + 1);
     });
 
     it('preserves HP ratio after recalc', () => {
         scene.playerHP = 50;
         scene.playerMaxHP = 100;
-        scene.materials = [{ stats: { hp: 100 } }];
-        scene.accountLevel = 1; // +2 HP
+        scene.accountLevel = 1;
         system.recalcStats();
-        expect(scene.playerMaxHP).toBe(202); // 100 + 100 material + 2 account
-        expect(scene.playerHP).toBe(Math.floor((50 / 100) * 202));
+        expect(scene.playerMaxHP).toBe(102);
+        expect(scene.playerHP).toBe(Math.floor((50 / 100) * 102));
     });
 
     it('calculates different classes correctly', () => {
         scene.classKey = 'alchemist';
         scene.classData = mockClassData.alchemist;
-        scene.accountLevel = 1; // +2 HP, +1 DMG, +1 SPD
+        scene.accountLevel = 1;
         system.recalcStats();
-        expect(scene.playerMaxHP).toBe(122); // 120 + 2 account
-        expect(scene.playerDamage).toBe(16); // 15 + 1 account
-        expect(scene.playerSpeed).toBe(141); // 140 + 1 account
+        expect(scene.playerMaxHP).toBe(122);
+        expect(scene.playerDamage).toBe(16);
+        expect(scene.playerSpeed).toBe(141);
     });
 
     it('handles no materials and no equipment gracefully', () => {
         scene.materials = [];
         scene.equipment = { weapon: null, armor: null, accessory: null };
-        scene.accountLevel = 1; // Account level 1 gives +2 HP, +1 DMG, +1 SPD
+        scene.accountLevel = 1;
         system.recalcStats();
-        expect(scene.playerMaxHP).toBe(102); // 100 + 2 account bonus
-        expect(scene.playerDamage).toBe(21); // 20 + 1 account bonus
-        expect(scene.playerSpeed).toBe(151); // 150 + 1 account bonus
+        expect(scene.playerMaxHP).toBe(102);
+        expect(scene.playerDamage).toBe(21);
+        expect(scene.playerSpeed).toBe(151);
     });
 
     it('applies corruption max from class and talents', () => {
@@ -200,5 +203,141 @@ describe('PlayerSystem.recalcStats', () => {
         scene.upgradeLevels = {};
         scene.activeBoosts = {};
         expect(() => system.recalcStats()).not.toThrow();
+    });
+
+    it('multiple equipment pieces stack speed', () => {
+        scene.equipment = {
+            weapon: { stats: { speed: 10 } },
+            armor: { stats: { speed: 5 } },
+            accessory: { stats: { speed: 3 } }
+        };
+        scene.accountLevel = 1;
+        system.recalcStats();
+        expect(scene.playerSpeed).toBe(150 + 10 + 5 + 3 + 1);
+    });
+
+    it('material count multiplies speed', () => {
+        scene.materials = [
+            { stats: { speed: 5 }, count: 3 }
+        ];
+        scene.accountLevel = 1;
+        system.recalcStats();
+        expect(scene.playerSpeed).toBe(150 + 5 * 3 + 1);
+    });
+
+    it('hp ratio preserved when HP is at max', () => {
+        scene.playerHP = 100;
+        scene.playerMaxHP = 100;
+        scene.accountLevel = 1;
+        system.recalcStats();
+        expect(scene.playerHP).toBe(scene.playerMaxHP);
+    });
+
+    it('hp ratio preserved when HP is at 1', () => {
+        scene.playerHP = 1;
+        scene.playerMaxHP = 100;
+        scene.accountLevel = 1;
+        system.recalcStats();
+        expect(scene.playerHP).toBe(1);
+    });
+
+    it('hp is clamped to min 1 after recalc', () => {
+        scene.playerHP = 0;
+        scene.playerMaxHP = 100;
+        system.recalcStats();
+        expect(scene.playerHP).toBeGreaterThanOrEqual(1);
+    });
+
+    it('angel class has correct base stats', () => {
+        scene.classKey = 'angel';
+        scene.classData = mockClassData.angel;
+        scene.accountLevel = 1;
+        system.recalcStats();
+        expect(scene.playerMaxHP).toBe(92);
+        expect(scene.playerDamage).toBe(23);
+        expect(scene.playerSpeed).toBe(161);
+    });
+
+    it('account level scales all stats', () => {
+        scene.accountLevel = 5;
+        system.recalcStats();
+        expect(scene.playerMaxHP).toBe(100 + 5 * 2);
+        expect(scene.playerDamage).toBe(20 + 5 * 1);
+        expect(scene.playerSpeed).toBe(150 + 5 * 1);
+    });
+
+    it('account effects apply percentage bonuses', () => {
+        scene.accountEffects = { hpPercent: 10, damagePercent: 10 };
+        scene.accountLevel = 1;
+        system.recalcStats();
+        const expectedHp = Math.floor((100 + 2) * (1 + 10 / 100));
+        const expectedDmg = Math.floor((20 + 1) * (1 + 10 / 100));
+        expect(scene.playerMaxHP).toBe(expectedHp);
+        expect(scene.playerDamage).toBe(expectedDmg);
+    });
+
+    it('upgrade levels apply flat percentage bonuses', () => {
+        scene.upgradeLevels = { upg_hp: 2, upg_dmg: 3, upg_spd: 1 };
+        scene.accountLevel = 1;
+        system.recalcStats();
+        const expectedHp = Math.floor((100 + 2) * (1 + 10 / 100));
+        const expectedDmg = Math.floor((20 + 1) * (1 + 15 / 100));
+        const expectedSpd = Math.floor((150 + 1) * (1 + 5 / 100));
+        expect(scene.playerMaxHP).toBe(expectedHp);
+        expect(scene.playerDamage).toBe(expectedDmg);
+        expect(scene.playerSpeed).toBe(expectedSpd);
+    });
+
+    it('materials without speed stat do not affect speed', () => {
+        scene.materials = [
+            { stats: { hp: 10, dmg: 5 } }
+        ];
+        scene.accountLevel = 1;
+        system.recalcStats();
+        expect(scene.playerSpeed).toBe(151);
+    });
+
+    it('materials without stats object are skipped', () => {
+        scene.materials = [
+            { name: 'broken material' }
+        ];
+        scene.accountLevel = 1;
+        system.recalcStats();
+        expect(scene.playerSpeed).toBe(151);
+    });
+
+    it('equipment without stats is skipped', () => {
+        scene.equipment = {
+            weapon: { name: 'empty weapon' },
+            armor: null,
+            accessory: null
+        };
+        scene.accountLevel = 1;
+        system.recalcStats();
+        expect(scene.playerSpeed).toBe(151);
+    });
+
+    it('corruptionMax stacks from talents', () => {
+        scene.talentEffects = { corruptionMax: 20 };
+        system.recalcStats();
+        expect(scene.corruptionMax).toBe(120);
+    });
+
+    it('computed crit chance includes talent and account effects', () => {
+        scene.talentEffects = { critChance: 5 };
+        scene.accountEffects = { critPercent: 3 };
+        system.recalcStats();
+        expect(scene.computedCritChance).toBe(8);
+    });
+
+    it('computed crit damage defaults to 1.5', () => {
+        system.recalcStats();
+        expect(scene.computedCritDamage).toBe(1.5);
+    });
+
+    it('computed crit damage includes talent bonus', () => {
+        scene.talentEffects = { critDamagePercent: 50 };
+        system.recalcStats();
+        expect(scene.computedCritDamage).toBe(2.0);
     });
 });

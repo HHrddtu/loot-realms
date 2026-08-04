@@ -69,7 +69,7 @@ export class MineZone extends BaseZone {
         this.spawner.spawnDecor();
         this.spawner.spawnCart();
 
-        s.mineDarkness = s.add.image(400, 300, 'mine_darkness').setDepth(13).setAlpha(0.9).setScrollFactor(0);
+        s.mineDarkness = s.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'mine_darkness').setDepth(13).setAlpha(0.9).setScrollFactor(0);
 
         this.setupEnemyOverlap();
 
@@ -108,9 +108,9 @@ export class MineZone extends BaseZone {
         if (s.mineCrystals) { s.mineCrystals.destroy(); s.mineCrystals = null; }
         if (s.mineChests && s.mineChests.getLength && s.mineChests.getLength() > 0) {
             s.mineChests.getChildren().forEach(ch => {
-                if (ch.hintText) ch.hintText.destroy();
-                if (ch.hpBg) ch.hpBg.destroy();
-                if (ch.hpFill) ch.hpFill.destroy();
+                if (ch.hintText) { ch.hintText.destroy(); ch.hintText = null; }
+                if (ch.hpBg) { ch.hpBg.destroy(); ch.hpBg = null; }
+                if (ch.hpFill) { ch.hpFill.destroy(); ch.hpFill = null; }
             });
             s.mineChests.clear(true, true);
         }
@@ -140,9 +140,9 @@ export class MineZone extends BaseZone {
             s.mineDecor = null;
         }
         if (s.mineBoss) {
-            if (s.mineBoss.hpBg) s.mineBoss.hpBg.destroy();
-            if (s.mineBoss.hpFill) s.mineBoss.hpFill.destroy();
-            if (s.mineBossNameText) s.mineBossNameText.destroy();
+            if (s.mineBoss.hpBg) { s.mineBoss.hpBg.destroy(); s.mineBoss.hpBg = null; }
+            if (s.mineBoss.hpFill) { s.mineBoss.hpFill.destroy(); s.mineBoss.hpFill = null; }
+            if (s.mineBossNameText) { s.mineBossNameText.destroy(); s.mineBossNameText = null; }
             if (s.mineBoss.aoeRing) { s.mineBoss.aoeRing.destroy(); s.mineBoss.aoeRing = null; }
             if (s.mineBoss.aoeRing2) { s.mineBoss.aoeRing2.destroy(); s.mineBoss.aoeRing2 = null; }
             if (s.mineBoss.telegraph) { s.mineBoss.telegraph.destroy(); s.mineBoss.telegraph = null; }
@@ -485,7 +485,7 @@ export class MineZone extends BaseZone {
         s.physics.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
         s.cameras.main.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-        s.add.image(400, 300, 'boss_ground').setDepth(0);
+        s.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'boss_ground').setDepth(0);
 
         s.mineArenaExit = s.add.sprite(ARENA_EXIT_POS.x, ARENA_EXIT_POS.y, 'mine_ladder').setDepth(1);
         s.mineArenaExitHint = s.add.text(ARENA_EXIT_POS.x, ARENA_EXIT_POS.y + 50, '', {
@@ -516,9 +516,9 @@ export class MineZone extends BaseZone {
         const s = this.scene;
         s.physics.world.colliders.destroy();
         if (s.mineBoss) {
-            if (s.mineBoss.hpBg) s.mineBoss.hpBg.destroy();
-            if (s.mineBoss.hpFill) s.mineBoss.hpFill.destroy();
-            if (s.mineBossNameText) s.mineBossNameText.destroy();
+            if (s.mineBoss.hpBg) { s.mineBoss.hpBg.destroy(); s.mineBoss.hpBg = null; }
+            if (s.mineBoss.hpFill) { s.mineBoss.hpFill.destroy(); s.mineBoss.hpFill = null; }
+            if (s.mineBossNameText) { s.mineBossNameText.destroy(); s.mineBossNameText = null; }
             if (s.mineBoss.aoeRing) { s.mineBoss.aoeRing.destroy(); s.mineBoss.aoeRing = null; }
             if (s.mineBoss.aoeRing2) { s.mineBoss.aoeRing2.destroy(); s.mineBoss.aoeRing2 = null; }
             if (s.mineBoss.telegraph) { s.mineBoss.telegraph.destroy(); s.mineBoss.telegraph = null; }
@@ -530,10 +530,10 @@ export class MineZone extends BaseZone {
         this._destroyDefeatedUI();
         if (s.enemies && s.enemies.getLength && s.enemies.getLength() > 0) {
             s.enemies.getChildren().forEach(e => {
-                if (e.hpBg) e.hpBg.destroy();
-                if (e.hpFill) e.hpFill.destroy();
-                if (e.shieldIcon) e.shieldIcon.destroy();
-                if (e.roleIcon) e.roleIcon.destroy();
+                if (e.hpBg) { e.hpBg.destroy(); e.hpBg = null; }
+                if (e.hpFill) { e.hpFill.destroy(); e.hpFill = null; }
+                if (e.shieldIcon) { e.shieldIcon.destroy(); e.shieldIcon = null; }
+                if (e.roleIcon) { e.roleIcon.destroy(); e.roleIcon = null; }
             });
             s.enemies.clear(true, true);
         }

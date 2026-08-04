@@ -177,6 +177,7 @@ export class CastleSpawner {
             exp: Math.floor(t.exp * this.scene.diffMulti.exp),
             bw: t.bw, bh: t.bh, role: t.role,
             wTimer: 0, wDir: 0,
+            hasShield: t.hasShield || false,
             rangedTimer: 0, rangedInterval: t.role === 'ranger' ? 1800 : 2000,
             patrol: [
                 { x: x - 60, y: y },

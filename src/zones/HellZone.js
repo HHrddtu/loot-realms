@@ -4,7 +4,8 @@ import {
     HELL_WIDTH, HELL_HEIGHT,
     HELL_LAVA_DAMAGE, HELL_LAVA_INTERVAL, HELL_HEAT_DAMAGE,
     HEAT_CRYSTAL,
-    BOSS_DROP_CHANCE, RARITY_COLORS, VILLAGE_WIDTH, CEMETERY_HEIGHT
+    BOSS_DROP_CHANCE, ZONE_BOSS_SECOND_DROP_CHANCE, RARITY_COLORS, VILLAGE_WIDTH, CEMETERY_HEIGHT,
+    RANGED_INTERVAL_DEFAULT
 } from '../config/index.js';
 import { rollEquip, rollAccountEquip } from '../utils.js';
 import { rollBossCrystals } from '../config/pets.js';
@@ -106,10 +107,10 @@ export class HellZone extends BaseZone {
         const s = this.scene;
         if (s.hellImps && s.hellImps.getLength && s.hellImps.getLength() > 0) {
             s.hellImps.getChildren().forEach(e => {
-                if (e.hpBg) e.hpBg.destroy();
-                if (e.hpFill) e.hpFill.destroy();
-                if (e.shieldIcon) e.shieldIcon.destroy();
-                if (e.roleIcon) e.roleIcon.destroy();
+                if (e.hpBg) { e.hpBg.destroy(); e.hpBg = null; }
+                if (e.hpFill) { e.hpFill.destroy(); e.hpFill = null; }
+                if (e.shieldIcon) { e.shieldIcon.destroy(); e.shieldIcon = null; }
+                if (e.roleIcon) { e.roleIcon.destroy(); e.roleIcon = null; }
             });
             s.hellImps.clear(true, true);
         }
@@ -191,7 +192,8 @@ export class HellZone extends BaseZone {
             if (!lava.active) return;
             const dist = Phaser.Math.Distance.Between(s.player.x, s.player.y, lava.x, lava.y);
             if (dist < 60) {
-                const dmg = HELL_LAVA_DAMAGE;
+                const prestigeLavaMult = s._prestigeLavaMult || 1;
+                const dmg = Math.floor(HELL_LAVA_DAMAGE * prestigeLavaMult);
                 s.combat.takeDamage(dmg);
                 s.floatingText(s.player.x, s.player.y - 30, '-' + dmg + ' LAVA', '#ff4400');
             }
@@ -273,19 +275,19 @@ export class HellZone extends BaseZone {
 
                 if (e.stats.role === 'archer' && dist < 220 && dist > 40) {
                     e.stats.rangedTimer = (e.stats.rangedTimer || 0) + delta;
-                    if (e.stats.rangedTimer >= (e.stats.rangedInterval || 1500)) {
+                    if (e.stats.rangedTimer >= (e.stats.rangedInterval || RANGED_INTERVAL_DEFAULT)) {
                         e.stats.rangedTimer = 0;
                         this._fireEnemyProjectile(e, dx, dy, 'arrow');
                     }
                 } else if (e.stats.role === 'mage' && dist < 220 && dist > 40) {
                     e.stats.rangedTimer = (e.stats.rangedTimer || 0) + delta;
-                    if (e.stats.rangedTimer >= (e.stats.rangedInterval || 2000)) {
+                    if (e.stats.rangedTimer >= (e.stats.rangedInterval || RANGED_INTERVAL_DEFAULT)) {
                         e.stats.rangedTimer = 0;
                         this._fireEnemyProjectile(e, dx, dy, 'magic');
                     }
                 } else if (e.stats.role === 'healer' && dist < 180) {
                     e.stats.rangedTimer = (e.stats.rangedTimer || 0) + delta;
-                    if (e.stats.rangedTimer >= (e.stats.rangedInterval || 2200)) {
+                    if (e.stats.rangedTimer >= (e.stats.rangedInterval || RANGED_INTERVAL_DEFAULT)) {
                         e.stats.rangedTimer = 0;
                         s.enemies.getChildren().forEach(ally => {
                             if (ally !== e && ally.active && ally.stats && ally.stats.hp < ally.stats.maxHp) {
@@ -380,7 +382,7 @@ export class HellZone extends BaseZone {
             playLoot();
         }
 
-        if (Math.random() < 0.6) {
+        if (Math.random() < ZONE_BOSS_SECOND_DROP_CHANCE) {
             const item = rollEquip();
             if (s.addEquip(item)) {
                 lootItems.push(item);

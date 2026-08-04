@@ -2,13 +2,15 @@ import Phaser from 'phaser';
 import {
     GAME_WIDTH, GAME_HEIGHT,
     DEPTHS_WIDTH, DEPTHS_HEIGHT,
-    BOSS_DROP_CHANCE, RARITY_COLORS
+    BOSS_DROP_CHANCE, ZONE_BOSS_SECOND_DROP_CHANCE, RARITY_COLORS,
+    RANGED_INTERVAL_DEFAULT
 } from '../config/index.js';
 import { rollEquip, rollAccountEquip, rollZoneAccountEquip } from '../utils.js';
 import { rollBossCrystals } from '../config/pets.js';
 import { playBossDeath, playLoot, playPortal } from '../sound.js';
 
 import { BaseZone } from '../systems/BaseZone.js';
+import { CombatLoot } from '../systems/CombatLoot.js';
 import { DepthsSpawner } from './DepthsSpawner.js';
 import { DepthsBoss } from './DepthsBoss.js';
 
@@ -77,27 +79,27 @@ export class DepthsZone extends BaseZone {
         const s = this.scene;
         if (s.depthsMinions && s.depthsMinions.getLength && s.depthsMinions.getLength() > 0) {
             s.depthsMinions.getChildren().forEach(e => {
-                if (e.hpBg) e.hpBg.destroy();
-                if (e.hpFill) e.hpFill.destroy();
-                if (e.shieldIcon) e.shieldIcon.destroy();
-                if (e.roleIcon) e.roleIcon.destroy();
+                if (e.hpBg) { e.hpBg.destroy(); e.hpBg = null; }
+                if (e.hpFill) { e.hpFill.destroy(); e.hpFill = null; }
+                if (e.shieldIcon) { e.shieldIcon.destroy(); e.shieldIcon = null; }
+                if (e.roleIcon) { e.roleIcon.destroy(); e.roleIcon = null; }
             });
             s.depthsMinions.clear(true, true);
         }
         if (s.depthsMinions) { s.depthsMinions.destroy(); s.depthsMinions = null; }
         if (s.depthsChests && s.depthsChests.getLength && s.depthsChests.getLength() > 0) {
             s.depthsChests.getChildren().forEach(ch => {
-                if (ch.hpBg) ch.hpBg.destroy();
-                if (ch.hpFill) ch.hpFill.destroy();
-                if (ch.hintText) ch.hintText.destroy();
+                if (ch.hpBg) { ch.hpBg.destroy(); ch.hpBg = null; }
+                if (ch.hpFill) { ch.hpFill.destroy(); ch.hpFill = null; }
+                if (ch.hintText) { ch.hintText.destroy(); ch.hintText = null; }
             });
             s.depthsChests.clear(true, true);
         }
         if (s.depthsChests) { s.depthsChests.destroy(); s.depthsChests = null; }
         if (s.depthsBoss) {
-            if (s.depthsBoss.hpBg) s.depthsBoss.hpBg.destroy();
-            if (s.depthsBoss.hpFill) s.depthsBoss.hpFill.destroy();
-            if (s.depthsBossNameText) s.depthsBossNameText.destroy();
+            if (s.depthsBoss.hpBg) { s.depthsBoss.hpBg.destroy(); s.depthsBoss.hpBg = null; }
+            if (s.depthsBoss.hpFill) { s.depthsBoss.hpFill.destroy(); s.depthsBoss.hpFill = null; }
+            if (s.depthsBossNameText) { s.depthsBossNameText.destroy(); s.depthsBossNameText = null; }
             s.depthsBoss.destroy();
             s.depthsBoss = null;
         }
@@ -190,19 +192,19 @@ export class DepthsZone extends BaseZone {
 
                 if (e.stats.role === 'archer' && dist < 220 && dist > 40) {
                     e.stats.rangedTimer = (e.stats.rangedTimer || 0) + delta;
-                    if (e.stats.rangedTimer >= (e.stats.rangedInterval || 1500)) {
+                    if (e.stats.rangedTimer >= (e.stats.rangedInterval || RANGED_INTERVAL_DEFAULT)) {
                         e.stats.rangedTimer = 0;
                         this._fireEnemyProjectile(e, dx, dy, 'arrow');
                     }
                 } else if (e.stats.role === 'mage' && dist < 220 && dist > 40) {
                     e.stats.rangedTimer = (e.stats.rangedTimer || 0) + delta;
-                    if (e.stats.rangedTimer >= (e.stats.rangedInterval || 2000)) {
+                    if (e.stats.rangedTimer >= (e.stats.rangedInterval || RANGED_INTERVAL_DEFAULT)) {
                         e.stats.rangedTimer = 0;
                         this._fireEnemyProjectile(e, dx, dy, 'magic');
                     }
                 } else if (e.stats.role === 'healer' && dist < 180) {
                     e.stats.rangedTimer = (e.stats.rangedTimer || 0) + delta;
-                    if (e.stats.rangedTimer >= (e.stats.rangedInterval || 2200)) {
+                    if (e.stats.rangedTimer >= (e.stats.rangedInterval || RANGED_INTERVAL_DEFAULT)) {
                         e.stats.rangedTimer = 0;
                         s.enemies.getChildren().forEach(ally => {
                             if (ally !== e && ally.active && ally.stats && ally.stats.hp < ally.stats.maxHp) {
@@ -268,6 +270,7 @@ export class DepthsZone extends BaseZone {
         if (this.bossDefeated) return;
         this.bossDefeated = true;
         playBossDeath();
+        CombatLoot.celebrateBossKill(s);
         const ox = s.depthsOffsetX;
 
         if (s.depthsBoss) {
@@ -316,7 +319,7 @@ export class DepthsZone extends BaseZone {
         s.defeatedLoot = [];
         const lootItems = [];
 
-        if (Math.random() < 0.6) {
+        if (Math.random() < ZONE_BOSS_SECOND_DROP_CHANCE) {
             const item = rollEquip();
             if (s.addEquip(item)) {
                 lootItems.push(item);

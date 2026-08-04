@@ -440,14 +440,16 @@ export class PlayerSystem {
         if (this.scene.playerExp >= req) {
             this.scene.playerExp -= req;
             this.scene.playerLevel++;
-            this.scene.talentPoints++;
+            const gotTalent = this.scene.playerLevel % 3 === 0;
+            if (gotTalent) this.scene.talentPoints++;
             this.scene.classStats = getClassStats(this.scene.classKey, this.scene.playerLevel);
             this.recalcStats();
             this.scene.playerHP = this.scene.playerMaxHP;
             playLevelUp();
             this.scene.cameras.main.flash(300, 241, 196, 15);
             if (this.scene.particles) this.scene.particles.spawnLevelUp(this.scene.player.x, this.scene.player.y);
-            const lt = this.scene.add.text(400, 250, 'LEVEL UP! Lv.' + this.scene.playerLevel + ' [+1 Talent]', {
+            const talentMsg = gotTalent ? ' [+1 Talent]' : '';
+            const lt = this.scene.add.text(400, 250, 'LEVEL UP! Lv.' + this.scene.playerLevel + talentMsg, {
                 fontSize: '24px', fill: '#f1c40f', fontFamily: 'Arial',
                 fontStyle: 'bold', stroke: '#000', strokeThickness: 3
             }).setOrigin(0.5);

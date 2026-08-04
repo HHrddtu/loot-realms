@@ -1,7 +1,7 @@
 import {
     SHADOW_CAMP_COUNT, SHADOW_MOBS_PER_CAMP,
     SHADOW_ENEMY_TYPES, SHADOW_CAMP_POSITIONS, SHADOW_CHEST_POSITIONS,
-    SHADOW_CHEST_DROP_CHANCE
+    SHADOW_CHEST_DROP_CHANCE, RANGED_INTERVALS, RANGED_INTERVAL_DEFAULT
 } from '../config/index.js';
 import { rollEquip } from '../utils.js';
 
@@ -39,7 +39,7 @@ export class ShadowSpawner {
         e.body.setCollideWorldBounds(true);
         if (s.anims.exists(animKey)) e.play(animKey);
 
-        const rangedInterval = t.role === 'archer' ? 1500 : t.role === 'mage' ? 2000 : t.role === 'healer' ? 2200 : 2000;
+        const rangedInterval = RANGED_INTERVALS[t.role] || RANGED_INTERVAL_DEFAULT;
         e.stats = {
             key: t.key, name: t.name,
             hp: Math.floor(t.hp * s.diffMulti.hp),
@@ -49,6 +49,7 @@ export class ShadowSpawner {
             bw: t.bw, bh: t.bh, role: t.role,
             invisible: t.invisible || false,
             campIndex: campIndex,
+            hasShield: t.hasShield || false,
             rangedTimer: 0, rangedInterval
         };
 

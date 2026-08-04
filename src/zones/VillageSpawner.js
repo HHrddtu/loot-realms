@@ -4,7 +4,8 @@ import { VILLAGE_ENEMY_TYPES, VILLAGE_CAMP_POSITIONS, VILLAGE_MOBS_PER_CAMP, VIL
          VILLAGE_CHEST_OPEN_KEY, VILLAGE_CHEST_CLOSED_KEY, VILLAGE_CHEST_W, VILLAGE_CHEST_H,
          SNOWY_VILLAGE_ENEMY_TYPES, SNOWY_VILLAGE_CAMP_POSITIONS, SNOWY_VILLAGE_BOSS_TYPE,
          SNOWY_VILLAGE_CHEST_COUNT, SNOWY_VILLAGE_CHEST_DROP_CHANCE,
-         WARMTH_CORE, DIFF_COLORS, VILLAGE_WIDTH, VILLAGE_HEIGHT, CEMETERY_HEIGHT, GAME_WIDTH } from '../config/index.js';
+         WARMTH_CORE, DIFF_COLORS, VILLAGE_WIDTH, VILLAGE_HEIGHT, CEMETERY_HEIGHT, GAME_WIDTH,
+         VILLAGE_RANGED_INTERVALS, RANGED_INTERVAL_DEFAULT } from '../config/index.js';
 import { rollVillageEquip } from '../utils.js';
 
 export class VillageSpawner {
@@ -40,7 +41,7 @@ export class VillageSpawner {
         e.body.setCollideWorldBounds(true);
         if (this.scene.anims.exists(animKey)) e.play(animKey);
         const diff = this.scene.diffMulti;
-        e.stats = { key: t.key, name: t.name, hp: Math.floor(t.hp * diff.hp), maxHp: Math.floor(t.hp * diff.hp), damage: Math.floor(t.dmg * diff.dmg), exp: Math.floor(t.exp * diff.exp), bw: t.bw, bh: t.bh, wTimer: 0, wDir: 0, campIndex };
+        e.stats = { key: t.key, name: t.name, hp: Math.floor(t.hp * diff.hp), maxHp: Math.floor(t.hp * diff.hp), damage: Math.floor(t.dmg * diff.dmg), exp: Math.floor(t.exp * diff.exp), bw: t.bw, bh: t.bh, wTimer: 0, wDir: 0, campIndex, role: t.role || 'dps', hasShield: t.hasShield || false, walkAnimKey: animKey };
         const hpW = t.bw + 6;
         e.hpBg = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hpW, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hpW, 3, 0xe74c3c).setOrigin(0.5).setDepth(11);
@@ -378,7 +379,7 @@ export class VillageSpawner {
         e.body.setSize(t.bw, t.bh); e.body.setCollideWorldBounds(true);
         if (this.scene.anims.exists(t.key + '_walk_anim')) e.play(t.key + '_walk_anim');
         const diff = this.scene.diffMulti;
-        const rangedInterval = t.role === 'archer' ? 1800 : t.role === 'healer' ? 2500 : 2000;
+        const rangedInterval = VILLAGE_RANGED_INTERVALS[t.role] || RANGED_INTERVAL_DEFAULT;
         e.stats = { key: t.key, name: t.name, hp: Math.floor(t.hp * diff.hp), maxHp: Math.floor(t.hp * diff.hp), damage: Math.floor(t.dmg * diff.dmg), exp: Math.floor(t.exp * diff.exp), bw: t.bw, bh: t.bh, role: t.role, campIndex, rangedTimer: 0, rangedInterval };
         const hpW = t.bw + 6;
         e.hpBg = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hpW, 3, 0x333333).setOrigin(0.5).setDepth(11);

@@ -14,7 +14,7 @@ export class SpellSystem {
         scene.effects = this.effects;
     }
 
-    _updateCorruption() { this.cast._updateCorruption(); }
+    _updateCorruption(delta) { this.cast._updateCorruption(delta); }
     _getClassSpells() { return this.cast._getClassSpells(); }
 
     _castSpell(slot) {

@@ -52,6 +52,8 @@ export class BaseZone {
         s.physics.world.colliders.destroy();
         if (s.ui && s.ui.hud) s.ui.hud.clearFloatingTexts();
         if (s.loreItems) s.loreItems.cleanup();
+        if (s.tutorialMgr) s.tutorialMgr._clearGuided();
+        if (s._spellTimers) { s._spellTimers.forEach(t => { if (t && t.remove) t.remove(); }); s._spellTimers = []; }
         this._destroyFireballs();
         this._destroyEnemyProjectiles();
         this._destroyShield();
@@ -93,14 +95,12 @@ export class BaseZone {
         if (s.villageDecor) { s.villageDecor.forEach(d => { if (d && d.destroy) d.destroy(); }); s.villageDecor = null; }
         if (s.shopGroup) { s.shopGroup.forEach(e => { if (e && e.destroy) e.destroy(); }); s.shopGroup = []; }
         if (s.obstacles) { s.obstacles.clear(true, true); s.obstacles = null; }
-        // Kill all timers
-        s.time.removeAllEvents();
     }
 
     _destroyFireballs() {
         const s = this.scene;
         if (s.fireballs) {
-            s.fireballs.forEach(fb => { if (fb.glow) fb.glow.destroy(); fb.destroy(); });
+            s.fireballs.forEach(fb => { if (fb.glow) { fb.glow.destroy(); fb.glow = null; } fb.destroy(); });
             s.fireballs = [];
         }
     }
@@ -127,11 +127,11 @@ export class BaseZone {
         const s = this.scene;
         if (s.enemies && s.enemies.scene && s.enemies.getLength && s.enemies.getLength() > 0) {
             s.enemies.getChildren().forEach(e => {
-                if (e.hpBg) e.hpBg.destroy();
-                if (e.hpFill) e.hpFill.destroy();
-                if (e.nameText) e.nameText.destroy();
-                if (e.shieldIcon) e.shieldIcon.destroy();
-                if (e.roleIcon) e.roleIcon.destroy();
+                if (e.hpBg) { e.hpBg.destroy(); e.hpBg = null; }
+                if (e.hpFill) { e.hpFill.destroy(); e.hpFill = null; }
+                if (e.nameText) { e.nameText.destroy(); e.nameText = null; }
+                if (e.shieldIcon) { e.shieldIcon.destroy(); e.shieldIcon = null; }
+                if (e.roleIcon) { e.roleIcon.destroy(); e.roleIcon = null; }
             });
             s.enemies.clear(true, true);
         }
@@ -141,8 +141,8 @@ export class BaseZone {
     _destroyNPCs() {
         const s = this.scene;
         s.npcSprites.forEach(n => {
-            if (n.nameTag) n.nameTag.destroy();
-            if (n.questIcon) n.questIcon.destroy();
+            if (n.nameTag) { n.nameTag.destroy(); n.nameTag = null; }
+            if (n.questIcon) { n.questIcon.destroy(); n.questIcon = null; }
             n.destroy();
         });
         s.npcSprites = [];
@@ -163,8 +163,8 @@ export class BaseZone {
         const s = this.scene;
         if (s.stumps && s.stumps.scene && s.stumps.getLength && s.stumps.getLength() > 0) {
             s.stumps.getChildren().forEach(st => {
-                if (st.hpBg) st.hpBg.destroy();
-                if (st.hpFill) st.hpFill.destroy();
+                if (st.hpBg) { st.hpBg.destroy(); st.hpBg = null; }
+                if (st.hpFill) { st.hpFill.destroy(); st.hpFill = null; }
             });
             s.stumps.clear(true, true);
         }

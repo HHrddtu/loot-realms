@@ -34,6 +34,7 @@ export class SaveLoadSystem {
             crystals: s.crystals ?? 0,
             kills: s.kills ?? 0,
             stumpsBroken: s.stumpsBroken ?? 0,
+            deaths: s.deaths ?? 0,
             corruption: s.corruption ?? 0,
             mineUnlocked: s.zones.mine.isUnlocked ?? false,
             mineBossDefeated: s.zones.mine.bossDefeated ?? false,
@@ -136,6 +137,7 @@ export class SaveLoadSystem {
         s.innUsed = data.innUsed ?? false;
         s.kills = data.kills ?? 0;
         s.stumpsBroken = data.stumpsBroken ?? 0;
+        s.deaths = data.deaths ?? 0;
         s.corruption = data.corruption ?? 0;
         s.zones.mine.isUnlocked = data.mineUnlocked ?? false;
         s.zones.mine.bossDefeated = data.mineBossDefeated ?? false;

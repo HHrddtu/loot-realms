@@ -78,10 +78,6 @@ export class CombatLoot {
             const item = rollEquip();
             if (item) items.push({ kind: 'equip', item, x: enemy.x, y: enemy.y - 45, rarity: item.rarity });
         }
-        if (Math.random() < ACCOUNT_EQUIP_DROP_CHANCE) {
-            const accItem = rollAccountEquip();
-            if (accItem) items.push({ kind: 'accountEquip', item: { ...accItem, name: accItem.name + ' [ACCOUNT]' }, x: enemy.x, y: enemy.y - 60, rarity: accItem.rarity });
-        }
 
         // Prestige-exclusive drops
         const prestige = s.prestigeLevel || 0;
@@ -95,10 +91,10 @@ export class CombatLoot {
             items.push({ kind: 'material', item: pItem, x: enemy.x, y: enemy.y - 50, rarity: pItem.rarity });
         }
 
-        if (enemy.hpBg) enemy.hpBg.destroy();
-        if (enemy.hpFill) enemy.hpFill.destroy();
-        if (enemy.shieldIcon) enemy.shieldIcon.destroy();
-        if (enemy.roleIcon) enemy.roleIcon.destroy();
+        if (enemy.hpBg) { enemy.hpBg.destroy(); enemy.hpBg = null; }
+        if (enemy.hpFill) { enemy.hpFill.destroy(); enemy.hpFill = null; }
+        if (enemy.shieldIcon) { enemy.shieldIcon.destroy(); enemy.shieldIcon = null; }
+        if (enemy.roleIcon) { enemy.roleIcon.destroy(); enemy.roleIcon = null; }
         enemy.destroy();
 
         return {
@@ -116,12 +112,25 @@ export class CombatLoot {
         const lootData = this.killGenericBoss({
             bossRef: 'boss',
             nameTextKey: 'bossNameText', recordKey: 'ancient_treant',
-            defeatedText: 'BOSS DEFEATED!', defeatedColor: '#f1c40f', secondDropChance: 0.5,
+            defeatedText: 'ARENA CONQUERED!', defeatedColor: '#f1c40f', secondDropChance: 0.5,
             textX: 400, textY: 200,
-            onPostKill: () => { s.zones.mine.isUnlocked = true; s.exitPortal.setTexture('mine_ladder'); s.exitPortal.setScale(1); s.exitHint.setText('SPACE to enter the Mine'); }
+            onPostKill: () => {
+                s.zones.mine.isUnlocked = true;
+                s.zones.arena.bossDefeated = true;
+                s._arenaBossJustKilled = true;
+                s.time.delayedCall(3000, () => {
+                    if (s.zone !== 'arena') return;
+                    s.transitioning = true;
+                    s.cameras.main.fadeOut(800, 0, 0, 0);
+                    s.time.delayedCall(800, () => {
+                        s._setupZone('mine');
+                        s.cameras.main.fadeIn(500, 0, 0, 0);
+                        s.transitioning = false;
+                    });
+                });
+            }
         });
         if (s._distributeLoot) s._distributeLoot(lootData, killer);
-        s.zones.arena.bossDefeated = true;
         s.zones.arena.bossAlive = false;
     }
 
@@ -136,10 +145,17 @@ export class CombatLoot {
             textX: 400, textY: 200,
             extraLoot: () => {
                 if (!s.zones.mine.hasSecretKey) {
-                    const keyItem = { ...SECRET_KEY_ITEM };
+                    const keyItem = { ...SECRET_KEY_ITEM, _kind: 'material' };
                     return { items: [keyItem], zoneFlags: { 'mine.hasSecretKey': true } };
                 }
                 return { items: [], zoneFlags: {} };
+            },
+            onPostKill: () => {
+                s.zones.cave.isUnlocked = true;
+                s.time.delayedCall(2000, () => {
+                    if (s.zone !== 'mine' && s.zone !== 'mine_boss') return;
+                    s.floatingText(s.player.x, s.player.y - 50, 'Ancient Key obtained! Return to the Forest — the Cart Driver awaits.', '#bf77f6');
+                });
             }
         });
         if (s._distributeLoot) s._distributeLoot(lootData, killer);
@@ -183,6 +199,18 @@ export class CombatLoot {
         s._updateQuestIcons();
         if (s.particles) s.particles.spawnBossDeath(b.x, b.y);
         b.body.setVelocity(0); b.setTint(0xff0000);
+
+        s.physics.world.timeScale = 0.3;
+        const zoneKey = cfg.bossRef === 'boss' ? 'arena' : cfg.bossRef === 'mineBoss' ? 'mine' : cfg.bossRef === 'caveBoss' ? 'cave' : null;
+        const alreadyDefeated = zoneKey && s.zones && s.zones[zoneKey] && s.zones[zoneKey].bossDefeated;
+        if (!alreadyDefeated) {
+            s.time.delayedCall(1500, () => {
+                s.physics.world.timeScale = 1;
+            });
+        } else {
+            s.time.delayedCall(100, () => { s.physics.world.timeScale = 1; });
+        }
+
         s.tweens.add({ targets: b, alpha: 0, scaleX: 1.5, scaleY: 1.5, duration: 800, onComplete: () => { if (b.hpBg) b.hpBg.destroy(); if (b.hpFill) b.hpFill.destroy(); b.destroy(); s[cfg.bossRef] = null; } });
         if (b.aoeRing) { b.aoeRing.destroy(); b.aoeRing = null; }
         if (b.aoeRing2) { b.aoeRing2.destroy(); b.aoeRing2 = null; }
@@ -220,7 +248,8 @@ export class CombatLoot {
             if (extra) {
                 if (extra.items) {
                     extra.items.forEach(it => {
-                        lootItems.push({ kind: 'accountEquip', item: it, x: cfg.textX, y: cfg.textY + 100 + lootItems.length * 24, rarity: it.rarity });
+                        const kind = it._kind || 'accountEquip';
+                        lootItems.push({ kind, item: it, x: cfg.textX, y: cfg.textY + 100 + lootItems.length * 24, rarity: it.rarity });
                     });
                 }
                 if (extra.zoneFlags) Object.assign(zoneFlags, extra.zoneFlags);
@@ -250,6 +279,17 @@ export class CombatLoot {
         };
     }
 
+    static celebrateBossKill(scene, opts = {}) {
+        const s = scene;
+        const duration = opts.duration || 1500;
+        const slowScale = opts.slowScale || 0.3;
+
+        s.physics.world.timeScale = slowScale;
+        s.time.delayedCall(duration, () => {
+            s.physics.world.timeScale = 1;
+        });
+    }
+
     breakChest(ch) {
         const s = this.scene;
         if (ch.broken) return { items: [], gold: 0 };
@@ -274,7 +314,8 @@ export class CombatLoot {
         ch.broken = true; ch.body.enable = false;
         if (ch.isForestChest) { ch.setAlpha(0.4); ch.setTint(0x886633); }
         else { ch.setTexture(ch.isCaveChest ? CAVE_CHEST_OPEN_KEY : 'mine_chest_broken'); }
-        ch.hpBg.destroy(); ch.hpFill.destroy(); if (ch.hintText) ch.hintText.setText('');
+        ch.hpBg.destroy(); ch.hpBg = null; ch.hpFill.destroy(); ch.hpFill = null;
+        if (ch.hintText) ch.hintText.setText('');
         if (ch.glow) { ch.glow.destroy(); ch.glow = null; }
         if (ch.arrow) { ch.arrow.destroy(); ch.arrow = null; }
         playBreak(); onCollect(ch.isForestChest ? 'treasure_chest' : 'mine_chest');
@@ -317,7 +358,7 @@ export class CombatLoot {
             const item = rollMaterial(s.zone);
             if (item) items.push({ kind: 'material', item, x: stump.x + (i * 20 - 10), y: stump.y - 15, rarity: item.rarity });
         }
-        stump.hpBg.destroy(); stump.hpFill.destroy(); stump.setTexture('stump_broken');
+        stump.hpBg.destroy(); stump.hpBg = null; stump.hpFill.destroy(); stump.hpFill = null; stump.setTexture('stump_broken');
         s.time.delayedCall(8000, () => { if (stump.active) stump.setTexture('stump'); stump.stats.hp = stump.stats.maxHp; });
         return { source: 'stump', items, stumpsBrokenDelta: 1 };
     }
@@ -326,7 +367,7 @@ export class CombatLoot {
         const s = this.scene;
         if (!ch || ch.broken) return { items: [], gold: 0 };
         ch.broken = true; ch.setTexture(VILLAGE_CHEST_OPEN_KEY);
-        ch.hpBg.destroy(); ch.hpFill.destroy(); playBreak();
+        ch.hpBg.destroy(); ch.hpBg = null; ch.hpFill.destroy(); ch.hpFill = null; playBreak();
         const vGold = rollChestGold(s.zone || 'village');
         const goldBonus = 1 + ((s.accountEffects ? s.accountEffects.goldPercent || 0 : 0) / 100);
         const finalGold = Math.floor(vGold * goldBonus);

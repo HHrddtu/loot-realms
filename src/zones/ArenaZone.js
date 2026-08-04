@@ -20,7 +20,7 @@ export class ArenaZone extends BaseZone {
         s.physics.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
         s.cameras.main.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-        s.add.image(400, 300, 'boss_ground').setDepth(0);
+        s.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'boss_ground').setDepth(0);
 
         s.exitPortal = s.add.sprite(ARENA_EXIT_POS.x, ARENA_EXIT_POS.y, s.zones.mine.isUnlocked ? 'mine_ladder' : 'boss_portal').setDepth(1);
         s.exitPortalGlow = s.add.image(ARENA_EXIT_POS.x, ARENA_EXIT_POS.y, 'portal_glow').setDepth(0).setScale(2);

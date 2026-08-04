@@ -1,4 +1,4 @@
-import { RARITY_COLORS, VILLAGE_HOUSE_POSITIONS } from '../../config/index.js';
+import { RARITY_COLORS, VILLAGE_HOUSE_POSITIONS, GAME_WIDTH, GAME_HEIGHT } from '../../config/index.js';
 import { CONSUMABLES, SHOP_BOOSTS, SHOP_UPGRADES, SHOP_GOLD_CASES } from '../../config/gold.js';
 import { rollCaseDrop, CASE_DB } from '../../config/pets.js';
 import { loadAccount, saveAccount } from '../../save.js';
@@ -78,7 +78,7 @@ export class VillageShop {
         const mk = (el) => { el.setScrollFactor(0).setDepth(200); return el; };
 
         const W = 520, H = 500;
-        s.shopGroup.push(mk(s.add.rectangle(400, 300, W, H, 0x0a0a1a, 0.95).setStrokeStyle(2, 0xf1c40f)));
+        s.shopGroup.push(mk(s.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, W, H, 0x0a0a1a, 0.95).setStrokeStyle(2, 0xf1c40f)));
 
         s.shopGroup.push(mk(s.add.text(400, 65, 'VILLAGE MERCHANT', {
             fontSize: '18px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
@@ -146,7 +146,7 @@ export class VillageShop {
         const mk = (el) => { el.setScrollFactor(0).setDepth(200); return el; };
 
         const W = 520, H = 500;
-        s.shopGroup.push(mk(s.add.rectangle(400, 300, W, H, 0x0a0a1a, 0.95).setStrokeStyle(2, 0xf1c40f)));
+        s.shopGroup.push(mk(s.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, W, H, 0x0a0a1a, 0.95).setStrokeStyle(2, 0xf1c40f)));
 
         s.shopGroup.push(mk(s.add.text(400, 65, 'VILLAGE MERCHANT', {
             fontSize: '18px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',

@@ -45,7 +45,7 @@ import { SnowyZone } from '../zones/SnowyZone.js';
 import { CastleZone } from '../zones/CastleZone.js';
 import { MeadowZone } from '../zones/MeadowZone.js';
 import { MultiplayerManager } from '../systems/MultiplayerManager.js';
-import { isHost, getMyId, disconnect as mpDisconnect, sendInventoryUpdate } from '../network.js';
+import { disconnect as mpDisconnect } from '../network.js';
 import { CRYSTAL_RUN_CAPS } from '../config/pets.js';
 import { createAllAnimations } from '../config/animations.js';
 
@@ -112,6 +112,10 @@ export default class GameScene extends Phaser.Scene {
         this._createUI();
         this.inputSys.bindKeys();
 
+        if (this.cameras.main.postFX) {
+            this.cameras.main.postFX.addBloom(0xffffff, 0.5, 0.4, 0.1, 0.3);
+        }
+
         this.events.on('resume', () => {
             this.inputSys.bindKeys();
         });
@@ -122,6 +126,11 @@ export default class GameScene extends Phaser.Scene {
         this.cartDriverNpc = null;
         this.meadowGate = null;
         this.meadowBg = null;
+        this.gateArrow = null;
+        this.gateGlow = null;
+        this.portalArrow = null;
+        this._meadowSwordGiven = false;
+        this._guidedReadyAt = 0;
 
         initBestiary();
         initMaterialBook();
@@ -162,6 +171,13 @@ export default class GameScene extends Phaser.Scene {
         this.shopGroup = [];
         this.castleChildNPC = null;
         this.castleChildHint = null;
+        this._consumableBonusKeys = [
+            ['_consumableBonusDmgTimer', '_consumableBonusDmg', 'DMG boost expired'],
+            ['_consumableBonusSpdTimer', '_consumableBonusSpd', 'SPD boost expired'],
+            ['_consumableBonusDefTimer', '_consumableBonusDef', 'DEF boost expired'],
+            ['_consumableBonusCritTimer', '_consumableBonusCrit', 'Crit boost expired'],
+            ['_consumableBonusLifestealTimer', '_consumableBonusLifesteal', 'Lifesteal expired']
+        ];
         this._consumableBonusDmg = 0;
         this._consumableBonusDmgTimer = 0;
         this._consumableBonusSpd = 0;
@@ -199,7 +215,7 @@ export default class GameScene extends Phaser.Scene {
             } else if (this._savedZone === 'cave') {
                 this._setupZone('cave');
             } else if (this._savedZone === 'meadow') {
-                this._setupZone('meadow');
+                this._setupZone('forest');
             } else if (this._savedZone === 'village') {
                 this._setupZone('village', this.zones.village.isFrozen);
             } else if (this._savedZone === 'cemetery') {
@@ -228,7 +244,7 @@ export default class GameScene extends Phaser.Scene {
             }
             delete this._savedZone;
         } else {
-            this._setupZone('forest');
+            this._setupZone('meadow');
         }
 
         if (this.multiplayer) {
@@ -368,6 +384,7 @@ export default class GameScene extends Phaser.Scene {
         this.menuOpen = false;
         this.kills = 0;
         this.stumpsBroken = 0;
+        this.deaths = 0;
         this.tutorialSeen = {};
         this.talentEffects = getTalentEffects([]);
 
@@ -460,39 +477,13 @@ export default class GameScene extends Phaser.Scene {
     /* ===== UTILITY ===== */
 
     _updateConsumableBonuses(delta) {
-        if (this._consumableBonusDmgTimer > 0) {
-            this._consumableBonusDmgTimer -= delta;
-            if (this._consumableBonusDmgTimer <= 0) {
-                this._consumableBonusDmg = 0;
-                this.floatingText(this.player.x, this.player.y - 30, 'DMG boost expired', '#95a5a6');
-            }
-        }
-        if (this._consumableBonusSpdTimer > 0) {
-            this._consumableBonusSpdTimer -= delta;
-            if (this._consumableBonusSpdTimer <= 0) {
-                this._consumableBonusSpd = 0;
-                this.floatingText(this.player.x, this.player.y - 30, 'SPD boost expired', '#95a5a6');
-            }
-        }
-        if (this._consumableBonusDefTimer > 0) {
-            this._consumableBonusDefTimer -= delta;
-            if (this._consumableBonusDefTimer <= 0) {
-                this._consumableBonusDef = 0;
-                this.floatingText(this.player.x, this.player.y - 30, 'DEF boost expired', '#95a5a6');
-            }
-        }
-        if (this._consumableBonusCritTimer > 0) {
-            this._consumableBonusCritTimer -= delta;
-            if (this._consumableBonusCritTimer <= 0) {
-                this._consumableBonusCrit = 0;
-                this.floatingText(this.player.x, this.player.y - 30, 'Crit boost expired', '#95a5a6');
-            }
-        }
-        if (this._consumableBonusLifestealTimer > 0) {
-            this._consumableBonusLifestealTimer -= delta;
-            if (this._consumableBonusLifestealTimer <= 0) {
-                this._consumableBonusLifesteal = 0;
-                this.floatingText(this.player.x, this.player.y - 30, 'Lifesteal expired', '#95a5a6');
+        for (const [timerKey, valueKey, label] of this._consumableBonusKeys) {
+            if (this[timerKey] > 0) {
+                this[timerKey] -= delta;
+                if (this[timerKey] <= 0) {
+                    this[valueKey] = 0;
+                    this.floatingText(this.player.x, this.player.y - 30, label, '#95a5a6');
+                }
             }
         }
     }
@@ -615,7 +606,7 @@ export default class GameScene extends Phaser.Scene {
 
     _castSpell(slot) { if (this.spellSys) this.spellSys._castSpell(slot); }
     _getClassSpells() { return this.spellSys ? this.spellSys._getClassSpells() : { q: 'fireball', w: 'shield', e: 'heal' }; }
-    _updateCorruption() { if (this.spellSys) this.spellSys._updateCorruption(); }
+    _updateCorruption(delta) { if (this.spellSys) this.spellSys._updateCorruption(delta); }
     _updateSpells(delta) { if (this.spellSys) this.spellSys._updateSpells(delta); }
 
     /* ===== UI DELEGATION ===== */
@@ -727,7 +718,7 @@ export default class GameScene extends Phaser.Scene {
             }
         }
         this._updateEnemies();
-        this._checkTutorials();
+        if (this.tutorialMgr) this.tutorialMgr.updateGuided();
         if (this._poisonDot && this._poisonTimer > 0) {
             this._poisonTimer -= delta;
             if (this._poisonTimer <= 0) {
@@ -745,7 +736,7 @@ export default class GameScene extends Phaser.Scene {
             }
         }
         this.forestBossAI.update(time, delta);
-        this._updateCorruption();
+        this._updateCorruption(delta);
         this._updateSpells(delta);
         this._updateConsumableBonuses(delta);
         this._updateRegen(delta);
@@ -784,5 +775,4 @@ export default class GameScene extends Phaser.Scene {
         });
     }
 
-    _checkTutorials() { /* handled by TutorialManager */ }
 }

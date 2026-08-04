@@ -192,6 +192,8 @@ export default class LobbyScene extends Phaser.Scene {
         input.type = 'text';
         input.placeholder = placeholder;
         input.maxLength = 4;
+        input.name = 'game-code';
+        input.id = 'game-code';
         input.style.cssText = `
             flex: 1; height: 100%;
             background: transparent !important; border: none !important; outline: none !important;

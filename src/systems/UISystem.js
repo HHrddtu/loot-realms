@@ -3,6 +3,7 @@ import { PauseMenu } from './PauseMenu.js';
 import { InventoryUI } from './InventoryUI.js';
 import { AccountEquipUI } from './AccountEquipUI.js';
 import { loadAccount, saveAccount } from '../save.js';
+import { GAME_WIDTH, GAME_HEIGHT } from '../config/index.js';
 import { getTalentEffects } from '../talents.js';
 import { getAccountTalentEffects } from '../accountTalents.js';
 import { SPELLS } from '../config/spells.js';
@@ -77,7 +78,7 @@ export class UISystem {
         if (!assignments.q) assignments.q = d.q; if (!assignments.w) assignments.w = d.w; if (!assignments.e) assignments.e = d.e; if (!assignments.r) assignments.r = d.r;
 
         const container = this.scene.add.container(0, 0).setScrollFactor(0).setDepth(90);
-        const overlay = this.scene.add.rectangle(400, 300, 800, 600, 0x000000, 0.85).setScrollFactor(0).setDepth(90);
+        const overlay = this.scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, 800, 600, 0x000000, 0.85).setScrollFactor(0).setDepth(90);
         overlay.setInteractive(); container.add(overlay);
 
         // Title
@@ -259,7 +260,7 @@ export class UISystem {
         const allSpells = classSpells[cls] || classSpells.sage;
 
         const container = this.scene.add.container(0, 0).setScrollFactor(0).setDepth(90);
-        const overlay = this.scene.add.rectangle(400, 300, 800, 600, 0x000000, 0.85).setScrollFactor(0).setDepth(90);
+        const overlay = this.scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, 800, 600, 0x000000, 0.85).setScrollFactor(0).setDepth(90);
         overlay.setInteractive(); container.add(overlay);
 
         // Title

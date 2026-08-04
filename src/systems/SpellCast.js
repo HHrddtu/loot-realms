@@ -35,15 +35,27 @@ export class SpellCast {
         s._divineBlessingDefBuff = this.divineBlessingDefBuff;
     }
 
-    _updateCorruption() {
-        if (this.scene.corruption > 0) {
-            const decay = this.scene.classStats ? this.scene.classStats.corruptionDecay : CORRUPTION.decayRate;
-            this.scene.corruption = Math.max(0, this.scene.corruption - decay);
+    _updateCorruption(delta) {
+        const s = this.scene;
+        const dt = Math.min(delta / 1000, 0.1);
+        if (s.corruption > 0) {
+            const decay = s.classStats ? s.classStats.corruptionDecay : CORRUPTION.decayRate;
+            s.corruption = Math.max(0, s.corruption - decay * dt * 60);
         }
-        if (this.scene.corruption >= this.scene.corruptionMax) {
-            const rotDmg = this.scene.classStats ? this.scene.classStats.corruptionDmg : CORRUPTION.rotDmg;
-            this.scene.takeDamage(rotDmg);
-            this.scene.player.setTint(0x9b59b6);
+        if (s.corruption >= s.corruptionMax) {
+            this._rotTick = (this._rotTick || 0) - delta;
+            if (this._rotTick <= 0) {
+                this._rotTick = 1000;
+                const rotDmg = s.classStats ? s.classStats.corruptionDmg : CORRUPTION.rotDmg;
+                if (s.player && s.player.active) {
+                    s.takeDamage(rotDmg);
+                    s.player.setTint(0x9b59b6);
+                    s.time.delayedCall(200, () => { if (s.player && s.player.active) s.player.clearTint(); });
+                    s.floatingText(s.player.x, s.player.y - 30, 'ROT -' + rotDmg, '#9b59b6');
+                }
+            }
+        } else {
+            this._rotTick = 0;
         }
     }
 
@@ -79,10 +91,12 @@ export class SpellCast {
     }
 
     _updateTimers(dt) {
+        const cdrMult = this.scene.computedCooldownReduction ? 1 + this.scene.computedCooldownReduction / 100 : 1;
+        const effectiveDt = dt * cdrMult;
         const allSpellKeys = Object.keys(SPELLS);
         allSpellKeys.forEach(k => {
             if (this.scene.spellCooldowns[k] > 0) {
-                this.scene.spellCooldowns[k] = Math.max(0, this.scene.spellCooldowns[k] - dt);
+                this.scene.spellCooldowns[k] = Math.max(0, this.scene.spellCooldowns[k] - effectiveDt);
             }
         });
 

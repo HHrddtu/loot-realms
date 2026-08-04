@@ -37,5 +37,7 @@ const LAZY_SCENES = [
 ];
 
 LAZY_SCENES.forEach(s => {
-    s.path().then(mod => game.scene.add(s.key, mod.default, false));
+    s.path()
+        .then(mod => game.scene.add(s.key, mod.default, false))
+        .catch(err => console.error(`Failed to load scene "${s.key}":`, err));
 });

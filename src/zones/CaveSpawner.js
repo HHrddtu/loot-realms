@@ -57,7 +57,8 @@ export class CaveSpawner {
             damage: Math.floor(t.dmg * s.diffMulti.dmg),
             exp: Math.floor(t.exp * s.diffMulti.exp),
             bw: t.bw, bh: t.bh,
-            wTimer: 0, wDir: 0
+            wTimer: 0, wDir: 0,
+            hasShield: t.hasShield || false
         };
 
         const hw = t.bw + 4;

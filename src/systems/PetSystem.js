@@ -47,12 +47,15 @@ export class PetSystem {
         this.petAbilityLabel.setPosition(this.petSprite.x, this.petSprite.y - 28);
         if (!this.petData || !this.petData.abilityKey) { this.petAbilityLabel.setText(''); return; }
         const cd = this.petAbilityTimer;
+        const abKey = this.petData.abilityKey;
+        const abColor = { rush: '#ff6600', taunt: '#ff4400', vacuum: '#f1c40f', buff: '#9b59b6' };
+        const abIcon = { rush: '⚡', taunt: '🛡', vacuum: '🌀', buff: '✦' };
         if (cd <= 0) {
-            this.petAbilityLabel.setText('[' + this.petData.abilityKey.toUpperCase() + ']');
+            this.petAbilityLabel.setText(abIcon[abKey] || '◈');
             this.petAbilityLabel.setColor(this.petManualMode ? '#ff8800' : '#2ecc71');
         } else {
-            this.petAbilityLabel.setText((cd / 1000).toFixed(1));
-            this.petAbilityLabel.setColor('#555');
+            this.petAbilityLabel.setText(Math.ceil(cd / 1000) + 's');
+            this.petAbilityLabel.setColor('#666');
         }
     }
 

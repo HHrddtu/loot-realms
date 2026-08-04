@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import {
     CASTLE_WIDTH, CASTLE_ROOM_HEIGHT, CASTLE_ROOMS, BANDIT_TYPES, BANDIT_LEADER_BOSS,
-    CASTLE_KEY, GAME_WIDTH, DIFF_COLORS
+    CASTLE_KEY, GAME_WIDTH, DIFF_COLORS, ZONE_BOSS_SECOND_DROP_CHANCE
 } from '../config/index.js';
 import { rollEquip } from '../utils.js';
 import { rollBossCrystals } from '../config/pets.js';
@@ -311,7 +311,7 @@ export class CastleBoss {
             this.scene.floatingText(GAME_WIDTH / 2, 130, 'Castle Key obtained!', '#f1c40f');
         });
 
-        if (Math.random() < 0.6) {
+        if (Math.random() < ZONE_BOSS_SECOND_DROP_CHANCE) {
             const item = rollEquip();
             this.scene.equipBag.push(item);
             playLoot();

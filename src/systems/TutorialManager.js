@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config/index.js';
 import { LORE } from '../config/lore.js';
 
@@ -7,13 +6,13 @@ const ZONE_TUTORIALS = {
         title: 'The Corrupted Forest',
         titleRu: 'Проклятый Лес',
         lines: [
-            { text: 'WASD / Arrows — move', icon: 'movement' },
+            { text: 'Arrow Keys — move', icon: 'movement' },
             { text: 'SPACE / Left Click — attack', icon: 'attack' },
             { text: 'F — use potion', icon: 'potion' },
             { text: 'Break chests for loot. Kill the boss to proceed.', icon: 'info' }
         ],
         linesRu: [
-            { text: 'WASD / Стрелки — движение', icon: 'movement' },
+            { text: 'Стрелки — движение', icon: 'movement' },
             { text: 'SPACE / ЛКМ — атака', icon: 'attack' },
             { text: 'F — зелье', icon: 'potion' },
             { text: 'Ломай сундуки за лут. Убей босса чтобы продолжить.', icon: 'info' }
@@ -173,6 +172,10 @@ export class TutorialManager {
         this.shown = {};
         this.active = false;
         this.queue = [];
+        this._guidedSteps = [];
+        this._guidedIndex = -1;
+        this._guidedHint = null;
+        this._guidedHintBg = null;
     }
 
     showZoneIntro(zoneKey) {
@@ -229,6 +232,7 @@ export class TutorialManager {
     }
 
     showZoneTutorial(zoneKey) {
+        if (zoneKey === 'forest') return;
         const key = 'zone_' + zoneKey;
         if (this.shown[key]) return;
         const tutorial = ZONE_TUTORIALS[zoneKey];
@@ -368,5 +372,70 @@ export class TutorialManager {
 
     load(data) {
         if (data) this.shown = { ...data };
+    }
+
+    startGuidedTutorial(steps) {
+        if (this._guidedSteps.length > 0) return;
+        this._guidedSteps = steps;
+        this._guidedIndex = 0;
+        this._showGuidedHint();
+    }
+
+    _showGuidedHint() {
+        const s = this.scene;
+        if (this._guidedHint) { this._guidedHint.destroy(); this._guidedHint = null; }
+        if (this._guidedHintBg) { this._guidedHintBg.destroy(); this._guidedHintBg = null; }
+        if (this._guidedIndex < 0 || this._guidedIndex >= this._guidedSteps.length) return;
+
+        const step = this._guidedSteps[this._guidedIndex];
+        const lang = localStorage.getItem('game_lang') || 'en';
+        const text = lang === 'ru' ? (step.textRu || step.text) : step.text;
+
+        const depth = 50;
+        const bx = GAME_WIDTH / 2;
+        const by = GAME_HEIGHT - 30;
+
+        this._guidedHintBg = s.add.rectangle(bx, by, 400, 28, 0x0a0a1a, 0.85)
+            .setStrokeStyle(1, 0xf1c40f).setScrollFactor(0).setDepth(depth);
+        this._guidedHint = s.add.text(bx, by, text, {
+            fontSize: '12px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1);
+
+        s.tweens.add({
+            targets: this._guidedHintBg,
+            alpha: { from: 0.6, to: 1 },
+            duration: 800, yoyo: true, repeat: -1
+        });
+    }
+
+    advanceGuidedStep() {
+        this._guidedIndex++;
+        if (this._guidedIndex >= this._guidedSteps.length) {
+            this._clearGuided();
+            return;
+        }
+        this._showGuidedHint();
+    }
+
+    _clearGuided() {
+        if (this._guidedHint) { this._guidedHint.destroy(); this._guidedHint = null; }
+        if (this._guidedHintBg) { this._guidedHintBg.destroy(); this._guidedHintBg = null; }
+        this._guidedSteps = [];
+        this._guidedIndex = -1;
+    }
+
+    updateGuided() {
+        if (this._guidedIndex < 0 || this._guidedIndex >= this._guidedSteps.length) return;
+        const step = this._guidedSteps[this._guidedIndex];
+        if (!step || !step.check) return;
+        if (step.check(this.scene)) {
+            const s = this.scene;
+            const msg = step.completeMsg || 'Done!';
+            const lang = localStorage.getItem('game_lang') || 'en';
+            const completeText = lang === 'ru' ? (step.completeMsgRu || msg) : msg;
+            s.floatingText(s.player.x, s.player.y - 50, completeText, '#2ecc71');
+            this.advanceGuidedStep();
+        }
     }
 }

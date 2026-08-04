@@ -26,7 +26,11 @@ export default class BootScene extends Phaser.Scene {
     }
 
     create() {
-        this.generateAllTextures();
+        try {
+            this.generateAllTextures();
+        } catch (e) {
+            console.error('Texture generation failed:', e);
+        }
 
         const unsub = onAuthChange((user) => {
             unsub();
@@ -37,7 +41,7 @@ export default class BootScene extends Phaser.Scene {
             }
         });
 
-        this.time.delayedCall(8000, () => {
+        this.time.delayedCall(5000, () => {
             if (!getCurrentUser()) {
                 unsub();
                 this.scene.start('Login');
@@ -49,21 +53,24 @@ export default class BootScene extends Phaser.Scene {
         const mk = (key, w, h, drawFn) => {
             if (this.textures.exists(key)) return;
             const canvas = this.textures.createCanvas(key, w, h);
+            if (!canvas) return;
             drawFn(canvas.getContext());
             canvas.refresh();
         };
 
-        drawPlayerTextures(mk);
-        drawEnemyTextures(mk);
-        drawEffectTextures(mk);
-        drawZoneTextures(mk);
-        drawItemTextures(mk);
-        drawNpcTextures(mk);
-        drawBossTextures(mk);
-        drawMineTextures(mk);
-        drawSnowyTextures(mk, this.textures);
-        drawExpansionTextures(mk, this.textures);
-        drawPetTextures(mk);
-        generateAnimations(this.textures);
+        const safe = (fn) => { try { fn(); } catch (e) { console.warn('Texture gen error:', e); } };
+
+        safe(() => drawPlayerTextures(mk));
+        safe(() => drawEnemyTextures(mk));
+        safe(() => drawEffectTextures(mk));
+        safe(() => drawZoneTextures(mk));
+        safe(() => drawItemTextures(mk));
+        safe(() => drawNpcTextures(mk));
+        safe(() => drawBossTextures(mk));
+        safe(() => drawMineTextures(mk));
+        safe(() => drawSnowyTextures(mk, this.textures));
+        safe(() => drawExpansionTextures(mk, this.textures));
+        safe(() => drawPetTextures(mk));
+        safe(() => generateAnimations(this.textures));
     }
 }

@@ -1,7 +1,7 @@
 import {
     DEPTHS_CAMP_COUNT, DEPTHS_MOBS_PER_CAMP,
     DEPTHS_ENEMY_TYPES, DEPTHS_CAMP_POSITIONS, DEPTHS_CHEST_POSITIONS,
-    DEPTHS_CHEST_DROP_CHANCE
+    DEPTHS_CHEST_DROP_CHANCE, RANGED_INTERVALS, RANGED_INTERVAL_DEFAULT
 } from '../config/index.js';
 import { rollEquip } from '../utils.js';
 
@@ -39,7 +39,7 @@ export class DepthsSpawner {
         e.body.setCollideWorldBounds(true);
         if (s.anims.exists(animKey)) e.play(animKey);
 
-        const rangedInterval = t.role === 'archer' ? 1500 : t.role === 'mage' ? 2000 : t.role === 'healer' ? 2200 : 2000;
+        const rangedInterval = RANGED_INTERVALS[t.role] || RANGED_INTERVAL_DEFAULT;
         e.stats = {
             key: t.key, name: t.name,
             hp: Math.floor(t.hp * s.diffMulti.hp),
@@ -48,6 +48,7 @@ export class DepthsSpawner {
             exp: Math.floor(t.exp * s.diffMulti.exp),
             bw: t.bw, bh: t.bh, role: t.role,
             campIndex: campIndex,
+            hasShield: t.hasShield || false,
             rangedTimer: 0, rangedInterval
         };
 

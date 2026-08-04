@@ -1,6 +1,7 @@
 import {
     HELL_CAMP_COUNT, HELL_MOBS_PER_CAMP,
-    HELL_ENEMY_TYPES, HELL_CAMP_POSITIONS, HELL_LAVA_POSITIONS
+    HELL_ENEMY_TYPES, HELL_CAMP_POSITIONS, HELL_LAVA_POSITIONS,
+    RANGED_INTERVALS, RANGED_INTERVAL_DEFAULT
 } from '../config/index.js';
 
 export class HellSpawner {
@@ -37,7 +38,7 @@ export class HellSpawner {
         e.body.setCollideWorldBounds(true);
         if (s.anims.exists(animKey)) e.play(animKey);
 
-        const rangedInterval = t.role === 'archer' ? 1500 : t.role === 'mage' ? 2000 : t.role === 'healer' ? 2200 : 2000;
+        const rangedInterval = RANGED_INTERVALS[t.role] || RANGED_INTERVAL_DEFAULT;
         e.stats = {
             key: t.key, name: t.name,
             hp: Math.floor(t.hp * s.diffMulti.hp),
@@ -46,6 +47,7 @@ export class HellSpawner {
             exp: Math.floor(t.exp * s.diffMulti.exp),
             bw: t.bw, bh: t.bh, role: t.role,
             campIndex: campIndex,
+            hasShield: t.hasShield || false,
             rangedTimer: 0, rangedInterval
         };
 

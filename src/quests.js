@@ -120,6 +120,7 @@ export function isQuestComplete(qKey) {
 }
 
 export function completeQuest(qKey) {
+    if (!activeQuests.includes(qKey)) return null;
     if (!isQuestComplete(qKey)) return null;
     const quest = QUEST_DB[qKey];
     if (!quest) return null;

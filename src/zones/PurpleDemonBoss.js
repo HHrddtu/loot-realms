@@ -4,6 +4,7 @@ import { rollBossCrystals } from '../config/pets.js';
 import { rollZoneEquip, rollVillageAccountEquip } from '../utils.js';
 import { playBossDeath, playBossAoE, playLoot } from '../sound.js';
 import { BossAI } from '../systems/BossAI.js';
+import { CombatLoot } from '../systems/CombatLoot.js';
 
 export class PurpleDemonBoss {
     constructor(scene, zone) {
@@ -168,6 +169,7 @@ export class PurpleDemonBoss {
         const s = this.scene;
         const ox = s.villageOffsetX;
         playBossDeath();
+        CombatLoot.celebrateBossKill(s);
         if (s.particles) s.particles.spawnBossDeath(ox + VILLAGE_WIDTH / 2, 200);
         s.defeatedText = s.add.text(ox + VILLAGE_WIDTH / 2, 230, 'PURPLE DEMON DEFEATED!', { fontSize: '28px', fill: '#9b59b6', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 4 }).setOrigin(0.5).setScrollFactor(0);
         s.tweens.add({ targets: s.defeatedText, alpha: 0, duration: 5000, onComplete: () => { if (s.defeatedText) s.defeatedText.destroy(); s.defeatedText = null; } });

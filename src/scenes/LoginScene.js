@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { lighten } from '../utils.js';
 import { register, login, loginAsGuest } from '../auth.js';
 import { t } from '../i18n.js';
+import { GAME_WIDTH, GAME_HEIGHT } from '../config/index.js';
 
 export default class LoginScene extends Phaser.Scene {
     constructor() {
@@ -14,11 +15,13 @@ export default class LoginScene extends Phaser.Scene {
         this._domInputs = [];
         this.errorText = null;
 
-        this.add.text(400, 50, t('login.title'), {
+        const cx = GAME_WIDTH / 2;
+
+        this.add.text(cx, 50, t('login.title'), {
             fontSize: '36px', fill: '#f1c40f', fontFamily: 'Georgia', fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        this.add.text(400, 90, t('login.subtitle'), {
+        this.add.text(cx, 90, t('login.subtitle'), {
             fontSize: '14px', fill: '#7f8c8d', fontFamily: 'Arial'
         }).setOrigin(0.5);
 
@@ -29,21 +32,21 @@ export default class LoginScene extends Phaser.Scene {
         ];
 
         this._fields.forEach(f => {
-            const bg = this.add.rectangle(400, f.y, 300, 34, 0x12121f)
+            const bg = this.add.rectangle(cx, f.y, 300, 34, 0x12121f)
                 .setStrokeStyle(1, 0x3a3a5c);
             this.elements.push(bg);
         });
 
-        this.errorText = this.add.text(400, 300, '', {
+        this.errorText = this.add.text(cx, 300, '', {
             fontSize: '13px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold',
             wordWrap: { width: 360 }
         }).setOrigin(0.5);
 
-        this._createBtn(400, 340, t('login.login'), 0x27ae60, () => this._doLogin());
-        this._createBtn(400, 385, t('login.register'), 0x2980b9, () => this._doRegister());
-        this._createBtn(400, 435, t('login.guest'), 0x555577, () => this._doGuest());
+        this._createBtn(cx, 340, t('login.login'), 0x27ae60, () => this._doLogin());
+        this._createBtn(cx, 385, t('login.register'), 0x2980b9, () => this._doRegister());
+        this._createBtn(cx, 435, t('login.guest'), 0x555577, () => this._doGuest());
 
-        this.add.text(400, 490, t('login.hint'), {
+        this.add.text(cx, 490, t('login.hint'), {
             fontSize: '11px', fill: '#555', fontFamily: 'Arial',
             wordWrap: { width: 350 }, align: 'center'
         }).setOrigin(0.5);
@@ -60,13 +63,13 @@ export default class LoginScene extends Phaser.Scene {
         const parentRect = parent.getBoundingClientRect();
         const offsetX = canvasRect.left - parentRect.left;
         const offsetY = canvasRect.top - parentRect.top;
-        const scaleX = canvasRect.width / 800;
-        const scaleY = canvasRect.height / 600;
+        const scaleX = canvasRect.width / GAME_WIDTH;
+        const scaleY = canvasRect.height / GAME_HEIGHT;
 
         this._fields.forEach(f => {
             const wrapper = this['_' + f.key + 'Wrapper'];
             if (!wrapper) return;
-            const px = offsetX + 400 * scaleX;
+            const px = offsetX + (GAME_WIDTH / 2) * scaleX;
             const py = offsetY + f.y * scaleY;
             const w = 300 * scaleX;
             const h = 34 * scaleY;
@@ -86,11 +89,11 @@ export default class LoginScene extends Phaser.Scene {
         const parentRect = parent.getBoundingClientRect();
         const offsetX = canvasRect.left - parentRect.left;
         const offsetY = canvasRect.top - parentRect.top;
-        const scaleX = canvasRect.width / 800;
-        const scaleY = canvasRect.height / 600;
+        const scaleX = canvasRect.width / GAME_WIDTH;
+        const scaleY = canvasRect.height / GAME_HEIGHT;
 
         this._fields.forEach(f => {
-            const px = offsetX + 400 * scaleX;
+            const px = offsetX + (GAME_WIDTH / 2) * scaleX;
             const py = offsetY + f.y * scaleY;
             const w = 300 * scaleX;
             const h = 34 * scaleY;
@@ -114,6 +117,8 @@ export default class LoginScene extends Phaser.Scene {
             const input = document.createElement('input');
             input.type = f.type;
             input.placeholder = f.placeholder;
+            input.name = f.type === 'password' ? 'password' : 'email';
+            input.id = input.name;
             input.style.cssText = `
                 flex: 1;
                 height: 100%;

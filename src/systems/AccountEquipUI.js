@@ -1,4 +1,4 @@
-import { RARITY_COLORS } from '../config/index.js';
+import { RARITY_COLORS, GAME_WIDTH, GAME_HEIGHT } from '../config/index.js';
 import { t } from '../i18n.js';
 
 export class AccountEquipUI {
@@ -14,7 +14,7 @@ export class AccountEquipUI {
         const mk = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
 
         const W = 520, H = 520;
-        this.scene.accountEquipGroup.push(mk(this.scene.add.rectangle(400, 300, W, H, 0x000000, 0.94)
+        this.scene.accountEquipGroup.push(mk(this.scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, W, H, 0x000000, 0.94)
             .setStrokeStyle(2, 0xf39c12)));
 
         this.scene.accountEquipGroup.push(mk(this.scene.add.text(400, 28, t('accEquip.title'), {

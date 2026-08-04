@@ -4,7 +4,11 @@ import { BaseZone } from '../src/systems/BaseZone.js';
 
 function createMockScene() {
     return {
+        tweens: { killAll: vi.fn() },
         physics: { world: { colliders: { destroy: vi.fn() } } },
+        ui: { hud: { clearFloatingTexts: vi.fn() } },
+        loreItems: { cleanup: vi.fn() },
+        tutorialMgr: { _clearGuided: vi.fn() },
         fireballs: [{ glow: { destroy: vi.fn() }, destroy: vi.fn() }],
         enemyProjectiles: [{ destroy: vi.fn() }],
         shieldActive: true,

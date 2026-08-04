@@ -35,3 +35,6 @@
 1. Протестировать полный flow: Meadow → Forest → Mine → Cave → Village → Cemetery → Hell → Snowy → Castle → Depths → Cursed → Shadow → Tower → Throne
 2. Проверить что сейв/загрузка корректно работает с village state
 3. Firebase Auth доработка (баг ника, offline fallback)
+
+## Tools Created
+- `tools/export-promo.html` — инструмент для экспорта промо-изображений персонажей (Sage, Alchemist, Angel) в PNG с увеличением 8x

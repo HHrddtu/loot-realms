@@ -1,4 +1,4 @@
-import { DIFF_COLORS } from '../config/index.js';
+import { DIFF_COLORS, GAME_WIDTH, GAME_HEIGHT } from '../config/index.js';
 import { lighten } from '../utils.js';
 import { t } from '../i18n.js';
 
@@ -23,8 +23,8 @@ export class PauseMenu {
         const mk = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
         
         // Parchment background
-        this.scene.pauseGroup.push(mk(this.scene.add.image(400, 300, 'parchment_bg')));
-        this.scene.pauseGroup.push(mk(this.scene.add.image(400, 300, 'ornate_border')));
+        this.scene.pauseGroup.push(mk(this.scene.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'parchment_bg')));
+        this.scene.pauseGroup.push(mk(this.scene.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'ornate_border')));
         
         this.scene.pauseGroup.push(mk(this.scene.add.text(400, 185, t('pause.title'), { fontSize: '28px', fill: '#5c3a1e', fontFamily: 'Georgia, serif', fontStyle: 'bold' }).setOrigin(0.5)));
         this.scene.pauseGroup.push(mk(this.scene.add.text(400, 215, 'Story Mode', { fontSize: '14px', fill: '#27ae60', fontFamily: 'Georgia, serif', fontStyle: 'bold' }).setOrigin(0.5)));
@@ -60,8 +60,8 @@ export class PauseMenu {
         } catch (e) {}
         this.scene.pauseGroup = [];
         const mk = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
-        this.scene.pauseGroup.push(mk(this.scene.add.rectangle(400, 300, 420, 340, 0x000000, 0.92).setStrokeStyle(2, 0x555577)));
-        this.scene.pauseGroup.push(mk(this.scene.add.text(400, 165, t('adv.title'), { fontSize: '22px', fill: '#aaa', fontFamily: 'Georgia, serif', fontStyle: 'bold' }).setOrigin(0.5)));
+        this.scene.pauseGroup.push(mk(this.scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, 420, 340, 0x000000, 0.92).setStrokeStyle(2, 0x555577)));
+        this.scene.pauseGroup.push(mk(this.scene.add.text(GAME_WIDTH / 2, 165, t('adv.title'), { fontSize: '22px', fill: '#aaa', fontFamily: 'Georgia, serif', fontStyle: 'bold' }).setOrigin(0.5)));
         const makeSmallBtn = (x, y, text, color, cb) => {
             const bg = mk(this.scene.add.rectangle(x, y, 130, 28, color).setStrokeStyle(1, lighten(color, 0.3)).setInteractive({ useHandCursor: true }));
             const lbl = mk(this.scene.add.text(x, y, text, { fontSize: '11px', fill: '#fff', fontFamily: 'Georgia, serif', fontStyle: 'bold' }).setOrigin(0.5));

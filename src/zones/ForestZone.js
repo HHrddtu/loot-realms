@@ -5,7 +5,6 @@ import {
     ENEMY_TYPES
 } from '../config/index.js';
 import { playPortal, startZoneMusic } from '../sound.js';
-import { recordEncounter } from '../bestiary.js';
 import { rollZoneEquip } from '../utils.js';
 import { BaseZone } from '../systems/BaseZone.js';
 
@@ -37,6 +36,12 @@ export class ForestZone extends BaseZone {
             fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5).setDepth(12);
+
+        if (s.portalArrow) { s.portalArrow.destroy(); s.portalArrow = null; }
+        s.portalArrow = s.add.text(PORTAL_POS.x, PORTAL_POS.y - 40, '\u25bc', {
+            fontSize: '18px', fill: '#44cc55', fontFamily: 'Arial'
+        }).setOrigin(0.5).setDepth(12).setAlpha(0.7);
+        s.tweens.add({ targets: s.portalArrow, y: PORTAL_POS.y - 33, alpha: { from: 0.5, to: 1 }, duration: 600, yoyo: true, repeat: -1 });
 
         s.player.x = FOREST_RETURN_POS.x;
         s.player.y = FOREST_RETURN_POS.y;
@@ -94,12 +99,50 @@ export class ForestZone extends BaseZone {
 
         s.zone = 'forest';
         s.npc.spawnNPCs();
-        s.hintText.setText('Arrows=move | SPACE=attack/NPC | I=inventory | TAB=stats | T=talents | C=craft | Q=quests | P=pause | M=sound');
+        s.hintText.setText('Arrows=move | SPACE=attack | I=inventory | TAB=stats | T=talents | P=pause');
         startZoneMusic('forest');
         if (s.particles) {
             s.particles.startForestLeaves(800, FOREST_HEIGHT);
             s.particles.startFirefly(800, FOREST_HEIGHT);
             s.particles.startPortalParticles(PORTAL_POS.x, PORTAL_POS.y, [0x44cc55, 0x66ee77, 0x88ff99]);
+        }
+
+        if (!s.tutorialMgr.shown['guided_forest']) {
+            s.tutorialMgr.shown['guided_forest'] = true;
+            s._guidedReadyAt = Date.now() + 2000;
+            s.tutorialMgr.startGuidedTutorial([
+                {
+                    text: 'Use the Arrow Keys to move around',
+                    textRu: 'Используй Стрелки для движения',
+                    check: (sc) => {
+                        if (Date.now() < (sc._guidedReadyAt || 0)) return false;
+                        return sc.kills > 0 || sc.stumpsBroken > 0 || (sc.player && (Math.abs(sc.player.body.velocity.x) > 10 || Math.abs(sc.player.body.velocity.y) > 10));
+                    },
+                    completeMsg: 'Good, you can move!',
+                    completeMsgRu: 'Отлично, ты умеешь двигаться!'
+                },
+                {
+                    text: 'Find a glowing chest and press SPACE to attack it',
+                    textRu: 'Найди светящийся сундук и нажми SPACE чтобы атаковать',
+                    check: (sc) => sc.stumpsBroken > 0 || (sc.forestChests && sc.forestChests.getChildren().some(ch => ch.broken)),
+                    completeMsg: 'Loot obtained!',
+                    completeMsgRu: 'Лут получен!'
+                },
+                {
+                    text: 'Defeat 3 enemies with SPACE',
+                    textRu: 'Победи 3 врагов нажатием SPACE',
+                    check: (sc) => sc.kills >= 3,
+                    completeMsg: 'Combat mastered!',
+                    completeMsgRu: 'Бой освоен!'
+                },
+                {
+                    text: 'Go to the portal at the top (SPACE to enter Arena)',
+                    textRu: 'Иди к порталу наверху (SPACE для входа на Арену)',
+                    check: (sc) => sc.zone === 'arena',
+                    completeMsg: 'Arena awaits!',
+                    completeMsgRu: 'Арена ждёт!'
+                }
+            ]);
         }
     }
 
@@ -113,9 +156,9 @@ export class ForestZone extends BaseZone {
         if (s.groundLootGroup) { s.groundLootGroup.clear(true, true); s.groundLootGroup.destroy(); s.groundLootGroup = null; }
         if (s.forestChests) {
             s.forestChests.getChildren().forEach(ch => {
-                if (ch.hintText) ch.hintText.destroy();
-                if (ch.hpBg) ch.hpBg.destroy();
-                if (ch.hpFill) ch.hpFill.destroy();
+                if (ch.hintText) { ch.hintText.destroy(); ch.hintText = null; }
+                if (ch.hpBg) { ch.hpBg.destroy(); ch.hpBg = null; }
+                if (ch.hpFill) { ch.hpFill.destroy(); ch.hpFill = null; }
             });
             s.forestChests.clear(true, true);
             s.forestChests.destroy();
@@ -125,6 +168,7 @@ export class ForestZone extends BaseZone {
         if (s.portalSprite) { s.portalSprite.destroy(); s.portalSprite = null; }
         if (s.portalGlow) { s.portalGlow.destroy(); s.portalGlow = null; }
         if (s.portalHint) { s.portalHint.destroy(); s.portalHint = null; }
+        if (s.portalArrow) { s.portalArrow.destroy(); s.portalArrow = null; }
     }
 
     handleSpace() {

@@ -60,23 +60,24 @@ export default class MenuScene extends Phaser.Scene {
             }
         }, 280, 50, '24px');
 
-        this.menuBtn(400, 280, t('menu.multiplayer'), 0x8e44ad, () => {
-            this.scene.start('Lobby');
-        }, 200, 40, '18px');
+        // Multiplayer hidden — not ready for release
+        // this.menuBtn(400, 280, t('menu.multiplayer'), 0x8e44ad, () => {
+        //     this.scene.start('Lobby');
+        // }, 200, 40, '18px');
 
         // Secondary buttons
-        this.menuBtn(300, 340, t('menu.account'), 0x2980b9, () => this.showAccount(), 160, 35, '14px');
-        this.menuBtn(500, 340, t('menu.advanced'), 0x555577, () => this.showAdvanced(), 160, 35, '14px');
-        this.menuBtn(400, 380, 'Lore', 0x8e44ad, () => this.showLore(), 140, 30, '14px');
+        this.menuBtn(300, 280, t('menu.account'), 0x2980b9, () => this.showAccount(), 160, 35, '14px');
+        this.menuBtn(500, 280, t('menu.advanced'), 0x555577, () => this.showAdvanced(), 160, 35, '14px');
+        this.menuBtn(400, 320, 'Lore', 0x8e44ad, () => this.showLore(), 140, 30, '14px');
 
         // Logout
-        this.menuBtn(400, 420, t('menu.logout'), 0xc0392b, async () => {
+        this.menuBtn(400, 360, t('menu.logout'), 0xc0392b, async () => {
             await logout();
             this.scene.start('Login');
         }, 140, 30, '14px');
 
         // Version
-        this.versionText = this.add.text(400, 460, t('menu.version'), {
+        this.versionText = this.add.text(400, 400, t('menu.version'), {
             fontSize: '11px', fill: '#8b4513', fontFamily: 'Georgia, serif'
         }).setOrigin(0.5);
     }

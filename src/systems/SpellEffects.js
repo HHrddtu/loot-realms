@@ -7,8 +7,11 @@ export class SpellEffects {
 
     _castShield(spell) {
         this.scene.shieldActive = true;
-        this.scene.shieldHP = spell.absorption + Math.floor(this.scene.playerMaxHP * 0.1);
-        this.scene.shieldTimer = spell.duration;
+        const shieldHpBonus = this.scene.computedShieldPercent ? 1 + this.scene.computedShieldPercent / 100 : 1;
+        this.scene.shieldHP = Math.floor((spell.absorption + Math.floor(this.scene.playerMaxHP * 0.1)) * shieldHpBonus);
+        const shieldDurBonus = this.scene.computedShieldDuration ? 1 + this.scene.computedShieldDuration / 100 : 1;
+        this.scene.shieldTimer = Math.floor(spell.duration * shieldDurBonus);
+        this.scene.shieldReflect = this.scene.computedShieldReflect || 0;
         this.scene.shieldVfx = this.scene.add.sprite(this.scene.player.x, this.scene.player.y, 'shield_vfx')
             .setDepth(15).setAlpha(0.8);
         this.scene.tweens.add({
@@ -245,7 +248,8 @@ export class SpellEffects {
             if (cloud.active) cloud.destroy(); if (cloudBorder.active) cloudBorder.destroy();
             if (outerRing.active) outerRing.destroy();
         };
-        this.scene.time.addEvent({
+        if (!this.scene._spellTimers) this.scene._spellTimers = [];
+        const toxicCloudTimer = this.scene.time.addEvent({
             delay: tickInterval,
             callback: () => {
                 elapsed += tickInterval;
@@ -280,6 +284,7 @@ export class SpellEffects {
             },
             repeat: Math.floor(durationMs / tickInterval)
         });
+        this.scene._spellTimers.push(toxicCloudTimer);
         this.scene.floatingText(targetX, targetY - 30, 'TOXIC CLOUD!', '#27ae60');
     }
 
@@ -315,7 +320,8 @@ export class SpellEffects {
         let elapsed = 0;
         const tickInterval = 500;
         const radius = spell.radius || 70;
-        this.scene.time.addEvent({
+        if (!this.scene._spellTimers) this.scene._spellTimers = [];
+        const puddleTimer = this.scene.time.addEvent({
             delay: tickInterval,
             callback: () => {
                 elapsed += tickInterval;
@@ -362,6 +368,7 @@ export class SpellEffects {
             },
             repeat: Math.floor(spell.duration / (tickInterval / 1000))
         });
+        this.scene._spellTimers.push(puddleTimer);
     }
 
     _spawnHealZone(x, y, radius, duration, healPerSec) {
@@ -375,6 +382,7 @@ export class SpellEffects {
         this.scene.floatingText(x, y - 20, 'HEAL ZONE!', '#f1c40f');
         const healInterval = 500;
         let elapsed = 0;
+        if (!this.scene._spellTimers) this.scene._spellTimers = [];
         const timer = this.scene.time.addEvent({
             delay: healInterval,
             callback: () => {
@@ -396,9 +404,8 @@ export class SpellEffects {
             },
             repeat: Math.floor(duration * 1000 / healInterval)
         });
+        this.scene._spellTimers.push(timer);
     }
-
-    // === NEW SPELL EFFECTS ===
 
     _castArcaneBurst(spell) {
         const s = this.scene;
@@ -541,6 +548,7 @@ export class SpellEffects {
 
         let elapsed = 0;
         const tickInterval = 500;
+        if (!this.scene._spellTimers) this.scene._spellTimers = [];
         const timer = s.time.addEvent({
             delay: tickInterval, repeat: Math.floor(duration * 1000 / tickInterval),
             callback: () => {
@@ -559,6 +567,7 @@ export class SpellEffects {
                 });
             }
         });
+        this.scene._spellTimers.push(timer);
         s.floatingText(worldPoint.x, worldPoint.y - 20, 'POISON!', '#27ae60');
     }
 

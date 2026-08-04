@@ -1,10 +1,10 @@
-import { RARITY_COLORS, SPELLS, DIFF_COLORS } from '../config/index.js';
+import { RARITY_COLORS, SPELLS, DIFF_COLORS, GAME_WIDTH, GAME_HEIGHT } from '../config/index.js';
 import { lighten } from '../utils.js';
 import { toggleMute } from '../sound.js';
-import { getAccountLevelUpReq, loadAccount, saveAccount } from '../save.js';
-import { initMaterialBook, getMaterialBookData } from '../materialBook.js';
+import { getAccountLevelUpReq } from '../save.js';
 import { PET_DB } from '../config/pets.js';
 import { t } from '../i18n.js';
+import { getActiveQuests } from '../quests.js';
 
 const SPELL_SLOT_STORAGE_KEY = 'loot_realms_spell_slot_pos';
 
@@ -14,6 +14,8 @@ export class HUD {
         this.ui = ui;
         this._uiFrame = 0;
         this._floatingTexts = [];
+        this._lastQuestCache = null;
+        this._questCacheFrame = 0;
     }
 
     _mkEl(el) { el.setScrollFactor(0).setDepth(100); return el; }
@@ -31,17 +33,17 @@ export class HUD {
         this.scene.heroHpBarFill = s(this.scene.add.rectangle(59, 44, 124, 8, 0xe74c3c).setOrigin(0, 0.5));
         this.scene.heroShieldFill = s(this.scene.add.rectangle(59, 44, 0, 8, 0x3498db, 0.4).setOrigin(0, 0.5));
         this.scene.heroHpText = sx(this.scene.add.text(121, 44, '', { fontSize: '8px', fill: '#fff', fontFamily: 'Arial', stroke: '#000', strokeThickness: 1 }).setOrigin(0.5));
-        this.scene.heroCorLabel = sx(this.scene.add.text(58, 54, 'COR', { fontSize: '8px', fill: '#9b59b6', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }));
-        this.scene.heroCorBarOuter = s(this.scene.add.rectangle(80, 54, 104, 5, 0x1a1a2e).setOrigin(0, 0.5).setStrokeStyle(1, 0x333333));
-        this.scene.heroCorBarFill = s(this.scene.add.rectangle(81, 54, 0, 3, 0x9b59b6).setOrigin(0, 0.5));
-        this.scene.heroAccLabel = sx(this.scene.add.text(58, 64, '', { fontSize: '8px', fill: '#e67e22', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }));
-        this.scene.heroAccBarOuter = s(this.scene.add.rectangle(100, 64, 84, 4, 0x1a1a2e).setOrigin(0, 0.5).setStrokeStyle(1, 0x333333));
-        this.scene.heroAccBarFill = s(this.scene.add.rectangle(101, 64, 0, 2, 0xe67e22).setOrigin(0, 0.5));
-        this.scene.heroHint = sx(this.scene.add.text(58, 74, '', { fontSize: '8px', fill: '#666', fontFamily: 'Arial' }));
+        this.scene.heroAccLabel = sx(this.scene.add.text(58, 54, '', { fontSize: '8px', fill: '#e67e22', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }));
+        this.scene.heroAccBarOuter = s(this.scene.add.rectangle(100, 54, 84, 4, 0x1a1a2e).setOrigin(0, 0.5).setStrokeStyle(1, 0x333333));
+        this.scene.heroAccBarFill = s(this.scene.add.rectangle(101, 54, 0, 2, 0xe67e22).setOrigin(0, 0.5));
+        this.scene.corruptionBarOuter = s(this.scene.add.rectangle(58, 74, 126, 6, 0x1a1a2e).setOrigin(0, 0.5).setStrokeStyle(1, 0x333333));
+        this.scene.corruptionBarFill = s(this.scene.add.rectangle(59, 74, 124, 4, 0x9b59b6).setOrigin(0, 0.5));
+        this.scene.heroHint = sx(this.scene.add.text(58, 64, '', { fontSize: '8px', fill: '#666', fontFamily: 'Arial' }));
         this.scene.diffText = sx(this.scene.add.text(185, 4, '', { fontSize: '9px', fill: '#f39c12', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0));
         this.scene.zoneText = sx(this.scene.add.text(400, 4, '', { fontSize: '11px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5, 0));
         this.scene.goldText = sx(this.scene.add.text(185, 86, '', { fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0));
         this.scene.crystalText = sx(this.scene.add.text(185, 98, '', { fontSize: '11px', fill: '#3498db', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0));
+        this.scene.deathsText = sx(this.scene.add.text(185, 110, '', { fontSize: '10px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0));
         this.scene.petBtnText = sx(this.scene.add.text(185, 114, '', { fontSize: '11px', fill: '#e67e22', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0).setInteractive({ useHandCursor: true }));
         this.scene.petBtnText.on('pointerdown', (p) => { if (p.event.shiftKey) { if (this.scene.petSys) this.scene.petSys.toggleMode(); } else { this.ui._openPets(); } });
         this.scene.petBtnText.on('pointerover', () => this.scene.petBtnText.setStyle({ fill: '#f39c12' }));
@@ -52,6 +54,9 @@ export class HUD {
         this.scene.muteText = this.scene.add.text(790, 30, 'SOUND', { fontSize: '10px', fill: '#27ae60', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0.5).setScrollFactor(0).setDepth(23).setInteractive({ useHandCursor: true });
         this.scene.muteText.on('pointerdown', () => this._toggleMute());
         this.scene.talentText = this.scene.add.text(400, 36, '', { fontSize: '9px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setScrollFactor(0).setDepth(23);
+
+        this.scene.questTrackerBg = s(this.scene.add.rectangle(400, 570, 350, 18, 0x0a0a1a, 0.7).setStrokeStyle(1, 0x555555));
+        this.scene.questTracker = sx(this.scene.add.text(400, 570, '', { fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(0.5));
 
         this._createSpellSlots();
         this._createConsumableSlot();
@@ -227,22 +232,67 @@ export class HUD {
             this.scene.heroShieldFill.width = Math.min(124, 124 * (this.scene.shieldHP / this.scene.playerMaxHP));
             this.scene.heroShieldFill.x = 59 + this.scene.heroHpBarFill.width;
         } else { this.scene.heroShieldFill.width = 0; }
-        const corRatio = this.scene.corruptionMax > 0 ? this.scene.corruption / this.scene.corruptionMax : 0;
-        if (this.scene.heroCorBarFill) {
-            this.scene.heroCorBarFill.width = Math.max(0, 102 * corRatio);
-            this.scene.heroCorBarFill.setFillStyle(corRatio > 0.8 ? 0xe74c3c : corRatio > 0.5 ? 0xe67e22 : 0x9b59b6);
-        }
         if (this.scene.heroAccLabel) this.scene.heroAccLabel.setText('AcLv' + this.scene.accountLevel);
         if (this.scene.heroAccBarFill) this.scene.heroAccBarFill.width = Math.max(0, 82 * (this.scene.accountExp / accReq));
+        const corrMax = this.scene.corruptionMax || 100;
+        const corrRatio = Math.min(1, (this.scene.corruption || 0) / corrMax);
+        if (this.scene.corruptionBarFill) {
+            this.scene.corruptionBarFill.width = Math.max(0, 124 * corrRatio);
+            this.scene.corruptionBarFill.setFillStyle(corrRatio >= 1 ? 0xe74c3c : 0x9b59b6);
+        }
         if (this.scene.heroHint) this.scene.heroHint.setText(this.scene.talentPoints > 0 ? 'Talents: ' + this.scene.talentPoints + ' [T]' : '');
         if (this.scene.diffText) this.scene.diffText.setText(this.scene.difficulty).setColor(DIFF_COLORS[this.scene.difficulty] || '#f39c12');
         
         // Zone indicator
-        const zoneNames = { forest: 'Forest', arena: 'Arena', mine: 'Mine', cave: 'Cave', village: 'Village', hell: 'Hell', snowy: 'Snowy Village', castle: 'Castle', meadow: 'Meadow', cemetery: 'Cemetery', mine_boss: 'Mine Boss' };
+        const zoneNames = { forest: 'Forest', arena: 'Arena', mine: 'Mine', cave: 'Cave', village: 'Village', hell: 'Hell', depths: 'Depths', cursed: 'Cursed Lands', shadow: 'Shadow', tower: 'Tower', throne: 'Throne', snowy: 'Snowy Village', castle: 'Castle', meadow: 'Meadow', cemetery: 'Cemetery', mine_boss: 'Mine Boss' };
         if (this.scene.zoneText) this.scene.zoneText.setText(zoneNames[this.scene.zone] || this.scene.zone);
+
+        // Quest tracker
+        if (this.scene.questTracker) {
+            this._questCacheFrame++;
+            if (this._questCacheFrame % 30 === 0) {
+                try {
+                    const quests = getActiveQuests();
+                    this._lastQuestCache = quests;
+                } catch (e) { this._lastQuestCache = []; }
+            }
+            const quests = this._lastQuestCache;
+            if (quests && quests.length > 0) {
+                const q = quests[0];
+                const lang = localStorage.getItem('game_lang') || 'en';
+                const name = lang === 'ru' ? (q.nameRu || q.name) : lang === 'de' ? (q.nameDe || q.name) : q.name;
+                let target = '';
+                if (q.type === 'talk') {
+                    const npcNames = { elder: 'Village Elder', miner: 'Old Miner', meadow_elder: 'Old Traveler' };
+                    const npcRu = { elder: 'Старейшина', miner: 'Шахтёр', meadow_elder: 'Странник' };
+                    const npc = lang === 'ru' ? (npcRu[q.target] || q.target) : npcNames[q.target] || q.target;
+                    const zone = lang === 'ru' ? (q.biome === 'forest' ? 'Лес' : q.biome === 'mine' ? 'Шахта' : q.biome) : q.biome;
+                    target = ' — ' + npc + ' (' + zone + ')';
+                } else if (q.type === 'explore') {
+                    const zone = lang === 'ru' ? (q.biome === 'mine' ? 'Шахта' : q.biome) : q.biome;
+                    target = ' — ' + zone;
+                }
+                this.scene.questTracker.setText('\u25b6 ' + name + '  ' + (q.progress || 0) + '/' + q.count + target);
+                this.scene.questTrackerBg.setVisible(true);
+                this.scene.questTracker.setVisible(true);
+            } else {
+                const zoneHints = { meadow: 'Enter the Forest', forest: 'Find the Portal to Arena', arena: 'Defeat the Treant', mine: 'Find the Skeleton Lord', cave: 'Defeat the Giant Bat', village: 'Clear the camps' };
+                const hint = zoneHints[this.scene.zone];
+                if (hint) {
+                    this.scene.questTracker.setText('\u25b6 ' + hint);
+                    this.scene.questTrackerBg.setVisible(true);
+                    this.scene.questTracker.setVisible(true);
+                } else {
+                    this.scene.questTracker.setText('');
+                    this.scene.questTrackerBg.setVisible(false);
+                    this.scene.questTracker.setVisible(false);
+                }
+            }
+        }
         this.scene.talentText.setText(this.scene.talentPoints > 0 ? 'TALENTS: ' + this.scene.talentPoints + ' [T]' : '');
         if (this.scene.goldText) this.scene.goldText.setText('Gold: ' + (this.scene.gold || 0));
         if (this.scene.crystalText) this.scene.crystalText.setText('\u{1F48E} ' + (this.scene.crystals || 0));
+        if (this.scene.deathsText) this.scene.deathsText.setText('Deaths: ' + (this.scene.deaths || 0));
         if (this.scene.petBtnText) {
             const eqPet = this.scene.equippedPet;
             const petData = PET_DB.find(p => p.id === eqPet);
@@ -292,7 +342,7 @@ export class HUD {
 
     showDamageFlash() {
         if (this._damageFlash) return;
-        this._damageFlash = this.scene.add.rectangle(400, 300, 800, 600, 0xff0000).setAlpha(0.25).setScrollFactor(0).setDepth(300);
+        this._damageFlash = this.scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, 800, 600, 0xff0000).setAlpha(0.25).setScrollFactor(0).setDepth(300);
         this.scene.tweens.add({ targets: this._damageFlash, alpha: 0, duration: 200, onComplete: () => { if (this._damageFlash) { this._damageFlash.destroy(); this._damageFlash = null; } } });
     }
 }

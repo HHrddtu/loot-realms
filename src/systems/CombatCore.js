@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
-import { MINE_RETURN_POS, FOREST_RETURN_POS, CAVE_WIDTH } from '../config/index.js';
 import { getClassData } from '../classes.js';
 import { recordKill, getWeaknessMultiplier, getPlayerAttackType } from '../bestiary.js';
+import { GAME_WIDTH, GAME_HEIGHT } from '../config/index.js';
 
 export class CombatCore {
     constructor(scene) {
@@ -53,6 +53,13 @@ export class CombatCore {
         if (s.invincible) return;
         amount = Math.floor(amount) || 0;
         if (amount <= 0) return;
+
+        // Passive dodge check
+        if (s.computedDodgePercent > 0 && Math.random() * 100 < s.computedDodgePercent) {
+            s.floatingText(s.player.x, s.player.y - 20, 'DODGE!', '#3498db');
+            return;
+        }
+
         if (s.computedDamageReduction > 0) {
             amount = Math.floor(amount * (1 - Math.min(s.computedDamageReduction, 90) / 100));
             if (amount <= 0) amount = 1;
@@ -62,6 +69,28 @@ export class CombatCore {
             const absorbed = Math.min(s.shieldHP, amount);
             s.shieldHP -= absorbed; amount -= absorbed;
             if (absorbed > 0) s.floatingText(s.player.x, s.player.y - 20, absorbed + ' blocked', '#3498db');
+
+            // Shield reflect: deal damage back to attacker
+            if (absorbed > 0 && s.shieldReflect > 0) {
+                const reflectDmg = Math.floor(absorbed * s.shieldReflect / 100);
+                if (reflectDmg > 0) {
+                    // Find nearest enemy and reflect damage
+                    const enemies = s.enemies && s.enemies.scene ? s.enemies.getChildren() : [];
+                    let nearest = null, nearDist = Infinity;
+                    enemies.forEach(e => {
+                        if (!e.active || !e.stats) return;
+                        const d = Phaser.Math.Distance.Between(s.player.x, s.player.y, e.x, e.y);
+                        if (d < nearDist) { nearDist = d; nearest = e; }
+                    });
+                    if (nearest && nearDist < 200) {
+                        nearest.stats.hp -= reflectDmg;
+                        s.floatingText(nearest.x, nearest.y - 20, '-' + reflectDmg + ' REFLECT', '#9b59b6');
+                        if (nearest.stats.hp <= 0 && s.loot) s.loot.handleEnemyDeath(nearest);
+                        else if (nearest.hpFill) nearest.hpFill.width = nearest.hpBg.width * (nearest.stats.hp / nearest.stats.maxHp);
+                    }
+                }
+            }
+
             if (s.shieldHP <= 0) { s.shieldActive = false; s.lifeLinkActive = false; if (s.shieldVfx) { s.shieldVfx.destroy(); s.shieldVfx = null; } }
             if (amount <= 0) return;
         }
@@ -72,6 +101,27 @@ export class CombatCore {
         s.cameras.main.shake(100, 0.002);
         if (s.ui) s.ui.showDamageFlash();
         s.time.delayedCall(500, () => { s.player.clearTint(); s.player.setAlpha(1); s.invincible = false; });
+
+        // Damage reflection: deal % of damage taken back to nearest enemy
+        if (s.computedDamageReflection > 0) {
+            const reflectDmg = Math.floor(amount * s.computedDamageReflection / 100);
+            if (reflectDmg > 0) {
+                const enemies = s.enemies && s.enemies.scene ? s.enemies.getChildren() : [];
+                let nearest = null, nearDist = Infinity;
+                enemies.forEach(e => {
+                    if (!e.active || !e.stats) return;
+                    const d = Phaser.Math.Distance.Between(s.player.x, s.player.y, e.x, e.y);
+                    if (d < nearDist) { nearDist = d; nearest = e; }
+                });
+                if (nearest && nearDist < 200) {
+                    nearest.stats.hp -= reflectDmg;
+                    s.floatingText(nearest.x, nearest.y - 20, '-' + reflectDmg + ' REFLECT', '#e74c3c');
+                    if (nearest.stats.hp <= 0 && s.loot) s.loot.handleEnemyDeath(nearest);
+                    else if (nearest.hpFill) nearest.hpFill.width = nearest.hpBg.width * (nearest.stats.hp / nearest.stats.maxHp);
+                }
+            }
+        }
+
         if (s.playerHP <= 0) {
             s.playerHP = 0;
             if (s.multiplayer && s.mpManager) {
@@ -110,13 +160,105 @@ export class CombatCore {
 
     respawnPlayer() {
         const s = this.scene;
-        if (s.zone === 'arena') { s.player.x = 400; s.player.y = 500; }
-        else if (s.zone === 'mine') { s.player.x = MINE_RETURN_POS.x; s.player.y = MINE_RETURN_POS.y; }
-        else if (s.zone === 'mine_boss') { s.player.x = 400; s.player.y = 500; }
-        else if (s.zone === 'cave') { s.player.x = (s.caveOffsetX || 0) + CAVE_WIDTH / 2; s.player.y = 50; }
-        else { s.player.x = FOREST_RETURN_POS.x; s.player.y = FOREST_RETURN_POS.y; }
-        s.recalcStats(); s.playerHP = s.playerMaxHP;
-        s.cameras.main.shake(200, 0.01); s.updateUI();
+        s.deaths = (s.deaths || 0) + 1;
+
+        const goldLost = Math.floor(s.gold * 0.2);
+        const expLost = Math.floor(s.playerExp * 0.2);
+        s.gold = Math.max(0, s.gold - goldLost);
+        s.playerExp = Math.max(0, s.playerExp - expLost);
+
+        this._showDeathScreen(goldLost, expLost);
+    }
+
+    _showDeathScreen(goldLost, expLost) {
+        const s = this.scene;
+        if (s.menuOpen) return;
+        s.menuOpen = true;
+        if (s.enemies) s.enemies.getChildren().forEach(e => { if (e.body) e.body.setVelocity(0); });
+        s.physics.pause();
+        if (s.tutorialMgr) s.tutorialMgr._clearGuided();
+
+        const depth = 400;
+        const elements = [];
+        const mk = (el) => { el.setScrollFactor(0).setDepth(depth); elements.push(el); return el; };
+
+        mk(s.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, 800, 600, 0x000000, 0));
+
+        const overlay = mk(s.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, 800, 600, 0x880000, 0));
+        s.tweens.add({ targets: overlay, alpha: 0.6, duration: 1000 });
+
+        const title = mk(s.add.text(400, 200, 'YOU DIED', {
+            fontSize: '48px', fill: '#e74c3c', fontFamily: 'Georgia', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 4
+        }).setOrigin(0.5).setAlpha(0));
+        s.tweens.add({ targets: title, alpha: 1, duration: 1500, delay: 300, ease: 'Sine.easeIn' });
+
+        const deathCount = mk(s.add.text(400, 260, 'Death #' + s.deaths, {
+            fontSize: '14px', fill: '#999', fontFamily: 'Arial',
+            stroke: '#000', strokeThickness: 2
+        }).setOrigin(0.5).setAlpha(0));
+        s.tweens.add({ targets: deathCount, alpha: 1, duration: 1000, delay: 800 });
+
+        let penaltyText = '';
+        if (goldLost > 0) penaltyText += '-' + goldLost + ' Gold';
+        if (goldLost > 0 && expLost > 0) penaltyText += '  ';
+        if (expLost > 0) penaltyText += '-' + expLost + ' EXP';
+        if (!penaltyText) penaltyText = 'No gold or EXP to lose';
+
+        const penalty = mk(s.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, penaltyText, {
+            fontSize: '16px', fill: '#f39c12', fontFamily: 'Arial', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
+        }).setOrigin(0.5).setAlpha(0));
+        s.tweens.add({ targets: penalty, alpha: 1, duration: 1000, delay: 1200 });
+
+        let canContinue = false;
+        s.time.delayedCall(1500, () => { canContinue = true; });
+
+        const continueBtn = mk(s.add.rectangle(400, 400, 200, 40, 0x27ae60)
+            .setStrokeStyle(2, 0x2ecc71).setInteractive({ useHandCursor: true }).setAlpha(0));
+        const continueLbl = mk(s.add.text(400, 400, 'Continue', {
+            fontSize: '18px', fill: '#fff', fontFamily: 'Georgia', fontStyle: 'bold'
+        }).setOrigin(0.5).setAlpha(0));
+        s.tweens.add({ targets: [continueBtn, continueLbl], alpha: 1, duration: 800, delay: 1800 });
+
+        const doRespawn = () => {
+            if (!canContinue) return;
+            canContinue = false;
+            elements.forEach(el => el.destroy());
+            s.menuOpen = false;
+            s.physics.resume();
+
+            if (s.zone === 'arena') { s.player.x = 400; s.player.y = 500; }
+            else if (s.zone === 'meadow') { s.player.x = 400; s.player.y = 500; }
+            else if (s.zone === 'mine' || s.zone === 'mine_boss') { s.player.x = 400; s.player.y = 520; }
+            else if (s.zone === 'cave') { s.player.x = (s.caveOffsetX || 0) + 400; s.player.y = 50; }
+            else if (s.zone === 'village') { s.player.x = (s.villageOffsetX || 0) + 400; s.player.y = 200; }
+            else if (s.zone === 'hell') { s.player.x = (s.hellOffsetX || 0) + 450; s.player.y = 200; }
+            else if (s.zone === 'depths') { s.player.x = (s.depthsOffsetX || 0) + 400; s.player.y = 200; }
+            else if (s.zone === 'cursed') { s.player.x = (s.cursedOffsetX || 0) + 450; s.player.y = 200; }
+            else if (s.zone === 'shadow') { s.player.x = (s.shadowOffsetX || 0) + 400; s.player.y = 150; }
+            else if (s.zone === 'tower') { s.player.x = (s.towerOffsetX || 0) + 400; s.player.y = 150; }
+            else if (s.zone === 'throne') { s.player.x = (s.throneOffsetX || 0) + 400; s.player.y = 500; }
+            else if (s.zone === 'snowy') { s.player.x = (s.villageOffsetX || 0) + 400; s.player.y = 200; }
+            else if (s.zone === 'castle') { s.player.x = 400; s.player.y = 500; }
+            else { s.player.x = 400; s.player.y = 120; }
+            s.recalcStats();
+            s.playerHP = s.playerMaxHP;
+            s.invincible = true;
+            s.player.setAlpha(0.4);
+            s.floatingText(s.player.x, s.player.y - 50, 'Protected for 3s', '#2ecc71');
+            s.time.delayedCall(3000, () => {
+                if (s.player && s.player.active) { s.player.clearTint(); s.player.setAlpha(1); }
+                s.invincible = false;
+            });
+            s.cameras.main.shake(200, 0.01);
+            s.updateUI();
+        };
+
+        continueBtn.on('pointerover', () => continueBtn.setFillStyle(0x2ecc71));
+        continueBtn.on('pointerout', () => continueBtn.setFillStyle(0x27ae60));
+        continueBtn.on('pointerdown', doRespawn);
+        s.input.keyboard.once('keydown-SPACE', doRespawn);
     }
 
     attack() {
@@ -196,9 +338,16 @@ export class CombatCore {
         fb.damage = attackDamage; fb.lifespan = (cls.meleeRange || 120) / speed;
         fb.isMeleeProjectile = true; fb.healPercent = cls.meleeHealPercent || 0;
         s.fireballs.push(fb);
-        const glow = s.add.circle(px, py, 10, cls.meleeColor || 0xf1c40f, 0.4).setDepth(14);
+        const glow = s.add.circle(px, py, 14, cls.meleeColor || 0xf1c40f, 0.5).setDepth(14);
         fb.glow = glow;
-        s.tweens.add({ targets: fb, scaleX: 1.2, scaleY: 1.2, duration: 80, yoyo: true, repeat: -1 });
+        s.tweens.add({ targets: fb, scaleX: 1.3, scaleY: 1.3, duration: 80, yoyo: true, repeat: -1 });
+        for (let i = 0; i < 3; i++) {
+            const trail = s.add.circle(
+                px - vx * 0.02 * i, py - vy * 0.02 * i,
+                6 - i * 1.5, cls.meleeColor || 0xf1c40f, 0.6 - i * 0.15
+            ).setDepth(14);
+            s.tweens.add({ targets: trail, alpha: 0, scaleX: 0.3, scaleY: 0.3, duration: 250 + i * 80, onComplete: () => trail.destroy() });
+        }
     }
 
     _attackThrust(ax, ay, range, dmg, color, cls) {
@@ -210,27 +359,38 @@ export class CombatCore {
             targets: proj, x: ax, y: ay, alpha: 0, duration: range / speed * 1000,
             onComplete: () => proj.destroy()
         });
+        const trailGlow = s.add.circle(s.player.x, s.player.y, 8, color || 0xe74c3c, 0.35).setDepth(14);
+        s.tweens.add({
+            targets: trailGlow, x: ax, y: ay, alpha: 0, scaleX: 0.2, scaleY: 0.2,
+            duration: range / speed * 1000,
+            onComplete: () => trailGlow.destroy()
+        });
         this._hitAt(ax, ay, 18, dmg, cls);
         s.player.setTint(color || 0xe74c3c);
         s.time.delayedCall(80, () => { if (s.player.active) s.player.clearTint(); });
+        s.cameras.main.shake(60, 0.003);
     }
 
     _attackCleave(ax, ay, range, dmg, color, cls) {
         const s = this.scene;
+        const areaDmgBonus = s.computedAreaDamage ? 1 + s.computedAreaDamage / 100 : 1;
+        const finalDmg = Math.floor(dmg * areaDmgBonus);
         const perpX = s.facing === 'up' || s.facing === 'down' ? 1 : 0;
         const perpY = s.facing === 'left' || s.facing === 'right' ? 1 : 0;
         const angle = s.facing === 'left' ? 180 : s.facing === 'up' ? -90 : s.facing === 'down' ? 90 : 0;
         for (let i = -1; i <= 1; i++) {
             const sx = ax + i * 10 * perpX;
             const sy = ay + i * 10 * perpY;
-            const sl = s.add.sprite(sx, sy, 'slash').setAlpha(0.8).setTint(color || 0xaaddff).setAngle(angle);
-            s.tweens.add({ targets: sl, alpha: 0, scaleX: 1.6, scaleY: 1.6, duration: 200, delay: Math.abs(i) * 30, onComplete: () => sl.destroy() });
+            const sl = s.add.sprite(sx, sy, 'slash').setAlpha(0.9).setTint(color || 0xaaddff).setAngle(angle);
+            s.tweens.add({ targets: sl, alpha: 0, scaleX: 1.8, scaleY: 1.8, duration: 220, delay: Math.abs(i) * 30, onComplete: () => sl.destroy() });
         }
+        const arcGlow = s.add.circle(ax, ay, range * 0.5, color || 0xaaddff, 0.12).setDepth(13);
+        s.tweens.add({ targets: arcGlow, alpha: 0, scaleX: 1.5, scaleY: 1.5, duration: 250, onComplete: () => arcGlow.destroy() });
         const enemies = [];
         this._collectInRange(s.enemies, ax, ay, range, (e) => {
             if (this._inArc(s.player, e, 120)) enemies.push(e);
         });
-        enemies.forEach(e => this.hitEnemy(e, dmg, {}));
+        enemies.forEach(e => this.hitEnemy(e, finalDmg, {}));
         if (cls && cls.key === 'alchemist') enemies.forEach(e => this._applyArmorShred(e));
         s.player.setTint(color || 0xaaddff);
         s.time.delayedCall(120, () => { if (s.player.active) s.player.clearTint(); });
@@ -238,6 +398,8 @@ export class CombatCore {
 
     _attackBurst(ax, ay, dmg, cls) {
         const s = this.scene;
+        const areaDmgBonus = s.computedAreaDamage ? 1 + s.computedAreaDamage / 100 : 1;
+        const finalDmg = Math.floor(dmg * areaDmgBonus);
         const dirs = [];
         if (s.facing === 'right') { dirs.push(0, -15, 15); }
         else if (s.facing === 'left') { dirs.push(180, 165, 195); }
@@ -250,11 +412,19 @@ export class CombatCore {
             const fb = s.add.sprite(px, py, 'attack_spell').setDepth(15).setTint(cls?.meleeColor || 0x27ae60);
             s.physics.add.existing(fb);
             fb.body.setVelocity(Math.cos(rad) * 300, Math.sin(rad) * 300);
-            fb.damage = Math.floor(dmg * 0.6);
+            fb.damage = Math.floor(finalDmg * 0.6);
             fb.lifespan = 0.5;
             fb.isMeleeProjectile = true;
             s.fireballs.push(fb);
+            const acidTrail = s.add.circle(px, py, 5, cls?.meleeColor || 0x27ae60, 0.4).setDepth(14);
+            s.tweens.add({
+                targets: acidTrail, x: px + Math.cos(rad) * 40, y: py + Math.sin(rad) * 40,
+                alpha: 0, scaleX: 2, scaleY: 2, duration: 350,
+                onComplete: () => acidTrail.destroy()
+            });
         });
+        const splashRadius = s.add.circle(s.player.x, s.player.y, 30, cls?.meleeColor || 0x27ae60, 0.15).setDepth(13);
+        s.tweens.add({ targets: splashRadius, alpha: 0, scaleX: 1.8, scaleY: 1.8, duration: 300, onComplete: () => splashRadius.destroy() });
     }
 
     _attackBash(ax, ay, dmg, color, cls) {
@@ -269,12 +439,14 @@ export class CombatCore {
 
     _attackSpin(ax, ay, dmg, color, cls) {
         const s = this.scene;
+        const areaDmgBonus = s.computedAreaDamage ? 1 + s.computedAreaDamage / 100 : 1;
+        const finalDmg = Math.floor(dmg * areaDmgBonus);
         for (let i = 0; i < 4; i++) {
             const sl = s.add.sprite(ax, ay, 'slash').setAlpha(0.6).setTint(color || 0xaaddff);
             sl.setAngle(i * 90);
             s.tweens.add({ targets: sl, alpha: 0, scaleX: 1.8, scaleY: 1.8, duration: 350, delay: i * 60, onComplete: () => sl.destroy() });
         }
-        this._hitAllAround(s.player.x, s.player.y, 55, dmg, cls);
+        this._hitAllAround(s.player.x, s.player.y, 55, finalDmg, cls);
         s.cameras.main.shake(80, 0.005);
         s.player.setTint(color || 0xaaddff);
         s.time.delayedCall(200, () => { if (s.player.active) s.player.clearTint(); });
@@ -286,14 +458,6 @@ export class CombatCore {
         this.scene.tweens.add({ targets: s, alpha: 0, scaleX: 1.4, scaleY: 1.4, angle: 90, duration: 180, onComplete: () => s.destroy() });
         this.scene.player.setTint(color || 0xaaddff);
         this.scene.time.delayedCall(100, () => { if (this.scene.player.active) this.scene.player.clearTint(); });
-    }
-
-    _facingOffset(dist) {
-        if (this.scene.facing === 'right') return { x: dist, y: 0 };
-        if (this.scene.facing === 'left') return { x: -dist, y: 0 };
-        if (this.scene.facing === 'up') return { x: 0, y: -dist };
-        if (this.scene.facing === 'down') return { x: 0, y: dist };
-        return { x: dist, y: 0 };
     }
 
     _hitAt(ax, ay, radius, dmg, cls) {
@@ -381,25 +545,20 @@ export class CombatCore {
                 obs.hp--;
                 s.floatingText(obs.x, obs.y - 20, '!', '#27ae60');
                 if (obs.hp <= 0) {
+                    const ox = obs.x, oy = obs.y;
                     obs.destroy();
-                    s.floatingText(obs.x, obs.y, 'Bush broken', '#27ae60');
+                    s.floatingText(ox, oy, 'Bush broken', '#27ae60');
                 }
             } else if (obs._isFence) {
                 obs.hp--;
                 obs.setTint(0xffffff);
                 s.floatingText(obs.x, obs.y - 20, '!', '#8b4513');
-                if (obs.hp <= 0) { obs.destroy(); s.floatingText(obs.x, obs.y, 'Fence broken', '#8b4513'); }
+                if (obs.hp <= 0) {
+                    const ox = obs.x, oy = obs.y;
+                    obs.destroy();
+                    s.floatingText(ox, oy, 'Fence broken', '#8b4513');
+                }
             }
-        });
-    }
-
-    _forEachGroup(group, fn) {
-        if (!group || !group.scene) return;
-        let children;
-        try { children = group.getChildren(); } catch (e) { return; }
-        children.forEach(child => {
-            if (!child.active || !child.stats || child.broken) return;
-            fn(child);
         });
     }
 
@@ -498,6 +657,8 @@ export class CombatCore {
                 s._luckyHitCounter = Math.min((s._luckyHitCounter || 0) + 1, 50);
             }
             if (enemy.armorShredStacks && enemy.armorShredStacks > 0) finalDamage = Math.floor(finalDamage * (1 + enemy.armorShredStacks * 0.05));
+            // Player armor reduction: increases all damage dealt to enemies
+            if (s.computedArmorReduction > 0) finalDamage = Math.floor(finalDamage * (1 + s.computedArmorReduction / 100));
         }
 
         enemy.stats.hp -= finalDamage;

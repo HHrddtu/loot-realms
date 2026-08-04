@@ -31,7 +31,6 @@ export class TowerBoss {
         const bx = ox + TOWER_WIDTH / 2;
         const by = 200; // Inside the room (room height = 600)
         const b = s.add.sprite(bx, by, 'fallen_king_walk').setDepth(5);
-        console.log('[TowerBoss] Boss sprite created, visible:', b.visible, 'alpha:', b.alpha);
         s.physics.add.existing(b, false);
         b.body.setSize(bt.bw, bt.bh);
         b.body.setCollideWorldBounds(true);
