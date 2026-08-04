@@ -130,12 +130,15 @@ Write-Log "=== AutoPilot START (interval=${IntervalSec}s, server=${ServerUrl}) =
 
 # убеждаемся что мы в ветке autopilot
 Push-Location $ProjectDir
-$currentBranch = (cmd /c "git rev-parse --abbrev-ref HEAD 2>nul") -join ""
+$prevEAP = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+$currentBranch = (& git rev-parse --abbrev-ref HEAD) -join ""
 if ($currentBranch -ne "autopilot") {
-    $existing = (cmd /c "git branch --list autopilot 2>nul") -join ""
-    if ($existing) { cmd /c "git checkout autopilot 2>nul" } else { cmd /c "git checkout -b autopilot 2>nul" }
+    $existing = (& git branch --list autopilot) -join ""
+    if ($existing) { & git checkout autopilot } else { & git checkout -b autopilot }
     Write-Log "Switched to branch: autopilot"
 }
+$ErrorActionPreference = $prevEAP
 Pop-Location
 
 while ($true) {
@@ -199,17 +202,23 @@ while ($true) {
         Set-TaskDone $task.Index
 
         # коммит результата
-        Push-Location $ProjectDir
-        cmd /c "git add -A 2>nul"
-        if ($LASTEXITCODE -ne 0) { Write-Log "git add failed: $LASTEXITCODE" }
-        cmd /c "git diff --cached --quiet 2>nul"
-        if ($LASTEXITCODE -eq 1) {
-            cmd /c "git commit -m `"autopilot: $($task.Text)`" 2>nul"
-            if ($LASTEXITCODE -eq 0) { Write-Log "Коммит создан" } else { Write-Log "git commit failed: $LASTEXITCODE" }
-        } else {
-            Write-Log "Изменений нет — коммит пропущен"
+        $prevEAP = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+        try {
+            Push-Location $ProjectDir
+            & git add -A
+            & git diff --cached --quiet
+            if ($LASTEXITCODE -eq 1) {
+                & git commit -m "autopilot: $($task.Text)"
+                if ($LASTEXITCODE -eq 0) { Write-Log "Коммит создан" } else { Write-Log "git commit failed: $LASTEXITCODE" }
+            } else {
+                Write-Log "Изменений нет — коммит пропущен"
+            }
+            Pop-Location
         }
-        Pop-Location
+        finally {
+            $ErrorActionPreference = $prevEAP
+        }
 
         Write-Control $cfg "STATUS: ok | task: $($task.Text) | tokens: $tokens"
         Write-Log "Сплю $IntervalSec сек до следующей задачи"
