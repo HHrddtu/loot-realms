@@ -54,6 +54,8 @@ export default class LoginScene extends Phaser.Scene {
         this.time.delayedCall(100, () => this._injectDOMInputs());
         this._resizeHandler = () => { if (this._domInputs.length) this._repositionDOMInputs(); };
         window.addEventListener('resize', this._resizeHandler);
+        this._resizeObserver = new ResizeObserver(() => { if (this._domInputs.length) this._repositionDOMInputs(); });
+        this._resizeObserver.observe(this.game.canvas);
     }
 
     _repositionDOMInputs() {
@@ -226,6 +228,7 @@ export default class LoginScene extends Phaser.Scene {
         this._domInputs.forEach(el => { if (el.parentNode) el.parentNode.removeChild(el); });
         this._domInputs = [];
         if (this._resizeHandler) { window.removeEventListener('resize', this._resizeHandler); this._resizeHandler = null; }
+        if (this._resizeObserver) { this._resizeObserver.disconnect(); this._resizeObserver = null; }
     }
 
     shutdown() { this._cleanup(); }

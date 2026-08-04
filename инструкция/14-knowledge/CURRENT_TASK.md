@@ -6,7 +6,7 @@
 ## Status: In Progress
 
 ## Last Session
-2026-07-18 — Исправлены баги Meadow зоны (NPC, floating text, декорации, сундуки) + баг cemetery gate в деревне. Обнаружен и удалён AI-сгенерированный код defense waves. Обновлена база знаний.
+2026-08-05 — Исправлен Firebase Auth race condition: `_authReady` теперь выставляется сразу при первом `onAuthStateChanged` (до async nickname resolution). Nickname resolution вынесен в `_resolveNickname()` с lock-флагом `_nicknameResolving` для предотвращения concurrent overwrite.
 
 ## Completed (с доказательствами)
 
@@ -24,7 +24,7 @@
 
 | Проблема | Локализация | Статус |
 |----------|-------------|--------|
-| Firebase Auth: баг ника (race condition onAuthStateChanged) | `src/auth.js` | ⚠️ Активен |
+| Firebase Auth: баг ника (race condition onAuthStateChanged) | `src/auth.js` | ✅ Исправлено (2026-08-05) |
 | LoginScene HTML инпуты нестабильны при resize | `src/scenes/LoginScene.js` | ⚠️ Активен |
 | Multiplayer: нет offline fallback | `src/network.js` | ⚠️ Активен |
 

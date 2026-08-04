@@ -5,6 +5,7 @@ let _cachedDisplayName = null;
 let _authReady = false;
 let _authReadyCallbacks = [];
 let _firebaseAvailable = false;
+let _nicknameResolving = false;
 
 let _fbAuth = null;
 let _fbDb = null;
@@ -23,6 +24,31 @@ function _getCachedName() {
         if (stored) { _cachedDisplayName = stored; return stored; }
     } catch (e) {}
     return null;
+}
+
+async function _resolveNickname(user) {
+    if (!user || user.isAnonymous || _nicknameResolving) return;
+    _nicknameResolving = true;
+    try {
+        const stored = _getCachedName();
+        if (stored && !user.displayName) {
+            try { await _fbModule.updateProfile(user, { displayName: stored }); } catch (e) {}
+        }
+        if (user.displayName && !_cachedDisplayName) {
+            _setCachedName(user.displayName);
+        }
+        if (!_cachedDisplayName) {
+            try {
+                const snap = await _fsModule.getDoc(_fsModule.doc(_fbDb, 'users', user.uid));
+                if (snap.exists() && snap.data().displayName) {
+                    _setCachedName(snap.data().displayName);
+                    await _fbModule.updateProfile(user, { displayName: _cachedDisplayName });
+                }
+            } catch (e) {}
+        }
+    } finally {
+        _nicknameResolving = false;
+    }
 }
 
 async function _initAuth() {
@@ -49,31 +75,14 @@ async function _initAuth() {
         _fsModule = await import('firebase/firestore');
         _firebaseAvailable = true;
 
-        _fbModule.onAuthStateChanged(_fbAuth, async (user) => {
+        _fbModule.onAuthStateChanged(_fbAuth, (user) => {
             _currentUser = user;
-            if (user && !user.isAnonymous) {
-                const stored = _getCachedName();
-                if (stored && !user.displayName) {
-                    try { await _fbModule.updateProfile(user, { displayName: stored }); } catch (e) {}
-                }
-                if (user.displayName && !_cachedDisplayName) {
-                    _setCachedName(user.displayName);
-                }
-                if (!_cachedDisplayName) {
-                    try {
-                        const snap = await _fsModule.getDoc(_fsModule.doc(_fbDb, 'users', user.uid));
-                        if (snap.exists() && snap.data().displayName) {
-                            _setCachedName(snap.data().displayName);
-                            await _fbModule.updateProfile(user, { displayName: _cachedDisplayName });
-                        }
-                    } catch (e) {}
-                }
-            }
             if (!_authReady) {
                 _authReady = true;
                 _authReadyCallbacks.forEach(cb => cb());
                 _authReadyCallbacks = [];
             }
+            _resolveNickname(user);
         });
     } catch (e) {
         console.warn('Auth init failed:', e.message);
