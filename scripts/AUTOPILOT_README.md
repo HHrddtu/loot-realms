@@ -31,6 +31,29 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\autopilot.ps1 -Inter
 - Для запуска в фоне: `Start-Process powershell -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File','scripts\autopilot.ps1','-IntervalSec','1800' -WindowStyle Hidden`
 - Пароль сервера берётся из `OPENCODE_SERVER_PASSWORD` (или передай `-ServerPass`).
 
+## Наблюдатель за ботом (необязательно)
+
+Если демон Telegram-бота завис (процесс жив, но нет соединений), он не отвечает.
+Лёгкий наблюдатель `scripts\watch-bot.ps1` раз в 5 минут проверяет бота и
+перезапускает, если тот завис:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\watch-bot.ps1
+```
+
+- Потребляет почти ничего (одна проверка в 300 сек).
+- **Не вмешивается**, если процесс бота полностью отсутствует — то есть ты
+  сам его убрал, наблюдатель не мешает твоему контролю.
+- Запускается вручную (в автозапуске нет).
+
+## Автозапуск
+
+Автозапуск сервера/бота **отключён** (удалён из Startup). Всё запускаешь сам:
+- Сервер: `opencode serve --port 4096`
+- Бот: `opencode-telegram start --daemon`
+- Наблюдатель: `scripts\watch-bot.ps1`
+- Автопилот: `scripts\autopilot.ps1`
+
 ## Управление (в т.ч. с телефона)
 
 Всё управление — через файл `AUTO_CONTROL.md` в корне проекта:

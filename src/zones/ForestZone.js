@@ -68,34 +68,8 @@ export class ForestZone extends BaseZone {
             ]);
         }
 
-        s.physics.add.overlap(s.player, s.trapGroup, (p, trap) => {
-            if (!trap.active || trap.onCooldown || s.menuOpen || s.transitioning) return;
-            trap.onCooldown = true;
-            const dmg = 10 + Math.floor(Math.random() * 11);
-            s.combat.takeDamage(dmg);
-            s.floatingText(trap.x, trap.y - 20, '-' + dmg, '#e74c3c');
-            const angle = Math.atan2(p.y - trap.y, p.x - trap.x);
-            const kb = 150;
-            p.body.setVelocity(Math.cos(angle) * kb, Math.sin(angle) * kb);
-            trap.setAlpha(0.2);
-            s.time.delayedCall(3000, () => {
-                if (trap.active) {
-                    trap.onCooldown = false;
-                    trap.setAlpha(0.7);
-                }
-            });
-        }, null, s);
-
-        s.physics.add.overlap(s.player, s.groundLootGroup, (p, loot) => {
-            if (!loot.active) return;
-            if (s.multiplayer && s.mpSync && loot.mpId) {
-                s.mpSync.broadcastLootCollected(loot.mpId);
-            }
-            const gold = loot.goldValue || 10;
-            s.gold += gold;
-            s.floatingText(loot.x, loot.y - 20, '+' + gold + ' gold', '#f1c40f');
-            loot.destroy();
-        }, null, s);
+        this._setupTrapOverlap(s.trapGroup);
+        this._setupGroundLootOverlap(s.groundLootGroup);
 
         s.zone = 'forest';
         s.npc.spawnNPCs();
@@ -155,13 +129,7 @@ export class ForestZone extends BaseZone {
         if (s.trapGroup) { s.trapGroup.clear(true, true); s.trapGroup.destroy(); s.trapGroup = null; }
         if (s.groundLootGroup) { s.groundLootGroup.clear(true, true); s.groundLootGroup.destroy(); s.groundLootGroup = null; }
         if (s.forestChests) {
-            s.forestChests.getChildren().forEach(ch => {
-                if (ch.hintText) { ch.hintText.destroy(); ch.hintText = null; }
-                if (ch.hpBg) { ch.hpBg.destroy(); ch.hpBg = null; }
-                if (ch.hpFill) { ch.hpFill.destroy(); ch.hpFill = null; }
-            });
-            s.forestChests.clear(true, true);
-            s.forestChests.destroy();
+            this._destroyChestGroup(s.forestChests);
             s.forestChests = null;
         }
         if (s.forestBg) { s.forestBg.destroy(); s.forestBg = null; }

@@ -74,20 +74,7 @@ export class CombatCore {
             if (absorbed > 0 && s.shieldReflect > 0) {
                 const reflectDmg = Math.floor(absorbed * s.shieldReflect / 100);
                 if (reflectDmg > 0) {
-                    // Find nearest enemy and reflect damage
-                    const enemies = s.enemies && s.enemies.scene ? s.enemies.getChildren() : [];
-                    let nearest = null, nearDist = Infinity;
-                    enemies.forEach(e => {
-                        if (!e.active || !e.stats) return;
-                        const d = Phaser.Math.Distance.Between(s.player.x, s.player.y, e.x, e.y);
-                        if (d < nearDist) { nearDist = d; nearest = e; }
-                    });
-                    if (nearest && nearDist < 200) {
-                        nearest.stats.hp -= reflectDmg;
-                        s.floatingText(nearest.x, nearest.y - 20, '-' + reflectDmg + ' REFLECT', '#9b59b6');
-                        if (nearest.stats.hp <= 0 && s.loot) s.loot.handleEnemyDeath(nearest);
-                        else if (nearest.hpFill) nearest.hpFill.width = nearest.hpBg.width * (nearest.stats.hp / nearest.stats.maxHp);
-                    }
+                    this._reflectDamageToNearest(reflectDmg, '#9b59b6');
                 }
             }
 
@@ -106,19 +93,7 @@ export class CombatCore {
         if (s.computedDamageReflection > 0) {
             const reflectDmg = Math.floor(amount * s.computedDamageReflection / 100);
             if (reflectDmg > 0) {
-                const enemies = s.enemies && s.enemies.scene ? s.enemies.getChildren() : [];
-                let nearest = null, nearDist = Infinity;
-                enemies.forEach(e => {
-                    if (!e.active || !e.stats) return;
-                    const d = Phaser.Math.Distance.Between(s.player.x, s.player.y, e.x, e.y);
-                    if (d < nearDist) { nearDist = d; nearest = e; }
-                });
-                if (nearest && nearDist < 200) {
-                    nearest.stats.hp -= reflectDmg;
-                    s.floatingText(nearest.x, nearest.y - 20, '-' + reflectDmg + ' REFLECT', '#e74c3c');
-                    if (nearest.stats.hp <= 0 && s.loot) s.loot.handleEnemyDeath(nearest);
-                    else if (nearest.hpFill) nearest.hpFill.width = nearest.hpBg.width * (nearest.stats.hp / nearest.stats.maxHp);
-                }
+                this._reflectDamageToNearest(reflectDmg, '#e74c3c');
             }
         }
 
@@ -131,6 +106,23 @@ export class CombatCore {
             }
         }
         s.updateUI();
+    }
+
+    _reflectDamageToNearest(amount, color) {
+        const s = this.scene;
+        const enemies = s.enemies && s.enemies.scene ? s.enemies.getChildren() : [];
+        let nearest = null, nearDist = Infinity;
+        enemies.forEach(e => {
+            if (!e.active || !e.stats) return;
+            const d = Phaser.Math.Distance.Between(s.player.x, s.player.y, e.x, e.y);
+            if (d < nearDist) { nearDist = d; nearest = e; }
+        });
+        if (nearest && nearDist < 200) {
+            nearest.stats.hp -= amount;
+            s.floatingText(nearest.x, nearest.y - 20, '-' + amount + ' REFLECT', color);
+            if (nearest.stats.hp <= 0 && s.loot) s.loot.handleEnemyDeath(nearest);
+            else if (nearest.hpFill) nearest.hpFill.width = nearest.hpBg.width * (nearest.stats.hp / nearest.stats.maxHp);
+        }
     }
 
     _enterDownedState() {
@@ -464,16 +456,6 @@ export class CombatCore {
         this._dealAttackDamage(ax, ay, dmg, cls, {});
     }
 
-    _collectInRange(group, ax, ay, range, fn) {
-        if (!group || !group.scene) return;
-        let children;
-        try { children = group.getChildren(); } catch (e) { return; }
-        children.forEach(child => {
-            if (!child.active || !child.stats || child.broken) return;
-            if (Phaser.Math.Distance.Between(ax, ay, child.x, child.y) <= range) fn(child);
-        });
-    }
-
     _inArc(player, enemy, arcDeg) {
         const dx = enemy.x - player.x, dy = enemy.y - player.y;
         const angle = Math.atan2(dy, dx) * 180 / Math.PI;
@@ -490,7 +472,7 @@ export class CombatCore {
 
     _hitAllAround(cx, cy, radius, dmg, cls) {
         const enemies = [];
-        this._collectInRange(this.scene.enemies, cx, cy, radius, (e) => enemies.push(e));
+        this._forEachGroupInRange(this.scene.enemies, cx, cy, radius, (e) => enemies.push(e));
         enemies.forEach(e => this.hitEnemy(e, dmg, {}));
         if (cls && cls.key === 'alchemist') enemies.forEach(e => this._applyArmorShred(e));
     }

@@ -1,11 +1,10 @@
 import Phaser from 'phaser';
 import {
-    GAME_WIDTH, GAME_HEIGHT,
+    GAME_WIDTH,
     HELL_WIDTH, HELL_HEIGHT,
     HELL_LAVA_DAMAGE, HELL_LAVA_INTERVAL, HELL_HEAT_DAMAGE,
     HEAT_CRYSTAL,
-    BOSS_DROP_CHANCE, ZONE_BOSS_SECOND_DROP_CHANCE, RARITY_COLORS, VILLAGE_WIDTH, CEMETERY_HEIGHT,
-    RANGED_INTERVAL_DEFAULT, MOB_ROLE_DEFAULTS, HEALER_HEAL_AMOUNT_DEFAULT, HEALER_HEAL_RANGE_DEFAULT, HEALER_ALLY_RANGE_DEFAULT
+    BOSS_DROP_CHANCE, ZONE_BOSS_SECOND_DROP_CHANCE, RARITY_COLORS, VILLAGE_WIDTH, CEMETERY_HEIGHT
 } from '../config/index.js';
 import { rollEquip, rollAccountEquip } from '../utils.js';
 import { rollBossCrystals } from '../config/pets.js';
@@ -65,11 +64,7 @@ export class HellZone extends BaseZone {
             ]);
         }
 
-        s.physics.add.overlap(s.player, s.hellImps, (p, e) => {
-            if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
-                s.combat.takeDamage(e.stats.damage);
-            }
-        }, null, s);
+        this._setupMinionOverlap(s.hellImps);
 
         s.zone = 'hell';
         s.hintText.setText('SPACE=attack | I=inventory | TAB=stats | T=talents | C=craft | Q=quests | P=pause');
@@ -105,16 +100,8 @@ export class HellZone extends BaseZone {
 
     _destroyZoneSpecific() {
         const s = this.scene;
-        if (s.hellImps && s.hellImps.getLength && s.hellImps.getLength() > 0) {
-            s.hellImps.getChildren().forEach(e => {
-                if (e.hpBg) { e.hpBg.destroy(); e.hpBg = null; }
-                if (e.hpFill) { e.hpFill.destroy(); e.hpFill = null; }
-                if (e.shieldIcon) { e.shieldIcon.destroy(); e.shieldIcon = null; }
-                if (e.roleIcon) { e.roleIcon.destroy(); e.roleIcon = null; }
-            });
-            s.hellImps.clear(true, true);
-        }
-        if (s.hellImps) { s.hellImps.destroy(); s.hellImps = null; }
+        this._destroyGroup(s.hellImps);
+        s.hellImps = null;
         if (s.hellLavaCircles) {
             s.hellLavaCircles.forEach(lc => {
                 if (lc.gfx) lc.gfx.destroy();
@@ -131,11 +118,9 @@ export class HellZone extends BaseZone {
             s.hellLavaSafes = null;
         }
         if (s.hellBoss) {
-            if (s.hellBoss.hpBg) { s.hellBoss.hpBg.destroy(); s.hellBoss.hpBg = null; }
-            if (s.hellBoss.hpFill) { s.hellBoss.hpFill.destroy(); s.hellBoss.hpFill = null; }
-            if (s.hellBossNameText) { s.hellBossNameText.destroy(); s.hellBossNameText = null; }
-            s.hellBoss.destroy();
+            this._destroyBoss(s.hellBoss, s.hellBossNameText);
             s.hellBoss = null;
+            s.hellBossNameText = null;
         }
         if (s.hellBossFireWaveVfx) {
             s.hellBossFireWaveVfx.forEach(v => { if (v && v.destroy) v.destroy(); });
@@ -144,7 +129,6 @@ export class HellZone extends BaseZone {
         if (s.hellBg) { s.hellBg.destroy(); s.hellBg = null; }
         if (s.hellReturnPortal) { if (s.hellReturnPortal.destroy) s.hellReturnPortal.destroy(); s.hellReturnPortal = null; }
         if (s.hellReturnPortalHint) { s.hellReturnPortalHint.destroy(); s.hellReturnPortalHint = null; }
-        this._destroyDefeatedUI();
     }
 
     handleSpace() {
@@ -242,7 +226,6 @@ export class HellZone extends BaseZone {
 
         s.enemies.getChildren().forEach(e => {
             if (!e.active || !e.stats) return;
-
             const aggro = s.getAggroTarget();
             const dx = aggro.x - e.x;
             const dy = aggro.y - e.y;
@@ -252,7 +235,6 @@ export class HellZone extends BaseZone {
                 const roleDefaults = MOB_ROLE_DEFAULTS[e.stats.role] || MOB_ROLE_DEFAULTS.default;
                 const speed = (e.stats.speed || 50) * roleDefaults.speedMult;
                 const engageDist = roleDefaults.engageDist;
-
                 if (dist > engageDist) {
                     e.body.setVelocity((dx / dist) * speed * roleDefaults.moveMult, (dy / dist) * speed * roleDefaults.moveMult);
                     e.setFlipX(dx < 0);
@@ -300,39 +282,8 @@ export class HellZone extends BaseZone {
         this._updateEnemyProjectiles();
     }
 
-    _fireEnemyProjectile(e, dx, dy, type) {
-        const s = this.scene;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const speed = type === 'arrow' ? 200 : type === 'magic' ? 160 : 120;
-        const texKey = type === 'arrow' ? 'enemy_arrow' : type === 'heal' ? 'enemy_heal' : 'enemy_magic';
-
-        const proj = s.add.sprite(e.x, e.y, texKey).setDepth(15);
-        s.physics.add.existing(proj);
-        proj.body.setVelocity((dx / dist) * speed, (dy / dist) * speed);
-        proj.damage = e.stats.damage;
-        proj.lifespan = 2000;
-        proj.isHeal = (type === 'heal');
-        s.enemyProjectiles.push(proj);
-    }
-
-    _updateEnemyProjectiles() {
-        const s = this.scene;
-        for (let i = s.enemyProjectiles.length - 1; i >= 0; i--) {
-            const p = s.enemyProjectiles[i];
-            if (!p.active) { s.enemyProjectiles.splice(i, 1); continue; }
-
-            p.lifespan -= s.game.loop.delta;
-            if (p.lifespan <= 0) { p.destroy(); s.enemyProjectiles.splice(i, 1); continue; }
-
-            if (!p.isHeal) {
-                const dist = Phaser.Math.Distance.Between(p.x, p.y, s.player.x, s.player.y);
-                if (dist < 16) {
-                    s.combat.takeDamage(p.damage);
-                    p.destroy();
-                    s.enemyProjectiles.splice(i, 1);
-                }
-            }
-        }
+    updateHellImps() {
+        this._updateMinionGroup(this.scene.hellImps, 'hell');
     }
 
     victoryHellBoss() {
@@ -462,32 +413,6 @@ export class HellZone extends BaseZone {
             s._setupZone('village', !s.zones.village.isRestored);
             s.cameras.main.fadeIn(500, 0, 0, 0);
             s.transitioning = false;
-        });
-    }
-
-    updateHellImps() {
-        const s = this.scene;
-        if (s.zone !== 'hell' || s.menuOpen || s.transitioning) return;
-        if (!s.hellImps) return;
-        s.hellImps.getChildren().forEach(e => {
-            if (!e.active || !e.stats) return;
-            const aggroImp = s.getAggroTarget();
-            const dx = aggroImp.x - e.x;
-            const dy = aggroImp.y - e.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 250) {
-                const spd = e.stats.speed || 80;
-                if (dist > 20) {
-                    e.body.setVelocity((dx / dist) * spd, (dy / dist) * spd);
-                    e.setFlipX(dx < 0);
-                } else {
-                    e.body.setVelocity(0);
-                }
-            } else {
-                e.body.setVelocity(0);
-            }
-            if (e.hpBg) { e.hpBg.x = e.x; e.hpBg.y = e.y - e.stats.bh / 2 - 6; }
-            if (e.hpFill) { e.hpFill.x = e.x; e.hpFill.y = e.y - e.stats.bh / 2 - 6; }
         });
     }
 

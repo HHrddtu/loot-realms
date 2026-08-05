@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
 import {
-    GAME_WIDTH, GAME_HEIGHT,
+    GAME_WIDTH,
     TOWER_WIDTH, TOWER_ROOM_HEIGHT, TOWER_ROOMS,
     BOSS_DROP_CHANCE, ZONE_BOSS_SECOND_DROP_CHANCE, RARITY_COLORS,
     RANGED_INTERVAL_DEFAULT, MOB_ROLE_DEFAULTS, HEALER_HEAL_AMOUNT_DEFAULT, HEALER_HEAL_RANGE_DEFAULT, HEALER_ALLY_RANGE_DEFAULT
 } from '../config/index.js';
-import { rollEquip, rollAccountEquip, rollZoneAccountEquip } from '../utils.js';
+import { rollEquip, rollZoneAccountEquip } from '../utils.js';
 import { rollBossCrystals } from '../config/pets.js';
 import { playBossDeath, playLoot, playPortal } from '../sound.js';
 
@@ -67,12 +67,7 @@ export class TowerZone extends BaseZone {
         this.spawner.spawnRoomChest(roomIndex);
 
         this.setupEnemyOverlap();
-
-        s.physics.add.overlap(s.player, s.towerMinions, (p, e) => {
-            if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
-                s.combat.takeDamage(e.stats.damage);
-            }
-        }, null, s);
+        this._setupMinionOverlap(s.towerMinions);
 
         s.zone = 'tower';
         s.hintText.setText('SPACE=attack | I=inventory | TAB=stats | T=talents | C=craft | Q=quests | P=pause');
@@ -83,31 +78,14 @@ export class TowerZone extends BaseZone {
 
     _destroyZoneSpecific() {
         const s = this.scene;
-        if (s.towerMinions && s.towerMinions.getLength && s.towerMinions.getLength() > 0) {
-            s.towerMinions.getChildren().forEach(e => {
-                if (e.hpBg) { e.hpBg.destroy(); e.hpBg = null; }
-                if (e.hpFill) { e.hpFill.destroy(); e.hpFill = null; }
-                if (e.shieldIcon) { e.shieldIcon.destroy(); e.shieldIcon = null; }
-                if (e.roleIcon) { e.roleIcon.destroy(); e.roleIcon = null; }
-            });
-            s.towerMinions.clear(true, true);
-        }
-        if (s.towerMinions) { s.towerMinions.destroy(); s.towerMinions = null; }
-        if (s.towerChests && s.towerChests.getLength && s.towerChests.getLength() > 0) {
-            s.towerChests.getChildren().forEach(ch => {
-                if (ch.hpBg) { ch.hpBg.destroy(); ch.hpBg = null; }
-                if (ch.hpFill) { ch.hpFill.destroy(); ch.hpFill = null; }
-                if (ch.hintText) { ch.hintText.destroy(); ch.hintText = null; }
-            });
-            s.towerChests.clear(true, true);
-        }
-        if (s.towerChests) { s.towerChests.destroy(); s.towerChests = null; }
+        this._destroyGroup(s.towerMinions);
+        s.towerMinions = null;
+        this._destroyChestGroup(s.towerChests);
+        s.towerChests = null;
         if (s.towerBoss) {
-            if (s.towerBoss.hpBg) { s.towerBoss.hpBg.destroy(); s.towerBoss.hpBg = null; }
-            if (s.towerBoss.hpFill) { s.towerBoss.hpFill.destroy(); s.towerBoss.hpFill = null; }
-            if (s.towerBossNameText) { s.towerBossNameText.destroy(); s.towerBossNameText = null; }
-            s.towerBoss.destroy();
+            this._destroyBoss(s.towerBoss, s.towerBossNameText);
             s.towerBoss = null;
+            s.towerBossNameText = null;
         }
         if (s.towerBossVfx) {
             s.towerBossVfx.forEach(v => { if (v && v.destroy) v.destroy(); });
@@ -120,7 +98,6 @@ export class TowerZone extends BaseZone {
         if (s.towerReturnPortalHint) { if (s.towerReturnPortalHint.destroy) s.towerReturnPortalHint.destroy(); s.towerReturnPortalHint = null; }
         if (s.towerThronePortal) { if (s.towerThronePortal.destroy) s.towerThronePortal.destroy(); s.towerThronePortal = null; }
         if (s.towerThronePortalHint) { if (s.towerThronePortalHint.destroy) s.towerThronePortalHint.destroy(); s.towerThronePortalHint = null; }
-        this._destroyDefeatedUI();
     }
 
     handleSpace() {
@@ -255,14 +232,12 @@ export class TowerZone extends BaseZone {
         if (s.zone !== 'tower' || s.menuOpen || s.transitioning) return;
         if (!s.enemies) return;
 
-        // Boss spawns when all enemies in boss room are killed
         if (this.currentRoom >= TOWER_ROOMS - 1 && s.enemies.getLength() === 0 && !this.bossSpawned && !this.bossDefeated) {
             this.bossAI.spawnTowerBoss();
         }
 
         s.enemies.getChildren().forEach(e => {
             if (!e.active || !e.stats) return;
-
             const aggro = s.getAggroTarget();
             const dx = aggro.x - e.x;
             const dy = aggro.y - e.y;
@@ -272,7 +247,6 @@ export class TowerZone extends BaseZone {
                 const roleDefaults = MOB_ROLE_DEFAULTS[e.stats.role] || MOB_ROLE_DEFAULTS.default;
                 const speed = (e.stats.speed || 50) * roleDefaults.speedMult;
                 const engageDist = roleDefaults.engageDist;
-
                 if (dist > engageDist) {
                     e.body.setVelocity((dx / dist) * speed * roleDefaults.moveMult, (dy / dist) * speed * roleDefaults.moveMult);
                     e.setFlipX(dx < 0);
@@ -320,39 +294,8 @@ export class TowerZone extends BaseZone {
         this._updateEnemyProjectiles();
     }
 
-    _fireEnemyProjectile(e, dx, dy, type) {
-        const s = this.scene;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const speed = type === 'arrow' ? 200 : type === 'magic' ? 160 : 120;
-        const texKey = type === 'arrow' ? 'enemy_arrow' : type === 'heal' ? 'enemy_heal' : 'enemy_magic';
-
-        const proj = s.add.sprite(e.x, e.y, texKey).setDepth(15);
-        s.physics.add.existing(proj);
-        proj.body.setVelocity((dx / dist) * speed, (dy / dist) * speed);
-        proj.damage = e.stats.damage;
-        proj.lifespan = 2000;
-        proj.isHeal = (type === 'heal');
-        s.enemyProjectiles.push(proj);
-    }
-
-    _updateEnemyProjectiles() {
-        const s = this.scene;
-        for (let i = s.enemyProjectiles.length - 1; i >= 0; i--) {
-            const p = s.enemyProjectiles[i];
-            if (!p.active) { s.enemyProjectiles.splice(i, 1); continue; }
-
-            p.lifespan -= s.game.loop.delta;
-            if (p.lifespan <= 0) { p.destroy(); s.enemyProjectiles.splice(i, 1); continue; }
-
-            if (!p.isHeal) {
-                const dist = Phaser.Math.Distance.Between(p.x, p.y, s.player.x, s.player.y);
-                if (dist < 16) {
-                    s.combat.takeDamage(p.damage);
-                    p.destroy();
-                    s.enemyProjectiles.splice(i, 1);
-                }
-            }
-        }
+    updateTowerMinions() {
+        this._updateMinionGroup(this.scene.towerMinions, 'tower');
     }
 
     victoryTowerBoss() {
@@ -500,32 +443,6 @@ export class TowerZone extends BaseZone {
             s._setupZone('throne');
             s.cameras.main.fadeIn(500, 200, 180, 100);
             s.transitioning = false;
-        });
-    }
-
-    updateTowerMinions() {
-        const s = this.scene;
-        if (s.zone !== 'tower' || s.menuOpen || s.transitioning) return;
-        if (!s.towerMinions) return;
-        s.towerMinions.getChildren().forEach(e => {
-            if (!e.active || !e.stats) return;
-            const aggroMinion = s.getAggroTarget();
-            const dx = aggroMinion.x - e.x;
-            const dy = aggroMinion.y - e.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 250) {
-                const spd = e.stats.speed || 80;
-                if (dist > 20) {
-                    e.body.setVelocity((dx / dist) * spd, (dy / dist) * spd);
-                    e.setFlipX(dx < 0);
-                } else {
-                    e.body.setVelocity(0);
-                }
-            } else {
-                e.body.setVelocity(0);
-            }
-            if (e.hpBg) { e.hpBg.x = e.x; e.hpBg.y = e.y - e.stats.bh / 2 - 6; }
-            if (e.hpFill) { e.hpFill.x = e.x; e.hpFill.y = e.y - e.stats.bh / 2 - 6; }
         });
     }
 }

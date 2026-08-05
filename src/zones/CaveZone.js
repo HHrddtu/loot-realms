@@ -76,35 +76,8 @@ export class CaveZone extends BaseZone {
         this.spawner.spawnGroundLootInZone('cave');
         this.spawner.spawnExtraChestsInZone('cave');
 
-        s.physics.add.overlap(s.player, s.trapGroup, (p, trap) => {
-            if (!trap.active || trap.onCooldown || s.menuOpen || s.transitioning) return;
-            trap.onCooldown = true;
-            const dmg = 10 + Math.floor(Math.random() * 11);
-            s.combat.takeDamage(dmg);
-            s.floatingText(trap.x, trap.y - 20, '-' + dmg, '#e74c3c');
-            const angle = Math.atan2(p.y - trap.y, p.x - trap.x);
-            const kb = 150;
-            p.body.setVelocity(Math.cos(angle) * kb, Math.sin(angle) * kb);
-            trap.setAlpha(0.2);
-            s.time.delayedCall(3000, () => {
-                if (trap.active) {
-                    trap.onCooldown = false;
-                    trap.setAlpha(0.7);
-                }
-            });
-        }, null, s);
-
-        s.physics.add.overlap(s.player, s.groundLootGroup, (p, loot) => {
-            if (!loot.active) return;
-            if (s.multiplayer && s.mpManager) {
-                s.mpManager.handleLocalLootPickup(loot);
-                return;
-            }
-            const gold = loot.goldValue || 10;
-            s.gold += gold;
-            s.floatingText(loot.x, loot.y - 20, '+' + gold + ' gold', '#f1c40f');
-            loot.destroy();
-        }, null, s);
+        this._setupTrapOverlap(s.trapGroup);
+        this._setupGroundLootOverlap(s.groundLootGroup);
 
         s.zone = 'cave';
         s.npc.spawnNPCs();
@@ -133,24 +106,13 @@ export class CaveZone extends BaseZone {
         if (s.trapGroup) { s.trapGroup.clear(true, true); s.trapGroup.destroy(); s.trapGroup = null; }
         if (s.groundLootGroup) { s.groundLootGroup.clear(true, true); s.groundLootGroup.destroy(); s.groundLootGroup = null; }
         if (s.caveExtraChests) {
-            s.caveExtraChests.getChildren().forEach(ch => {
-                if (ch.hintText) { ch.hintText.destroy(); ch.hintText = null; }
-                if (ch.hpBg) { ch.hpBg.destroy(); ch.hpBg = null; }
-                if (ch.hpFill) { ch.hpFill.destroy(); ch.hpFill = null; }
-            });
-            s.caveExtraChests.clear(true, true);
-            s.caveExtraChests.destroy();
+            this._destroyChestGroup(s.caveExtraChests);
             s.caveExtraChests = null;
         }
-        if (s.caveChests && s.caveChests.getLength && s.caveChests.getLength() > 0) {
-            s.caveChests.getChildren().forEach(ch => {
-                if (ch.hintText) { ch.hintText.destroy(); ch.hintText = null; }
-                if (ch.hpBg) { ch.hpBg.destroy(); ch.hpBg = null; }
-                if (ch.hpFill) { ch.hpFill.destroy(); ch.hpFill = null; }
-            });
-            s.caveChests.clear(true, true);
+        if (s.caveChests) {
+            this._destroyChestGroup(s.caveChests);
+            s.caveChests = null;
         }
-        if (s.caveChests) { s.caveChests.destroy(); s.caveChests = null; }
         if (s.caveSmallBats && s.caveSmallBats.getLength && s.caveSmallBats.getLength() > 0) {
             s.caveSmallBats.getChildren().forEach(e => {
                 if (e.hpBg) { e.hpBg.destroy(); e.hpBg = null; }
@@ -160,13 +122,7 @@ export class CaveZone extends BaseZone {
         }
         if (s.caveSmallBats) { s.caveSmallBats.destroy(); s.caveSmallBats = null; }
         if (s.caveBoss) {
-            if (s.caveBoss.hpBg) { s.caveBoss.hpBg.destroy(); s.caveBoss.hpBg = null; }
-            if (s.caveBoss.hpFill) { s.caveBoss.hpFill.destroy(); s.caveBoss.hpFill = null; }
-            if (s.caveBoss.aoeRing) { s.caveBoss.aoeRing.destroy(); s.caveBoss.aoeRing = null; }
-            if (s.caveBoss.aoeRing2) { s.caveBoss.aoeRing2.destroy(); s.caveBoss.aoeRing2 = null; }
-            if (s.caveBoss.telegraph) { s.caveBoss.telegraph.destroy(); s.caveBoss.telegraph = null; }
-            if (s.caveBoss.auraRing) { s.caveBoss.auraRing.destroy(); s.caveBoss.auraRing = null; }
-            s.caveBoss.destroy();
+            this._destroyBoss(s.caveBoss, null);
             s.caveBoss = null;
         }
         if (s.caveBossNameText) { s.caveBossNameText.destroy(); s.caveBossNameText = null; }
@@ -179,7 +135,6 @@ export class CaveZone extends BaseZone {
             s.caveTorches.forEach(t => { if (t.torch) t.torch.destroy(); if (t.glow) t.glow.destroy(); });
             s.caveTorches = null;
         }
-        this._destroyDefeatedUI();
         this.bossAlive = false;
         this.bossSpawned = false;
         this.bossDefeated = false;
