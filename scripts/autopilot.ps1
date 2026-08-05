@@ -113,7 +113,7 @@ function Get-MessageCount([string]$sessionId) {
 }
 
 function Wait-Session([string]$sessionId, [int]$baseline) {
-    $timeout = [DateTime]::Now.AddMinutes(120)
+    $timeout = [DateTime]::Now.AddMinutes(180)
     $lastCount = $baseline
     $quietRounds = 0
     while ([DateTime]::Now -lt $timeout) {
@@ -127,8 +127,8 @@ function Wait-Session([string]$sessionId, [int]$baseline) {
         $count = $all.Count
         if ($count -eq $lastCount) { $quietRounds++ } else { $quietRounds = 0 }
         $lastCount = $count
-        if ($quietRounds -ge 6) {
-            Write-Log "Сессия $sessionId без прогресса 60 сек — считаю зависшей"
+        if ($quietRounds -ge 30) {
+            Write-Log "Сессия $sessionId без прогресса 300 сек — считаю зависшей"
             return $null
         }
         Start-Sleep -Seconds 10

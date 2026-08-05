@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { VILLAGE_BOSS_TYPE, VILLAGE_CORPSE_MINION, VILLAGE_WIDTH, DIFF_COLORS, MAGMA_ARMOR } from '../config/index.js';
+import { VILLAGE_BOSS_TYPE, VILLAGE_CORPSE_MINION, VILLAGE_WIDTH, DIFF_COLORS, MAGMA_ARMOR, BOSS_HP_BAR_WIDTH } from '../config/index.js';
 import { rollBossCrystals } from '../config/pets.js';
 import { rollZoneEquip, rollVillageAccountEquip } from '../utils.js';
 import { playBossDeath, playBossAoE, playLoot } from '../sound.js';
@@ -24,7 +24,7 @@ export class PurpleDemonBoss {
         b.body.setSize(bt.bw, bt.bh); b.body.setCollideWorldBounds(true);
         if (this.scene.anims.exists('purple_demon_walk_anim')) b.play('purple_demon_walk_anim');
         b.stats = { name: bt.name, hp, maxHp: hp, damage: dmg, exp, bw: bt.bw, bh: bt.bh, speed: bt.speed, meteorTimer: 0, meteorInterval: bt.meteorInterval, meteorRadius: bt.meteorRadius, meteorDmgMul: bt.meteorDmgMul, corpseTimer: 0, corpseInterval: bt.corpseInterval, corpseCount: bt.corpseCount, splitThreshold: bt.splitThreshold, splitDone: false };
-        const hpW = 80;
+        const hpW = BOSS_HP_BAR_WIDTH;
         b.hpBg = this.scene.add.rectangle(bx, by - bt.bh / 2 - 12, hpW, 6, 0x000000).setDepth(20).setScrollFactor(0);
         b.hpFill = this.scene.add.rectangle(bx - hpW / 2, by - bt.bh / 2 - 12, hpW, 6, 0x9b59b6).setOrigin(0, 0.5).setDepth(20).setScrollFactor(0);
         b.hpBg.setVisible(false); b.hpFill.setVisible(false);

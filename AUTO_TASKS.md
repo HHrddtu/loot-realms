@@ -21,9 +21,7 @@
 ## Задачи
 
 
-- [x] Тест-един: запиши в AUTO_CONTROL.md строку TEST_SINGLE_1.
-- [x] Тест-един: запиши в AUTO_CONTROL.md строку TEST_SINGLE_2.
 - [x] Аудит кода на анти-паттерны из AGENTS.md: orphaned scene refs (после destroy не обнулены), magic numbers в коде, зоны без BaseZone. Исправить найденное.
-- [ ] Проверить, что все зоны используют BaseZone и вызывают super.clear() в cleanup.
+- [x] Проверить, что все зоны используют BaseZone и вызывают super.clear() в cleanup.
 - [ ] Найти дублирование кода в src/systems/ и src/scenes/ и отрефакторить.
 

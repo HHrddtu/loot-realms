@@ -4,7 +4,8 @@ import {
     SNOWY_VILLAGE_ENEMY_TYPES, SNOWY_VILLAGE_BOSS_TYPE, SNOWY_BOSS_MINION,
     WARMTH_CORE,
     SNOWY_VILLAGE_CAMP_POSITIONS, SNOWY_VILLAGE_CHEST_COUNT, SNOWY_VILLAGE_CHEST_DROP_CHANCE,
-    VILLAGE_CHEST_EQUIP_DROP_CHANCE, DIFF_COLORS, VILLAGE_RANGED_INTERVALS, RANGED_INTERVAL_DEFAULT
+    VILLAGE_CHEST_EQUIP_DROP_CHANCE, DIFF_COLORS, VILLAGE_RANGED_INTERVALS, RANGED_INTERVAL_DEFAULT,
+    BOSS_HP_BAR_WIDTH
 } from '../config/index.js';
 import { playBossDeath, playLoot } from '../sound.js';
 import { rollVillageEquip, rollEquip } from '../utils.js';
@@ -146,7 +147,7 @@ export class SnowyZone extends BaseZone {
             shardTimer: 0, shardInterval: bt.summonInterval
         };
 
-        const hpW = 80;
+        const hpW = BOSS_HP_BAR_WIDTH;
         e.hpBg = this.scene.add.rectangle(400, 110, hpW, 6, 0x000000).setOrigin(0.5).setDepth(20).setScrollFactor(0);
         e.hpFill = this.scene.add.rectangle(400 - hpW / 2, 110, hpW, 6, 0x3498db).setOrigin(0, 0.5).setDepth(20).setScrollFactor(0);
         e.hpBg.setVisible(false); e.hpFill.setVisible(false);
