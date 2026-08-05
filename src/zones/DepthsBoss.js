@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import {
     DEPTHS_WIDTH, DEPTHS_HEIGHT,
-    DEPTHS_BOSS_TYPE, DEPTHS_BOSS_MINION, DIFF_COLORS
+    DEPTHS_BOSS_TYPE, DEPTHS_BOSS_MINION, DIFF_COLORS,
+    BOSS_HP_BAR_WIDTH, BOSS_MINION_SPEED
 } from '../config/index.js';
 import { BossAI } from '../systems/BossAI.js';
 
@@ -41,7 +42,7 @@ export class DepthsBoss {
             summonTimer: 0, summonInterval: bt.summonInterval
         };
 
-        const hpW = 80;
+        const hpW = BOSS_HP_BAR_WIDTH;
         b.hpBg = s.add.rectangle(400, 110, hpW, 6, 0x000000).setDepth(12).setScrollFactor(0);
         b.hpFill = s.add.rectangle(400 - hpW / 2, 110, hpW, 6, 0x8800ff).setOrigin(0, 0.5).setDepth(12).setScrollFactor(0);
         b.hpBg.setVisible(false);
@@ -210,7 +211,7 @@ export class DepthsBoss {
                 hp, maxHp: hp,
                 damage: Math.floor(bt.dmg * s.diffMulti.dmg),
                 exp: Math.floor(bt.exp * s.diffMulti.exp),
-                bw: bt.bw, bh: bt.bh, speed: 80
+                bw: bt.bw, bh: bt.bh, speed: BOSS_MINION_SPEED
             };
 
             const hpW = bt.bw + 6;

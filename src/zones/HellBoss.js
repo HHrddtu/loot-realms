@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import {
     HELL_WIDTH, HELL_HEIGHT,
-    HELL_BOSS_TYPE, HELL_BOSS_MINION, DIFF_COLORS
+    HELL_BOSS_TYPE, HELL_BOSS_MINION, DIFF_COLORS,
+    BOSS_HP_BAR_WIDTH, BOSS_MINION_SPEED
 } from '../config/index.js';
 import { BossAI } from '../systems/BossAI.js';
 
@@ -39,7 +40,7 @@ export class HellBoss {
             summonTimer: 0, summonInterval: bt.summonInterval
         };
 
-        const hpW = 80;
+        const hpW = BOSS_HP_BAR_WIDTH;
         b.hpBg = s.add.rectangle(400, 110, hpW, 6, 0x000000).setDepth(12).setScrollFactor(0);
         b.hpFill = s.add.rectangle(400 - hpW / 2, 110, hpW, 6, 0xff2200).setOrigin(0, 0.5).setDepth(12).setScrollFactor(0);
         b.hpBg.setVisible(false);
@@ -191,7 +192,7 @@ export class HellBoss {
                 hp, maxHp: hp,
                 damage: Math.floor(bt.dmg * s.diffMulti.dmg),
                 exp: Math.floor(bt.exp * s.diffMulti.exp),
-                bw: bt.bw, bh: bt.bh, speed: 80
+                bw: bt.bw, bh: bt.bh, speed: BOSS_MINION_SPEED
             };
 
             const hpW = bt.bw + 6;

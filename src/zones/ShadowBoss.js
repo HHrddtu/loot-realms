@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import {
     SHADOW_WIDTH, SHADOW_HEIGHT,
-    SHADOW_BOSS_TYPE, SHADOW_BOSS_MINION, DIFF_COLORS
+    SHADOW_BOSS_TYPE, SHADOW_BOSS_MINION, DIFF_COLORS,
+    BOSS_HP_BAR_WIDTH, BOSS_MINION_SPEED
 } from '../config/index.js';
 import { BossAI } from '../systems/BossAI.js';
 
@@ -42,7 +43,7 @@ export class ShadowBoss {
             auraTimer: 0, auraInterval: bt.auraInterval
         };
 
-        const hpW = 80;
+        const hpW = BOSS_HP_BAR_WIDTH;
         b.hpBg = s.add.rectangle(400, 110, hpW, 6, 0x000000).setDepth(12).setScrollFactor(0);
         b.hpFill = s.add.rectangle(400 - hpW / 2, 110, hpW, 6, 0x4a0080).setOrigin(0, 0.5).setDepth(12).setScrollFactor(0);
         b.hpBg.setVisible(false);
@@ -207,7 +208,7 @@ export class ShadowBoss {
                 hp, maxHp: hp,
                 damage: Math.floor(bt.dmg * s.diffMulti.dmg),
                 exp: Math.floor(bt.exp * s.diffMulti.exp),
-                bw: bt.bw, bh: bt.bh, speed: 80
+                bw: bt.bw, bh: bt.bh, speed: BOSS_MINION_SPEED
             };
 
             const hpW = bt.bw + 6;
