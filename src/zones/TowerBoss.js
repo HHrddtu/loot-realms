@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import {
     TOWER_WIDTH, TOWER_HEIGHT,
-    TOWER_BOSS_TYPE, TOWER_BOSS_MINION, DIFF_COLORS
+    TOWER_BOSS_TYPE, TOWER_BOSS_MINION, DIFF_COLORS,
+    BOSS_HP_BAR_WIDTH, BOSS_MINION_SPEED
 } from '../config/index.js';
 import { BossAI } from '../systems/BossAI.js';
 
@@ -45,7 +46,7 @@ export class TowerBoss {
             baseDamage: dmg, baseSpeed: spd
         };
 
-        const hpW = 80;
+        const hpW = BOSS_HP_BAR_WIDTH;
         b.hpBg = s.add.rectangle(400, 110, hpW, 6, 0x000000).setDepth(12).setScrollFactor(0);
         b.hpFill = s.add.rectangle(400 - hpW / 2, 110, hpW, 6, 0xcc8800).setOrigin(0, 0.5).setDepth(12).setScrollFactor(0);
         b.hpBg.setVisible(false);
@@ -176,7 +177,7 @@ export class TowerBoss {
                 hp, maxHp: hp,
                 damage: Math.floor(bt.dmg * s.diffMulti.dmg),
                 exp: Math.floor(bt.exp * s.diffMulti.exp),
-                bw: bt.bw, bh: bt.bh, speed: 80
+                bw: bt.bw, bh: bt.bh, speed: BOSS_MINION_SPEED
             };
 
             const hpW = bt.bw + 6;
@@ -215,7 +216,7 @@ export class TowerBoss {
                 hp, maxHp: hp,
                 damage: Math.floor(bt.dmg * s.diffMulti.dmg),
                 exp: Math.floor(bt.exp * s.diffMulti.exp),
-                bw: bt.bw, bh: bt.bh, speed: 80
+                bw: bt.bw, bh: bt.bh, speed: BOSS_MINION_SPEED
             };
 
             const hpW = bt.bw + 6;
