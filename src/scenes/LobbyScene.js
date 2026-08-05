@@ -6,6 +6,13 @@ import {
     getPlayerNames, onPlayerJoin, onPlayerLeave, broadcastStartGame, onStartGame,
     onWelcome, onDifficulty, sendDifficulty
 } from '../network.js';
+const _offNetworkCallbacks = () => {
+    onPlayerJoin(null);
+    onPlayerLeave(null);
+    onStartGame(null);
+    onWelcome(null);
+    onDifficulty(null);
+};
 import { DIFFICULTIES } from '../config/index.js';
 import { t } from '../i18n.js';
 import { loadAccount, loadGame } from '../save.js';
@@ -204,8 +211,11 @@ export default class LobbyScene extends Phaser.Scene {
             text-align: center;
         `;
         container.appendChild(input);
-        container.addEventListener('mouseenter', () => container.style.borderColor = '#5a5a8c');
-        container.addEventListener('mouseleave', () => container.style.borderColor = '#3a3a5c');
+        const mouseenter = () => container.style.borderColor = '#5a5a8c';
+        const mouseleave = () => container.style.borderColor = '#3a3a5c';
+        container.addEventListener('mouseenter', mouseenter);
+        container.addEventListener('mouseleave', mouseleave);
+        this._domContainerListeners = { container, mouseenter, mouseleave };
 
         this.game.canvas.parentNode.appendChild(container);
         this['_' + key + 'Input'] = input;
@@ -290,6 +300,7 @@ export default class LobbyScene extends Phaser.Scene {
     }
 
     _cleanup() {
+        _offNetworkCallbacks();
         for (let i = this._objs.length - 1; i >= 0; i--) {
             const obj = this._objs[i];
             if (obj && obj.active) {
@@ -297,6 +308,14 @@ export default class LobbyScene extends Phaser.Scene {
             }
         }
         this._objs = [];
+        if (this._domContainerListeners) {
+            const { container, mouseenter, mouseleave } = this._domContainerListeners;
+            if (container) {
+                container.removeEventListener('mouseenter', mouseenter);
+                container.removeEventListener('mouseleave', mouseleave);
+            }
+            this._domContainerListeners = null;
+        }
         this._domInputs.forEach(el => { if (el.parentNode) el.parentNode.removeChild(el); });
         this._domInputs = [];
         this._errorText = null;

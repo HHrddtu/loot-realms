@@ -85,9 +85,6 @@ export default class TalentScene extends Phaser.Scene {
 
         this.tabClass.on('pointerdown', () => this._switchTab('class'));
         this.tabAccount.on('pointerdown', () => this._switchTab('account'));
-    
-        this.events.on('shutdown', () => { this.tweens.killAll(); });
-
     }
 
     _clearBranchTabs() {
@@ -95,9 +92,6 @@ export default class TalentScene extends Phaser.Scene {
         this.branchLabels.forEach(t => t.destroy());
         this.branchTabs = [];
         this.branchLabels = [];
-    
-        this.events.on('shutdown', () => { this.tweens.killAll(); });
-
     }
 
     _buildBranchTabs() {
@@ -133,9 +127,6 @@ export default class TalentScene extends Phaser.Scene {
             this.branchTabs.push(tab);
             this.branchLabels.push(label);
         });
-    
-        this.events.on('shutdown', () => { this.tweens.killAll(); });
-
     }
 
     _switchTab(tab) {
@@ -161,9 +152,6 @@ export default class TalentScene extends Phaser.Scene {
 
         this._buildBranchTabs();
         this._drawCurrentBranch();
-    
-        this.events.on('shutdown', () => { this.tweens.killAll(); });
-
     }
 
     _getCurrentTalents() {
@@ -176,16 +164,10 @@ export default class TalentScene extends Phaser.Scene {
             if (!branch) return ACCOUNT_TALENTS;
             return getAccountTalentsByBranch(branch.key);
         }
-    
-        this.events.on('shutdown', () => { this.tweens.killAll(); });
-
     }
 
     _getCurrentUnlocked() {
         return this.activeTab === 'class' ? this.unlockedTalents : this.unlockedAccountTalents;
-    
-        this.events.on('shutdown', () => { this.tweens.killAll(); });
-
     }
 
     _getAccentColor() {

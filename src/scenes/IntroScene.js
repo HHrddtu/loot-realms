@@ -184,8 +184,10 @@ export default class IntroScene extends Phaser.Scene {
         this.canStart = false;
         this.time.delayedCall(2000, () => { this.canStart = true; });
 
-        this.input.keyboard.on('keydown-SPACE', () => this._tryStart());
-        this.input.on('pointerdown', () => this._tryStart());
+        this._startSpaceHandler = () => this._tryStart();
+        this._startPointerHandler = () => this._tryStart();
+        this.input.keyboard.on('keydown-SPACE', this._startSpaceHandler);
+        this.input.on('pointerdown', this._startPointerHandler);
     }
 
     _tryStart() {
@@ -205,5 +207,19 @@ export default class IntroScene extends Phaser.Scene {
     _clearElements() {
         this.elements.forEach(el => { if (el && el.destroy) el.destroy(); });
         this.elements = [];
+    }
+
+    shutdown() {
+        this.tweens.killAll();
+        this.time.removeAllEvents();
+        if (this._startSpaceHandler) {
+            this.input.keyboard.off('keydown-SPACE', this._startSpaceHandler);
+            this._startSpaceHandler = null;
+        }
+        if (this._startPointerHandler) {
+            this.input.off('pointerdown', this._startPointerHandler);
+            this._startPointerHandler = null;
+        }
+        this._clearElements();
     }
 }

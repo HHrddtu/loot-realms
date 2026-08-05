@@ -260,6 +260,7 @@ export default class GameScene extends Phaser.Scene {
             }
             if (this.particles) { this.particles.destroy(); this.particles = null; }
             if (this.petSys) { this.petSys.destroy(); this.petSys = null; }
+            if (this.autoSaveTimer) { this.autoSaveTimer.remove(); this.autoSaveTimer = null; }
             this.doSave();
             stopMusic();
             if (this.multiplayer) {
