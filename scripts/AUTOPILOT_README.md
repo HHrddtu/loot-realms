@@ -28,6 +28,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\autopilot.ps1 -Inter
 ```
 
 - `-IntervalSec` — пауза между задачами в секундах (по умолчанию 1800 = 30 мин).
+- `-TaskTimeoutMin` — лимит времени на одну задачу (по умолчанию 20 мин). Если задача
+  превышает лимит или не даёт прогресса 5 минут — сессия прерывается, задача
+  помечается пропущенной, двигатель идёт дальше.
 - Для запуска в фоне: `Start-Process powershell -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File','scripts\autopilot.ps1','-IntervalSec','1800' -WindowStyle Hidden`
 - Пароль сервера берётся из `OPENCODE_SERVER_PASSWORD` (или передай `-ServerPass`).
 

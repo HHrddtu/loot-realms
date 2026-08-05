@@ -9,6 +9,7 @@
 
 param(
     [int]$IntervalSec = 1800,
+    [int]$TaskTimeoutMin = 20,
     [string]$ServerUrl = "http://localhost:4096",
     [string]$ServerUser = "opencode",
     [string]$ServerPass = $env:OPENCODE_SERVER_PASSWORD,
@@ -113,10 +114,10 @@ function Get-MessageCount([string]$sessionId) {
 }
 
 function Wait-Session([string]$sessionId, [int]$baseline) {
-    $timeout = [DateTime]::Now.AddMinutes(180)
+    $deadline = [DateTime]::Now.AddMinutes($TaskTimeoutMin)
     $lastCount = $baseline
     $quietRounds = 0
-    while ([DateTime]::Now -lt $timeout) {
+    while ([DateTime]::Now -lt $deadline) {
         $msgs = Invoke-RestMethod -Uri "$ServerUrl/session/$sessionId/message" -Headers @{ Authorization = (Get-AuthHeader) }
         $all = @($msgs)
         $newDone = $null
@@ -133,7 +134,20 @@ function Wait-Session([string]$sessionId, [int]$baseline) {
         }
         Start-Sleep -Seconds 10
     }
+    Write-Log "Задача превысила лимит $TaskTimeoutMin мин — прерываю сессию $sessionId"
+    Abort-Session $sessionId
     return $null
+}
+
+function Abort-Session([string]$sessionId) {
+    try {
+        Invoke-RestMethod -Uri "$ServerUrl/session/$sessionId/abort" -Method Post -Headers @{ Authorization = (Get-AuthHeader) } -TimeoutSec 15 | Out-Null
+        Write-Log "Сессия $sessionId прервана"
+    }
+    catch {
+        $errMsg = $PSItem.Exception.Message
+        Write-Log "Не удалось прервать сессию ${sessionId}: $errMsg"
+    }
 }
 
 function Get-SessionTokens([string]$sessionId) {
@@ -211,9 +225,10 @@ while ($true) {
         Send-Prompt $sessionId $prompt | Out-Null
         $done = Wait-Session $sessionId $baseline
         if (-not $done) {
-            Write-Log "Таймаут сессии $sessionId — помечаю как пропущенную"
-            $cfg.FLAG = "PAUSE"
-            Write-Control $cfg "STATUS: timeout on $sessionId"
+            Write-Log "Задача не завершилась вовремя — помечаю как пропущенную, перехожу дальше"
+            Set-TaskDone $task.Index
+            Write-Control $cfg "STATUS: timeout | task: $($task.Text)"
+            Start-Sleep -Seconds 30
             continue
         }
 
