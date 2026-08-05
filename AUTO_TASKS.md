@@ -23,5 +23,5 @@
 
 - [x] Аудит кода на анти-паттерны из AGENTS.md: orphaned scene refs (после destroy не обнулены), magic numbers в коде, зоны без BaseZone. Исправить найденное.
 - [x] Проверить, что все зоны используют BaseZone и вызывают super.clear() в cleanup.
-- [ ] Найти дублирование кода в src/systems/ и src/scenes/ и отрефакторить.
+- [x] Найти дублирование кода в src/systems/ и src/scenes/ и отрефакторить.
 
