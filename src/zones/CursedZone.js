@@ -114,7 +114,7 @@ export class CursedZone extends BaseZone {
     }
 
     updateCursedMobs(delta) {
-        this._updateMobs(delta, 'cursed', this.bossAI.spawnCursedBoss);
+        this._updateMobs(delta, 'cursed', this.bossAI.spawnCursedBoss.bind(this.bossAI));
     }
 
     updateCursedMinions() {

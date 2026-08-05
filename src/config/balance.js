@@ -8,12 +8,41 @@ export const MELEE_SLASH_COLOR = 0xaaddff;
 export const RANGED_PROJECTILE_SPEED = 350;
 export const RANGED_ATTACK_RANGE = 120;
 export const RANGEDProjectile_TINT = 0xf1c40f;
+export const DEFAULT_MELEE_HIT_RADIUS = 45;
+export const THRUST_SPEED = 500;
+export const THRUST_HIT_RADIUS = 18;
+export const CLEAVE_ARC_DEG = 120;
+export const CLEAVE_VISUAL_DURATION = 220;
+export const BURST_OFFSET = 30;
+export const BURST_SPEED = 300;
+export const BURST_DAMAGE_MULT = 0.6;
+export const BURST_SPLASH_RADIUS = 30;
+export const BASH_HIT_RADIUS = 35;
+export const SPIN_HIT_RADIUS = 55;
 
 export const MAX_ARMOR_SHRED_STACKS = 3;
 export const ARMOR_SHRED_PER_STACK_PCT = 5;
 export const LOW_HP_DAMAGE_BONUS_THRESHOLD = 0.3;
 export const ARMOR_SHRED_DAMAGE_BONUS_PER_STACK = 0.05;
 export const LIFELINK_DAMAGE_REDUCTION = 0.7;
+export const MAX_DAMAGE_REDUCTION_PCT = 90;
+export const REFLECT_DAMAGE_RANGE = 200;
+export const DOWNED_TIMER_MS = 10000;
+export const REVIVE_HP_PCT = 0.3;
+export const POST_REVIVE_INVINCIBLE_MS = 1000;
+export const DEATH_GOLD_LOSS_PCT = 0.2;
+export const DEATH_EXP_LOSS_PCT = 0.2;
+export const POST_DEATH_DELAY_MS = 1500;
+export const POST_RESPAWN_PROTECTION_MS = 3000;
+export const COMBO_HIT_WINDOW_MS = 500;
+export const COMBO_DAMAGE_MULT = 1.5;
+export const SHIELD_BLOCK_THRESHOLD = 0.5;
+export const SHIELD_BLOCK_DAMAGE_MULT = 0.2;
+export const LUCKY_HIT_BASE_CHANCE = 3;
+export const LUCKY_HIT_MAX_COUNTER = 50;
+export const LUCKY_HIT_BASE_MULT = 1.5;
+export const LUCKY_HIT_COUNTER_SCALE = 0.05;
+export const LUCKY_HIT_COUNTER_MAX_FOR_MULT = 10;
 
 export const STUMP_RESPAWN_MS = 8000;
 export const VILLAGE_CHEST_DESTROY_DELAY = 2500;
@@ -41,6 +70,12 @@ export const RESPAWN_SHAKE_DURATION = 200;
 export const RESPAWN_SHAKE_INTENSITY = 0.01;
 export const BOSS_DEATH_SHAKE_DURATION = 200;
 export const BOSS_DEATH_SHAKE_INTENSITY = 0.008;
+export const THRUST_SHAKE_DURATION = 60;
+export const THRUST_SHAKE_INTENSITY = 0.003;
+export const BASH_SHAKE_DURATION = 120;
+export const BASH_SHAKE_INTENSITY = 0.008;
+export const SPIN_SHAKE_DURATION = 80;
+export const SPIN_SHAKE_INTENSITY = 0.005;
 
 // ── Spells ──
 export const PROJECTILE_DMG_SCALING = 0.5;
@@ -140,3 +175,41 @@ export const HEALER_ALLY_RANGE_DEFAULT = 120;
 export const BOSS_HP_BAR_WIDTH = 80;
 export const BOSS_HP_BAR_HEIGHT = 6;
 export const BOSS_MINION_SPEED = 80;
+
+// ── Dodge & Movement ──
+export const DODGE_ROLL_SPEED = 450;
+export const DODGE_ROLL_DURATION_MS = 400;
+export const DODGE_ROLL_COOLDOWN_MS = 1200;
+export const DODGE_ROLL_SHAKE_DURATION = 120;
+export const DODGE_ROLL_SHAKE_INTENSITY = 0.008;
+export const SHADOW_STEP_SPEED = 500;
+export const SHADOW_STEP_DISTANCE = 100;
+export const SHADOW_STEP_COOLDOWN_MS = 5000;
+export const TIME_SLOW_FACTOR = 0.5;
+export const TIME_SLOW_DURATION_MS = 3000;
+export const TIME_SLOW_COOLDOWN_MS = 30000;
+
+// ── Revive ──
+export const REVIVE_PROXIMITY_RANGE = 60;
+export const REVIVE_PROGRESS_INCREMENT = 16;
+export const REVIVE_TIME_MS = 2000;
+
+// ── Enemy Behavior ──
+export const ENEMY_WANDER_SPEED = 50;
+export const ENEMY_CHASE_RANGE = 200;
+export const ENEMY_WANDER_TICK = 60;
+export const ENEMY_LEASH_DIST = 280;
+export const ENEMY_LEASH_RETURN_SPEED = 80;
+export const ENEMY_LEASH_HP_REGEN = 2;
+export const ENEMY_SEPARATION_RADIUS = 30;
+export const ENEMY_SEPARATION_FORCE = 40;
+export const ENEMY_ALERT_BASE_DELAY = 400;
+export const ENEMY_ALERT_RANDOM_DELAY = 800;
+export const ENEMY_CLOSE_RANGE_SPEED_MULT = 1.4;
+export const ENEMY_CLOSE_RANGE_THRESHOLD = 80;
+export const ENEMY_MAX_COUNT = 15;
+export const ENEMY_ROLE_RANGES = { archer: 250, mage: 250, assassin: 180, tank: 150, healer: 180, poison: 180, necro: 200, fire: 180, swarm: 200 };
+
+// ── Pet Cooldowns & Ranges ──
+export const PET_COOLDOWNS = { attacker: 1500, companion: 2200, tank: 2500, collector: 2000 };
+export const PET_RANGES = { attacker: 130, companion: 110, tank: 150, collector: 100 };

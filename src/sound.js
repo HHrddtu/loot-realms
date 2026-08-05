@@ -7,6 +7,20 @@ function getCtx() {
     return ctx;
 }
 
+function _unlockAudio() {
+    try {
+        if (ctx && ctx.state === 'suspended') ctx.resume();
+    } catch (e) {}
+}
+
+function ensureAudioUnlock() {
+    if (typeof window === 'undefined') return;
+    window.addEventListener('pointerdown', _unlockAudio);
+    window.addEventListener('keydown', _unlockAudio);
+    window.addEventListener('touchstart', _unlockAudio);
+}
+ensureAudioUnlock();
+
 export function toggleMute() {
     muted = !muted;
     if (muted) {

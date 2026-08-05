@@ -1,17 +1,22 @@
 import Phaser from 'phaser';
 import { playHit, playBossAoE } from '../sound.js';
+import { ENEMY_WANDER_SPEED, ENEMY_CHASE_RANGE, ENEMY_WANDER_TICK, ENEMY_LEASH_DIST,
+    ENEMY_LEASH_RETURN_SPEED, ENEMY_LEASH_HP_REGEN,
+    ENEMY_SEPARATION_RADIUS, ENEMY_SEPARATION_FORCE,
+    ENEMY_ALERT_BASE_DELAY, ENEMY_ALERT_RANDOM_DELAY,
+    ENEMY_CLOSE_RANGE_SPEED_MULT, ENEMY_CLOSE_RANGE_THRESHOLD,
+    ENEMY_MAX_COUNT, ENEMY_ROLE_RANGES
+} from '../config/index.js';
 
 export class EnemyAI {
-    static WANDER_SPEED = 50;
-    static CHASE_RANGE = 200;
-    static WANDER_TICK = 60;
-    static LEASH_DIST = 280;
+    static WANDER_SPEED = ENEMY_WANDER_SPEED;
+    static CHASE_RANGE = ENEMY_CHASE_RANGE;
+    static WANDER_TICK = ENEMY_WANDER_TICK;
+    static LEASH_DIST = ENEMY_LEASH_DIST;
 
     static _detectRange(e, scene) {
         const noise = scene._materialSensors?.moveNoise || 0;
-        const roleRanges = { archer: 250, mage: 250, assassin: 180, tank: 150, healer: 180,
-            poison: 180, necro: 200, fire: 180, swarm: 200 };
-        const base = roleRanges[e.stats?.role] || this.CHASE_RANGE;
+        const base = ENEMY_ROLE_RANGES[e.stats?.role] || this.CHASE_RANGE;
         return base * (1 + noise);
     }
 
@@ -25,10 +30,10 @@ export class EnemyAI {
         const fromSpawn = Math.sqrt(dx * dx + dy * dy);
         if (fromSpawn > this.LEASH_DIST) {
             const angle = Math.atan2(e._spawnY - e.y, e._spawnX - e.x);
-            e.body.setVelocity(Math.cos(angle) * 80, Math.sin(angle) * 80);
+            e.body.setVelocity(Math.cos(angle) * ENEMY_LEASH_RETURN_SPEED, Math.sin(angle) * ENEMY_LEASH_RETURN_SPEED);
             e.setFlipX(Math.cos(angle) < 0);
             if (fromSpawn < this.LEASH_DIST + 20 && e.stats.hp < e.stats.maxHp) {
-                e.stats.hp = Math.min(e.stats.maxHp, e.stats.hp + 2);
+                e.stats.hp = Math.min(e.stats.maxHp, e.stats.hp + ENEMY_LEASH_HP_REGEN);
             }
             if (!e._leashAlert) {
                 scene.floatingText(e.x, e.y - 30, 'LEASH!', '#ff4444');
@@ -43,7 +48,7 @@ export class EnemyAI {
     static _alertDelay(e, dist, detectRange, scene) {
         if (dist >= detectRange) { e._alertTimer = null; e._alertShown = false; return false; }
         if (e._alertTimer === null) {
-            e._alertTimer = 400 + Math.random() * 800;
+            e._alertTimer = ENEMY_ALERT_BASE_DELAY + Math.random() * ENEMY_ALERT_RANDOM_DELAY;
             e._alertShown = false;
         }
         if (e._alertTimer > 0) {
@@ -68,8 +73,8 @@ export class EnemyAI {
             if (other === e || !other.active || !other.body) return;
             const dx = e.x - other.x, dy = e.y - other.y;
             const d = Math.sqrt(dx * dx + dy * dy);
-            if (d < 30 && d > 0) {
-                const force = (30 - d) / 30 * 40;
+            if (d < ENEMY_SEPARATION_RADIUS && d > 0) {
+                const force = (ENEMY_SEPARATION_RADIUS - d) / ENEMY_SEPARATION_RADIUS * ENEMY_SEPARATION_FORCE;
                 pushX += (dx / d) * force;
                 pushY += (dy / d) * force;
             }
@@ -307,7 +312,7 @@ export class EnemyAI {
             spd = Math.floor(spd * (1 - e.stats._slowPct / 100));
         }
         const engageDist = e.stats.engageDist || 30;
-        if (dist > engageDist) { const chaseSpd = dist < 80 ? spd * 1.4 : spd; e.body.setVelocity((dx / dist) * chaseSpd, (dy / dist) * chaseSpd); e.setFlipX(dx < 0); }
+        if (dist > engageDist) { const chaseSpd = dist < ENEMY_CLOSE_RANGE_THRESHOLD ? spd * ENEMY_CLOSE_RANGE_SPEED_MULT : spd; e.body.setVelocity((dx / dist) * chaseSpd, (dy / dist) * chaseSpd); e.setFlipX(dx < 0); }
         else e.body.setVelocity(0);
         if (e.walkAnimKey && (!e.anims.isPlaying || e.anims.currentAnim.key !== e.walkAnimKey)) e.play(e.walkAnimKey);
     }
@@ -349,7 +354,7 @@ export class EnemyAI {
 
     static _raiseDead(e, scene) {
         if (!scene.enemies) return;
-        if (scene.enemies.getLength() >= 15) return;
+        if (scene.enemies.getLength() >= ENEMY_MAX_COUNT) return;
         scene.floatingText(e.x, e.y - 35, 'RAISE DEAD!', '#8e44ad'); playBossAoE();
         for (let i = 0; i < 2; i++) {
             const angle = (i / 2) * Math.PI * 2 + Math.random();

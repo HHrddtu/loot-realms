@@ -42,7 +42,6 @@ export const MAP_CHAPTERS = [
         nameRu: 'Крепость',
         nameDe: 'Die Festung',
         color: 0x9b59b6,
-        requireItem: 'warmth_core',
         zones: [
             { key: 'castle', name: 'Castle', nameRu: 'Замок', nameDe: 'Burg', x: 0, y: 0 },
             { key: 'depths', name: 'Depths', nameRu: 'Глубины', nameDe: 'Tiefen', x: 1, y: 0 }

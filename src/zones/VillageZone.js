@@ -230,6 +230,8 @@ export class VillageZone extends BaseZone {
             s.villageZombies.getChildren().forEach(e => {
                 if (e.hpBg) { e.hpBg.destroy(); e.hpBg = null; }
                 if (e.hpFill) { e.hpFill.destroy(); e.hpFill = null; }
+                if (e.shieldIcon) { e.shieldIcon.destroy(); e.shieldIcon = null; }
+                if (e.roleIcon) { e.roleIcon.destroy(); e.roleIcon = null; }
             });
         }
         s.villageZombies = clearGroup(s.villageZombies);
@@ -314,6 +316,10 @@ export class VillageZone extends BaseZone {
             this.shop.useInn();
             return;
         }
+        if (s.nearbyNpc && !s.menuOpen) {
+            s.npc.interactWithNpc();
+            return;
+        }
         if (s.zones.village.isFrozen && s.campfire && Phaser.Math.Distance.Between(
             s.player.x, s.player.y, s.campfire.x, s.campfire.y
         ) < 60) {
@@ -346,8 +352,6 @@ export class VillageZone extends BaseZone {
             s.player.x, s.player.y, s.cursedPortalVillage.x, s.cursedPortalVillage.y
         ) < 60) {
             this.enterCursed();
-        } else if (s.nearbyNpc && !s.menuOpen) {
-            s.npc.interactWithNpc();
         } else if (s.loreItems && s.loreItems.tryInteract()) {
             return;
         } else {
@@ -577,6 +581,8 @@ export class VillageZone extends BaseZone {
             e.hpBg.y = e.y - e.stats.bh / 2 - 8;
             e.hpFill.x = e.x;
             e.hpFill.y = e.y - e.stats.bh / 2 - 8;
+            if (e.shieldIcon) { e.shieldIcon.x = e.x; e.shieldIcon.y = e.y - e.stats.bh / 2 - 16; }
+            if (e.roleIcon) { e.roleIcon.x = e.x; e.roleIcon.y = e.y - e.stats.bh / 2 - 16; }
         });
 
         this._updateEnemyProjectiles();
@@ -601,6 +607,8 @@ export class VillageZone extends BaseZone {
                 e.hpBg.y = e.y - e.stats.bh / 2 - 6;
                 e.hpFill.x = e.x;
                 e.hpFill.y = e.y - e.stats.bh / 2 - 6;
+                if (e.shieldIcon) { e.shieldIcon.x = e.x; e.shieldIcon.y = e.y - e.stats.bh / 2 - 14; }
+                if (e.roleIcon) { e.roleIcon.x = e.x; e.roleIcon.y = e.y - e.stats.bh / 2 - 14; }
             });
         }
     }
@@ -793,6 +801,8 @@ export class VillageZone extends BaseZone {
             e.hpBg.y = e.y - e.stats.bh / 2 - 8;
             e.hpFill.x = e.x;
             e.hpFill.y = e.y - e.stats.bh / 2 - 8;
+            if (e.shieldIcon) { e.shieldIcon.x = e.x; e.shieldIcon.y = e.y - e.stats.bh / 2 - 16; }
+            if (e.roleIcon) { e.roleIcon.x = e.x; e.roleIcon.y = e.y - e.stats.bh / 2 - 16; }
         });
 
         this._updateEnemyProjectiles();

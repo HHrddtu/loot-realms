@@ -125,7 +125,7 @@ export class DepthsZone extends BaseZone {
     }
 
     updateDepthsMobs(delta) {
-        this._updateMobs(delta, 'depths', this.bossAI.spawnDepthsBoss);
+        this._updateMobs(delta, 'depths', this.bossAI.spawnDepthsBoss.bind(this.bossAI));
     }
 
     updateDepthsMinions() {

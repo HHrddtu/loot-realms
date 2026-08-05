@@ -2,6 +2,12 @@ import Phaser from 'phaser';
 import { getClassData } from '../classes.js';
 import { getKeybinds, parseKeyCode } from '../keybinds.js';
 import { playHit, playBossAoE } from '../sound.js';
+import { DODGE_ROLL_SPEED, DODGE_ROLL_DURATION_MS, DODGE_ROLL_COOLDOWN_MS,
+    DODGE_ROLL_SHAKE_DURATION, DODGE_ROLL_SHAKE_INTENSITY,
+    SHADOW_STEP_SPEED, SHADOW_STEP_DISTANCE, SHADOW_STEP_COOLDOWN_MS,
+    TIME_SLOW_FACTOR, TIME_SLOW_DURATION_MS, TIME_SLOW_COOLDOWN_MS,
+    REVIVE_PROXIMITY_RANGE, REVIVE_PROGRESS_INCREMENT, REVIVE_TIME_MS
+} from '../config/index.js';
 
 export class InputSystem {
     constructor(scene) {
@@ -180,7 +186,7 @@ export class InputSystem {
         s.dodgeCooldown = true;
         s.invincible = true;
 
-        const speed = 450;
+        const speed = DODGE_ROLL_SPEED;
         const dirs = { right: 1, left: -1, up: -1, down: 1 };
         const isHoriz = s.facing === 'right' || s.facing === 'left';
         const vx = isHoriz ? dirs[s.facing] * speed : 0;
@@ -198,15 +204,15 @@ export class InputSystem {
             });
         }
 
-        s.cameras.main.shake(120, 0.008);
+        s.cameras.main.shake(DODGE_ROLL_SHAKE_DURATION, DODGE_ROLL_SHAKE_INTENSITY);
 
-        s.time.delayedCall(400, () => {
+        s.time.delayedCall(DODGE_ROLL_DURATION_MS, () => {
             s.player.body.setVelocity(0);
             s.player.clearTint();
             s.isDodging = false;
             s.invincible = false;
         });
-        s.time.delayedCall(1200, () => { s.dodgeCooldown = false; });
+        s.time.delayedCall(DODGE_ROLL_COOLDOWN_MS, () => { s.dodgeCooldown = false; });
     }
 
     _tryReviveAlly() {
@@ -217,15 +223,15 @@ export class InputSystem {
             const rp = rpm[id];
             if (!rp || !rp.sprite || !rp.sprite.active || !rp.isDowned) continue;
             const dist = Phaser.Math.Distance.Between(s.player.x, s.player.y, rp.sprite.x, rp.sprite.y);
-            if (dist < 60) {
+            if (dist < REVIVE_PROXIMITY_RANGE) {
                 if (this._reviveTarget !== id) {
                     this._reviveTarget = id;
                     this._reviveProgress = 0;
                 }
-                this._reviveProgress += 16;
-                const pct = Math.min(100, Math.floor(this._reviveProgress / 2000 * 100));
+                this._reviveProgress += REVIVE_PROGRESS_INCREMENT;
+                const pct = Math.min(100, Math.floor(this._reviveProgress / REVIVE_TIME_MS * 100));
                 s.floatingText(rp.sprite.x, rp.sprite.y - 40, 'Reviving... ' + pct + '%', '#2ecc71');
-                if (this._reviveProgress >= 2000) {
+                if (this._reviveProgress >= REVIVE_TIME_MS) {
                     this._reviveProgress = 0;
                     this._reviveTarget = null;
                     s.mpManager.sendRevive(id);
@@ -248,8 +254,8 @@ export class InputSystem {
             s.floatingText(s.player.x, s.player.y - 60, 'Shadow Step!', '#8844ff');
         }
 
-        const speed = 500;
-        const dist = 100;
+        const speed = SHADOW_STEP_SPEED;
+        const dist = SHADOW_STEP_DISTANCE;
         const dirs = { right: 1, left: -1, up: -1, down: 1 };
         const isHoriz = s.facing === 'right' || s.facing === 'left';
         const vx = isHoriz ? dirs[s.facing] * speed : 0;
@@ -279,7 +285,7 @@ export class InputSystem {
             s.player.clearTint();
         });
 
-        s.time.delayedCall(5000, () => { this._shadowStepCooldown = false; });
+        s.time.delayedCall(SHADOW_STEP_COOLDOWN_MS, () => { this._shadowStepCooldown = false; });
     }
 
     timeSlow() {

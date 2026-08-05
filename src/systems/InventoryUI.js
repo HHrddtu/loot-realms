@@ -50,6 +50,8 @@ export class InventoryUI {
         // Bottom bar
         this._drawConsumableBar(cx, 520);
 
+        this._mk(this.scene.add.text(cx, 540, 'LMB = equip  |  RMB = lock  |  SHIFT + click = sell', { fontSize: '10px', fill: '#777', fontFamily: 'Arial' }).setOrigin(0.5));
+
         // Close X
         this._mk(this.scene.add.text(cx + 340, 42, 'X', { fontSize: '22px', fill: '#e74c3c', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5).setInteractive({ useHandCursor: true }).on('pointerdown', () => this.closeInventory()));
     }
@@ -214,7 +216,22 @@ export class InventoryUI {
                     this._mk(this.scene.add.sprite(x, y, item.texKey));
                     bg.setStrokeStyle(2, RARITY_COLORS[item.rarity] || 0x444466);
                     bg.setInteractive({ useHandCursor: true });
-                    bg.on('pointerdown', () => this._equipFromBag(idx));
+                    bg.on('pointerdown', (pointer) => {
+                        if (pointer.rightButtonDown()) {
+                            this.scene.playerSys.toggleLock('equip', idx);
+                            this._drawAll();
+                        } else if (this.scene.input.keyboard.checkDown(this.scene.input.keyboard.addKey('SHIFT'))) {
+                            if (item.locked) {
+                                this.ui.floatingText(x, y - 20, 'Item is locked!', '#e74c3c');
+                                return;
+                            }
+                            const res = this.scene.playerSys.sellItem('equip', idx);
+                            if (res > 0) this.ui.floatingText(x, y - 20, '+' + res + ' gold', '#f1c40f');
+                            this._drawAll();
+                        } else {
+                            this._equipFromBag(idx);
+                        }
+                    });
                     bg.on('pointerover', () => { this._infoItem = item; this._drawInfoPanel(130, 210); });
                 }
             }

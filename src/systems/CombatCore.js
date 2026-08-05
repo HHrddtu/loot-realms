@@ -1,7 +1,22 @@
 import Phaser from 'phaser';
 import { getClassData } from '../classes.js';
 import { recordKill, getWeaknessMultiplier, getPlayerAttackType } from '../bestiary.js';
-import { GAME_WIDTH, GAME_HEIGHT } from '../config/index.js';
+import { GAME_WIDTH, GAME_HEIGHT, INVINCIBILITY_DURATION, DAMAGE_SHAKE_DURATION, DAMAGE_SHAKE_INTENSITY,
+    REFLECT_DAMAGE_RANGE, DOWNED_TIMER_MS, REVIVE_HP_PCT, POST_REVIVE_INVINCIBLE_MS,
+    DEATH_GOLD_LOSS_PCT, DEATH_EXP_LOSS_PCT, POST_DEATH_DELAY_MS, POST_RESPAWN_PROTECTION_MS,
+    COMBO_HIT_WINDOW_MS, COMBO_DAMAGE_MULT, SHIELD_BLOCK_THRESHOLD, SHIELD_BLOCK_DAMAGE_MULT,
+    LUCKY_HIT_BASE_CHANCE, LUCKY_HIT_MAX_COUNTER, LUCKY_HIT_BASE_MULT,
+    LUCKY_HIT_COUNTER_SCALE, LUCKY_HIT_COUNTER_MAX_FOR_MULT,
+    LIFELINK_DAMAGE_REDUCTION, MAX_DAMAGE_REDUCTION_PCT,
+    DEFAULT_MELEE_HIT_RADIUS, THRUST_SPEED, THRUST_HIT_RADIUS,
+    CLEAVE_ARC_DEG, CLEAVE_VISUAL_DURATION,
+    BURST_OFFSET, BURST_SPEED, BURST_DAMAGE_MULT, BURST_SPLASH_RADIUS,
+    BASH_HIT_RADIUS, SPIN_HIT_RADIUS,
+    THRUST_SHAKE_DURATION, THRUST_SHAKE_INTENSITY,
+    BASH_SHAKE_DURATION, BASH_SHAKE_INTENSITY,
+    SPIN_SHAKE_DURATION, SPIN_SHAKE_INTENSITY,
+    RESPAWN_SHAKE_DURATION, RESPAWN_SHAKE_INTENSITY
+} from '../config/index.js';
 
 export class CombatCore {
     constructor(scene) {
@@ -61,11 +76,11 @@ export class CombatCore {
         }
 
         if (s.computedDamageReduction > 0) {
-            amount = Math.floor(amount * (1 - Math.min(s.computedDamageReduction, 90) / 100));
+            amount = Math.floor(amount * (1 - Math.min(s.computedDamageReduction, MAX_DAMAGE_REDUCTION_PCT) / 100));
             if (amount <= 0) amount = 1;
         }
         if (s.shieldActive && s.shieldHP > 0) {
-            if (s.lifeLinkActive) amount = Math.floor(amount * 0.7);
+            if (s.lifeLinkActive) amount = Math.floor(amount * LIFELINK_DAMAGE_REDUCTION);
             const absorbed = Math.min(s.shieldHP, amount);
             s.shieldHP -= absorbed; amount -= absorbed;
             if (absorbed > 0) s.floatingText(s.player.x, s.player.y - 20, absorbed + ' blocked', '#3498db');
@@ -85,9 +100,9 @@ export class CombatCore {
         s.invincible = true;
         s.player.setTint(0xff4444).setAlpha(0.5);
         if (s.particles) s.particles.spawnDamageToPlayer(s.player.x, s.player.y);
-        s.cameras.main.shake(100, 0.002);
+        s.cameras.main.shake(DAMAGE_SHAKE_DURATION, DAMAGE_SHAKE_INTENSITY);
         if (s.ui) s.ui.showDamageFlash();
-        s.time.delayedCall(500, () => { s.player.clearTint(); s.player.setAlpha(1); s.invincible = false; });
+        s.time.delayedCall(INVINCIBILITY_DURATION, () => { s.player.clearTint(); s.player.setAlpha(1); s.invincible = false; });
 
         // Damage reflection: deal % of damage taken back to nearest enemy
         if (s.computedDamageReflection > 0) {
@@ -117,7 +132,7 @@ export class CombatCore {
             const d = Phaser.Math.Distance.Between(s.player.x, s.player.y, e.x, e.y);
             if (d < nearDist) { nearDist = d; nearest = e; }
         });
-        if (nearest && nearDist < 200) {
+        if (nearest && nearDist < REFLECT_DAMAGE_RANGE) {
             nearest.stats.hp -= amount;
             s.floatingText(nearest.x, nearest.y - 20, '-' + amount + ' REFLECT', color);
             if (nearest.stats.hp <= 0 && s.loot) s.loot.handleEnemyDeath(nearest);
@@ -128,7 +143,7 @@ export class CombatCore {
     _enterDownedState() {
         const s = this.scene;
         s.isDowned = true;
-        s.downedTimer = 10000;
+        s.downedTimer = DOWNED_TIMER_MS;
         s.player.setTint(0x666666);
         s.player.setAlpha(0.6);
         s.player.body.setVelocity(0);
@@ -142,9 +157,9 @@ export class CombatCore {
         s.downedTimer = 0;
         s.player.clearTint();
         s.player.setAlpha(1);
-        s.playerHP = Math.floor(s.playerMaxHP * 0.3);
+        s.playerHP = Math.floor(s.playerMaxHP * REVIVE_HP_PCT);
         s.invincible = true;
-        s.time.delayedCall(1000, () => { s.invincible = false; });
+        s.time.delayedCall(POST_REVIVE_INVINCIBLE_MS, () => { s.invincible = false; });
         s.floatingText(s.player.x, s.player.y - 40, 'REVIVED!', '#2ecc71');
         s.updateUI();
         if (s.multiplayer && s.mpManager) s.mpManager.broadcastDowned(false);
@@ -154,8 +169,8 @@ export class CombatCore {
         const s = this.scene;
         s.deaths = (s.deaths || 0) + 1;
 
-        const goldLost = Math.floor(s.gold * 0.2);
-        const expLost = Math.floor(s.playerExp * 0.2);
+        const goldLost = Math.floor(s.gold * DEATH_GOLD_LOSS_PCT);
+        const expLost = Math.floor(s.playerExp * DEATH_EXP_LOSS_PCT);
         s.gold = Math.max(0, s.gold - goldLost);
         s.playerExp = Math.max(0, s.playerExp - expLost);
 
@@ -204,7 +219,7 @@ export class CombatCore {
         s.tweens.add({ targets: penalty, alpha: 1, duration: 1000, delay: 1200 });
 
         let canContinue = false;
-        s.time.delayedCall(1500, () => { canContinue = true; });
+        s.time.delayedCall(POST_DEATH_DELAY_MS, () => { canContinue = true; });
 
         const continueBtn = mk(s.add.rectangle(400, 400, 200, 40, 0x27ae60)
             .setStrokeStyle(2, 0x2ecc71).setInteractive({ useHandCursor: true }).setAlpha(0));
@@ -239,11 +254,11 @@ export class CombatCore {
             s.invincible = true;
             s.player.setAlpha(0.4);
             s.floatingText(s.player.x, s.player.y - 50, 'Protected for 3s', '#2ecc71');
-            s.time.delayedCall(3000, () => {
+            s.time.delayedCall(POST_RESPAWN_PROTECTION_MS, () => {
                 if (s.player && s.player.active) { s.player.clearTint(); s.player.setAlpha(1); }
                 s.invincible = false;
             });
-            s.cameras.main.shake(200, 0.01);
+            s.cameras.main.shake(RESPAWN_SHAKE_DURATION, RESPAWN_SHAKE_INTENSITY);
             s.updateUI();
         };
 
@@ -319,7 +334,7 @@ export class CombatCore {
     _rangedAttack(cls, attackDamage) {
         const s = this.scene;
         let vx = 0, vy = 0, ox = 0, oy = 0;
-        const speed = 350;
+        const speed = RANGED_PROJECTILE_SPEED;
         if (s.facing === 'left') { vx = -speed; ox = -20; } else if (s.facing === 'right') { vx = speed; ox = 20; }
         else if (s.facing === 'up') { vy = -speed; oy = -20; } else if (s.facing === 'down') { vy = speed; oy = 20; }
         else { vx = speed; ox = 20; }
@@ -346,7 +361,7 @@ export class CombatCore {
         const s = this.scene;
         const thrustAngle = s.facing === 'left' ? 180 : s.facing === 'up' ? -90 : s.facing === 'down' ? 90 : 0;
         const proj = s.add.sprite(s.player.x, s.player.y, 'attack_arrow').setDepth(15).setTint(color || 0xe74c3c).setAngle(thrustAngle);
-        const speed = 500;
+        const speed = THRUST_SPEED;
         s.tweens.add({
             targets: proj, x: ax, y: ay, alpha: 0, duration: range / speed * 1000,
             onComplete: () => proj.destroy()
@@ -357,10 +372,10 @@ export class CombatCore {
             duration: range / speed * 1000,
             onComplete: () => trailGlow.destroy()
         });
-        this._hitAt(ax, ay, 18, dmg, cls);
+        this._hitAt(ax, ay, THRUST_HIT_RADIUS, dmg, cls);
         s.player.setTint(color || 0xe74c3c);
         s.time.delayedCall(80, () => { if (s.player.active) s.player.clearTint(); });
-        s.cameras.main.shake(60, 0.003);
+        s.cameras.main.shake(THRUST_SHAKE_DURATION, THRUST_SHAKE_INTENSITY);
     }
 
     _attackCleave(ax, ay, range, dmg, color, cls) {
@@ -379,8 +394,8 @@ export class CombatCore {
         const arcGlow = s.add.circle(ax, ay, range * 0.5, color || 0xaaddff, 0.12).setDepth(13);
         s.tweens.add({ targets: arcGlow, alpha: 0, scaleX: 1.5, scaleY: 1.5, duration: 250, onComplete: () => arcGlow.destroy() });
         const enemies = [];
-        this._collectInRange(s.enemies, ax, ay, range, (e) => {
-            if (this._inArc(s.player, e, 120)) enemies.push(e);
+        this._forEachGroupInRange(s.enemies, ax, ay, range, (e) => {
+            if (this._inArc(s.player, e, CLEAVE_ARC_DEG)) enemies.push(e);
         });
         enemies.forEach(e => this.hitEnemy(e, finalDmg, {}));
         if (cls && cls.key === 'alchemist') enemies.forEach(e => this._applyArmorShred(e));
@@ -399,12 +414,12 @@ export class CombatCore {
         else { dirs.push(90, 75, 105); }
         dirs.forEach(angle => {
             const rad = angle * Math.PI / 180;
-            const px = s.player.x + Math.cos(rad) * 30;
-            const py = s.player.y + Math.sin(rad) * 30;
+            const px = s.player.x + Math.cos(rad) * BURST_OFFSET;
+            const py = s.player.y + Math.sin(rad) * BURST_OFFSET;
             const fb = s.add.sprite(px, py, 'attack_spell').setDepth(15).setTint(cls?.meleeColor || 0x27ae60);
             s.physics.add.existing(fb);
-            fb.body.setVelocity(Math.cos(rad) * 300, Math.sin(rad) * 300);
-            fb.damage = Math.floor(finalDmg * 0.6);
+            fb.body.setVelocity(Math.cos(rad) * BURST_SPEED, Math.sin(rad) * BURST_SPEED);
+            fb.damage = Math.floor(finalDmg * BURST_DAMAGE_MULT);
             fb.lifespan = 0.5;
             fb.isMeleeProjectile = true;
             s.fireballs.push(fb);
@@ -415,7 +430,7 @@ export class CombatCore {
                 onComplete: () => acidTrail.destroy()
             });
         });
-        const splashRadius = s.add.circle(s.player.x, s.player.y, 30, cls?.meleeColor || 0x27ae60, 0.15).setDepth(13);
+        const splashRadius = s.add.circle(s.player.x, s.player.y, BURST_SPLASH_RADIUS, cls?.meleeColor || 0x27ae60, 0.15).setDepth(13);
         s.tweens.add({ targets: splashRadius, alpha: 0, scaleX: 1.8, scaleY: 1.8, duration: 300, onComplete: () => splashRadius.destroy() });
     }
 
@@ -423,8 +438,8 @@ export class CombatCore {
         const s = this.scene;
         const bash = s.add.sprite(ax, ay, 'attack_bash').setAlpha(0.9).setTint(color || 0x3498db);
         s.tweens.add({ targets: bash, alpha: 0, scaleX: 1.5, scaleY: 1.5, duration: 250, onComplete: () => bash.destroy() });
-        this._hitAt(ax, ay, 35, dmg, cls);
-        s.cameras.main.shake(120, 0.008);
+        this._hitAt(ax, ay, BASH_HIT_RADIUS, dmg, cls);
+        s.cameras.main.shake(BASH_SHAKE_DURATION, BASH_SHAKE_INTENSITY);
         s.player.setTint(color || 0x3498db);
         s.time.delayedCall(150, () => { if (s.player.active) s.player.clearTint(); });
     }
@@ -438,8 +453,8 @@ export class CombatCore {
             sl.setAngle(i * 90);
             s.tweens.add({ targets: sl, alpha: 0, scaleX: 1.8, scaleY: 1.8, duration: 350, delay: i * 60, onComplete: () => sl.destroy() });
         }
-        this._hitAllAround(s.player.x, s.player.y, 55, finalDmg, cls);
-        s.cameras.main.shake(80, 0.005);
+        this._hitAllAround(s.player.x, s.player.y, SPIN_HIT_RADIUS, finalDmg, cls);
+        s.cameras.main.shake(SPIN_SHAKE_DURATION, SPIN_SHAKE_INTENSITY);
         s.player.setTint(color || 0xaaddff);
         s.time.delayedCall(200, () => { if (s.player.active) s.player.clearTint(); });
     }
@@ -479,7 +494,7 @@ export class CombatCore {
 
     _dealAttackDamage(ax, ay, attackDamage, cls, opts = {}) {
         const dmg = attackDamage || this.scene.playerDamage;
-        const hitRadius = 45;
+        const hitRadius = DEFAULT_MELEE_HIT_RADIUS;
         const isAlchemist = cls && cls.key === 'alchemist';
         const ap = this._attackerPeerId(opts);
         const chestOpts = ap ? { attackerPeerId: ap } : {};
@@ -579,8 +594,8 @@ export class CombatCore {
         // Combo: if another player hit this enemy recently, ×1.5 damage
         if (!opts.bypassModifiers && s.multiplayer) {
             const now = Date.now();
-            if (enemy._lastHitByOther && now - enemy._lastHitByOther < 500 && enemy._lastHitter !== (opts.attackerPeerId || 'local')) {
-                finalDamage = Math.floor(finalDamage * 1.5);
+            if (enemy._lastHitByOther && now - enemy._lastHitByOther < COMBO_HIT_WINDOW_MS && enemy._lastHitter !== (opts.attackerPeerId || 'local')) {
+                finalDamage = Math.floor(finalDamage * COMBO_DAMAGE_MULT);
                 s.floatingText(enemy.x, enemy.y - 40, 'COMBO!', '#f1c40f');
             }
             enemy._lastHitByOther = now;
@@ -594,8 +609,8 @@ export class CombatCore {
             const dy = s.player.y - enemy.y;
             const len = Math.sqrt(dx * dx + dy * dy) || 1;
             const dot = (dx / len) * facingX;
-            if (dot > 0.5) {
-                finalDamage = Math.floor(finalDamage * 0.2);
+            if (dot > SHIELD_BLOCK_THRESHOLD) {
+                finalDamage = Math.floor(finalDamage * SHIELD_BLOCK_DAMAGE_MULT);
                 s.floatingText(enemy.x, enemy.y - 30, 'BLOCKED!', '#3498db');
             }
         }
@@ -629,14 +644,14 @@ export class CombatCore {
                 s.floatingText(enemy.x, enemy.y - 30, 'CRIT!', '#f1c40f');
             }
             if (s._luckyHitCounter === undefined) s._luckyHitCounter = 0;
-            const luckyChance = 3 + s._luckyHitCounter;
+            const luckyChance = LUCKY_HIT_BASE_CHANCE + s._luckyHitCounter;
             if (Math.random() * 100 < luckyChance) {
-                const luckyMult = 1.5 + Math.min(s._luckyHitCounter, 10) * 0.05;
+                const luckyMult = LUCKY_HIT_BASE_MULT + Math.min(s._luckyHitCounter, LUCKY_HIT_COUNTER_MAX_FOR_MULT) * LUCKY_HIT_COUNTER_SCALE;
                 finalDamage = Math.floor(finalDamage * luckyMult);
                 s.floatingText(enemy.x, enemy.y - 40, 'LUCKY!', '#ff6600');
                 s._luckyHitCounter = 0;
             } else {
-                s._luckyHitCounter = Math.min((s._luckyHitCounter || 0) + 1, 50);
+                s._luckyHitCounter = Math.min((s._luckyHitCounter || 0) + 1, LUCKY_HIT_MAX_COUNTER);
             }
             if (enemy.armorShredStacks && enemy.armorShredStacks > 0) finalDamage = Math.floor(finalDamage * (1 + enemy.armorShredStacks * 0.05));
             // Player armor reduction: increases all damage dealt to enemies

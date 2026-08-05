@@ -152,6 +152,9 @@ export class HUD {
     _createNavPanel() {
         const s = (el) => { el.setScrollFactor(0).setDepth(21); return el; };
         const navBtns = []; const startX = 14, startY = 100, gap = 22;
+        if (this.scene.navBtns) {
+            this.scene.navBtns.forEach(b => { if (b && b.destroy) b.destroy(); });
+        }
         const navItems = [
             { icon: 'nav_quest', label: 'Q', cb: () => this.scene._openQuestLog() },
             { icon: 'nav_book', label: 'B', cb: () => this.ui._openBestiary() },

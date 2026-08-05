@@ -45,6 +45,9 @@ export class VillageSpawner {
         const hpW = t.bw + 6;
         e.hpBg = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hpW, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hpW, 3, 0xe74c3c).setOrigin(0.5).setDepth(11);
+        if (t.hasShield) e.shieldIcon = this.scene.add.text(x, y - t.bh / 2 - 16, '\u{1F6E1}', { fontSize: '10px' }).setOrigin(0.5).setDepth(12);
+        const roleIcons = { healer: '\u{2764}', mage: '\u{2728}', assassin: '\u{1F5E1}', fire: '\u{1F525}', poison: '\u{2620}', necro: '\u{1F480}', swarm: '\u{1F41D}', tank: '\u{1F6E1}' };
+        if (roleIcons[t.role] && !t.hasShield) e.roleIcon = this.scene.add.text(x, y - t.bh / 2 - 16, roleIcons[t.role], { fontSize: '10px' }).setOrigin(0.5).setDepth(12);
         this.scene.enemies.add(e);
         if (this.scene.multiplayer && this.scene.mpSync) this.scene.mpSync.assignMobId(e, t.key);
     }
@@ -269,18 +272,6 @@ export class VillageSpawner {
                 ease: 'Sine.easeInOut'
             });
         });
-
-        // Elder near fountain
-        const elder = this.scene.add.sprite(ox + VILLAGE_WIDTH / 2 + 30, 1000, 'villager_elder').setDepth(8);
-        this.scene.villageDecor.push(elder);
-        this.scene.tweens.add({
-            targets: elder,
-            y: 998,
-            duration: 1500,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut'
-        });
     }
 
     showVillageClearedDecor() {
@@ -380,10 +371,13 @@ export class VillageSpawner {
         if (this.scene.anims.exists(t.key + '_walk_anim')) e.play(t.key + '_walk_anim');
         const diff = this.scene.diffMulti;
         const rangedInterval = VILLAGE_RANGED_INTERVALS[t.role] || RANGED_INTERVAL_DEFAULT;
-        e.stats = { key: t.key, name: t.name, hp: Math.floor(t.hp * diff.hp), maxHp: Math.floor(t.hp * diff.hp), damage: Math.floor(t.dmg * diff.dmg), exp: Math.floor(t.exp * diff.exp), bw: t.bw, bh: t.bh, role: t.role, campIndex, rangedTimer: 0, rangedInterval };
+        e.stats = { key: t.key, name: t.name, hp: Math.floor(t.hp * diff.hp), maxHp: Math.floor(t.hp * diff.hp), damage: Math.floor(t.dmg * diff.dmg), exp: Math.floor(t.exp * diff.exp), bw: t.bw, bh: t.bh, role: t.role, campIndex, hasShield: t.hasShield || false, rangedTimer: 0, rangedInterval };
         const hpW = t.bw + 6;
         e.hpBg = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hpW, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hpW, 3, 0xff0000).setOrigin(0.5).setDepth(11);
+        if (t.hasShield) e.shieldIcon = this.scene.add.text(x, y - t.bh / 2 - 16, '\u{1F6E1}', { fontSize: '10px' }).setOrigin(0.5).setDepth(12);
+        const roleIcons = { healer: '\u{2764}', mage: '\u{2728}', assassin: '\u{1F5E1}', fire: '\u{1F525}', poison: '\u{2620}', necro: '\u{1F480}', swarm: '\u{1F41D}', tank: '\u{1F6E1}' };
+        if (roleIcons[t.role] && !t.hasShield) e.roleIcon = this.scene.add.text(x, y - t.bh / 2 - 16, roleIcons[t.role], { fontSize: '10px' }).setOrigin(0.5).setDepth(12);
         this.scene.enemies.add(e);
         if (this.scene.multiplayer && this.scene.mpSync) this.scene.mpSync.assignMobId(e, t.key);
     }

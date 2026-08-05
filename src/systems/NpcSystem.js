@@ -27,6 +27,7 @@ export class NpcSystem {
                 if (cond === '!isRestored' && s.zones.village && s.zones.village.isRestored) return;
                 if (cond === '!isThriving' && s.zones.village && s.zones.village.isThriving) return;
                 if (cond === 'isThriving' && s.zones.village && !s.zones.village.isThriving) return;
+                if (cond === 'isRestored' && s.zones.village && !s.zones.village.isRestored) return;
                 if (cond === 'depthsBossDefeated' && s.zones.depths && !s.zones.depths.bossDefeated) return;
                 if (cond === 'cursedBossDefeated' && s.zones.cursed && !s.zones.cursed.bossDefeated) return;
             }
@@ -169,6 +170,25 @@ export class NpcSystem {
             return;
         }
 
+        // Restored Elder gives the World Map after the village is saved
+        if (npcKey === 'restored_elder' && !s.mapUnlocked) {
+            const lang = getLang();
+            const text = lang === 'ru'
+                ? 'Ты спас нас всех, герой. Деревня обязана тебе всем. Возьми — это карта королевства. Она показывает все главы и зоны, и какие ещё нужно спасти.'
+                : lang === 'de'
+                ? 'Du hast uns alle gerettet, Held. Das Dorf schuldet dir alles. Nimm diese Karte des Reiches. Sie zeigt jedes Kapitel und jede Zone und welche noch gerettet werden müssen.'
+                : 'You saved us all, hero. The village owes you everything. Here — take this map of the realm. It shows every chapter and zone, and which ones still need saving.';
+            const label = lang === 'ru' ? 'Взять карту' : lang === 'de' ? 'Karte nehmen' : 'Take the map';
+            this._showDialog(npc, npc.name, text, '#f1c40f', () => {
+                s.mapUnlocked = true;
+                s.doSave();
+                if (s.ui && s.ui.hud && s.ui.hud._createNavPanel) s.ui.hud._createNavPanel();
+                if (s.tutorialMgr) s.tutorialMgr.showAbilityTutorial('map');
+                s.floatingText(s.player.x, s.player.y - 40, 'World Map Unlocked!', '#f1c40f');
+            }, label);
+            return;
+        }
+
         onTalk(npcKey);
 
         const status = getNpcQuestStatus(npcKey);
@@ -260,7 +280,7 @@ export class NpcSystem {
         const depth = 120;
 
         s.dialogGroup = [];
-        const mk = (el) => { el.setDepth(depth); s.dialogGroup.push(el); return el; };
+        const mk = (el) => { el.setScrollFactor(0).setDepth(depth); s.dialogGroup.push(el); return el; };
 
         mk(s.add.rectangle(dx, dy, dw, dh, 0x0a0a18, 0.96).setStrokeStyle(2, Phaser.Display.Color.HexStringToColor(titleColor).color));
 

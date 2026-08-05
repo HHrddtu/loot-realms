@@ -126,14 +126,14 @@ export class ShadowZone extends BaseZone {
     }
 
     updateShadowMobs(delta) {
-        this._updateMobs(delta, 'shadow', this.bossAI.spawnShadowBoss);
+        this._updateMobs(delta, 'shadow', this.bossAI.spawnShadowBoss.bind(this.bossAI));
     }
 
     updateShadowMinions() {
         this._updateMinionGroup(this.scene.shadowMinions, 'shadow');
     }
 
-    checkReturnPortal() {
+    victoryShadowBoss() {
         const s = this.scene;
         if (this.bossDefeated) return;
         this.bossDefeated = true;

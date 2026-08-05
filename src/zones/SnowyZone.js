@@ -64,6 +64,9 @@ export class SnowyZone extends BaseZone {
         const hw = t.bw + 4;
         e.hpBg = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = this.scene.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x3498db).setOrigin(0.5).setDepth(11);
+        if (t.hasShield) e.shieldIcon = this.scene.add.text(x, y - t.bh / 2 - 16, '\u{1F6E1}', { fontSize: '10px' }).setOrigin(0.5).setDepth(12);
+        const roleIcons = { healer: '\u{2764}', mage: '\u{2728}', assassin: '\u{1F5E1}', fire: '\u{1F525}', poison: '\u{2620}', necro: '\u{1F480}', swarm: '\u{1F41D}', tank: '\u{1F6E1}' };
+        if (roleIcons[t.role] && !t.hasShield) e.roleIcon = this.scene.add.text(x, y - t.bh / 2 - 16, roleIcons[t.role], { fontSize: '10px' }).setOrigin(0.5).setDepth(12);
         this.scene.enemies.add(e);
         if (this.scene.multiplayer && this.scene.mpSync) {
             this.scene.mpSync.assignMobId(e, t.key);
@@ -358,6 +361,8 @@ export class SnowyZone extends BaseZone {
             e.hpBg.y = e.y - e.stats.bh / 2 - 8;
             e.hpFill.x = e.x;
             e.hpFill.y = e.y - e.stats.bh / 2 - 8;
+            if (e.shieldIcon) { e.shieldIcon.x = e.x; e.shieldIcon.y = e.y - e.stats.bh / 2 - 16; }
+            if (e.roleIcon) { e.roleIcon.x = e.x; e.roleIcon.y = e.y - e.stats.bh / 2 - 16; }
         });
     }
 

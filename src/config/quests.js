@@ -83,6 +83,19 @@ export const NPC_DB = {
         hideName: true,
         condition: 'isRestored'
     },
+    restored_elder: {
+        name: 'Elder',
+        nameRu: 'Старейшина',
+        nameDe: 'Ältester',
+        texKey: 'villager_elder',
+        biome: 'village',
+        x: 430, y: 1000,
+        greeting: 'You saved us all, hero. The village owes you everything. Here — take this map of the realm. It shows every chapter and zone, and which ones still need saving.',
+        greetingRu: 'Ты спас нас всех, герой. Деревня обязана тебе всем. Возьми — это карта королевства. Она показывает все главы и зоны, и какие ещё нужно спасти.',
+        greetingDe: 'Du hast uns alle gerettet, Held. Das Dorf schuldet dir alles. Nimm diese Karte des Reiches. Sie zeigt jedes Kapitel und jede Zone und welche noch gerettet werden müssen.',
+        quests: [],
+        condition: 'isRestored'
+    },
     grown_child: {
         name: 'Grown Child',
         nameRu: 'Выросший Ребёнок',
