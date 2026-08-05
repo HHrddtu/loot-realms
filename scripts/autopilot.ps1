@@ -10,6 +10,7 @@
 param(
     [int]$IntervalSec = 1800,
     [int]$TaskTimeoutMin = 20,
+    [long]$MaxTaskTokens = 100000,
     [string]$ServerUrl = "http://localhost:4096",
     [string]$ServerUser = "opencode",
     [string]$ServerPass = $env:OPENCODE_SERVER_PASSWORD,
@@ -113,7 +114,7 @@ function Get-MessageCount([string]$sessionId) {
     return @($msgs).Count
 }
 
-function Wait-Session([string]$sessionId, [int]$baseline) {
+function Wait-Session([string]$sessionId, [int]$baseline, [long]$tokensBaseline) {
     $deadline = [DateTime]::Now.AddMinutes($TaskTimeoutMin)
     $lastCount = $baseline
     $quietRounds = 0
@@ -131,6 +132,14 @@ function Wait-Session([string]$sessionId, [int]$baseline) {
         if ($quietRounds -ge 30) {
             Write-Log "Сессия $sessionId без прогресса 300 сек — считаю зависшей"
             return $null
+        }
+        if ($MaxTaskTokens -gt 0) {
+            $current = Get-SessionTokens $sessionId
+            if (($current - $tokensBaseline) -ge $MaxTaskTokens) {
+                Write-Log "Задача превысила лимит токенов $MaxTaskTokens (прирост $($current - $tokensBaseline)) — прерываю сессию $sessionId"
+                Abort-Session $sessionId
+                return $null
+            }
         }
         Start-Sleep -Seconds 10
     }
@@ -222,8 +231,9 @@ while ($true) {
 "@
 
         $baseline = Get-MessageCount $sessionId
+        $tokensBaseline = Get-SessionTokens $sessionId
         Send-Prompt $sessionId $prompt | Out-Null
-        $done = Wait-Session $sessionId $baseline
+        $done = Wait-Session $sessionId $baseline $tokensBaseline
         if (-not $done) {
             Write-Log "Задача не завершилась вовремя — помечаю как пропущенную, перехожу дальше"
             Set-TaskDone $task.Index
