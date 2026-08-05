@@ -286,8 +286,8 @@ export class VillageZone extends BaseZone {
         }
         if (s.snowyIceShards) {
             s.snowyIceShards.getChildren().forEach(sh => {
-                if (sh.hpBg) sh.hpBg.destroy();
-                if (sh.hpFill) sh.hpFill.destroy();
+                if (sh.hpBg) { sh.hpBg.destroy(); sh.hpBg = null; }
+                if (sh.hpFill) { sh.hpFill.destroy(); sh.hpFill = null; }
             });
             s.snowyIceShards.clear(true, true);
             s.snowyIceShards.destroy(); s.snowyIceShards = null;

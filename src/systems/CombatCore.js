@@ -522,7 +522,7 @@ export class CombatCore {
         this._forEachGroupInRange(this.scene.snowyIceShards, ax, ay, hitRadius, (s) => {
             if (!s.active || !s.stats) return;
             s.stats.hp -= dmg; this.scene.floatingText(s.x, s.y - 15, '-' + dmg, '#3498db');
-            if (s.stats.hp <= 0) { recordKill('ice_shard'); if (s.hpBg) s.hpBg.destroy(); if (s.hpFill) s.hpFill.destroy(); s.destroy(); }
+            if (s.stats.hp <= 0) { recordKill('ice_shard'); if (s.hpBg) { s.hpBg.destroy(); s.hpBg = null; } if (s.hpFill) { s.hpFill.destroy(); s.hpFill = null; } s.destroy(); }
         });
         if (this.scene.snowyIceSpirit && this.scene.snowyIceSpirit.active && this.scene.snowyIceSpirit.stats &&
             Phaser.Math.Distance.Between(ax, ay, this.scene.snowyIceSpirit.x, this.scene.snowyIceSpirit.y) < hitRadius) {

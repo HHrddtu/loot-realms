@@ -72,7 +72,7 @@ export class LoreItemSystem {
     _showLore(item) {
         const s = this.scene;
         item.interacted = true;
-        if (item.hintText) item.hintText.destroy();
+        if (item.hintText) { item.hintText.destroy(); item.hintText = null; }
 
         const lang = localStorage.getItem('game_lang') || 'en';
         const text = item.loreText[lang] || item.loreText.en || item.loreText;
@@ -113,7 +113,11 @@ export class LoreItemSystem {
             elements.forEach(el => el.destroy());
             s.menuOpen = false;
             s.physics.resume();
-            s.tweens.add({ targets: item, alpha: 0, duration: 500, onComplete: () => item.destroy() });
+            s.tweens.add({ targets: item, alpha: 0, duration: 500, onComplete: () => {
+                const idx = s.loreItemSprites.indexOf(item);
+                if (idx !== -1) s.loreItemSprites.splice(idx, 1);
+                if (item.active) item.destroy();
+            }});
         };
 
         s.time.delayedCall(500, () => {
@@ -172,7 +176,7 @@ export class LoreItemSystem {
         const s = this.scene;
         if (s.loreItemSprites) {
             s.loreItemSprites.forEach(item => {
-                if (item.hintText) item.hintText.destroy();
+                if (item.hintText) { item.hintText.destroy(); item.hintText = null; }
                 if (item.active) item.destroy();
             });
             s.loreItemSprites = [];

@@ -287,8 +287,8 @@ export class SnowyZone extends BaseZone {
 
         if (this.scene.snowyIceShards) {
             this.scene.snowyIceShards.getChildren().forEach(s => {
-                if (s.hpBg) s.hpBg.destroy();
-                if (s.hpFill) s.hpFill.destroy();
+                if (s.hpBg) { s.hpBg.destroy(); s.hpBg = null; }
+                if (s.hpFill) { s.hpFill.destroy(); s.hpFill = null; }
             });
             this.scene.snowyIceShards.clear(true, true);
         }

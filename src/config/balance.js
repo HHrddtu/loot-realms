@@ -122,3 +122,21 @@ export const BOSS_DEFEATED_TEXT_DURATION = 5000;
 export const RANGED_INTERVALS = { archer: 1500, mage: 2000, healer: 2200 };
 export const RANGED_INTERVAL_DEFAULT = 2000;
 export const VILLAGE_RANGED_INTERVALS = { archer: 1800, healer: 2500 };
+
+// ── Mob Role Defaults (speed multiplier, engage distance, movement multiplier) ──
+export const MOB_ROLE_DEFAULTS = {
+    default:  { speedMult: 1.0, engageDist: 30, moveMult: 1.0 },
+    tank:     { speedMult: 0.8, engageDist: 25, moveMult: 1.0 },
+    assassin: { speedMult: 1.8, engageDist: 20, moveMult: 1.0 },
+    archer:   { speedMult: 0.9, engageDist: 150, moveMult: 0.3 },
+    mage:     { speedMult: 0.8, engageDist: 180, moveMult: 0.3 },
+    healer:   { speedMult: 0.9, engageDist: 120, moveMult: 0.3 },
+};
+export const HEALER_HEAL_AMOUNT_DEFAULT = 8;
+export const HEALER_HEAL_RANGE_DEFAULT = 120;
+export const HEALER_ALLY_RANGE_DEFAULT = 120;
+
+// ── Boss Shared Constants ──
+export const BOSS_HP_BAR_WIDTH = 80;
+export const BOSS_HP_BAR_HEIGHT = 6;
+export const BOSS_MINION_SPEED = 80;

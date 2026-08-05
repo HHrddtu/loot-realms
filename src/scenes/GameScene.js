@@ -258,8 +258,8 @@ export default class GameScene extends Phaser.Scene {
                 window.removeEventListener('beforeunload', this._onBeforeUnload);
                 this._onBeforeUnload = null;
             }
-            if (this.particles) this.particles.destroy();
-            this.petSys.destroy();
+            if (this.particles) { this.particles.destroy(); this.particles = null; }
+            if (this.petSys) { this.petSys.destroy(); this.petSys = null; }
             this.doSave();
             stopMusic();
             if (this.multiplayer) {

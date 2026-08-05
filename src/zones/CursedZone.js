@@ -3,7 +3,7 @@ import {
     GAME_WIDTH, GAME_HEIGHT,
     CURSED_WIDTH, CURSED_HEIGHT,
     BOSS_DROP_CHANCE, ZONE_BOSS_SECOND_DROP_CHANCE, RARITY_COLORS,
-    RANGED_INTERVAL_DEFAULT
+    RANGED_INTERVAL_DEFAULT, MOB_ROLE_DEFAULTS, HEALER_HEAL_AMOUNT_DEFAULT, HEALER_HEAL_RANGE_DEFAULT, HEALER_ALLY_RANGE_DEFAULT
 } from '../config/index.js';
 import { rollEquip, rollAccountEquip, rollZoneAccountEquip } from '../utils.js';
 import { rollBossCrystals } from '../config/pets.js';
@@ -155,25 +155,12 @@ export class CursedZone extends BaseZone {
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist < 250) {
-                let speed = e.stats.speed || 50;
-                let engageDist = 30;
-
-                switch (e.stats.role) {
-                    case 'tank':     speed = (e.stats.speed || 50) * 0.8; engageDist = 25; break;
-                    case 'assassin': speed = (e.stats.speed || 50) * 1.8; engageDist = 20; break;
-                    case 'archer':   speed = (e.stats.speed || 50) * 0.9; engageDist = 150; break;
-                    case 'mage':     speed = (e.stats.speed || 50) * 0.8; engageDist = 180; break;
-                    case 'healer':   speed = (e.stats.speed || 50) * 0.9; engageDist = 120; break;
-                }
+                const roleDefaults = MOB_ROLE_DEFAULTS[e.stats.role] || MOB_ROLE_DEFAULTS.default;
+                const speed = (e.stats.speed || 50) * roleDefaults.speedMult;
+                const engageDist = roleDefaults.engageDist;
 
                 if (dist > engageDist) {
-                    if (e.stats.role === 'tank' || e.stats.role === 'assassin') {
-                        e.body.setVelocity((dx / dist) * speed, (dy / dist) * speed);
-                    } else if (e.stats.role === 'archer' || e.stats.role === 'mage' || e.stats.role === 'healer') {
-                        e.body.setVelocity((dx / dist) * speed * 0.3, (dy / dist) * speed * 0.3);
-                    } else {
-                        e.body.setVelocity((dx / dist) * speed, (dy / dist) * speed);
-                    }
+                    e.body.setVelocity((dx / dist) * speed * roleDefaults.moveMult, (dy / dist) * speed * roleDefaults.moveMult);
                     e.setFlipX(dx < 0);
                 } else {
                     e.body.setVelocity(0);
@@ -191,15 +178,15 @@ export class CursedZone extends BaseZone {
                         e.stats.rangedTimer = 0;
                         this._fireEnemyProjectile(e, dx, dy, 'magic');
                     }
-                } else if (e.stats.role === 'healer' && dist < 180) {
+                } else if (e.stats.role === 'healer' && dist < HEALER_HEAL_RANGE_DEFAULT) {
                     e.stats.rangedTimer = (e.stats.rangedTimer || 0) + delta;
                     if (e.stats.rangedTimer >= (e.stats.rangedInterval || RANGED_INTERVAL_DEFAULT)) {
                         e.stats.rangedTimer = 0;
                         s.enemies.getChildren().forEach(ally => {
                             if (ally !== e && ally.active && ally.stats && ally.stats.hp < ally.stats.maxHp) {
                                 const ad = Phaser.Math.Distance.Between(e.x, e.y, ally.x, ally.y);
-                                if (ad < 120) {
-                                    const healAmt = 8;
+                                if (ad < HEALER_ALLY_RANGE_DEFAULT) {
+                                    const healAmt = HEALER_HEAL_AMOUNT_DEFAULT;
                                     ally.stats.hp = Math.min(ally.stats.maxHp, ally.stats.hp + healAmt);
                                     if (ally.hpFill) ally.hpFill.width = ally.hpBg.width * (ally.stats.hp / ally.stats.maxHp);
                                     this._fireEnemyProjectile(e, ally.x - e.x, ally.y - e.y, 'heal');

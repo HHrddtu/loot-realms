@@ -83,7 +83,18 @@ function New-Session([string]$model) {
     if ($model -match "^(?<provider>[^/]+)/(?<id>.+)$") {
         $body.model = @{ id = $Matches.id; providerID = $Matches.provider }
     }
-    $json = $body | ConvertTo-Json -Depth 4
+    # авто-разрешение всех действий — без запросов подтверждения
+    $body.permission = @(
+        @{ permission = "bash"; pattern = "**"; action = "allow" },
+        @{ permission = "edit"; pattern = "**"; action = "allow" },
+        @{ permission = "read"; pattern = "**"; action = "allow" },
+        @{ permission = "glob"; pattern = "**"; action = "allow" },
+        @{ permission = "grep"; pattern = "**"; action = "allow" },
+        @{ permission = "list"; pattern = "**"; action = "allow" },
+        @{ permission = "todowrite"; pattern = "**"; action = "allow" },
+        @{ permission = "webfetch"; pattern = "**"; action = "allow" }
+    )
+    $json = $body | ConvertTo-Json -Depth 6
     $bytes = [Text.Encoding]::UTF8.GetBytes($json)
     $r = Invoke-RestMethod -Uri "$ServerUrl/session" -Method Post -Headers @{ Authorization = (Get-AuthHeader) } -ContentType "application/json; charset=utf-8" -Body $bytes
     return $r.id
@@ -96,15 +107,24 @@ function Send-Prompt([string]$sessionId, [string]$text) {
     return $r
 }
 
-function Wait-Session([string]$sessionId) {
+function Get-MessageCount([string]$sessionId) {
+    $msgs = Invoke-RestMethod -Uri "$ServerUrl/session/$sessionId/message" -Headers @{ Authorization = (Get-AuthHeader) }
+    return @($msgs).Count
+}
+
+function Wait-Session([string]$sessionId, [int]$baseline) {
     $timeout = [DateTime]::Now.AddMinutes(120)
-    $lastCount = 0
+    $lastCount = $baseline
     $quietRounds = 0
     while ([DateTime]::Now -lt $timeout) {
         $msgs = Invoke-RestMethod -Uri "$ServerUrl/session/$sessionId/message" -Headers @{ Authorization = (Get-AuthHeader) }
-        $done = $msgs | Where-Object { $_.info.role -eq "assistant" -and $_.info.time.completed }
-        if ($done) { return $done }
-        $count = @($msgs).Count
+        $all = @($msgs)
+        $newDone = $null
+        for ($i = $all.Count - 1; $i -ge $baseline; $i--) {
+            if ($all[$i].info.role -eq "assistant" -and $all[$i].info.time.completed) { $newDone = $all[$i]; break }
+        }
+        if ($newDone) { return $newDone }
+        $count = $all.Count
         if ($count -eq $lastCount) { $quietRounds++ } else { $quietRounds = 0 }
         $lastCount = $count
         if ($quietRounds -ge 6) {
@@ -141,6 +161,11 @@ if ($currentBranch -ne "autopilot") {
 $ErrorActionPreference = $prevEAP
 Pop-Location
 
+# одна сессия на всю кампанию — контекст накапливается между задачами
+$cfg = Read-Control
+$sessionId = New-Session $cfg.MODEL
+Write-Log "Единая сессия: $sessionId"
+
 while ($true) {
     try {
         $cfg = Read-Control
@@ -172,22 +197,19 @@ while ($true) {
 
         Write-Log "Задача: $($task.Text)"
 
-        # защита от параллельного запуска — смотрим, нет ли уже busy-сессии автопилота
-        $sessionId = New-Session $cfg.MODEL
-        Write-Log "Сессия: $sessionId"
-
         $prompt = @"
 Проект Loot Realms. Ты автономный агент улучшения кода.
 Правила (обязательно):
 1. Соблюдай AGENTS.md проекта.
 2. НЕ добавляй новые игровые механики без явного запроса. Только рефакторинг, баги, документация, тесты, оптимизация.
-3. Задача из очереди: $($task.Text)
+3. Новая задача из очереди: $($task.Text)
 4. Когда закончишь, кратко опиши что сделал.
 Работай в текущей директории.
 "@
 
+        $baseline = Get-MessageCount $sessionId
         Send-Prompt $sessionId $prompt | Out-Null
-        $done = Wait-Session $sessionId
+        $done = Wait-Session $sessionId $baseline
         if (-not $done) {
             Write-Log "Таймаут сессии $sessionId — помечаю как пропущенную"
             $cfg.FLAG = "PAUSE"
