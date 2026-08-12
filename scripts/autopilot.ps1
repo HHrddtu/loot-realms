@@ -40,7 +40,8 @@ function Send-Telegram([string]$text) {
     if (-not $TelegramToken -or -not $TelegramChatId) { return }
     try {
         $body = @{ chat_id = $TelegramChatId; text = $text; disable_notification = $true } | ConvertTo-Json
-        Invoke-RestMethod -Uri "https://api.telegram.org/bot$TelegramToken/sendMessage" -Method Post -ContentType "application/json" -Body $body -TimeoutSec 15 | Out-Null
+        $bytes = [Text.Encoding]::UTF8.GetBytes($body)
+        Invoke-RestMethod -Uri "https://api.telegram.org/bot$TelegramToken/sendMessage" -Method Post -ContentType "application/json; charset=utf-8" -Body $bytes -TimeoutSec 15 | Out-Null
     }
     catch { Write-Log "TG-уведомление не отправлено: $($_.Exception.Message)" }
 }
