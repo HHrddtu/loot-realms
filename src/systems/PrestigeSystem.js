@@ -87,19 +87,9 @@ export class PrestigeSystem {
         const mods = [];
         if (level >= 2) {
             if (zoneKey === 'mine') mods.push({ type: 'darkness', mult: 1.5, desc: 'Deeper darkness' });
-            if (zoneKey === 'forest') mods.push({ type: 'poison_puddles', count: 3, desc: 'Poison puddles' });
         }
         if (level >= 3) {
             if (zoneKey === 'hell') mods.push({ type: 'lava_damage', mult: 1.5, desc: 'Deadlier lava' });
-            if (zoneKey === 'cave') mods.push({ type: 'swarm_bonus', mult: 1.3, desc: 'Stronger swarms' });
-        }
-        if (level >= 5) {
-            if (zoneKey === 'village') mods.push({ type: 'wave_bonus', count: 3, desc: 'Extra waves' });
-            if (zoneKey === 'castle') mods.push({ type: 'patrol_speed', mult: 1.4, desc: 'Faster patrols' });
-        }
-        if (level >= 7) {
-            if (zoneKey === 'shadow') mods.push({ type: 'more_invisible', count: 2, desc: 'More invisible enemies' });
-            if (zoneKey === 'tower') mods.push({ type: 'boss_shield', duration: 5000, desc: 'Boss has shield phase' });
         }
         return mods;
     }
@@ -113,9 +103,6 @@ export class PrestigeSystem {
             }
             if (mod.type === 'lava_damage') {
                 s._prestigeLavaMult = mod.mult;
-            }
-            if (mod.type === 'wave_bonus') {
-                s._prestigeWaveBonus = mod.count;
             }
         });
     }

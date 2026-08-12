@@ -35,7 +35,10 @@
     "task": "allow",
     "todowrite": "allow",
     "webfetch": "allow",
-    "external_directory": { "*": "deny" }
+    "external_directory": {
+      "*": "deny",
+      "C:\\Users\\pvova\\Desktop\\tgbot  + opencode\\*": "allow"
+    }
   },
 
   "compaction": {
