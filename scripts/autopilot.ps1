@@ -14,13 +14,36 @@ param(
     [string]$ServerUrl = "http://localhost:4096",
     [string]$ServerUser = "opencode",
     [string]$ServerPass = $env:OPENCODE_SERVER_PASSWORD,
-    [string]$ProjectDir = $PSScriptRoot.Replace("\scripts", "")
+    [string]$ProjectDir = $PSScriptRoot.Replace("\scripts", ""),
+    [string]$TelegramToken = $null,
+    [string]$TelegramChatId = $null
 )
 
 $ErrorActionPreference = "Stop"
 $ControlFile = Join-Path $ProjectDir "AUTO_CONTROL.md"
 $TasksFile   = Join-Path $ProjectDir "AUTO_TASKS.md"
 $LogFile     = Join-Path $ProjectDir "scripts\autopilot.log"
+
+# читаем Telegram-креды из .env бота, если не переданы явно
+if (-not $TelegramToken -or -not $TelegramChatId) {
+    $botEnv = Join-Path $env:APPDATA "opencode-telegram-bot\.env"
+    if (Test-Path $botEnv) {
+        $envLines = Get-Content $botEnv
+        foreach ($envLine in $envLines) {
+            if ($envLine -match "^TELEGRAM_BOT_TOKEN=(.+)$" -and -not $TelegramToken) { $TelegramToken = $Matches[1] }
+            if ($envLine -match "^TELEGRAM_ALLOWED_USER_ID=(\d+)" -and -not $TelegramChatId) { $TelegramChatId = $Matches[1] }
+        }
+    }
+}
+
+function Send-Telegram([string]$text) {
+    if (-not $TelegramToken -or -not $TelegramChatId) { return }
+    try {
+        $body = @{ chat_id = $TelegramChatId; text = $text; disable_notification = $true } | ConvertTo-Json
+        Invoke-RestMethod -Uri "https://api.telegram.org/bot$TelegramToken/sendMessage" -Method Post -ContentType "application/json" -Body $body -TimeoutSec 15 | Out-Null
+    }
+    catch { Write-Log "TG-уведомление не отправлено: $($_.Exception.Message)" }
+}
 
 function Write-Log([string]$msg) {
     $line = "[{0}] {1}" -f (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), $msg
@@ -206,6 +229,7 @@ while ($true) {
 
         if ($cfg.TOKEN_BUDGET -gt 0 -and $cfg.TOKENS_SPENT -ge $cfg.TOKEN_BUDGET) {
             Write-Log "Бюджет исчерпан ($($cfg.TOKENS_SPENT) >= $($cfg.TOKEN_BUDGET)) — STOP"
+            Send-Telegram "⛔ Бюджет исчерпан ($($cfg.TOKENS_SPENT) токенов). Автопилот остановлен."
             $cfg.FLAG = "STOP"
             Write-Control $cfg ""
             break
@@ -219,6 +243,7 @@ while ($true) {
         }
 
         Write-Log "Задача: $($task.Text)"
+        Send-Telegram "🚀 Задача: $($task.Text)"
 
         $prompt = @"
 Проект Loot Realms. Ты автономный агент улучшения кода.
@@ -245,6 +270,7 @@ while ($true) {
         $tokens = Get-SessionTokens $sessionId
         $cfg.TOKENS_SPENT += $tokens
         Write-Log "Задача завершена. Токены: $tokens, всего: $($cfg.TOKENS_SPENT)/$($cfg.TOKEN_BUDGET)"
+        Send-Telegram "✅ Завершено: $($task.Text) | токены: $tokens | всего: $($cfg.TOKENS_SPENT)/$($cfg.TOKEN_BUDGET)"
 
         Set-TaskDone $task.Index
 

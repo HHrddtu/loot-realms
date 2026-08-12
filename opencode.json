@@ -26,16 +26,15 @@
   },
 
   "permission": {
-    "edit": "ask",
-    "bash": {
-      "npm *": "allow",
-      "npx *": "allow",
-      "git *": "ask",
-      "vite*": "allow",
-      "node *": "allow",
-      "*": "ask"
-    },
+    "edit": "allow",
+    "bash": "allow",
+    "read": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
     "task": "allow",
+    "todowrite": "allow",
+    "webfetch": "allow",
     "external_directory": { "*": "deny" }
   },
 
