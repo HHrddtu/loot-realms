@@ -31,6 +31,7 @@ let _onLootCollected = null;
 let _onZoneState = null;
 let _onGameOver = null;
 let _onInventoryUpdate = null;
+let _offline = false;
 
 const ROOM_PREFIX = 'lr-';
 const MAX_PLAYERS = 3;
@@ -77,6 +78,7 @@ export function getMyId() { return _myId; }
 export function getPlayers() { return { ..._players }; }
 export function getPlayerNames() { return { ..._playerNames }; }
 export function isConnected() { return _peer !== null; }
+export function isOffline() { return _offline; }
 export function getMaxPlayers() { return MAX_PLAYERS; }
 
 export function onPlayerJoin(cb) { _onPlayerJoin = cb; }
@@ -102,7 +104,18 @@ export function onGameOver(cb) { _onGameOver = cb; }
 export function onInventoryUpdate(cb) { _onInventoryUpdate = cb; }
 
 export async function createRoom(playerName) {
-    const { default: Peer } = await import('peerjs');
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        _offline = true;
+        throw new Error('offline');
+    }
+    let Peer;
+    try {
+        ({ default: Peer } = await import('peerjs'));
+    } catch (e) {
+        _offline = true;
+        throw new Error('PeerJS unavailable');
+    }
+    _offline = false;
     return new Promise((resolve, reject) => {
         let settled = false;
         _roomCode = _genCode();
@@ -119,6 +132,7 @@ export async function createRoom(playerName) {
                 settled = true;
                 _peer.destroy();
                 _peer = null;
+                _offline = true;
                 reject(new Error('PeerJS connection timeout'));
             }
         }, 10000);
@@ -155,6 +169,7 @@ export async function createRoom(playerName) {
                     _peer = null;
                     createRoom(playerName).then(resolve).catch(reject);
                 } else {
+                    _offline = true;
                     reject(err);
                 }
             }
@@ -269,7 +284,18 @@ function _handleGuestData(peerId, data) {
 }
 
 export async function joinRoom(code, playerName) {
-    const { default: Peer } = await import('peerjs');
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        _offline = true;
+        throw new Error('offline');
+    }
+    let Peer;
+    try {
+        ({ default: Peer } = await import('peerjs'));
+    } catch (e) {
+        _offline = true;
+        throw new Error('PeerJS unavailable');
+    }
+    _offline = false;
     return new Promise((resolve, reject) => {
         _isHost = false;
         _roomCode = code.toUpperCase();
@@ -286,6 +312,7 @@ export async function joinRoom(code, playerName) {
                 settled = true;
                 _peer.destroy();
                 _peer = null;
+                _offline = true;
                 reject(new Error('Connection timeout'));
             }
         }, 10000);
@@ -331,6 +358,7 @@ export async function joinRoom(code, playerName) {
             if (!settled) {
                 settled = true;
                 clearTimeout(timer);
+                _offline = true;
                 reject(err);
             }
         });
@@ -587,4 +615,5 @@ export function disconnect() {
     _onZoneState = null;
     _onGameOver = null;
     _onInventoryUpdate = null;
+    _offline = false;
 }
