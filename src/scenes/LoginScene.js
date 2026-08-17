@@ -51,11 +51,20 @@ export default class LoginScene extends Phaser.Scene {
             wordWrap: { width: 350 }, align: 'center'
         }).setOrigin(0.5);
 
+        this._rafId = null;
         this.time.delayedCall(100, () => this._injectDOMInputs());
-        this._resizeHandler = () => { if (this._domInputs.length) this._repositionDOMInputs(); };
+        this._resizeHandler = () => this._scheduleReposition();
         window.addEventListener('resize', this._resizeHandler);
-        this._resizeObserver = new ResizeObserver(() => { if (this._domInputs.length) this._repositionDOMInputs(); });
+        this._resizeObserver = new ResizeObserver(() => this._scheduleReposition());
         this._resizeObserver.observe(this.game.canvas);
+    }
+
+    _scheduleReposition() {
+        if (this._rafId != null) return;
+        this._rafId = requestAnimationFrame(() => {
+            this._rafId = null;
+            if (this._domInputs.length) this._repositionDOMInputs();
+        });
     }
 
     _repositionDOMInputs() {
@@ -225,6 +234,7 @@ export default class LoginScene extends Phaser.Scene {
     }
 
     _cleanup() {
+        if (this._rafId != null) { cancelAnimationFrame(this._rafId); this._rafId = null; }
         this._domInputs.forEach(el => { if (el.parentNode) el.parentNode.removeChild(el); });
         this._domInputs = [];
         if (this._resizeHandler) { window.removeEventListener('resize', this._resizeHandler); this._resizeHandler = null; }
