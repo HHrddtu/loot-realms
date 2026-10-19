@@ -87,6 +87,7 @@ export class EnemyAI {
     static updateWanderChase(e, player, scene) {
         if (!e.active || !e.stats) return;
         this._updateHpBar(e);
+        this._updateStatuses(e, scene);
 
         // Decrement slow timer
         if (e.stats._slowed && e.stats._slowTimer !== undefined) {
@@ -96,8 +97,13 @@ export class EnemyAI {
                 e.stats._slowPct = 0;
                 e.stats._slowTimer = 0;
                 e.clearTint();
+                if (e.slowIcon) { e.slowIcon.destroy(); e.slowIcon = null; }
             } else {
                 e.setTint(0x6688ff);
+                if (!e.slowIcon && e.active) {
+                    e.slowIcon = scene.add.text(e.x, e.y - (e.stats.bh || 20) / 2 - 26, '\u{2744}', { fontSize: '10px' }).setOrigin(0.5).setDepth(13);
+                }
+                if (e.slowIcon) { e.slowIcon.x = e.x; e.slowIcon.y = e.y - (e.stats.bh || 20) / 2 - 26; }
             }
         }
 
@@ -315,6 +321,61 @@ export class EnemyAI {
         if (dist > engageDist) { const chaseSpd = dist < ENEMY_CLOSE_RANGE_THRESHOLD ? spd * ENEMY_CLOSE_RANGE_SPEED_MULT : spd; e.body.setVelocity((dx / dist) * chaseSpd, (dy / dist) * chaseSpd); e.setFlipX(dx < 0); }
         else e.body.setVelocity(0);
         if (e.walkAnimKey && (!e.anims.isPlaying || e.anims.currentAnim.key !== e.walkAnimKey)) e.play(e.walkAnimKey);
+    }
+
+    static _applyStatus(e, type, opts) {
+        if (!e || !e.stats || !e.active) return;
+        if (!e.statuses) e.statuses = {};
+        const o = opts || {};
+        if (type === 'poison' || type === 'burn') {
+            e.statuses[type] = { dps: o.dps || 3, timer: (o.duration || 3) * 1000 };
+        } else if (type === 'freeze' || type === 'stun') {
+            e.statuses[type] = { timer: (o.duration || 2) * 1000 };
+        }
+        if (e.stats) e.stats._hasStatus = true;
+    }
+
+    static _updateStatuses(e, scene) {
+        if (!e.statuses) return;
+        const keys = Object.keys(e.statuses);
+        if (keys.length === 0) return;
+        const delta = scene.game.loop.delta;
+        let statusIcon = null;
+        let mainTint = null;
+        const active = {};
+
+        keys.forEach(k => {
+            const st = e.statuses[k];
+            if (!st) return;
+            st.timer -= delta;
+            if (st.timer <= 0) { delete e.statuses[k]; return; }
+            active[k] = st;
+            if (k === 'poison') { mainTint = 0x44ff88; statusIcon = '\u{2620}'; }
+            else if (k === 'burn') { mainTint = 0xff6622; statusIcon = '\u{1F525}'; }
+            else if (k === 'freeze') { mainTint = 0x88ccff; statusIcon = '\u{2744}'; }
+            else if (k === 'stun') { mainTint = 0xffff88; statusIcon = '\u{26A1}'; }
+            // DoT
+            if ((k === 'poison' || k === 'burn') && st.timer > 0 && !e.stats._statusDotCooldown) {
+                scene.combat.hitEnemy(e, st.dps, { bypassModifiers: true, bypassLifeSteal: true });
+                e.stats._statusDotCooldown = true;
+                scene.time.delayedCall(700, () => { if (e.stats) e.stats._statusDotCooldown = false; });
+                scene.floatingText(e.x, e.y - 20, '-' + st.dps + (k === 'burn' ? ' BURN' : ''), k === 'burn' ? '#ff6622' : '#27ae60');
+            }
+        });
+
+        if (Object.keys(active).length > 0) {
+            if (e._roleTintApplied) e.clearTint();
+            e.setTint(mainTint);
+            if (e.statusIcon) { e.statusIcon.x = e.x; e.statusIcon.y = e.y - (e.stats.bh || 20) / 2 - 26; }
+            else if (scene.add) { e.statusIcon = scene.add.text(e.x, e.y - (e.stats.bh || 20) / 2 - 26, statusIcon, { fontSize: '11px' }).setOrigin(0.5).setDepth(13); }
+            if (e.statusIcon) e.statusIcon.setText(statusIcon);
+        } else {
+            if (e.statusIcon) { e.statusIcon.destroy(); e.statusIcon = null; }
+            if (e._roleTintApplied) e.setTint({ healer: 0x44ff44, mage: 0xaa66ff, assassin: 0xff44ff, fire: 0xff6622, poison: 0x44ff88, necro: 0xaa44ff, swarm: 0xffaa44, tank: 0x88aaff }[e.stats.role] || 0xffffff);
+        }
+
+        // Freeze/stun stop movement
+        if ((active.freeze || active.stun) && e.body) e.body.setVelocity(0);
     }
 
     static _wander(e) {

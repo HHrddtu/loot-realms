@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { getTalentsForClass, canUnlock, TALENT_SCOPE, getClassBranches, getTalentCost } from '../talents.js';
 import { ACCOUNT_TALENTS, canUnlockAccountTalent, ACCOUNT_BRANCHES, getAccountTalentsByBranch } from '../accountTalents.js';
+import { getMasteryNodesForClass, canUnlockMastery, getMasteryCost } from '../mastery.js';
+import { MASTERY_LEVEL_REQ } from '../config/index.js';
 import { lighten } from '../utils.js';
 import { getClassData } from '../classes.js';
 import { t } from '../i18n.js';
@@ -26,6 +28,9 @@ export default class TalentScene extends Phaser.Scene {
         this.accountLevel = data.accountLevel || 1;
         this.lockedBranches = data.lockedBranches || [];
         this.playerGold = data.playerGold || 0;
+        this.playerLevel = data.playerLevel || 1;
+        this.unlockedMastery = data.unlockedMastery || [];
+        this.masteryPoints = data.masteryPoints || 0;
     }
 
     create() {
@@ -79,12 +84,24 @@ export default class TalentScene extends Phaser.Scene {
             fontSize: '12px', fill: '#aaa', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5);
 
+        const masteryLocked = (this.playerLevel || 1) < MASTERY_LEVEL_REQ;
+        this.tabMastery = this.add.rectangle(580, tabY, 110, 24, masteryLocked ? 0x111111 : 0x1a2a1a)
+            .setStrokeStyle(1, masteryLocked ? 0x444444 : 0x2ecc71).setInteractive({ useHandCursor: !masteryLocked });
+        this.tabMasteryLabel = this.add.text(580, tabY, masteryLocked ? 'MASTERY (Lv.15)' : 'MASTERY', {
+            fontSize: '11px', fill: masteryLocked ? '#555' : '#2ecc71', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5);
+        if (masteryLocked) {
+            this.tabMastery.on('pointerover', () => this._showSimpleTooltip(580, 40, 'Unlocks at level 15'));
+            this.tabMastery.on('pointerout', () => this._hideTooltip());
+        }
+
         this.pointsText = this.add.text(400, 85, '', {
             fontSize: '12px', fill: '#ecf0f1', fontFamily: 'Arial'
         }).setOrigin(0.5);
 
         this.tabClass.on('pointerdown', () => this._switchTab('class'));
         this.tabAccount.on('pointerdown', () => this._switchTab('account'));
+        this.tabMastery.on('pointerdown', () => { if (!masteryLocked) this._switchTab('mastery'); });
     }
 
     _clearBranchTabs() {
@@ -96,6 +113,7 @@ export default class TalentScene extends Phaser.Scene {
 
     _buildBranchTabs() {
         this._clearBranchTabs();
+        if (this.activeTab === 'mastery') return;
 
         const branches = this.activeTab === 'class' ? this.classBranches : ACCOUNT_BRANCHES;
         const count = branches.length;
@@ -140,46 +158,63 @@ export default class TalentScene extends Phaser.Scene {
             this.tabClassLabel.setColor('#fff');
             this.tabAccount.setFillStyle(0x34495e);
             this.tabAccountLabel.setColor('#aaa');
+            this.tabMastery.setFillStyle(0x1a2a1a);
+            this.tabMasteryLabel.setColor('#2ecc71');
             const cls = getClassData(this.classKey);
             this.classNameText.setText((cls.name || this.classKey).toUpperCase());
-        } else {
+        } else if (tab === 'account') {
             this.tabAccount.setFillStyle(0xe67e22);
             this.tabAccountLabel.setColor('#fff');
             this.tabClass.setFillStyle(0x34495e);
             this.tabClassLabel.setColor('#aaa');
+            this.tabMastery.setFillStyle(0x1a2a1a);
+            this.tabMasteryLabel.setColor('#2ecc71');
             this.classNameText.setText('ACCOUNT');
+        } else {
+            this.tabMastery.setFillStyle(0x2ecc71);
+            this.tabMasteryLabel.setColor('#000');
+            this.tabClass.setFillStyle(0x34495e);
+            this.tabClassLabel.setColor('#aaa');
+            this.tabAccount.setFillStyle(0x34495e);
+            this.tabAccountLabel.setColor('#aaa');
+            const cls = getClassData(this.classKey);
+            this.classNameText.setText((cls.name || this.classKey).toUpperCase() + ' MASTERY');
         }
 
         this._buildBranchTabs();
         this._drawCurrentBranch();
     }
 
-    _getCurrentTalents() {
+_getCurrentTalents() {
         if (this.activeTab === 'class') {
             const branch = this.classBranches[this.activeBranch];
             if (!branch) return this.classTalents;
             return this.classTalents.filter(t => t.branch === branch.key);
-        } else {
+        } else if (this.activeTab === 'account') {
             const branch = ACCOUNT_BRANCHES[this.activeBranch];
             if (!branch) return ACCOUNT_TALENTS;
             return getAccountTalentsByBranch(branch.key);
+        } else {
+            return getMasteryNodesForClass(this.classKey);
         }
     }
 
     _getCurrentUnlocked() {
-        return this.activeTab === 'class' ? this.unlockedTalents : this.unlockedAccountTalents;
+        if (this.activeTab === 'class') return this.unlockedTalents;
+        if (this.activeTab === 'account') return this.unlockedAccountTalents;
+        return this.unlockedMastery;
     }
 
-    _getAccentColor() {
+_getAccentColor() {
         if (this.activeTab === 'class') {
             const branch = this.classBranches[this.activeBranch];
             return branch ? branch.color : 0x9b59b6;
-        } else {
+        } else if (this.activeTab === 'account') {
             const branch = ACCOUNT_BRANCHES[this.activeBranch];
             return branch ? branch.color : 0xe67e22;
+        } else {
+            return 0x2ecc71;
         }
-    
-        this.events.on('shutdown', () => { this.tweens.killAll(); });
 
     }
 
@@ -224,9 +259,9 @@ export default class TalentScene extends Phaser.Scene {
 
         const talents = this._getCurrentTalents();
         const unlocked = this._getCurrentUnlocked();
-        const points = this.activeTab === 'class' ? this.talentPoints : this.accountTalentPoints;
+        const points = this.activeTab === 'class' ? this.talentPoints : this.activeTab === 'account' ? this.accountTalentPoints : this.masteryPoints;
         const accentColor = this._getAccentColor();
-        const canUnlockFn = this.activeTab === 'class' ? canUnlock : canUnlockAccountTalent;
+        const canUnlockFn = this.activeTab === 'class' ? canUnlock : this.activeTab === 'account' ? canUnlockAccountTalent : canUnlockMastery;
         const isLocked = this.activeTab === 'class' && this.classBranches[this.activeBranch] &&
             this.lockedBranches.includes(this.classBranches[this.activeBranch].key);
 
@@ -235,7 +270,9 @@ export default class TalentScene extends Phaser.Scene {
         this.pointsText.setText(
             this.activeTab === 'class'
                 ? `Class Points: ${this.talentPoints}  |  Gold: ${this.playerGold}`
-                : `Account Points: ${this.accountTalentPoints}  (Lv.${this.accountLevel})`
+                : this.activeTab === 'account'
+                    ? `Account Points: ${this.accountTalentPoints}  (Lv.${this.accountLevel})`
+                    : `Mastery Points: ${this.masteryPoints}  (Lv.${this.playerLevel}/${MASTERY_LEVEL_REQ}+)`
         );
 
         this.lineGfx.clear();
@@ -292,7 +329,7 @@ export default class TalentScene extends Phaser.Scene {
             if (screenY < VIEW_TOP - 30 || screenY > VIEW_BOTTOM + 30) return;
 
             const isUnlocked = unlocked.includes(talent.id);
-            const cost = this.activeTab === 'class' ? getTalentCost(talent.row) : 1;
+            const cost = this.activeTab === 'class' ? getTalentCost(talent.row) : this.activeTab === 'account' ? 1 : getMasteryCost();
             const isAvailable = canUnlockFn(talent.id, unlocked) && points >= cost && !isLocked;
 
             let texKey = 'talent_node';
@@ -449,25 +486,28 @@ export default class TalentScene extends Phaser.Scene {
 
     }
 
-    _unlockTalent(talent) {
-        const cost = this.activeTab === 'class' ? getTalentCost(talent.row) : 1;
+_unlockTalent(talent) {
+        const cost = this.activeTab === 'class' ? getTalentCost(talent.row) : this.activeTab === 'account' ? 1 : getMasteryCost();
 
         if (this.activeTab === 'class') {
             if (!canUnlock(talent.id, this.unlockedTalents)) return;
             if (this.talentPoints < cost) return;
             this.unlockedTalents.push(talent.id);
             this.talentPoints -= cost;
-        } else {
+        } else if (this.activeTab === 'account') {
             if (!canUnlockAccountTalent(talent.id, this.unlockedAccountTalents)) return;
             if (this.accountTalentPoints < cost) return;
             this.unlockedAccountTalents.push(talent.id);
             this.accountTalentPoints -= cost;
+        } else {
+            if (!canUnlockMastery(talent.id, this.unlockedMastery)) return;
+            if (this.masteryPoints < cost) return;
+            this.unlockedMastery.push(talent.id);
+            this.masteryPoints -= cost;
         }
 
         this.cameras.main.flash(200, 155, 89, 182);
         this._drawCurrentBranch();
-    
-        this.events.on('shutdown', () => { this.tweens.killAll(); });
 
     }
 
@@ -488,7 +528,7 @@ export default class TalentScene extends Phaser.Scene {
 
     }
 
-    _respec() {
+_respec() {
         const cost = this._calcRespecCost();
 
         if (this.activeTab === 'class') {
@@ -506,12 +546,18 @@ export default class TalentScene extends Phaser.Scene {
                 const t = this.classTalents.find(tal => tal.id === id);
                 return t && t.scope === TALENT_SCOPE.ACCOUNT;
             });
-        } else {
+        } else if (this.activeTab === 'account') {
             if (this.unlockedAccountTalents.length === 0) return;
             if (this.playerGold < cost) return;
             this.playerGold -= cost;
             this.accountTalentPoints += this.unlockedAccountTalents.length;
             this.unlockedAccountTalents = [];
+        } else {
+            if (this.unlockedMastery.length === 0) return;
+            if (this.playerGold < cost) return;
+            this.playerGold -= cost;
+            this.masteryPoints += this.unlockedMastery.length;
+            this.unlockedMastery = [];
         }
 
         this.cameras.main.flash(200, 192, 57, 43);
@@ -570,7 +616,9 @@ export default class TalentScene extends Phaser.Scene {
             talentPoints: this.talentPoints,
             unlockedAccountTalents: this.unlockedAccountTalents,
             accountTalentPoints: this.accountTalentPoints,
-            lockedBranches: this.lockedBranches
+            lockedBranches: this.lockedBranches,
+            unlockedMastery: this.unlockedMastery,
+            masteryPoints: this.masteryPoints
         });
         const gs2 = this.scene.get(this.returnScene);
         if (gs2) { gs2.menuOpen = false; gs2.physics.resume(); }

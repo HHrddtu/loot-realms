@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { getClassData } from '../classes.js';
 import { recordKill, getWeaknessMultiplier, getPlayerAttackType } from '../bestiary.js';
+import { getSetBonuses } from '../config/sets.js';
+import { EnemyAI } from './EnemyAI.js';
 import { GAME_WIDTH, GAME_HEIGHT, INVINCIBILITY_DURATION, DAMAGE_SHAKE_DURATION, DAMAGE_SHAKE_INTENSITY,
     REFLECT_DAMAGE_RANGE, DOWNED_TIMER_MS, REVIVE_HP_PCT, POST_REVIVE_INVINCIBLE_MS,
     DEATH_GOLD_LOSS_PCT, DEATH_EXP_LOSS_PCT, POST_DEATH_DELAY_MS, POST_RESPAWN_PROTECTION_MS,
@@ -248,6 +250,8 @@ export class CombatCore {
             else if (s.zone === 'throne') { s.player.x = (s.throneOffsetX || 0) + 400; s.player.y = 500; }
             else if (s.zone === 'snowy') { s.player.x = (s.villageOffsetX || 0) + 400; s.player.y = 200; }
             else if (s.zone === 'castle') { s.player.x = 400; s.player.y = 500; }
+            else if (s.zone === 'desert') { s.player.x = (s.desertOffsetX || 0) + 450; s.player.y = 200; }
+            else if (s.zone === 'swamp') { s.player.x = (s.swampOffsetX || 0) + 450; s.player.y = 200; }
             else { s.player.x = 400; s.player.y = 120; }
             s.recalcStats();
             s.playerHP = s.playerMaxHP;
@@ -642,6 +646,8 @@ export class CombatCore {
             if (s.computedCritChance && Math.random() * 100 < s.computedCritChance + (s._consumableBonusCrit || 0)) {
                 finalDamage = Math.floor(finalDamage * s.computedCritDamage);
                 s.floatingText(enemy.x, enemy.y - 30, 'CRIT!', '#f1c40f');
+                const setB = getSetBonuses(s.equipment, s.accountEquipment);
+                if (setB.burnOnCrit && EnemyAI._applyStatus) EnemyAI._applyStatus(enemy, 'burn', { dps: 5, duration: 3 });
             }
             if (s._luckyHitCounter === undefined) s._luckyHitCounter = 0;
             const luckyChance = LUCKY_HIT_BASE_CHANCE + s._luckyHitCounter;

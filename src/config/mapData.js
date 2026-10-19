@@ -60,6 +60,17 @@ export const MAP_CHAPTERS = [
             { key: 'tower', name: 'Tower', nameRu: 'Башня', nameDe: 'Turm', x: 2, y: 0 },
             { key: 'throne', name: 'Throne', nameRu: 'Трон', nameDe: 'Thron', x: 3, y: 0 }
         ]
+    },
+    {
+        id: 'ch6',
+        name: 'Savage Lands',
+        nameRu: 'Дикие Земли',
+        nameDe: 'Wilde Lande',
+        color: 0xc8a44a,
+        zones: [
+            { key: 'desert', name: 'Desert', nameRu: 'Пустыня', nameDe: 'Wüste', x: 0, y: 0 },
+            { key: 'swamp', name: 'Swamp', nameRu: 'Болото', nameDe: 'Sumpf', x: 1, y: 0 }
+        ]
     }
 ];
 

@@ -31,7 +31,8 @@ export class CastleZone extends BaseZone {
                         'villageMerchantNPC', 'villageMerchantHint', 'villageInn', 'villageInnHint',
                         'campfire', 'campfireHint', 'hellPortal', 'hellPortalGlow', 'hellPortalHint',
                         'depthsPortal', 'depthsPortalGlow', 'depthsPortalHint',
-                        'cursedPortalVillage', 'cursedPortalVillageHint'];
+                        'cursedPortalVillage', 'cursedPortalVillageHint',
+                        'desertPortalVillage', 'desertPortalVillageHint'];
         npcRefs.forEach(ref => {
             if (this.scene[ref]) {
                 if (this.scene[ref].destroy) this.scene[ref].destroy();

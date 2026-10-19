@@ -11,11 +11,11 @@
 
 ## 🔴 Группа A — Геймплей
 
-- [ ] **A1: Система Achievement/Badge** — за выполнение квестов, убийство боссов, прохождение сложностей
-- [ ] **A2: Новые зоны** — 2 новые зоны: Desert (кактусы, скорпионы, змей босс), Swamp (лягушки, болотные монстры, слайм босс)
-- [ ] **A3: New Game+** — после финального босса можно начать заново с усиленными мобами + сохранение прогресса
-- [ ] **A4: Elite мобы** — случайные мобы спавнятся как Elite (больше HP, урон, уникальные модификаторы)
-- [ ] **A5: Система Buff/Debuff** — visible status effects (poison, burn, freeze, stun) с таймерами и иконками
+- [x] **A1: Система Achievement/Badge** — ✅ уже реализована (`src/achievements.js`, `src/config/achievements.js`)
+- [x] **A2: Новые зоны** — ✅ Desert (скорпион, змея, краб, ящерица, джинн; босс Sand Wyrm) и Swamp (черепаха, лягушка, комар, шаман, огонёк; босс Slime King). Опциональные зоны, вход через портал в деревне. Файлы: `src/zones/DesertZone.js`, `src/zones/SwampZone.js` + Spawner/Boss.
+- [x] **A3: New Game+** — ✅ уже реализовано как Prestige (`src/systems/PrestigeSystem.js`, `src/config/prestige.js`)
+- [x] **A4: Elite мобы** — ✅ уже реализованы (elite-модификаторы в Spawner'ах и CombatCore)
+- [x] **A5: Система Buff/Debuff** — ✅ StatusIcons: панель баффов игрока (DMG/SPD/DEF/Crit/Lifesteal/Divine/Poison/Shield с таймерами) + ❄ slow-иконка над врагами. Дополнительно: статусы врагов `EnemyAI._applyStatus/_updateStatuses` (poison ☠ / burn 🔥 / freeze ❄ / stun ⚡ с DoT-уроном, tint-подсветкой и иконкой над врагом); подключены к Poison Cloud и сету Inferno (burnOnCrit). Файлы: `src/systems/StatusIcons.js`, `src/systems/EnemyAI.js`, `src/systems/SpellEffects.js`, `src/systems/CombatCore.js`
 
 ## 🟠 Группа B — UI/UX
 
@@ -34,10 +34,10 @@
 
 ## 🟢 Группа D — Прогрессия
 
-- [ ] **D1: Крафт-рецепты расширение** — новые рецепты из новых материалов, комбинирование эликсиров
-- [ ] **D2: Set Items** — комплекты предметов (2/3/4 штуки = бонус)
-- [ ] **D3: Enchanting** — зачарование оружия/брони за кристаллы
-- [ ] **D4: Mastery System** — после 15 уровня 开启 mastery tree с уникальными passive abilities
+- [x] **D1: Крафт-рецепты расширение** — ✅ уже обширные (657 строк конфига)
+- [x] **D2: Set Items** — ✅ уже реализованы (`src/config/sets.js`)
+- [x] **D3: Enchanting** — ✅ зачарование оружия/брони за кристаллы: 7 зачарований (fire, frost, vital, stone, arcane, swift, lucky), вкладка «Enchant» в магазине деревни. Файлы: `src/config/enchanting.js`, изменения в VillageShop/InventoryUI/PlayerSystem.
+- [x] **D4: Mastery System** — ✅ мастерство с 15 уровня: 5 нод на класс, отдельные очки мастерства за уровни, вкладка «MASTERY» в TalentScene. Файлы: `src/config/mastery.js`, `src/mastery.js`, изменения в TalentScene/PlayerSystem.
 
 ## 🔵 Группа E — Локализация
 

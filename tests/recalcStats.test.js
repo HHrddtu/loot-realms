@@ -340,4 +340,87 @@ describe('PlayerSystem.recalcStats', () => {
         system.recalcStats();
         expect(scene.computedCritDamage).toBe(2.0);
     });
+
+    it('enchant weapon grants percentage damage and speed', () => {
+        scene.equipment = {
+            weapon: { stats: { speed: 0 }, rarity: 'rare', enchant: { stats: { damagePercent: 8, speedPercent: 6 } } },
+            armor: null,
+            accessory: null
+        };
+        scene.accountLevel = 1;
+        system.recalcStats();
+        const expectedDmg = Math.floor((20 + 1) * (1 + 8 / 100));
+        const expectedSpd = Math.floor((150 + 1) * (1 + 6 / 100));
+        expect(scene.playerDamage).toBe(expectedDmg);
+        expect(scene.playerSpeed).toBe(expectedSpd);
+    });
+
+    it('enchant armor grants hp percent and regen', () => {
+        scene.equipment = {
+            weapon: null,
+            armor: { stats: {}, rarity: 'rare', enchant: { stats: { hpPercent: 10, regenPercent: 3 } } },
+            accessory: null
+        };
+        scene.accountLevel = 1;
+        system.recalcStats();
+        const expectedHp = Math.floor((100 + 2) * (1 + 10 / 100));
+        expect(scene.playerMaxHP).toBe(expectedHp);
+        expect(scene.computedRegenPercent).toBe(3);
+    });
+
+    it('enchant accessory grants crit and dodge', () => {
+        scene.equipment = {
+            weapon: null,
+            armor: null,
+            accessory: { stats: {}, rarity: 'rare', enchant: { stats: { critPercent: 5, dodgePercent: 5 } } }
+        };
+        scene.accountLevel = 1;
+        system.recalcStats();
+        expect(scene.computedCritChance).toBe(5);
+        expect(scene.computedDodgePercent).toBe(5);
+    });
+
+    it('enchant damage reduction stacks into computed DR', () => {
+        scene.equipment = {
+            weapon: null,
+            armor: { stats: {}, rarity: 'epic', enchant: { stats: { damageReduction: 8 } } },
+            accessory: null
+        };
+        scene.accountLevel = 1;
+        system.recalcStats();
+        expect(scene.computedDamageReduction).toBe(8);
+    });
+
+    it('enchant without stats does not crash', () => {
+        scene.equipment = {
+            weapon: { stats: {}, rarity: 'rare', enchant: { name: 'Fire Enchant' } },
+            armor: null,
+            accessory: null
+        };
+        scene.accountLevel = 1;
+        expect(() => system.recalcStats()).not.toThrow();
+    });
+
+    it('mastery effects merge into talent effects', () => {
+        scene.unlockedMastery = ['ms_sage_1'];
+        scene.accountLevel = 1;
+        system.recalcStats();
+        expect(scene.computedCooldownReduction).toBe(2);
+        expect(scene.computedSpellDamage).toBe(5);
+    });
+
+    it('mastery without unlocked nodes has no effect', () => {
+        scene.unlockedMastery = [];
+        scene.accountLevel = 1;
+        system.recalcStats();
+        expect(scene.computedCooldownReduction).toBe(0);
+        expect(scene.computedSpellDamage).toBe(0);
+    });
+
+    it('mastery unknown id is ignored gracefully', () => {
+        scene.unlockedMastery = ['ms_unknown_99'];
+        scene.accountLevel = 1;
+        expect(() => system.recalcStats()).not.toThrow();
+        expect(scene.computedCooldownReduction).toBe(0);
+    });
 });

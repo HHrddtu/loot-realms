@@ -83,6 +83,8 @@ export class VillageZone extends BaseZone {
         if (this.scene.depthsPortal) { if (this.scene.depthsPortal.destroy) this.scene.depthsPortal.destroy(); this.scene.depthsPortal = null; }
         if (this.scene.depthsPortalGlow) { if (this.scene.depthsPortalGlow.destroy) this.scene.depthsPortalGlow.destroy(); this.scene.depthsPortalGlow = null; }
         if (this.scene.depthsPortalHint) { if (this.scene.depthsPortalHint.destroy) this.scene.depthsPortalHint.destroy(); this.scene.depthsPortalHint = null; }
+        if (this.scene.desertPortalVillage) { if (this.scene.desertPortalVillage.destroy) this.scene.desertPortalVillage.destroy(); this.scene.desertPortalVillage = null; }
+        if (this.scene.desertPortalVillageHint) { if (this.scene.desertPortalVillageHint.destroy) this.scene.desertPortalVillageHint.destroy(); this.scene.desertPortalVillageHint = null; }
 
         if (frozen) {
             this.spawner.spawnVillageDecor(true);
@@ -159,6 +161,17 @@ export class VillageZone extends BaseZone {
                 this.scene.cursedPortalVillage = this.scene.add.sprite(cpx, cpy, 'portal').setDepth(6).setScale(1.2).setTint(0x00aa00);
                 this.scene.tweens.add({ targets: this.scene.cursedPortalVillage, y: cpy - 5, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
                 this.scene.cursedPortalVillageHint = this.scene.add.text(cpx, cpy - 40, '', {
+                    fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                    stroke: '#000', strokeThickness: 2
+                }).setOrigin(0.5).setDepth(12);
+            }
+            // Desert portal (optional zone, after depths boss defeated)
+            if (!this.scene.desertPortalVillage && this.scene.zones.depths.bossDefeated) {
+                const ddx = ox + VILLAGE_WIDTH / 2;
+                const ddy = 1600;
+                this.scene.desertPortalVillage = this.scene.add.sprite(ddx, ddy, 'portal').setDepth(6).setScale(1.2).setTint(0xc8a44a);
+                this.scene.tweens.add({ targets: this.scene.desertPortalVillage, y: ddy - 5, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+                this.scene.desertPortalVillageHint = this.scene.add.text(ddx, ddy - 40, '', {
                     fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
                     stroke: '#000', strokeThickness: 2
                 }).setOrigin(0.5).setDepth(12);
@@ -303,6 +316,8 @@ export class VillageZone extends BaseZone {
         s.depthsPortal = kill(s.depthsPortal);
         s.depthsPortalGlow = kill(s.depthsPortalGlow);
         s.depthsPortalHint = kill(s.depthsPortalHint);
+        s.desertPortalVillage = kill(s.desertPortalVillage);
+        s.desertPortalVillageHint = kill(s.desertPortalVillageHint);
         this._destroyDefeatedUI();
     }
 
@@ -352,6 +367,10 @@ export class VillageZone extends BaseZone {
             s.player.x, s.player.y, s.cursedPortalVillage.x, s.cursedPortalVillage.y
         ) < 60) {
             this.enterCursed();
+        } else if (!s.zones.village.isFrozen && s.desertPortalVillage && Phaser.Math.Distance.Between(
+            s.player.x, s.player.y, s.desertPortalVillage.x, s.desertPortalVillage.y
+        ) < 60) {
+            this.scene.zones.desert.enterDesert();
         } else if (s.loreItems && s.loreItems.tryInteract()) {
             return;
         } else {
@@ -861,6 +880,15 @@ export class VillageZone extends BaseZone {
                 if (s.cursedPortalVillageHint) s.cursedPortalVillageHint.setText('SPACE = enter Cursed Lands');
             } else if (s.cursedPortalVillageHint) {
                 s.cursedPortalVillageHint.setText('');
+            }
+        }
+        if (s.zone === 'village' && s.desertPortalVillage) {
+            if (s.desertPortalVillageHint) s.desertPortalVillageHint.setPosition(s.desertPortalVillage.x, s.desertPortalVillage.y - 40);
+            const dpd = Phaser.Math.Distance.Between(s.player.x, s.player.y, s.desertPortalVillage.x, s.desertPortalVillage.y);
+            if (dpd < 80) {
+                if (s.desertPortalVillageHint) s.desertPortalVillageHint.setText('SPACE = enter Desert');
+            } else if (s.desertPortalVillageHint) {
+                s.desertPortalVillageHint.setText('');
             }
         }
     }

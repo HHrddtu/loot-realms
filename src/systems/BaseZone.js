@@ -338,6 +338,8 @@ export class BaseZone {
                 if (e.nameText) { e.nameText.destroy(); e.nameText = null; }
                 if (e.shieldIcon) { e.shieldIcon.destroy(); e.shieldIcon = null; }
                 if (e.roleIcon) { e.roleIcon.destroy(); e.roleIcon = null; }
+                if (e.slowIcon) { e.slowIcon.destroy(); e.slowIcon = null; }
+                if (e.statusIcon) { e.statusIcon.destroy(); e.statusIcon = null; }
             });
             s.enemies.clear(true, true);
         }

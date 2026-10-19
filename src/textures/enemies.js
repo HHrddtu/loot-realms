@@ -1,4 +1,4 @@
-export function drawEnemyTextures(mk) {
+﻿export function drawEnemyTextures(mk) {
     mk('goblin', 36, 36, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#1a5c2a';
@@ -1645,7 +1645,7 @@ export function drawEnemyTextures(mk) {
 
     // === DEPTHS ENEMIES ===
 
-    // Wraith — floating ghostly figure, tattered robes
+    // Wraith вЂ” floating ghostly figure, tattered robes
     mk('wraith', 30, 36, (c) => {
         c.imageSmoothingEnabled = false;
         // Hood
@@ -1690,7 +1690,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(6, 10, 18, 14);
     });
 
-    // Skeleton Ghost — translucent skeleton with spectral energy
+    // Skeleton Ghost вЂ” translucent skeleton with spectral energy
     mk('skeleton_ghost', 30, 36, (c) => {
         c.imageSmoothingEnabled = false;
         // Skull
@@ -1740,7 +1740,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(4, 30, 22, 4);
     });
 
-    // Cursed Child — small corrupted sprite, 24x28
+    // Cursed Child вЂ” small corrupted sprite, 24x28
     mk('cursed_child', 24, 28, (c) => {
         c.imageSmoothingEnabled = false;
         // Head
@@ -1787,7 +1787,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(18, 18, 2, 4);
     });
 
-    // Cursed Book — floating enchanted tome, 20x16
+    // Cursed Book вЂ” floating enchanted tome, 20x16
     mk('cursed_book', 20, 16, (c) => {
         c.imageSmoothingEnabled = false;
         // Book cover
@@ -1826,7 +1826,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(1, 1, 18, 14);
     });
 
-    // Ink Elemental — amorphous blob of dark ink, 30x36
+    // Ink Elemental вЂ” amorphous blob of dark ink, 30x36
     mk('ink_elemental', 30, 36, (c) => {
         c.imageSmoothingEnabled = false;
         // Main body (ink blob)
@@ -1871,7 +1871,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(18, 12, 3, 2);
     });
 
-    // Soul Forger — large armored humanoid with forge hammer, 36x40
+    // Soul Forger вЂ” large armored humanoid with forge hammer, 36x40
     mk('soul_forger', 36, 40, (c) => {
         c.imageSmoothingEnabled = false;
         // Head with helm
@@ -1937,7 +1937,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(20, 34, 8, 3);
     });
 
-    // Metal Golem — massive iron construct, 44x48
+    // Metal Golem вЂ” massive iron construct, 44x48
     mk('metal_golem', 44, 48, (c) => {
         c.imageSmoothingEnabled = false;
         // Head
@@ -2013,7 +2013,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(26, 42, 10, 4);
     });
 
-    // Judge — robed figure with gavel, 32x40
+    // Judge вЂ” robed figure with gavel, 32x40
     mk('judge', 32, 40, (c) => {
         c.imageSmoothingEnabled = false;
         // Hood
@@ -2074,7 +2074,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(8, 36, 16, 2);
     });
 
-    // Executioner — large hooded figure with axe, 36x44
+    // Executioner вЂ” large hooded figure with axe, 36x44
     mk('executioner', 36, 44, (c) => {
         c.imageSmoothingEnabled = false;
         // Hood
@@ -2137,7 +2137,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(20, 40, 8, 3);
     });
 
-    // Doom Knight — dark armored knight with cursed blade, 36x44
+    // Doom Knight вЂ” dark armored knight with cursed blade, 36x44
     mk('doom_knight', 36, 44, (c) => {
         c.imageSmoothingEnabled = false;
         // Helmet
@@ -2223,7 +2223,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(4, 36, 28, 6);
     });
 
-    // Shadow Wisp — small shadow sphere minion, 14x14
+    // Shadow Wisp вЂ” small shadow sphere minion, 14x14
     mk('shadow_wisp', 14, 14, (c) => {
         c.imageSmoothingEnabled = false;
         // Outer shadow
@@ -2255,7 +2255,7 @@ export function drawEnemyTextures(mk) {
 
     // === SWAMP / POISON BIOME ENEMIES ===
 
-    // Swamp Sludge — toxic blob, 28x24
+    // Swamp Sludge вЂ” toxic blob, 28x24
     mk('swamp_sludge', 28, 24, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#2a5a2a';
@@ -2282,7 +2282,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(24, 14, 2, 3);
     });
 
-    // Venom Spider — poisonous spider, 28x24
+    // Venom Spider вЂ” poisonous spider, 28x24
     mk('venom_spider', 28, 24, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#1a1a2a';
@@ -2315,7 +2315,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(21, 16, 3, 2);
     });
 
-    // Cursed Treant — corrupted tree, 36x44
+    // Cursed Treant вЂ” corrupted tree, 36x44
     mk('cursed_treant', 36, 44, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#3a2a1a';
@@ -2358,7 +2358,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(24, 40, 4, 2);
     });
 
-    // Plague Rat — disease rat, 24x16
+    // Plague Rat вЂ” disease rat, 24x16
     mk('plague_rat', 24, 16, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#5a4a3a';
@@ -2390,7 +2390,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(0, 6, 2, 2);
     });
 
-    // Toxin Sprite — poison fairy, 18x20
+    // Toxin Sprite вЂ” poison fairy, 18x20
     mk('toxin_sprite', 18, 20, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#88cc44';
@@ -2418,7 +2418,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(14, 5, 2, 2);
     });
 
-    // Bog Witch — swamp hag, 32x40
+    // Bog Witch вЂ” swamp hag, 32x40
     mk('bog_witch', 32, 40, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#4a6a3a';
@@ -2467,7 +2467,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(18, 34, 8, 4);
     });
 
-    // Corrupted Druid — fallen nature mage, 32x40
+    // Corrupted Druid вЂ” fallen nature mage, 32x40
     mk('corrupted_druid', 32, 40, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#2a1a3a';
@@ -2518,7 +2518,7 @@ export function drawEnemyTextures(mk) {
 
     // === HEART BIOME ENEMIES ===
 
-    // Flesh Crawler — heart蠕虫, 30x20
+    // Flesh Crawler вЂ” heartи •и™«, 30x20
     mk('flesh_crawler', 30, 20, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#8a3a4a';
@@ -2548,7 +2548,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(24, 14, 2, 3);
     });
 
-    // Vein Horror — heart creature, 32x36
+    // Vein Horror вЂ” heart creature, 32x36
     mk('vein_horror', 32, 36, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#6a2a3a';
@@ -2592,7 +2592,7 @@ export function drawEnemyTextures(mk) {
 
     // === TEMPLE BIOME ENEMIES ===
 
-    // Temple Guardian — stone construct, 36x40
+    // Temple Guardian вЂ” stone construct, 36x40
     mk('temple_guardian', 36, 40, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#6a6a7a';
@@ -2637,7 +2637,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(20, 36, 10, 4);
     });
 
-    // Ancient Warden — temple protector, 32x44
+    // Ancient Warden вЂ” temple protector, 32x44
     mk('ancient_warden', 32, 44, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#8a7a6a';
@@ -2683,7 +2683,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(18, 40, 8, 4);
     });
 
-    // Void Stalker — shadow creature, 28x32
+    // Void Stalker вЂ” shadow creature, 28x32
     mk('void_stalker', 28, 32, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#1a0a2a';
@@ -2723,7 +2723,7 @@ export function drawEnemyTextures(mk) {
 
     // === BOSS ===
 
-    // Ancient Evil — ancient dark entity, 40x56
+    // Ancient Evil вЂ” ancient dark entity, 40x56
     mk('ancient_evil', 40, 56, (c) => {
         c.imageSmoothingEnabled = false;
         // Dark aura
@@ -2807,7 +2807,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(4, 16, 32, 14);
     });
 
-    // Poison Frog — ядовито-зелёная лягушка, красные глаза, 20x16
+    // Poison Frog вЂ” СЏРґРѕРІРёС‚Рѕ-Р·РµР»С‘РЅР°СЏ Р»СЏРіСѓС€РєР°, РєСЂР°СЃРЅС‹Рµ РіР»Р°Р·Р°, 20x16
     mk('poison_frog', 20, 16, (c) => {
         c.imageSmoothingEnabled = false;
         // Body
@@ -2850,7 +2850,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(10, 8, 2, 1);
     });
 
-    // Bog Wraith — туманный призрак болота, полупрозрачный, 18x28
+    // Bog Wraith вЂ” С‚СѓРјР°РЅРЅС‹Р№ РїСЂРёР·СЂР°Рє Р±РѕР»РѕС‚Р°, РїРѕР»СѓРїСЂРѕР·СЂР°С‡РЅС‹Р№, 18x28
     mk('bog_wraith', 18, 28, (c) => {
         c.imageSmoothingEnabled = false;
         // Ghostly body (layered transparency)
@@ -2893,7 +2893,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(16, 22, 2, 4);
     });
 
-    // Zombie Knight — рыцарь-зомби, ржавая броня, зелёная кожа, 22x32
+    // Zombie Knight вЂ” СЂС‹С†Р°СЂСЊ-Р·РѕРјР±Рё, СЂР¶Р°РІР°СЏ Р±СЂРѕРЅСЏ, Р·РµР»С‘РЅР°СЏ РєРѕР¶Р°, 22x32
     mk('zombie_knight', 22, 32, (c) => {
         c.imageSmoothingEnabled = false;
         // Helmet (rusted)
@@ -2963,7 +2963,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(18, 22, 2, 6);
     });
 
-    // Shadow Acolyte — тёмный адепт, фиолетовые глаза, 16x24
+    // Shadow Acolyte вЂ” С‚С‘РјРЅС‹Р№ Р°РґРµРїС‚, С„РёРѕР»РµС‚РѕРІС‹Рµ РіР»Р°Р·Р°, 16x24
     mk('shadow_acolyte', 16, 24, (c) => {
         c.imageSmoothingEnabled = false;
         // Hood
@@ -3022,7 +3022,7 @@ export function drawEnemyTextures(mk) {
 
     // === SHADOW DISTRICT ENEMIES ===
 
-    // Shadow Stalker — cloaked assassin, 16x24
+    // Shadow Stalker вЂ” cloaked assassin, 16x24
     mk('shadow_stalker', 16, 24, (c) => {
         c.imageSmoothingEnabled = false;
         // Hood
@@ -3068,7 +3068,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(9, 22, 4, 2);
     });
 
-    // Void Wisp — floating orb, 14x14
+    // Void Wisp вЂ” floating orb, 14x14
     mk('void_wisp', 14, 14, (c) => {
         c.imageSmoothingEnabled = false;
         // Core
@@ -3098,7 +3098,7 @@ export function drawEnemyTextures(mk) {
         c.fill();
     });
 
-    // Mirror Shard — flying glass, 18x12
+    // Mirror Shard вЂ” flying glass, 18x12
     mk('mirror_shard', 18, 12, (c) => {
         c.imageSmoothingEnabled = false;
         // Main shard
@@ -3127,7 +3127,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(3, 3, 12, 6);
     });
 
-    // Shadow Hound — dark wolf, 22x16
+    // Shadow Hound вЂ” dark wolf, 22x16
     mk('shadow_hound', 22, 16, (c) => {
         c.imageSmoothingEnabled = false;
         // Body
@@ -3169,7 +3169,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(2, 12, 18, 2);
     });
 
-    // Dark Reflection — mirror copy, 20x28
+    // Dark Reflection вЂ” mirror copy, 20x28
     mk('dark_reflection', 20, 28, (c) => {
         c.imageSmoothingEnabled = false;
         // Distorted humanoid shape
@@ -3212,7 +3212,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(2, 8, 16, 18);
     });
 
-    // Void Knight — armored shadow, 22x32
+    // Void Knight вЂ” armored shadow, 22x32
     mk('void_knight', 22, 32, (c) => {
         c.imageSmoothingEnabled = false;
         // Helmet
@@ -3280,7 +3280,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(2, 28, 18, 3);
     });
 
-    // Nightmare Moth — insectoid, 20x18
+    // Nightmare Moth вЂ” insectoid, 20x18
     mk('nightmare_moth', 20, 18, (c) => {
         c.imageSmoothingEnabled = false;
         // Body
@@ -3334,7 +3334,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(13, 14, 1, 3);
     });
 
-    // Shadow Pillar — stationary totem, 12x28
+    // Shadow Pillar вЂ” stationary totem, 12x28
     mk('shadow_pillar', 12, 28, (c) => {
         c.imageSmoothingEnabled = false;
         // Base
@@ -3368,7 +3368,7 @@ export function drawEnemyTextures(mk) {
         c.fill();
     });
 
-    // Void Spawn — small creature, 12x10
+    // Void Spawn вЂ” small creature, 12x10
     mk('void_spawn', 12, 10, (c) => {
         c.imageSmoothingEnabled = false;
         // Body
@@ -3393,7 +3393,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(1, 8, 10, 1);
     });
 
-    // Rift Crawler — spider-like void creature, 24x18
+    // Rift Crawler вЂ” spider-like void creature, 24x18
     mk('rift_crawler', 24, 18, (c) => {
         c.imageSmoothingEnabled = false;
         // Body
@@ -3443,7 +3443,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(6, 12, 12, 4);
     });
 
-    // Phantom Knight — ghostly warrior, 20x30
+    // Phantom Knight вЂ” ghostly warrior, 20x30
     mk('phantom_knight', 20, 30, (c) => {
         c.imageSmoothingEnabled = false;
         // Helmet
@@ -3490,7 +3490,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(6, 28, 8, 2);
     });
 
-    // Void Leech — parasitic blob, 16x10
+    // Void Leech вЂ” parasitic blob, 16x10
     mk('void_leech', 16, 10, (c) => {
         c.imageSmoothingEnabled = false;
         // Body
@@ -3519,7 +3519,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(14, 5, 2, 1);
     });
 
-    // Shadow Mimic — chest-like creature, 24x20
+    // Shadow Mimic вЂ” chest-like creature, 24x20
     mk('shadow_mimic', 24, 20, (c) => {
         c.imageSmoothingEnabled = false;
         // Chest body
@@ -3562,7 +3562,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(1, 16, 22, 3);
     });
 
-    // Rift Horror — large void abomination, 28x32
+    // Rift Horror вЂ” large void abomination, 28x32
     mk('rift_horror', 28, 32, (c) => {
         c.imageSmoothingEnabled = false;
         // Main mass
@@ -3766,9 +3766,9 @@ export function drawEnemyTextures(mk) {
         c.fillRect(32, 40, 2, 2);
     });
 
-    // === SHADOW DISTRICT — 7 MISSING TEXTURES ===
+    // === SHADOW DISTRICT вЂ” 7 MISSING TEXTURES ===
 
-    // Mirror Image — зеркальное отражение игрока, полупрозрачное серебристое (16x24)
+    // Mirror Image вЂ” Р·РµСЂРєР°Р»СЊРЅРѕРµ РѕС‚СЂР°Р¶РµРЅРёРµ РёРіСЂРѕРєР°, РїРѕР»СѓРїСЂРѕР·СЂР°С‡РЅРѕРµ СЃРµСЂРµР±СЂРёСЃС‚РѕРµ (16x24)
     mk('mirror_image', 16, 24, (c) => {
         c.imageSmoothingEnabled = false;
         // Ethereal humanoid silhouette
@@ -3822,7 +3822,7 @@ export function drawEnemyTextures(mk) {
         c.fill();
     });
 
-    // Doppelganger — тёмная копия игрока, чёрный с красными глазами (18x36)
+    // Doppelganger вЂ” С‚С‘РјРЅР°СЏ РєРѕРїРёСЏ РёРіСЂРѕРєР°, С‡С‘СЂРЅС‹Р№ СЃ РєСЂР°СЃРЅС‹РјРё РіР»Р°Р·Р°РјРё (18x36)
     mk('doppelganger', 18, 36, (c) => {
         c.imageSmoothingEnabled = false;
         // Hood (dark)
@@ -3891,7 +3891,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(2, 30, 14, 5);
     });
 
-    // Void Elemental — сфера из пустоты, чёрный с фиолетовым (22x22)
+    // Void Elemental вЂ” СЃС„РµСЂР° РёР· РїСѓСЃС‚РѕС‚С‹, С‡С‘СЂРЅС‹Р№ СЃ С„РёРѕР»РµС‚РѕРІС‹Рј (22x22)
     mk('void_elemental', 22, 22, (c) => {
         c.imageSmoothingEnabled = false;
         // Outer void shell
@@ -3941,7 +3941,7 @@ export function drawEnemyTextures(mk) {
         c.fill();
     });
 
-    // Nightmare Beast — искажённое создание, неправильная форма, щупальца (24x30)
+    // Nightmare Beast вЂ” РёСЃРєР°Р¶С‘РЅРЅРѕРµ СЃРѕР·РґР°РЅРёРµ, РЅРµРїСЂР°РІРёР»СЊРЅР°СЏ С„РѕСЂРјР°, С‰СѓРїР°Р»СЊС†Р° (24x30)
     mk('nightmare_beast', 24, 30, (c) => {
         c.imageSmoothingEnabled = false;
         // Asymmetric body mass
@@ -4010,7 +4010,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(2, 0, 20, 28);
     });
 
-    // Twisted Copy — искажённый NPC, деформированный (16x28)
+    // Twisted Copy вЂ” РёСЃРєР°Р¶С‘РЅРЅС‹Р№ NPC, РґРµС„РѕСЂРјРёСЂРѕРІР°РЅРЅС‹Р№ (16x28)
     mk('twisted_copy', 16, 28, (c) => {
         c.imageSmoothingEnabled = false;
         // Twisted hood
@@ -4072,7 +4072,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(2, 24, 12, 1);
     });
 
-    // Dimension Tear — разрыв в ткани пространства, объект (20x30)
+    // Dimension Tear вЂ” СЂР°Р·СЂС‹РІ РІ С‚РєР°РЅРё РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІР°, РѕР±СЉРµРєС‚ (20x30)
     mk('dimension_tear', 20, 30, (c) => {
         c.imageSmoothingEnabled = false;
         // Outer tear edges (jagged)
@@ -4131,7 +4131,7 @@ export function drawEnemyTextures(mk) {
         c.fill();
     });
 
-    // Shade — миньон босса, маленькая тень (14x14)
+    // Shade вЂ” РјРёРЅСЊРѕРЅ Р±РѕСЃСЃР°, РјР°Р»РµРЅСЊРєР°СЏ С‚РµРЅСЊ (14x14)
     mk('shade', 14, 14, (c) => {
         c.imageSmoothingEnabled = false;
         // Body (small shadow)
@@ -4171,7 +4171,7 @@ export function drawEnemyTextures(mk) {
 
     // === TOWER OF THE FALLEN KING ENEMIES ===
 
-    // Tower Knight — рыцарь в ржавых доспехах, 22x32
+    // Tower Knight вЂ” СЂС‹С†Р°СЂСЊ РІ СЂР¶Р°РІС‹С… РґРѕСЃРїРµС…Р°С…, 22x32
     mk('tower_knight', 22, 32, (c) => {
         c.imageSmoothingEnabled = false;
         // Helmet
@@ -4247,7 +4247,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(13, 28, 5, 3);
     });
 
-    // Tower Mage — маг в тёмных одеждах, 16x28
+    // Tower Mage вЂ” РјР°Рі РІ С‚С‘РјРЅС‹С… РѕРґРµР¶РґР°С…, 16x28
     mk('tower_mage', 16, 28, (c) => {
         c.imageSmoothingEnabled = false;
         // Hood
@@ -4305,7 +4305,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(9, 26, 3, 2);
     });
 
-    // Tower Archer — лучник с луком, 18x30
+    // Tower Archer вЂ” Р»СѓС‡РЅРёРє СЃ Р»СѓРєРѕРј, 18x30
     mk('tower_archer', 18, 30, (c) => {
         c.imageSmoothingEnabled = false;
         // Hood
@@ -4370,7 +4370,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(10, 27, 5, 3);
     });
 
-    // Tower Healer — жрец в светлых одеждах, 16x28
+    // Tower Healer вЂ” Р¶СЂРµС† РІ СЃРІРµС‚Р»С‹С… РѕРґРµР¶РґР°С…, 16x28
     mk('tower_healer', 16, 28, (c) => {
         c.imageSmoothingEnabled = false;
         // Hood
@@ -4430,7 +4430,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(9, 26, 3, 2);
     });
 
-    // Tower Assassin — ассассин в чёрном, 16x26
+    // Tower Assassin вЂ” Р°СЃСЃР°СЃСЃРёРЅ РІ С‡С‘СЂРЅРѕРј, 16x26
     mk('tower_assassin', 16, 26, (c) => {
         c.imageSmoothingEnabled = false;
         // Mask
@@ -4485,7 +4485,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(9, 23, 4, 3);
     });
 
-    // Royal Guard — королевский страж, 26x36
+    // Royal Guard вЂ” РєРѕСЂРѕР»РµРІСЃРєРёР№ СЃС‚СЂР°Р¶, 26x36
     mk('royal_guard', 26, 36, (c) => {
         c.imageSmoothingEnabled = false;
         // Crown
@@ -4576,7 +4576,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(14, 32, 7, 1);
     });
 
-    // Dark Counselor — тёмный советник, 18x30
+    // Dark Counselor вЂ” С‚С‘РјРЅС‹Р№ СЃРѕРІРµС‚РЅРёРє, 18x30
     mk('dark_counselor', 18, 30, (c) => {
         c.imageSmoothingEnabled = false;
         // Hood
@@ -4638,7 +4638,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(10, 27, 3, 2);
     });
 
-    // Twisted Noble — искажённый аристократ, 18x28
+    // Twisted Noble вЂ” РёСЃРєР°Р¶С‘РЅРЅС‹Р№ Р°СЂРёСЃС‚РѕРєСЂР°С‚, 18x28
     mk('twisted_noble', 18, 28, (c) => {
         c.imageSmoothingEnabled = false;
         // Distorted head
@@ -4696,7 +4696,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(10, 26, 3, 2);
     });
 
-    // Shadow Advisor — тень советника, 16x26
+    // Shadow Advisor вЂ” С‚РµРЅСЊ СЃРѕРІРµС‚РЅРёРєР°, 16x26
     mk('shadow_advisor', 16, 26, (c) => {
         c.imageSmoothingEnabled = false;
         // Ghostly hood
@@ -4743,7 +4743,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(2, 24, 12, 1);
     });
 
-    // Fallen Paladin — павший паладин, 24x34
+    // Fallen Paladin вЂ” РїР°РІС€РёР№ РїР°Р»Р°РґРёРЅ, 24x34
     mk('fallen_paladin', 24, 34, (c) => {
         c.imageSmoothingEnabled = false;
         // Broken helm
@@ -4820,7 +4820,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(13, 30, 6, 3);
     });
 
-    // Fallen King — босс, 40x56
+    // Fallen King вЂ” Р±РѕСЃСЃ, 40x56
     mk('fallen_king', 40, 56, (c) => {
         c.imageSmoothingEnabled = false;
         // Broken crown
@@ -4946,7 +4946,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(4, 4, 32, 48);
     });
 
-    // Tower Guardian — миньон босса, 20x28
+    // Tower Guardian вЂ” РјРёРЅСЊРѕРЅ Р±РѕСЃСЃР°, 20x28
     mk('tower_guardian', 20, 28, (c) => {
         c.imageSmoothingEnabled = false;
         // Head (stone)
@@ -5004,7 +5004,7 @@ export function drawEnemyTextures(mk) {
 
     // === THRONE OF ETERNITY ENEMIES ===
 
-    // Eternity Lord — финальный босс, 50x64
+    // Eternity Lord вЂ” С„РёРЅР°Р»СЊРЅС‹Р№ Р±РѕСЃСЃ, 50x64
     mk('eternity_lord', 50, 64, (c) => {
         c.imageSmoothingEnabled = false;
         // Massive crown
@@ -5159,7 +5159,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(38, 48, 2, 2);
     });
 
-    // Eternity Spawn 1 — миньон-танк, 20x28
+    // Eternity Spawn 1 вЂ” РјРёРЅСЊРѕРЅ-С‚Р°РЅРє, 20x28
     mk('eternity_spawn_1', 20, 28, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#1a1a2a';
@@ -5206,7 +5206,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(12, 24, 5, 3);
     });
 
-    // Eternity Spawn 2 — миньон-маг, 16x24
+    // Eternity Spawn 2 вЂ” РјРёРЅСЊРѕРЅ-РјР°Рі, 16x24
     mk('eternity_spawn_2', 16, 24, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#1a0a2a';
@@ -5249,7 +5249,7 @@ export function drawEnemyTextures(mk) {
         c.fillRect(9, 22, 3, 2);
     });
 
-    // Eternity Spawn 3 — миньон-ассассин, 14x22
+    // Eternity Spawn 3 вЂ” РјРёРЅСЊРѕРЅ-Р°СЃСЃР°СЃСЃРёРЅ, 14x22
     mk('eternity_spawn_3', 14, 22, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#0a0a14';
@@ -5339,5 +5339,326 @@ export function drawEnemyTextures(mk) {
         c.fillRect(26, 28, 6, 8);
         c.fillRect(10, 30, 4, 6);
         c.fillRect(22, 30, 4, 6);
+    });
+    // === DESERT BIOME ENEMIES ===
+
+    // Sand Crab — armored desert tank, 32x28
+    mk('desert_crab', 32, 28, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#b89440';
+        c.fillRect(6, 12, 20, 8);
+        c.fillRect(4, 14, 24, 6);
+        c.fillStyle = '#c8a44a';
+        c.fillRect(8, 12, 16, 6);
+        c.fillStyle = '#8a6a2a';
+        c.fillRect(2, 12, 4, 4);
+        c.fillRect(26, 12, 4, 4);
+        c.fillRect(0, 16, 4, 3);
+        c.fillRect(28, 16, 4, 3);
+        c.fillStyle = '#e8d080';
+        c.fillRect(10, 14, 4, 3);
+        c.fillRect(18, 14, 4, 3);
+        c.fillStyle = '#000';
+        c.fillRect(11, 15, 2, 2);
+        c.fillRect(19, 15, 2, 2);
+        c.fillStyle = '#7a5a1a';
+        c.fillRect(8, 20, 4, 4);
+        c.fillRect(20, 20, 4, 4);
+    });
+
+    // Sand Scorpion — fast desert assassin, 28x24
+    mk('desert_scorpion', 28, 24, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#a88838';
+        c.fillRect(8, 10, 12, 6);
+        c.fillRect(6, 12, 16, 4);
+        c.fillStyle = '#b89848';
+        c.fillRect(9, 11, 10, 4);
+        c.fillStyle = '#d8b860';
+        c.fillRect(10, 12, 3, 3);
+        c.fillRect(15, 12, 3, 3);
+        c.fillStyle = '#000';
+        c.fillRect(11, 13, 2, 2);
+        c.fillRect(16, 13, 2, 2);
+        c.fillStyle = '#8a6a28';
+        c.fillRect(2, 12, 4, 3);
+        c.fillRect(22, 12, 4, 3);
+        // Stinger
+        c.fillStyle = '#d4a040';
+        c.fillRect(24, 4, 4, 3);
+        c.fillRect(26, 2, 3, 3);
+        c.fillStyle = '#000';
+        c.fillRect(26, 3, 2, 2);
+        c.fillStyle = '#7a5a18';
+        c.fillRect(6, 16, 4, 4);
+        c.fillRect(18, 16, 4, 4);
+    });
+
+    // Sand Viper — ranged desert enemy, 28x14
+    mk('desert_snake', 28, 14, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#8a9a3a';
+        c.fillRect(2, 8, 24, 4);
+        c.fillStyle = '#9aaa4a';
+        c.fillRect(4, 7, 20, 3);
+        c.fillStyle = '#7a8a2a';
+        c.fillRect(6, 10, 16, 2);
+        // Head
+        c.fillStyle = '#9aaa4a';
+        c.fillRect(22, 5, 6, 6);
+        c.fillStyle = '#000';
+        c.fillRect(24, 7, 2, 2);
+        c.fillStyle = '#e74c3c';
+        c.fillRect(27, 5, 1, 3);
+        // Pattern
+        c.fillStyle = '#6a7a1a';
+        c.fillRect(6, 8, 3, 2);
+        c.fillRect(12, 8, 3, 2);
+        c.fillRect(18, 8, 3, 2);
+    });
+
+    // Sun Lizard — desert mage, 24x22
+    mk('desert_lizard', 24, 22, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#d4a040';
+        c.fillRect(6, 8, 12, 8);
+        c.fillRect(4, 10, 16, 5);
+        c.fillStyle = '#e8b850';
+        c.fillRect(7, 9, 10, 6);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(8, 10, 3, 3);
+        c.fillRect(13, 10, 3, 3);
+        c.fillStyle = '#000';
+        c.fillRect(9, 11, 2, 2);
+        c.fillRect(14, 11, 2, 2);
+        c.fillStyle = '#b89030';
+        c.fillRect(2, 10, 3, 4);
+        c.fillRect(19, 10, 3, 4);
+        c.fillStyle = '#c8a038';
+        c.fillRect(8, 16, 3, 4);
+        c.fillRect(13, 16, 3, 4);
+    });
+
+    // Dune Djinn — desert healer, 22x28
+    mk('desert_djinn', 22, 28, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#e8c860';
+        c.fillRect(6, 2, 10, 4);
+        c.fillRect(4, 4, 14, 6);
+        c.fillStyle = '#f8d870';
+        c.fillRect(6, 5, 10, 4);
+        c.fillStyle = '#d4b050';
+        c.fillRect(5, 10, 12, 10);
+        c.fillRect(3, 16, 16, 8);
+        c.fillStyle = '#e8c860';
+        c.fillRect(6, 12, 10, 8);
+        c.fillStyle = '#000';
+        c.fillRect(8, 11, 2, 2);
+        c.fillRect(12, 11, 2, 2);
+        c.fillStyle = '#f8e080';
+        c.fillRect(3, 24, 4, 2);
+        c.fillRect(15, 24, 4, 2);
+        c.fillStyle = 'rgba(255,220,100,0.3)';
+        c.fillRect(1, 20, 3, 6);
+        c.fillRect(18, 20, 3, 6);
+    });
+
+    // Sand Wyrm boss — giant burrowing worm, 50x60
+    mk('sand_wyrm', 50, 60, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#a88430';
+        c.fillRect(10, 10, 30, 20);
+        c.fillStyle = '#b89440';
+        c.fillRect(12, 12, 26, 16);
+        c.fillStyle = '#c8a44a';
+        c.fillRect(14, 14, 22, 12);
+        // Head
+        c.fillStyle = '#a88430';
+        c.fillRect(30, 2, 12, 12);
+        c.fillRect(34, 0, 10, 10);
+        c.fillStyle = '#c8a44a';
+        c.fillRect(32, 4, 8, 6);
+        c.fillStyle = '#f1c40f';
+        c.fillRect(34, 4, 3, 3);
+        c.fillRect(39, 4, 3, 3);
+        c.fillStyle = '#000';
+        c.fillRect(35, 5, 2, 2);
+        c.fillRect(40, 5, 2, 2);
+        // Teeth
+        c.fillStyle = '#fff';
+        c.fillRect(36, 10, 2, 3);
+        c.fillRect(41, 10, 2, 3);
+        // Body segments
+        c.fillStyle = '#8a6a28';
+        c.fillRect(8, 30, 34, 8);
+        c.fillRect(6, 38, 38, 8);
+        c.fillRect(10, 46, 30, 8);
+        c.fillStyle = '#b89440';
+        c.fillRect(10, 32, 30, 4);
+        c.fillRect(8, 40, 34, 4);
+        c.fillRect(12, 48, 26, 4);
+        // Spikes
+        c.fillStyle = '#d4a040';
+        c.fillRect(8, 28, 4, 4);
+        c.fillRect(38, 28, 4, 4);
+        c.fillRect(10, 44, 3, 3);
+        c.fillRect(37, 44, 3, 3);
+    });
+
+    // === SWAMP BIOME ENEMIES (optional zone) ===
+
+    // Bog Turtle — armored swamp tank, 34x24
+    mk('swamp_turtle', 34, 24, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#4a3a1a';
+        c.fillRect(4, 10, 26, 10);
+        c.fillRect(2, 12, 30, 8);
+        c.fillStyle = '#5a4a2a';
+        c.fillRect(6, 11, 22, 8);
+        c.fillStyle = '#3a2a0a';
+        c.fillRect(4, 14, 6, 3);
+        c.fillRect(24, 14, 6, 3);
+        c.fillStyle = '#6a5a3a';
+        c.fillRect(8, 12, 18, 6);
+        c.fillRect(10, 13, 14, 4);
+        // Head
+        c.fillStyle = '#5a4a2a';
+        c.fillRect(28, 8, 6, 8);
+        c.fillStyle = '#000';
+        c.fillRect(31, 10, 2, 2);
+        // Legs
+        c.fillStyle = '#3a2a0a';
+        c.fillRect(6, 20, 5, 4);
+        c.fillRect(23, 20, 5, 4);
+        c.fillRect(0, 16, 4, 4);
+        c.fillRect(30, 16, 4, 4);
+    });
+
+    // Bog Frog — swamp assassin, 28x20
+    mk('swamp_frog', 28, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#3a7a3a';
+        c.fillRect(6, 8, 16, 8);
+        c.fillRect(4, 10, 20, 6);
+        c.fillStyle = '#4a9a4a';
+        c.fillRect(7, 9, 14, 6);
+        c.fillStyle = '#2a6a2a';
+        c.fillRect(2, 6, 6, 6);
+        c.fillRect(20, 6, 6, 6);
+        c.fillStyle = '#5aaa5a';
+        c.fillRect(8, 10, 4, 3);
+        c.fillRect(16, 10, 4, 3);
+        c.fillStyle = '#000';
+        c.fillRect(9, 11, 2, 2);
+        c.fillRect(17, 11, 2, 2);
+        c.fillStyle = '#2a5a2a';
+        c.fillRect(6, 16, 6, 4);
+        c.fillRect(16, 16, 6, 4);
+    });
+
+    // Swamp Mosquito — ranged swamp enemy, 24x16
+    mk('swamp_mosquito', 24, 16, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#2a2a3a';
+        c.fillRect(6, 6, 12, 6);
+        c.fillRect(8, 4, 8, 8);
+        c.fillStyle = '#3a3a4a';
+        c.fillRect(8, 6, 8, 4);
+        c.fillStyle = '#aa3333';
+        c.fillRect(7, 8, 2, 2);
+        c.fillRect(15, 8, 2, 2);
+        // Proboscis
+        c.fillStyle = '#555';
+        c.fillRect(18, 8, 6, 1);
+        // Wings
+        c.fillStyle = 'rgba(180,200,220,0.5)';
+        c.fillRect(0, 2, 6, 3);
+        c.fillRect(18, 2, 6, 3);
+        c.fillStyle = '#2a2a3a';
+        c.fillRect(2, 12, 3, 4);
+        c.fillRect(19, 12, 3, 4);
+    });
+
+    // Bog Shaman — swamp necro, 22x26
+    mk('swamp_shaman', 22, 26, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#2a3a1a';
+        c.fillRect(6, 2, 10, 4);
+        c.fillRect(4, 4, 14, 6);
+        c.fillStyle = '#3a4a2a';
+        c.fillRect(6, 5, 10, 4);
+        c.fillStyle = '#4a3a1a';
+        c.fillRect(5, 10, 12, 10);
+        c.fillRect(3, 16, 16, 8);
+        c.fillStyle = '#5a4a2a';
+        c.fillRect(6, 12, 10, 8);
+        c.fillStyle = '#aaff44';
+        c.fillRect(8, 11, 2, 2);
+        c.fillRect(12, 11, 2, 2);
+        c.fillStyle = '#3a2a0a';
+        c.fillRect(3, 24, 4, 2);
+        c.fillRect(15, 24, 4, 2);
+        // Staff
+        c.fillStyle = '#5a3a1a';
+        c.fillRect(18, 6, 2, 18);
+        c.fillStyle = '#aaff44';
+        c.fillRect(17, 4, 4, 4);
+    });
+
+    // Will-o-Wisp — swamp healer, 20x20
+    mk('swamp_wisp', 20, 20, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#8ae04a';
+        c.fillRect(6, 6, 8, 8);
+        c.fillRect(4, 8, 12, 6);
+        c.fillStyle = '#b4f07a';
+        c.fillRect(7, 7, 6, 6);
+        c.fillStyle = '#e8ffc0';
+        c.fillRect(8, 8, 4, 4);
+        c.fillStyle = '#000';
+        c.fillRect(9, 9, 2, 2);
+        c.fillRect(12, 9, 2, 2);
+        c.fillStyle = 'rgba(140,240,90,0.35)';
+        c.fillRect(2, 10, 4, 4);
+        c.fillRect(14, 10, 4, 4);
+        c.fillRect(6, 2, 4, 4);
+        c.fillRect(10, 14, 4, 4);
+    });
+
+    // Slime King boss — giant crowned slime, 48x48
+    mk('slime_king', 48, 48, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#2a8a2a';
+        c.fillRect(10, 16, 28, 22);
+        c.fillRect(6, 20, 36, 18);
+        c.fillRect(8, 14, 32, 26);
+        c.fillStyle = '#3aaa3a';
+        c.fillRect(12, 18, 24, 18);
+        c.fillRect(8, 22, 32, 14);
+        c.fillStyle = '#4aca4a';
+        c.fillRect(14, 20, 20, 12);
+        // Eyes
+        c.fillStyle = '#fff';
+        c.fillRect(14, 22, 6, 6);
+        c.fillRect(28, 22, 6, 6);
+        c.fillStyle = '#000';
+        c.fillRect(16, 24, 3, 3);
+        c.fillRect(30, 24, 3, 3);
+        // Crown
+        c.fillStyle = '#f1c40f';
+        c.fillRect(16, 6, 16, 6);
+        c.fillRect(14, 8, 20, 6);
+        c.fillRect(14, 2, 4, 6);
+        c.fillRect(24, 2, 4, 6);
+        c.fillStyle = '#d4a020';
+        c.fillRect(16, 8, 14, 4);
+        // Acid drips
+        c.fillStyle = '#2a6a2a';
+        c.fillRect(6, 36, 6, 6);
+        c.fillRect(36, 38, 6, 5);
+        c.fillRect(20, 40, 8, 6);
+        c.fillStyle = '#3a8a3a';
+        c.fillRect(8, 38, 4, 4);
+        c.fillRect(38, 40, 4, 3);
     });
 }

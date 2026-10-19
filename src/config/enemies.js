@@ -329,6 +329,62 @@ export const THRONE_BOSS_MINION_ASSASSIN = {
     bw: 14, bh: 22, hp: 90, dmg: 25, exp: 38
 };
 
+// Desert (optional zone) enemies
+export const DESERT_CAMP_COUNT = 10;
+export const DESERT_MOBS_PER_CAMP = 4;
+export const DESERT_ENEMY_TYPES = {
+    tank:     { key: 'desert_crab',    name: 'Sand Crab',      nameRu: 'Песчаный Краб',    nameDe: 'Sandkrabbe',      texKey: 'desert_crab',    hp: 700, dmg: 42, exp: 110, bw: 22, bh: 20, role: 'tank', hasShield: true, scale: 1.2 },
+    assassin: { key: 'desert_scorpion', name: 'Sand Scorpion', nameRu: 'Песчаный Скорпион', nameDe: 'Sandskorpion',    texKey: 'desert_scorpion', hp: 300, dmg: 58, exp: 98,  bw: 16, bh: 14, role: 'assassin', scale: 0.8 },
+    archer:   { key: 'desert_snake',   name: 'Sand Viper',     nameRu: 'Песчаная Змея',    nameDe: 'Sandviper',      texKey: 'desert_snake',   hp: 350, dmg: 40, exp: 90,  bw: 18, bh: 12, role: 'archer', scale: 0.9 },
+    mage:     { key: 'desert_lizard',  name: 'Sun Lizard',     nameRu: 'Солнечная Ящерица', nameDe: 'Sonneneidechse', texKey: 'desert_lizard',  hp: 260, dmg: 62, exp: 105, bw: 14, bh: 18, role: 'mage', scale: 0.9 },
+    healer:   { key: 'desert_djinn',   name: 'Dune Djinn',     nameRu: 'Дюнный Джинн',     nameDe: 'Dünengeist',     texKey: 'desert_djinn',   hp: 300, dmg: 28, exp: 95,  bw: 14, bh: 20, role: 'healer', scale: 0.85 }
+};
+
+// Desert boss
+export const DESERT_BOSS_TYPE = {
+    key: 'sand_wyrm', name: 'Sand Wyrm', nameRu: 'Песчаный Червь', nameDe: 'Sandwurm',
+    texKey: 'sand_wyrm',
+    bw: 50, bh: 60,
+    speed: 60, hp: 6500, dmg: 52, exp: 2000,
+    burrowInterval: 5000, burrowRadius: 110, burrowDmgMul: 1.6,
+    sandBlastInterval: 3000, sandBlastDmgMul: 1.2,
+    summonInterval: 9000, summonCount: 3,
+    phaseThresholds: [0.66, 0.33]
+};
+export const DESERT_BOSS_MINION = {
+    key: 'sand_spawn', name: 'Sand Spawn', nameRu: 'Песчаный Порожденец', nameDe: 'Sandbrut',
+    texKey: 'desert_snake',
+    bw: 14, bh: 10, hp: 90, dmg: 18, exp: 25
+};
+
+// Swamp (optional zone) enemies
+export const SWAMP_CAMP_COUNT = 10;
+export const SWAMP_MOBS_PER_CAMP = 4;
+export const SWAMP_ENEMY_TYPES = {
+    tank:     { key: 'swamp_turtle',   name: 'Bog Turtle',     nameRu: 'Болотная Черепаха', nameDe: 'Sumpfschildkröte', texKey: 'swamp_turtle',   hp: 720, dmg: 40, exp: 112, bw: 24, bh: 20, role: 'tank', hasShield: true, scale: 1.2 },
+    assassin: { key: 'swamp_frog',     name: 'Bog Frog',       nameRu: 'Болотная Лягушка', nameDe: 'Sumpffrosch',     texKey: 'swamp_frog',     hp: 300, dmg: 55, exp: 95,  bw: 16, bh: 14, role: 'assassin', scale: 0.8 },
+    archer:   { key: 'swamp_mosquito', name: 'Swamp Mosquito', nameRu: 'Болотный Комар',   nameDe: 'Sumpfmücke',      texKey: 'swamp_mosquito', hp: 340, dmg: 38, exp: 88,  bw: 18, bh: 14, role: 'archer', scale: 0.9 },
+    mage:     { key: 'swamp_shaman',   name: 'Bog Shaman',     nameRu: 'Болотный Шаман',   nameDe: 'Sumpfschamane',   texKey: 'swamp_shaman',   hp: 270, dmg: 60, exp: 102, bw: 14, bh: 20, role: 'necro', scale: 0.9 },
+    healer:   { key: 'swamp_wisp',     name: 'Will-o-Wisp',    nameRu: 'Блуждающий Огонёк', nameDe: 'Irrlicht',       texKey: 'swamp_wisp',     hp: 280, dmg: 26, exp: 90,  bw: 12, bh: 12, role: 'healer', scale: 0.8 }
+};
+
+// Swamp boss
+export const SWAMP_BOSS_TYPE = {
+    key: 'slime_king', name: 'Slime King', nameRu: 'Король Слизней', nameDe: 'Schleimkönig',
+    texKey: 'slime_king',
+    bw: 48, bh: 48,
+    speed: 50, hp: 6800, dmg: 50, exp: 2100,
+    splitInterval: 6000, splitCount: 3,
+    acidSpitInterval: 3500, acidSpitDmgMul: 1.3,
+    summonInterval: 8000, summonCount: 3,
+    phaseThresholds: [0.66, 0.33]
+};
+export const SWAMP_BOSS_MINION = {
+    key: 'slime_spawn', name: 'Slime Spawn', nameRu: 'Слизневый Отпрыск', nameDe: 'Schleimbrut',
+    texKey: 'slime',
+    bw: 12, bh: 12, hp: 80, dmg: 15, exp: 22
+};
+
 // Bestiary
 export const BESTIARY_LEVELS = [
     { level: 0, killsRequired: 0,   expBonus: 0,   info: 'description' },

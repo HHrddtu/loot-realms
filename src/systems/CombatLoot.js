@@ -95,6 +95,8 @@ export class CombatLoot {
         if (enemy.hpFill) { enemy.hpFill.destroy(); enemy.hpFill = null; }
         if (enemy.shieldIcon) { enemy.shieldIcon.destroy(); enemy.shieldIcon = null; }
         if (enemy.roleIcon) { enemy.roleIcon.destroy(); enemy.roleIcon = null; }
+        if (enemy.slowIcon) { enemy.slowIcon.destroy(); enemy.slowIcon = null; }
+        if (enemy.statusIcon) { enemy.statusIcon.destroy(); enemy.statusIcon = null; }
         enemy.destroy();
 
         return {

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { EnemyAI } from './EnemyAI.js';
 
 export class SpellEffects {
     constructor(scene) {
@@ -563,6 +564,7 @@ export class SpellEffects {
                         e.stats._slowed = true;
                         e.stats._slowTimer = 1;
                         e.stats._slowPct = slowPct;
+                        if (EnemyAI._applyStatus) EnemyAI._applyStatus(e, 'poison', { dps: dmgPerSec, duration: 3 });
                     }
                 });
             }

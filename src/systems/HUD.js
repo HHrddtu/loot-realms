@@ -54,6 +54,7 @@ export class HUD {
         this.scene.muteText = this.scene.add.text(790, 30, 'SOUND', { fontSize: '10px', fill: '#27ae60', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(1, 0.5).setScrollFactor(0).setDepth(23).setInteractive({ useHandCursor: true });
         this.scene.muteText.on('pointerdown', () => this._toggleMute());
         this.scene.talentText = this.scene.add.text(400, 36, '', { fontSize: '9px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setScrollFactor(0).setDepth(23);
+        this.scene.masteryText = this.scene.add.text(400, 47, '', { fontSize: '9px', fill: '#2ecc71', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setScrollFactor(0).setDepth(23);
 
         this.scene.questTrackerBg = s(this.scene.add.rectangle(400, 570, 350, 18, 0x0a0a1a, 0.7).setStrokeStyle(1, 0x555555));
         this.scene.questTracker = sx(this.scene.add.text(400, 570, '', { fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 1 }).setOrigin(0.5));
@@ -247,7 +248,7 @@ export class HUD {
         if (this.scene.diffText) this.scene.diffText.setText(this.scene.difficulty).setColor(DIFF_COLORS[this.scene.difficulty] || '#f39c12');
         
         // Zone indicator
-        const zoneNames = { forest: 'Forest', arena: 'Arena', mine: 'Mine', cave: 'Cave', village: 'Village', hell: 'Hell', depths: 'Depths', cursed: 'Cursed Lands', shadow: 'Shadow', tower: 'Tower', throne: 'Throne', snowy: 'Snowy Village', castle: 'Castle', meadow: 'Meadow', cemetery: 'Cemetery', mine_boss: 'Mine Boss' };
+        const zoneNames = { forest: 'Forest', arena: 'Arena', mine: 'Mine', cave: 'Cave', village: 'Village', hell: 'Hell', depths: 'Depths', cursed: 'Cursed Lands', shadow: 'Shadow', tower: 'Tower', throne: 'Throne', snowy: 'Snowy Village', castle: 'Castle', meadow: 'Meadow', cemetery: 'Cemetery', mine_boss: 'Mine Boss', desert: 'Desert', swamp: 'Swamp' };
         if (this.scene.zoneText) this.scene.zoneText.setText(zoneNames[this.scene.zone] || this.scene.zone);
 
         // Quest tracker
@@ -300,6 +301,9 @@ export class HUD {
             }
         }
         this.scene.talentText.setText(this.scene.talentPoints > 0 ? 'TALENTS: ' + this.scene.talentPoints + ' [T]' : '');
+        if (this.scene.masteryText) {
+            this.scene.masteryText.setText((this.scene.masteryPoints || 0) > 0 ? 'MASTERY: ' + this.scene.masteryPoints + ' [T]' : '');
+        }
         if (this.scene.goldText) this.scene.goldText.setText('Gold: ' + (this.scene.gold || 0));
         if (this.scene.crystalText) this.scene.crystalText.setText('\u{1F48E} ' + (this.scene.crystals || 0));
         if (this.scene.deathsText) this.scene.deathsText.setText('Deaths: ' + (this.scene.deaths || 0));

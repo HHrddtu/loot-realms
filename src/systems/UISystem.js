@@ -39,7 +39,7 @@ export class UISystem {
     }
 
     _openTalentTree() {
-        this._pauseAndLaunch('TalentTree', { unlockedTalents: this.scene.unlockedTalents, talentPoints: this.scene.talentPoints, classKey: this.scene.classKey, unlockedAccountTalents: this.scene.unlockedAccountTalents, accountTalentPoints: this.scene.accountTalentPoints, accountLevel: this.scene.accountLevel, lockedBranches: this.scene.lockedBranches || [], playerGold: this.scene.gold || 0 });
+        this._pauseAndLaunch('TalentTree', { unlockedTalents: this.scene.unlockedTalents, talentPoints: this.scene.talentPoints, classKey: this.scene.classKey, unlockedAccountTalents: this.scene.unlockedAccountTalents, accountTalentPoints: this.scene.accountTalentPoints, accountLevel: this.scene.accountLevel, lockedBranches: this.scene.lockedBranches || [], playerGold: this.scene.gold || 0, playerLevel: this.scene.playerLevel || 1, unlockedMastery: this.scene.unlockedMastery || [], masteryPoints: this.scene.masteryPoints || 0 });
     }
 
     _openBestiary() {

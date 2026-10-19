@@ -155,6 +155,9 @@ export default class MenuScene extends Phaser.Scene {
                     accountLevel: a ? a.accountLevel || 1 : 1,
                     lockedBranches: a ? (a.lockedBranchesPerClass || {})[a.classKey || 'sage'] || [] : [],
                     playerGold: 0,
+                    playerLevel: 1,
+                    unlockedMastery: [],
+                    masteryPoints: 0,
                     returnScene: 'Menu'
                 });
                 this.scene.pause();

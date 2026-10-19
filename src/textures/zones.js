@@ -1,4 +1,4 @@
-export function drawZoneTextures(mk) {
+﻿export function drawZoneTextures(mk) {
     mk('ground', 800, 200, (c) => {
         c.fillStyle = '#1a472a';
         c.fillRect(0, 0, 800, 200);
@@ -124,7 +124,7 @@ export function drawZoneTextures(mk) {
         c.fillRect(4, 15, 32, 2);
     });
 
-    // Depths floor — dark stone with cracks, bones, skulls (tileable 800x200)
+    // Depths floor вЂ” dark stone with cracks, bones, skulls (tileable 800x200)
     mk('depths_ground', 800, 200, (c) => {
         c.imageSmoothingEnabled = false;
 
@@ -250,7 +250,7 @@ export function drawZoneTextures(mk) {
         c.fill();
     });
 
-    // Depths bone chest — 28x24
+    // Depths bone chest вЂ” 28x24
     mk('depths_chest', 28, 24, (c) => {
         c.imageSmoothingEnabled = false;
         // Chest base (bone)
@@ -298,7 +298,7 @@ export function drawZoneTextures(mk) {
         c.fillRect(8, 12, 12, 6);
     });
 
-    // Portal — stone frame with purple void (64x80)
+    // Portal вЂ” stone frame with purple void (64x80)
     mk('portal', 64, 80, (c) => {
         c.imageSmoothingEnabled = false;
         // Outer glow
@@ -383,7 +383,7 @@ export function drawZoneTextures(mk) {
         c.fillRect(28, 32, 1, 1);
     });
 
-    // Swamp ground — murky water, mud, lily pads (800x200)
+    // Swamp ground вЂ” murky water, mud, lily pads (800x200)
     mk('swamp_ground', 800, 200, (c) => {
         c.imageSmoothingEnabled = false;
         // Dark murky water base
@@ -454,7 +454,7 @@ export function drawZoneTextures(mk) {
         c.fill();
     });
 
-    // Poison forest ground — sickly green/brown, mushrooms, toxic (800x200)
+    // Poison forest ground вЂ” sickly green/brown, mushrooms, toxic (800x200)
     mk('poison_forest_ground', 800, 200, (c) => {
         c.imageSmoothingEnabled = false;
         // Sickly base
@@ -525,7 +525,7 @@ export function drawZoneTextures(mk) {
         }
     });
 
-    // Dead field ground — cracked earth, dead grass, bones (800x200)
+    // Dead field ground вЂ” cracked earth, dead grass, bones (800x200)
     mk('dead_field_ground', 800, 200, (c) => {
         c.imageSmoothingEnabled = false;
         // Dry cracked earth
@@ -591,7 +591,7 @@ export function drawZoneTextures(mk) {
         c.fill();
     });
 
-    // Temple ground — stone tiles, moss, carvings (800x200)
+    // Temple ground вЂ” stone tiles, moss, carvings (800x200)
     mk('temple_ground', 800, 200, (c) => {
         c.imageSmoothingEnabled = false;
         // Stone base
@@ -646,7 +646,7 @@ export function drawZoneTextures(mk) {
         c.fillRect(750, 30, 20, 1);
     });
 
-    // Heart ground — pulsing red/fleshy, veins, organic (800x200)
+    // Heart ground вЂ” pulsing red/fleshy, veins, organic (800x200)
     mk('heart_ground', 800, 200, (c) => {
         c.imageSmoothingEnabled = false;
         // Fleshy base
@@ -712,7 +712,7 @@ export function drawZoneTextures(mk) {
         c.fill();
     });
 
-    // Cursed ground — dark swamp with corrupted vegetation (800x200 tileable)
+    // Cursed ground вЂ” dark swamp with corrupted vegetation (800x200 tileable)
     mk('cursed_ground', 800, 200, (c) => {
         c.imageSmoothingEnabled = false;
         // Base dark swamp
@@ -784,7 +784,7 @@ export function drawZoneTextures(mk) {
         c.fill();
     });
 
-    // Cursed chest — dark wood with purple runes (28x24)
+    // Cursed chest вЂ” dark wood with purple runes (28x24)
     mk('cursed_chest', 28, 24, (c) => {
         c.imageSmoothingEnabled = false;
         // Chest base (dark wood)
@@ -844,7 +844,7 @@ export function drawZoneTextures(mk) {
         c.fillRect(8, 4, 12, 6);
     });
 
-    // Shadow District ground — distorted mirror, dark reflections (800x200)
+    // Shadow District ground вЂ” distorted mirror, dark reflections (800x200)
     mk('shadow_ground', 800, 200, (c) => {
         c.imageSmoothingEnabled = false;
         // Dark mirror base
@@ -926,7 +926,7 @@ export function drawZoneTextures(mk) {
         c.fill();
     });
 
-    // Shadow chest — obsidian with void energy (28x24)
+    // Shadow chest вЂ” obsidian with void energy (28x24)
     mk('shadow_chest', 28, 24, (c) => {
         c.imageSmoothingEnabled = false;
         // Chest base (obsidian)
@@ -980,7 +980,7 @@ export function drawZoneTextures(mk) {
         c.fillRect(6, 5, 16, 2);
     });
 
-    // Tower ground — stone walls, torches, banners (800x200)
+    // Tower ground вЂ” stone walls, torches, banners (800x200)
     mk('tower_ground', 800, 200, (c) => {
         c.imageSmoothingEnabled = false;
         // Dark stone base
@@ -1097,7 +1097,7 @@ export function drawZoneTextures(mk) {
         c.fill();
     });
 
-    // Tower chest — iron-bound wood (28x24)
+    // Tower chest вЂ” iron-bound wood (28x24)
     mk('tower_chest', 28, 24, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#3a2a1a';
@@ -1135,7 +1135,7 @@ export function drawZoneTextures(mk) {
         c.fillRect(4, 22, 20, 2);
     });
 
-    // Throne ground — golden throne, marble columns (800x200)
+    // Throne ground вЂ” golden throne, marble columns (800x200)
     mk('throne_ground', 800, 200, (c) => {
         c.imageSmoothingEnabled = false;
         // White marble base
@@ -1232,7 +1232,7 @@ export function drawZoneTextures(mk) {
         c.fill();
     });
 
-    // Throne chest — ornate gold (28x24)
+    // Throne chest вЂ” ornate gold (28x24)
     mk('throne_chest', 28, 24, (c) => {
         c.imageSmoothingEnabled = false;
         c.fillStyle = '#d4ac0d';
@@ -1265,5 +1265,40 @@ export function drawZoneTextures(mk) {
         c.fillRect(6, 18, 16, 1);
         c.fillStyle = '#b8960d';
         c.fillRect(4, 22, 20, 2);
+    });
+    // Desert ground — golden sand with dunes (800x200)
+    mk('desert_ground', 800, 200, (c) => {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#c8a24a';
+        c.fillRect(0, 0, 800, 200);
+        c.fillStyle = '#d4b05a';
+        for (let i = 0; i < 300; i++) {
+            c.fillRect(Math.random() * 800, Math.random() * 200, 3, 1);
+        }
+        c.fillStyle = '#b89440';
+        for (let i = 0; i < 150; i++) {
+            c.fillRect(Math.random() * 800, Math.random() * 200, 2, 2);
+        }
+        c.fillStyle = '#a88430';
+        c.fillRect(0, 140, 800, 60);
+        c.fillStyle = '#96762a';
+        c.fillRect(0, 160, 800, 40);
+        c.fillStyle = '#d8b860';
+        c.fillRect(50, 30, 40, 12);
+        c.fillRect(350, 60, 60, 15);
+        c.fillRect(620, 40, 50, 10);
+        // Sparse desert plants
+        c.fillStyle = '#7a8a3a';
+        c.fillRect(120, 80, 2, 14);
+        c.fillRect(118, 80, 6, 2);
+        c.fillRect(500, 100, 2, 12);
+        c.fillRect(498, 100, 6, 2);
+        c.fillRect(700, 120, 2, 10);
+        c.fillRect(698, 120, 6, 2);
+        // Rocks
+        c.fillStyle = '#8a7a4a';
+        c.fillRect(200, 120, 14, 10);
+        c.fillRect(420, 140, 12, 8);
+        c.fillRect(650, 150, 16, 10);
     });
 }

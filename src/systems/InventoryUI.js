@@ -127,6 +127,15 @@ export class InventoryUI {
         }
 
         if (item.type === 'equip') {
+            if (item.enchant && item.enchant.stats) {
+                const es = item.enchant.stats;
+                _mkInfo(this.scene.add.text(px + 6, iy, '\u2728 ' + (item.enchant.nameRu || item.enchant.name), { fontSize: '9px', fill: '#e67e22', fontFamily: 'Arial', fontStyle: 'bold' })); iy += lh;
+                const eLabels = { hpPercent: 'HP%', damagePercent: 'DMG%', speedPercent: 'SPD%', critPercent: 'Crit%', spellPercent: 'Spell%', dodgePercent: 'Dodge%', regenPercent: 'Regen%', damageReduction: 'DR' };
+                Object.keys(eLabels).forEach(k => {
+                    if (es[k]) { _mkInfo(this.scene.add.text(px + 12, iy, '+' + es[k] + '% ' + eLabels[k], { fontSize: '9px', fill: '#e67e22', fontFamily: 'Arial' })); iy += lh - 1; }
+                });
+                iy += 2;
+            }
             if (item.slot === 'weapon') {
                 _mkInfo(this.scene.add.text(px + 6, iy, 'Atk: ' + (item.attackType || 'standard'), { fontSize: '10px', fill: '#f1c40f', fontFamily: 'Arial' })); iy += lh;
                 if (item.attackRange) { _mkInfo(this.scene.add.text(px + 6, iy, 'Rng: ' + item.attackRange, { fontSize: '9px', fill: '#aaa', fontFamily: 'Arial' })); iy += lh; }

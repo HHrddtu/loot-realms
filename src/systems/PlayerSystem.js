@@ -1,9 +1,10 @@
 import {
     DIFF_MULT, MATERIAL_SLOTS, EQUIP_BAG_SLOTS, ACCOUNT_EQUIP_BAG_SLOTS, EMPTY_ACCOUNT_EQUIPMENT,
-    SHOP_EQUIP_PRICES, SELL_PRICE_RATIO
+    SHOP_EQUIP_PRICES, SELL_PRICE_RATIO, MASTERY_LEVEL_REQ
 } from '../config/index.js';
 import { getClassData, getClassStats } from '../classes.js';
 import { getTalentEffects } from '../talents.js';
+import { getMasteryEffects, mergeMasteryEffects } from '../mastery.js';
 import { getAccountTalentEffects } from '../accountTalents.js';
 import { getAllBestiaryBonuses } from '../bestiary.js';
 import { getMaterialBonuses } from '../materialBook.js';
@@ -62,7 +63,9 @@ export class PlayerSystem {
         });
 
         const lvl = this.scene.playerLevel || 1;
-        const te = this.scene.talentEffects || getTalentEffects(this.scene.unlockedTalents || []);
+        let te = this.scene.talentEffects ? { ...this.scene.talentEffects } : getTalentEffects(this.scene.unlockedTalents || []);
+        const me = getMasteryEffects(this.scene.unlockedMastery || []);
+        te = mergeMasteryEffects(te, me);
         const ae = this.scene.accountEffects || {};
 
         let accHpPercent = (ae.hpPercent || 0);
@@ -107,6 +110,21 @@ export class PlayerSystem {
         if (setBonuses.regenFlat) { /* handled below */ }
         if (setBonuses.regenPercent) { /* handled below */ }
         if (setBonuses.corruptionMax) accCorruptionMax += setBonuses.corruptionMax;
+
+        // Enchant bonuses from equipped gear (config/enchanting.js)
+        let enchantRegenPercent = 0, enchantDamageReduction = 0;
+        [this.scene.equipment.weapon, this.scene.equipment.armor, this.scene.equipment.accessory].forEach(item => {
+            const es = item && item.enchant && item.enchant.stats;
+            if (!es) return;
+            accHpPercent += es.hpPercent || 0;
+            accDmgPercent += es.damagePercent || 0;
+            accSpdPercent += es.speedPercent || 0;
+            accSpellPercent += es.spellPercent || 0;
+            accCritPercent += es.critPercent || 0;
+            accDodgePercent += es.dodgePercent || 0;
+            enchantRegenPercent += es.regenPercent || 0;
+            enchantDamageReduction += es.damageReduction || 0;
+        });
 
         const upgradeLevels = this.scene.upgradeLevels || {};
         const upgHp = (upgradeLevels.upg_hp || 0) * 5;
@@ -158,7 +176,7 @@ export class PlayerSystem {
         this.scene.computedCritDamage = 1.5 + (te.critDamagePercent || 0) / 100;
         this.scene.computedDodgePercent = (te.dodgePercent || 0) + accDodgePercent;
         this.scene.computedLifeSteal = (te.lifeSteal || 0) + (ae.lifeSteal || 0);
-        this.scene.computedDamageReduction = (te.damageReduction || 0) + (ae.damageReduction || 0) + (petStats.damageReduction || 0) + boostDefPct + divineDefBuff * 100 + ((this.scene._consumableBonusDef || 0) * 100);
+        this.scene.computedDamageReduction = (te.damageReduction || 0) + (ae.damageReduction || 0) + (petStats.damageReduction || 0) + boostDefPct + divineDefBuff * 100 + ((this.scene._consumableBonusDef || 0) * 100) + enchantDamageReduction;
         this.scene.computedDamageReflection = (te.damageReflection || 0) + (ae.damageReflection || 0);
         this.scene.computedCooldownReduction = (te.cooldownReduction || 0) + (ae.cooldownReduction || 0);
         this.scene.computedAreaDamage = (te.areaDamage || 0) + (ae.areaDamage || 0);
@@ -173,7 +191,7 @@ export class PlayerSystem {
             }
         });
         this.scene.computedHealPower = (te.healPower || 0) + (ae.healPower || 0);
-        this.scene.computedRegenPercent = (te.regenPercent || 0) + (ae.regenPercent || 0) + (petStats.regenPercent || 0) + (setBonuses.regenPercent || 0);
+        this.scene.computedRegenPercent = (te.regenPercent || 0) + (ae.regenPercent || 0) + (petStats.regenPercent || 0) + (setBonuses.regenPercent || 0) + enchantRegenPercent;
         this.scene.computedDotPower = te.dotPower || 0;
         this.scene.computedDotDuration = te.dotDuration || 0;
         this.scene.computedShieldPercent = te.shieldPercent || 0;
@@ -442,6 +460,8 @@ export class PlayerSystem {
             this.scene.playerLevel++;
             const gotTalent = this.scene.playerLevel % 3 === 0;
             if (gotTalent) this.scene.talentPoints++;
+            const gotMastery = this.scene.playerLevel >= MASTERY_LEVEL_REQ;
+            if (gotMastery) this.scene.masteryPoints = (this.scene.masteryPoints || 0) + 1;
             this.scene.classStats = getClassStats(this.scene.classKey, this.scene.playerLevel);
             this.recalcStats();
             this.scene.playerHP = this.scene.playerMaxHP;
@@ -449,7 +469,8 @@ export class PlayerSystem {
             this.scene.cameras.main.flash(300, 241, 196, 15);
             if (this.scene.particles) this.scene.particles.spawnLevelUp(this.scene.player.x, this.scene.player.y);
             const talentMsg = gotTalent ? ' [+1 Talent]' : '';
-            const lt = this.scene.add.text(400, 250, 'LEVEL UP! Lv.' + this.scene.playerLevel + talentMsg, {
+            const masteryMsg = gotMastery ? ' [+1 Mastery]' : '';
+            const lt = this.scene.add.text(400, 250, 'LEVEL UP! Lv.' + this.scene.playerLevel + talentMsg + masteryMsg, {
                 fontSize: '24px', fill: '#f1c40f', fontFamily: 'Arial',
                 fontStyle: 'bold', stroke: '#000', strokeThickness: 3
             }).setOrigin(0.5);

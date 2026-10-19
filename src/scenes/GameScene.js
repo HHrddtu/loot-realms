@@ -30,6 +30,7 @@ import { TutorialManager } from '../systems/TutorialManager.js';
 import { LoreItemSystem } from '../systems/LoreItemSystem.js';
 import { ForestBossAI } from '../systems/ForestBossAI.js';
 import { EnemyAI } from '../systems/EnemyAI.js';
+import { StatusIcons } from '../systems/StatusIcons.js';
 import { ForestZone } from '../zones/ForestZone.js';
 import { ArenaZone } from '../zones/ArenaZone.js';
 import { MineZone } from '../zones/MineZone.js';
@@ -43,6 +44,8 @@ import { TowerZone } from '../zones/TowerZone.js';
 import { ThroneZone } from '../zones/ThroneZone.js';
 import { SnowyZone } from '../zones/SnowyZone.js';
 import { CastleZone } from '../zones/CastleZone.js';
+import { DesertZone } from '../zones/DesertZone.js';
+import { SwampZone } from '../zones/SwampZone.js';
 import { MeadowZone } from '../zones/MeadowZone.js';
 import { CRYSTAL_RUN_CAPS } from '../config/pets.js';
 import { createAllAnimations } from '../config/animations.js';
@@ -72,6 +75,7 @@ export default class GameScene extends Phaser.Scene {
         this.playerSys = new PlayerSystem(this);
         this.spellSys = new SpellSystem(this);
         this.ui = new UISystem(this);
+        this.statusIcons = new StatusIcons(this);
         this.npc = new NpcSystem(this);
         this.particles = new ParticleSystem(this);
         this.particles.init();
@@ -98,7 +102,9 @@ export default class GameScene extends Phaser.Scene {
             throne: new ThroneZone(this),
             snowy: new SnowyZone(this),
             castle: new CastleZone(this),
-            meadow: new MeadowZone(this)
+            meadow: new MeadowZone(this),
+            desert: new DesertZone(this),
+            swamp: new SwampZone(this)
         };
         this.currentZone = null;
 
@@ -147,6 +153,8 @@ export default class GameScene extends Phaser.Scene {
         this.unlockedTalents = [];
         this.talentPoints = 0;
         this.lockedBranches = [];
+        this.unlockedMastery = [];
+        this.masteryPoints = 0;
         this._loadAccountTalents = () => this.saveLoad.loadAccountTalents();
         this._loadAccountTalents();
 
@@ -237,6 +245,10 @@ export default class GameScene extends Phaser.Scene {
                 startZoneMusic('snowy');
             } else if (this._savedZone === 'castle') {
                 this._setupZone('castle', this.zones.castle.currentRoom || 0);
+            } else if (this._savedZone === 'desert') {
+                this._setupZone('desert');
+            } else if (this._savedZone === 'swamp') {
+                this._setupZone('swamp');
             } else {
                 this._setupZone('forest');
             }
@@ -260,6 +272,7 @@ export default class GameScene extends Phaser.Scene {
             }
             if (this.particles) { this.particles.destroy(); this.particles = null; }
             if (this.petSys) { this.petSys.destroy(); this.petSys = null; }
+            if (this.statusIcons) { this.statusIcons.clear(); this.statusIcons = null; }
             if (this.autoSaveTimer) { this.autoSaveTimer.remove(); this.autoSaveTimer = null; }
             this.doSave();
             stopMusic();
@@ -685,6 +698,8 @@ export default class GameScene extends Phaser.Scene {
         this.accountTalentPoints = data.accountTalentPoints || 0;
         this.accountEffects = getAccountTalentEffects(this.unlockedAccountTalents);
         this.lockedBranches = data.lockedBranches || [];
+        this.unlockedMastery = data.unlockedMastery || [];
+        this.masteryPoints = data.masteryPoints || 0;
         this.recalcStats();
         this.menuOpen = false;
         this.physics.resume();
@@ -740,6 +755,7 @@ export default class GameScene extends Phaser.Scene {
         this._updateCorruption(delta);
         this._updateSpells(delta);
         this._updateConsumableBonuses(delta);
+        if (this.statusIcons) this.statusIcons.update(delta);
         this._updateRegen(delta);
         this._checkSpikeDamage(delta);
         this.petSys.updateFollow();

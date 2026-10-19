@@ -43,6 +43,8 @@ export class SaveLoadSystem {
             bossDefeated: s.zones.arena.bossDefeated ?? false,
             unlockedTalents: s.unlockedTalents ?? [],
             talentPoints: s.talentPoints ?? 0,
+            unlockedMastery: s.unlockedMastery ?? [],
+            masteryPoints: s.masteryPoints ?? 0,
             villageFrozen: s.zones.village.isFrozen ?? false,
             villageRestored: s.zones.village.isRestored ?? false,
             villageAllCleared: s.zones.village.allCleared ?? false,
@@ -54,6 +56,8 @@ export class SaveLoadSystem {
             towerBossDefeated: s.zones.tower.bossDefeated ?? false,
             towerRoom: s.zones.tower.currentRoom ?? 0,
             throneBossDefeated: s.zones.throne.bossDefeated ?? false,
+            desertBossDefeated: s.zones.desert.bossDefeated ?? false,
+            swampBossDefeated: s.zones.swamp.bossDefeated ?? false,
             prestigeUnlocked: s.prestigeUnlocked ?? false,
             prestigeLevel: s.prestigeLevel ?? 0,
             shadowStepUnlocked: s.shadowStepUnlocked ?? false,
@@ -155,6 +159,8 @@ export class SaveLoadSystem {
         s.zones.tower.bossDefeated = data.towerBossDefeated ?? false;
         s.zones.tower.currentRoom = data.towerRoom ?? 0;
         s.zones.throne.bossDefeated = data.throneBossDefeated ?? false;
+        s.zones.desert.bossDefeated = data.desertBossDefeated ?? false;
+        s.zones.swamp.bossDefeated = data.swampBossDefeated ?? false;
         s.prestigeUnlocked = data.prestigeUnlocked ?? false;
         s.prestigeLevel = data.prestigeLevel ?? 0;
         s.shadowStepUnlocked = data.shadowStepUnlocked ?? false;
@@ -200,9 +206,13 @@ export class SaveLoadSystem {
         if (data) {
             s.unlockedTalents = data.unlockedTalents ?? [];
             s.talentPoints = data.talentPoints ?? 0;
+            s.unlockedMastery = data.unlockedMastery ?? [];
+            s.masteryPoints = data.masteryPoints ?? 0;
         } else {
             s.unlockedTalents = [];
             s.talentPoints = 0;
+            s.unlockedMastery = [];
+            s.masteryPoints = 0;
         }
         s.talentEffects = getTalentEffects(s.unlockedTalents);
     }

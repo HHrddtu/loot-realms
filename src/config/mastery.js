@@ -1,0 +1,29 @@
+export const MASTERY_LEVEL_REQ = 15;
+
+export const CLASS_MASTERY = {
+    sage: [
+        { id: 'ms_sage_1', row: 0, col: 0, name: 'Overchannel', nameRu: 'Перекачка', nameDe: 'Überladung', requires: [], effects: { spellDamage: 5, cooldownReduction: 2 }, description: '+5 Spell, +2 CDR. Mana overflows.', descriptionRu: '+5 Спеллы, +2 СКД. Мана переполняется.', descriptionDe: '+5 Zauber, +2 AZZ. Mana überläuft.' },
+        { id: 'ms_sage_2', row: 1, col: 0, name: 'Eternal Mind', nameRu: 'Вечный Разум', nameDe: 'Ewiger Geist', requires: ['ms_sage_1'], effects: { corruptionMax: 10, spellDamage: 5 }, description: '+10 Corr Max, +5 Spell. The mind endures.', descriptionRu: '+10 Корр. Макс, +5 Спеллы. Разум выдерживает.', descriptionDe: '+10 KORR Max, +5 Zauber. Der Geist erduldet.' },
+        { id: 'ms_sage_3', row: 1, col: 1, name: 'Insight', nameRu: 'Прозрение', nameDe: 'Einsicht', requires: ['ms_sage_1'], effects: { critChance: 4, spellDamage: 3 }, description: '+4 Crit, +3 Spell. Secrets revealed.', descriptionRu: '+4 Крит, +3 Спеллы. Тайны открыты.', descriptionDe: '+4 Krit, +3 Zauber. Geheimnisse enthüllt.' },
+        { id: 'ms_sage_4', row: 2, col: 0, name: 'Arcane Giant', nameRu: 'Тайный Гигант', nameDe: 'Arkane Gigant', requires: ['ms_sage_2', 'ms_sage_3'], effects: { spellDamage: 10, areaDamage: 5 }, description: '+10 Spell, +5 AoE. Colossal magic.', descriptionRu: '+10 Спеллы, +5 По площади. Колоссальная магия.', descriptionDe: '+10 Zauber, +5 Fläche. Kolossale Magie.' },
+        { id: 'ms_sage_5', row: 3, col: 0, name: 'Mind Over Matter', nameRu: 'Разум Над Материей', nameDe: 'Geist über Materie', requires: ['ms_sage_4'], effects: { damagePercent: 5, spellDamage: 5 }, description: '+5 DMG, +5 Spell. Thought becomes force.', descriptionRu: '+5 УРН, +5 Спеллы. Мысль становится силой.', descriptionDe: '+5 SCHD, +5 Zauber. Gedanke wird Kraft.' }
+    ],
+    alchemist: [
+        { id: 'ms_alch_1', row: 0, col: 0, name: 'Volatile Mind', nameRu: 'Взрывной Разум', nameDe: 'Volatiler Geist', requires: [], effects: { dotPower: 3, areaDamage: 3 }, description: '+3 DoT, +3 AoE. Instability mastered.', descriptionRu: '+3 ДоТ, +3 Площ. Освоенная нестабильность.', descriptionDe: '+3 DoT, +3 Fläche. Kontrollierte Instabilität.' },
+        { id: 'ms_alch_2', row: 1, col: 0, name: 'Iron Resolve', nameRu: 'Железная Воля', nameDe: 'Eisenentschluss', requires: ['ms_alch_1'], effects: { damageReduction: 6, regenPercent: 2 }, description: '+6 DR, +2 Regen. Unshakeable body.', descriptionRu: '+6 СЗ, +2 Реген. Неколебимое тело.', descriptionDe: '+6 VRS, +2 Regen. Unerschütterlicher Körper.' },
+        { id: 'ms_alch_3', row: 1, col: 1, name: 'Catalyst', nameRu: 'Катализатор', nameDe: 'Katalysator', requires: ['ms_alch_1'], effects: { spellDamage: 5, dotPower: 2 }, description: '+5 Spell, +2 DoT. Reactions accelerate.', descriptionRu: '+5 Спеллы, +2 ДоТ. Реакции ускоряются.', descriptionDe: '+5 Zauber, +2 DoT. Reaktionen beschleunigen.' },
+        { id: 'ms_alch_4', row: 2, col: 0, name: 'Transmutation', nameRu: 'Трансмутация', nameDe: 'Transmutation', requires: ['ms_alch_2', 'ms_alch_3'], effects: { damagePercent: 4, armorReduction: 3 }, description: '+4 DMG, -3 enemy armor. Lead to gold.', descriptionRu: '+4 УРН, -3 броня врага. Свинец в золото.', descriptionDe: '+4 SCHD, -3 Rüstung. Blei zu Gold.' },
+        { id: 'ms_alch_5', row: 3, col: 0, name: 'Grand Alchemy', nameRu: 'Великая Алхимия', nameDe: 'Große Alchemie', requires: ['ms_alch_4'], effects: { dotPower: 5, cooldownReduction: 3 }, description: '+5 DoT, +3 CDR. Perfected transmutation.', descriptionRu: '+5 ДоТ, +3 СКД. Совершенная трансмутация.', descriptionDe: '+5 DoT, +3 AZZ. Vollkommene Transmutation.' }
+    ],
+    angel: [
+        { id: 'ms_ang_1', row: 0, col: 0, name: 'Radiant', nameRu: 'Сияющий', nameDe: 'Strahlend', requires: [], effects: { spellSpeed: 8, critChance: 2 }, description: '+8 Spell Speed, +2 Crit. Pure radiance.', descriptionRu: '+8 Скорость спеллов, +2 Крит. Чистое сияние.', descriptionDe: '+8 Zauberzeit, +2 Krit. Reiner Glanz.' },
+        { id: 'ms_ang_2', row: 1, col: 0, name: 'Guardian', nameRu: 'Хранитель', nameDe: 'Wächter', requires: ['ms_ang_1'], effects: { damageReduction: 6, regenPercent: 2 }, description: '+6 DR, +2 Regen. Divine guardian.', descriptionRu: '+6 СЗ, +2 Реген. Божественный хранитель.', descriptionDe: '+6 VRS, +2 Regen. Göttlicher Wächter.' },
+        { id: 'ms_ang_3', row: 1, col: 1, name: 'Zealot', nameRu: 'Ревнитель', nameDe: 'Eiferer', requires: ['ms_ang_1'], effects: { spellDamage: 5, critChance: 3 }, description: '+5 Spell, +3 Crit. Zealous strikes.', descriptionRu: '+5 Спеллы, +3 Крит. Ревностные удары.', descriptionDe: '+5 Zauber, +3 Krit. Eifrige Schläge.' },
+        { id: 'ms_ang_4', row: 2, col: 0, name: 'Seraph', nameRu: 'Серафим', nameDe: 'Seraph', requires: ['ms_ang_2', 'ms_ang_3'], effects: { spellSpeed: 10, spellDamage: 5 }, description: '+10 Spell Speed, +5 Spell. Six wings of power.', descriptionRu: '+10 Скорость спеллов, +5 Спеллы. Шесть крыльев силы.', descriptionDe: '+10 Zauberzeit, +5 Zauber. Sechs Flügel der Macht.' },
+        { id: 'ms_ang_5', row: 3, col: 0, name: 'Archangel', nameRu: 'Архангел', nameDe: 'Erzengel', requires: ['ms_ang_4'], effects: { spellDamage: 8, healPower: 8, critChance: 2 }, description: '+8 Spell, +8 Heal, +2 Crit. Heaven\'s champion.', descriptionRu: '+8 Спеллы, +8 Лечение, +2 Крит. Чемпион небес.', descriptionDe: '+8 Zauber, +8 Heilung, +2 Krit. Champion des Himmels.' }
+    ]
+};
+
+export function getClassMastery(classKey) {
+    return CLASS_MASTERY[classKey] || CLASS_MASTERY.sage;
+}

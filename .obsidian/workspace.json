@@ -11,10 +11,14 @@
             "id": "021c18f08c774ddc",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Граф"
+              "type": "markdown",
+              "state": {
+                "file": "node_modules/phaser/changelog/3.60/CHANGELOG-v3.60.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "CHANGELOG-v3.60"
             }
           }
         ]
@@ -90,6 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "node_modules/phaser/changelog/3.60/CHANGELOG-v3.60.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -99,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Обратные ссылки"
+              "title": "Обратные ссылки для CHANGELOG-v3.60"
             }
           },
           {
@@ -162,8 +167,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -178,6 +182,10 @@
   },
   "active": "021c18f08c774ddc",
   "lastOpenFiles": [
+    "Без названия.canvas",
+    "2026-09-05.md",
+    "Без названия.base",
+    "инструкция/index.md",
     "dist/assets/TalentScene-B92iRNpR.js",
     "dist/assets/sound-BwIVHlNC.js",
     "dist/assets/SoulBookScene-CFmyshF-.js",
@@ -187,9 +195,6 @@
     "dist/assets/phaser-BGf9WekP.js",
     "dist/assets/PetScene-QFG_hvIc.js",
     "dist/assets/pets-DnKiE-Fh.js",
-    "dist/assets/peerjs-DW-fpQKQ.js",
-    "dist/assets/network-BTDCXMhC.js",
-    "инструкция/index.md",
     "инструкция/14-knowledge/FAILED_EXPERIMENTS.md",
     "инструкция/14-knowledge/SESSION_LOG.md",
     "инструкция/13-resources/gamedesign/obsidian-ai-knowledge-base.md",
@@ -213,7 +218,6 @@
     "существующая_заметка.md",
     "node_modules/phaser/CHANGELOG.md",
     "node_modules/undici/docs/docs/best-practices/undici-vs-builtin-fetch.md",
-    "инструкция/13-resources/phaser3/phaser-api-docs-index.md",
     "09-enemies/phaser-examples/public/3.86/js/vs/editor/contrib/quickOpen/browser/symbol-sprite.svg",
     "09-enemies/phaser-examples/public/3.86/assets/spine/4.1/spineboy/canvas/spineboy.png",
     "09-enemies/phaser-examples/public/3.86/assets/phaserbyexample/wallhamer/assets/maps/softbricks.png",

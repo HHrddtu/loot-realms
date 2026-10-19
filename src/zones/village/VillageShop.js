@@ -1,4 +1,5 @@
 import { RARITY_COLORS, VILLAGE_HOUSE_POSITIONS, GAME_WIDTH, GAME_HEIGHT } from '../../config/index.js';
+import { ENCHANTMENTS, canEnchantItem, enrichItem } from '../../config/enchanting.js';
 import { CONSUMABLES, SHOP_BOOSTS, SHOP_UPGRADES, SHOP_GOLD_CASES } from '../../config/gold.js';
 import { rollCaseDrop, CASE_DB } from '../../config/pets.js';
 import { loadAccount, saveAccount } from '../../save.js';
@@ -101,21 +102,21 @@ export class VillageShop {
         }).setOrigin(0.5));
         s.shopGroup.push(capText);
 
+        const isBlacksmithUnlocked = s._vendorUnlocked && s._vendorUnlocked.blacksmith;
         const tabs = ['Potions', 'Boosts', 'Upgrades', 'Cases'];
         const tabColors = ['#27ae60', '#3498db', '#e74c3c', '#f1c40f'];
-        let currentTab = 0;
-
+        if (isBlacksmithUnlocked) { tabs.push('Craft'); tabColors.push('#9b59b6'); }
+        tabs.push('Enchant'); tabColors.push('#e67e22');
         const tabBtns = [];
         tabs.forEach((tab, i) => {
-            const tx = 175 + i * 95;
-            const tbg = mk(s.add.rectangle(tx, 108, 85, 20, i === 0 ? 0x2c3e50 : 0x1a1a2e)
+            const tx = 130 + i * 88;
+            const tbg = mk(s.add.rectangle(tx, 108, 78, 20, i === 0 ? 0x2c3e50 : 0x1a1a2e)
                 .setStrokeStyle(1, i === 0 ? parseInt(tabColors[i].slice(1), 16) : 0x555));
             const ttl = mk(s.add.text(tx, 108, tab, {
                 fontSize: '10px', fill: i === 0 ? tabColors[i] : '#888', fontFamily: 'Arial', fontStyle: 'bold'
             }).setOrigin(0.5));
             tbg.setInteractive({ useHandCursor: true });
             tbg.on('pointerdown', () => {
-                currentTab = i;
                 this.closeShop();
                 s.menuOpen = false;
                 s.physics.resume();
@@ -173,6 +174,7 @@ export class VillageShop {
         const tabColors = ['#27ae60', '#3498db', '#e74c3c', '#f1c40f'];
         const isBlacksmithUnlocked = s._vendorUnlocked && s._vendorUnlocked.blacksmith;
         if (isBlacksmithUnlocked) { shopTabs.push('Craft'); tabColors.push('#9b59b6'); }
+        shopTabs.push('Enchant'); tabColors.push('#e67e22');
         shopTabs.forEach((tab, i) => {
             const tx = 130 + i * 88;
             const tbg = mk(s.add.rectangle(tx, 108, 78, 20, i === tabIndex ? 0x2c3e50 : 0x1a1a2e)
@@ -215,6 +217,7 @@ export class VillageShop {
         else if (tabIndex === 2) this._renderUpgradesTab(mk, updateCurrency);
         else if (tabIndex === 3) this._renderCasesTab(mk, updateCurrency);
         else if (tabIndex === 4) this._renderCraftTab(mk, updateCurrency);
+        else if (tabIndex === 5) this._renderEnchantTab(mk, updateCurrency);
     }
 
     _renderPotionsTab(mk, updateCurrency) {
@@ -597,9 +600,96 @@ export class VillageShop {
         });
     }
 
+    _renderEnchantTab(mk, updateCurrency) {
+        const s = this.scene;
+        const bag = s.equipBag || [];
+        const equips = [s.equipment.weapon, s.equipment.armor, s.equipment.accessory];
+        const items = [
+            ...equips.filter(Boolean).map(it => ({ item: it, label: (it.slot || '?').toUpperCase(), equipped: true })),
+            ...bag.map((it, i) => ({ item: it, label: 'Bag ' + (i + 1), equipped: false }))
+        ];
+
+        let selItem = s._enchantSelItem || null;
+        const self = this;
+
+        s.shopGroup.push(mk(s.add.text(400, 145, 'Enchant gear with crystals \u{1F48E} — click an item, then an enchantment', {
+            fontSize: '9px', fill: '#e67e22', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5)));
+
+        // Left column: items
+        const drawSelEnchants = (item) => {
+            const listY = 175;
+            const valid = ENCHANTMENTS.filter(e => canEnchantItem(item, e.id));
+            valid.forEach((e, i) => {
+                const sy = listY + i * 42;
+                const cost = e.cost;
+                const canAfford = (s.crystals || 0) >= cost;
+                const bg = mk(s.add.rectangle(400, sy, 250, 38, canAfford ? 0x1a2a1a : 0x15151f)
+                    .setStrokeStyle(1, canAfford ? 0x2ecc71 : 0x444466).setInteractive({ useHandCursor: canAfford }));
+                s.shopGroup.push(bg);
+                s.shopGroup.push(mk(s.add.sprite(310, sy, e.texKey).setScale(0.9)));
+                s.shopGroup.push(mk(s.add.text(345, sy - 10, e.nameRu || e.name, { fontSize: '9px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0, 0.5)));
+                s.shopGroup.push(mk(s.add.text(345, sy + 7, e.descriptionRu || e.description, { fontSize: '7px', fill: '#aaa', fontFamily: 'Arial', wordWrap: { width: 170 } }).setOrigin(0, 0.5)));
+                s.shopGroup.push(mk(s.add.text(560, sy, e.cost + ' \u{1F48E}', { fontSize: '10px', fill: canAfford ? '#3498db' : '#555', fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0.5)));
+
+                if (canAfford) {
+                    bg.on('pointerdown', () => {
+                        s.crystals -= cost;
+                        if (s.player) s.floatingText(s.player.x, s.player.y - 40, 'Enchanted: ' + (e.nameRu || e.name), '#e67e22');
+                        Object.assign(item, enrichItem(item, e.id));
+                        if (s.playerSys) s.playerSys.recalcStats();
+                        if (s.doSave) s.doSave();
+                        self.closeShop();
+                        s.menuOpen = false;
+                        s.physics.resume();
+                        self.openShopTab(5);
+                    });
+                }
+            });
+            if (valid.length === 0) {
+                s.shopGroup.push(mk(s.add.text(400, listY, 'No enchantments fit this item', { fontSize: '10px', fill: '#888', fontFamily: 'Arial' }).setOrigin(0.5)));
+            }
+        };
+
+        const maxShow = 9;
+        const shown = items.slice(0, maxShow);
+        shown.forEach((entry, i) => {
+            const it = entry.item;
+            const sy = 175 + i * 28;
+            const rc = RARITY_COLORS[it.rarity] || 0xaaaaaa;
+            const rcHex = '#' + rc.toString(16).padStart(6, '0');
+            const isSel = selItem === it;
+            const row = mk(s.add.rectangle(130, sy, 230, 26, isSel ? 0x3a2a1a : 0x15152a)
+                .setStrokeStyle(1, isSel ? 0xe67e22 : 0x444466).setInteractive({ useHandCursor: true }));
+            s.shopGroup.push(row);
+            row.on('pointerdown', () => {
+                s._enchantSelItem = it;
+                selItem = it;
+                self.closeShop();
+                s.menuOpen = false;
+                s.physics.resume();
+                self.openShopTab(5);
+            });
+            s.shopGroup.push(mk(s.add.text(35, sy, entry.label, { fontSize: '8px', fill: '#888', fontFamily: 'Arial' }).setOrigin(0.5)));
+            s.shopGroup.push(mk(s.add.sprite(70, sy, it.texKey).setScale(0.8)));
+            s.shopGroup.push(mk(s.add.text(95, sy, it.name, { fontSize: '8px', fill: rcHex, fontFamily: 'Arial', fontStyle: 'bold' }).setOrigin(0, 0.5)));
+            if (it.enchant) {
+                s.shopGroup.push(mk(s.add.text(95, sy + 9, '\u2728 ' + (it.enchant.nameRu || it.enchant.name), { fontSize: '7px', fill: '#e67e22', fontFamily: 'Arial' }).setOrigin(0, 0.5)));
+            }
+        });
+        if (shown.length < items.length) {
+            s.shopGroup.push(mk(s.add.text(130, 175 + shown.length * 28 + 6, '+' + (items.length - shown.length) + ' more...', { fontSize: '8px', fill: '#555', fontFamily: 'Arial' })));
+        }
+
+        // Right column: enchantments for the selected item (or first if none)
+        const targetItem = (selItem && items.some(e => e.item === selItem)) ? selItem : (items.length ? items[0].item : null);
+        if (targetItem) drawSelEnchants(targetItem);
+    }
+
     closeShop() {
         const s = this.scene;
         s._hideItemTooltip();
+        s._enchantSelItem = null;
         if (s.shopGroup) {
             s.shopGroup.forEach(e => e.destroy());
             s.shopGroup = [];

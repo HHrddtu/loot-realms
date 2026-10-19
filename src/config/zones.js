@@ -255,3 +255,41 @@ export const TOWER_CHEST_DROP_CHANCE = 0.55;
 export const THRONE_WIDTH = 800;
 export const THRONE_HEIGHT = 600;
 export const THRONE_BOSS_POSITION = { x: 400, y: 300 };
+
+// Desert (optional zone)
+export const DESERT_WIDTH = 900;
+export const DESERT_HEIGHT = 2000;
+export const DESERT_CAMP_POSITIONS = [
+    { x: 450, y: 200 },  { x: 200, y: 400 },  { x: 700, y: 400 },
+    { x: 350, y: 650 },  { x: 600, y: 650 },  { x: 200, y: 900 },
+    { x: 700, y: 900 },  { x: 450, y: 1150 }, { x: 300, y: 1400 },
+    { x: 600, y: 1400 }
+];
+export const DESERT_CHEST_POSITIONS = [
+    { x: 120, y: 180 },  { x: 780, y: 380 },
+    { x: 150, y: 620 },  { x: 750, y: 820 },
+    { x: 100, y: 1020 }, { x: 800, y: 1220 },
+    { x: 200, y: 1420 }, { x: 700, y: 1620 }
+];
+export const DESERT_BOSS_POSITION = { x: 450, y: 1900 };
+export const DESERT_CHEST_COUNT = 8;
+export const DESERT_CHEST_DROP_CHANCE = 0.45;
+
+// Swamp (optional zone)
+export const SWAMP_WIDTH = 900;
+export const SWAMP_HEIGHT = 2000;
+export const SWAMP_CAMP_POSITIONS = [
+    { x: 450, y: 200 },  { x: 200, y: 400 },  { x: 700, y: 400 },
+    { x: 350, y: 650 },  { x: 600, y: 650 },  { x: 200, y: 900 },
+    { x: 700, y: 900 },  { x: 450, y: 1150 }, { x: 300, y: 1400 },
+    { x: 600, y: 1400 }
+];
+export const SWAMP_CHEST_POSITIONS = [
+    { x: 120, y: 180 },  { x: 780, y: 380 },
+    { x: 150, y: 620 },  { x: 750, y: 820 },
+    { x: 100, y: 1020 }, { x: 800, y: 1220 },
+    { x: 200, y: 1420 }, { x: 700, y: 1620 }
+];
+export const SWAMP_BOSS_POSITION = { x: 450, y: 1900 };
+export const SWAMP_CHEST_COUNT = 8;
+export const SWAMP_CHEST_DROP_CHANCE = 0.45;
