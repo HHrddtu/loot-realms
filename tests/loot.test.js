@@ -73,11 +73,12 @@ vi.mock('../src/config/index.js', async (importOriginal) => {
 });
 
 import { CombatLoot } from '../src/systems/CombatLoot.js';
+import { recordKill } from '../src/bestiary.js';
 
 function createMockScene(overrides = {}) {
     const player = {
         x: 100, y: 100,
-        setTint: vi.fn(),
+        setTint: vi.fn().mockReturnThis(),
         clearTint: vi.fn(),
         setAlpha: vi.fn(),
         active: true
@@ -151,6 +152,7 @@ function createMockScene(overrides = {}) {
         camera: { scrollX: 0, scrollY: 0 },
         checkLevelUp: vi.fn(),
         _checkAccountLevelUp: vi.fn(),
+        _updateQuestIcons: vi.fn(),
         updateUI: vi.fn(),
         addEquip: vi.fn(() => true),
         addMaterial: vi.fn(() => true),
@@ -174,27 +176,29 @@ describe('CombatLoot', () => {
     });
 
     describe('killEnemy', () => {
-        it('should add EXP and gold on enemy kill', () => {
+        it('should report EXP, kills and gold on enemy kill', () => {
             const enemy = {
                 active: true,
                 stats: { key: 'goblin', name: 'Goblin', hp: 40, maxHp: 40, damage: 5, exp: 10 },
                 hpBg: { destroy: vi.fn() },
-                hpFill: { destroy: vi.fn() }
+                hpFill: { destroy: vi.fn() },
+                destroy: vi.fn()
             };
 
-            loot.killEnemy(enemy);
+            const data = loot.killEnemy(enemy);
 
-            expect(scene.playerExp).toBe(10);
-            expect(scene.kills).toBe(1);
+            expect(data.exp).toBe(10);
+            expect(data.killsDelta).toBe(1);
+            expect(data.gold).toBeGreaterThan(0);
         });
 
         it('should record kill in bestiary', () => {
-            const { recordKill } = require('../src/bestiary.js');
             const enemy = {
                 active: true,
                 stats: { key: 'goblin', name: 'Goblin', hp: 40, maxHp: 40, damage: 5, exp: 10 },
                 hpBg: { destroy: vi.fn() },
-                hpFill: { destroy: vi.fn() }
+                hpFill: { destroy: vi.fn() },
+                destroy: vi.fn()
             };
 
             loot.killEnemy(enemy);
@@ -206,20 +210,26 @@ describe('CombatLoot', () => {
     describe('breakChest', () => {
         it('should add gold and items on chest break', () => {
             const chest = {
+                x: 100, y: 100,
                 active: true,
                 broken: false,
                 isForestChest: true,
                 stats: { hp: 40, maxHp: 40 },
                 loot: [{ name: 'Sword', rarity: 'common' }],
+                body: { enable: true },
+                setAlpha: vi.fn(),
+                setTint: vi.fn(),
+                setTexture: vi.fn(),
                 hpBg: { destroy: vi.fn() },
                 hpFill: { destroy: vi.fn() },
                 hintText: { setText: vi.fn() }
             };
 
-            loot.breakChest(chest);
+            const data = loot.breakChest(chest);
 
             expect(chest.broken).toBe(true);
-            expect(scene.gold).toBeGreaterThan(0);
+            expect(data.gold).toBeGreaterThan(0);
+            expect(data.items.length).toBe(1);
         });
     });
 
@@ -228,13 +238,14 @@ describe('CombatLoot', () => {
             const stump = {
                 active: true,
                 stats: { hp: 40, maxHp: 40 },
+                setTexture: vi.fn(),
                 hpBg: { destroy: vi.fn() },
                 hpFill: { destroy: vi.fn() }
             };
 
-            loot.breakStump(stump);
+            const data = loot.breakStump(stump);
 
-            expect(scene.stumpsBroken).toBe(1);
+            expect(data.stumpsBrokenDelta).toBe(1);
         });
     });
 });

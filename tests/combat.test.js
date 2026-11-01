@@ -71,10 +71,19 @@ vi.mock('../src/config/index.js', async (importOriginal) => {
 import { CombatCore } from '../src/systems/CombatCore.js';
 import { CombatLoot } from '../src/systems/CombatLoot.js';
 
+function chainable() {
+    const el = {};
+    for (const method of ['setOrigin', 'setDepth', 'setScrollFactor', 'setAlpha', 'setStrokeStyle', 'setInteractive', 'setTint', 'setText', 'setFillStyle', 'on']) {
+        el[method] = vi.fn(() => el);
+    }
+    el.destroy = vi.fn();
+    return el;
+}
+
 function createMockScene(overrides = {}) {
     const player = {
         x: 100, y: 100,
-        setTint: vi.fn(),
+        setTint: vi.fn().mockReturnThis(),
         clearTint: vi.fn(),
         setAlpha: vi.fn(),
         active: true
@@ -101,7 +110,8 @@ function createMockScene(overrides = {}) {
         gold: 0,
         crystals: 0,
         crystalsThisRun: 0,
-        enemies: { add: vi.fn() },
+        enemies: { add: vi.fn(), getChildren: () => [] },
+        physics: { pause: vi.fn(), resume: vi.fn() },
         addEquip: vi.fn(() => true),
         addAccountEquip: vi.fn(() => true),
         checkLevelUp: vi.fn(),
@@ -111,13 +121,15 @@ function createMockScene(overrides = {}) {
         recalcStats: vi.fn(),
         _updateQuestIcons: vi.fn(),
         cameras: { main: { shake: vi.fn() } },
-        time: { delayedCall: vi.fn((_, cb) => { if (typeof cb === 'function') cb(); }) },
+        time: { delayedCall: vi.fn() },
         tweens: { add: vi.fn() },
         particles: { spawnDamageToPlayer: vi.fn(), spawnEnemyDeath: vi.fn() },
         ui: { showDamageFlash: vi.fn() },
+        input: { keyboard: { once: vi.fn() } },
         add: {
-            sprite: vi.fn(() => ({ setDepth: vi.fn(() => ({ destroy: vi.fn() })) })),
-            text: vi.fn(() => ({ setOrigin: vi.fn(() => ({ setDepth: vi.fn(() => ({ destroy: vi.fn() })) })) }))
+            sprite: vi.fn(chainable),
+            text: vi.fn(chainable),
+            rectangle: vi.fn(chainable)
         },
         ...overrides
     };
@@ -147,12 +159,13 @@ describe('CombatCore.takeDamage', () => {
         expect(s.playerHP).toBe(95);
     });
 
-    it('respawns player on fatal damage', () => {
+    it('enters the death screen on fatal damage', () => {
         const s = createMockScene({ playerHP: 10, playerMaxHP: 100 });
         const core = new CombatCore(s);
         core.takeDamage(20);
-        expect(s.playerHP).toBe(100);
-        expect(s.recalcStats).toHaveBeenCalled();
+        expect(s.playerHP).toBe(0);
+        expect(s.deaths).toBe(1);
+        expect(s.menuOpen).toBe(true);
     });
 });
 
@@ -167,12 +180,13 @@ describe('CombatLoot.killEnemy', () => {
             hpFill: { destroy: vi.fn() },
             destroy: vi.fn()
         };
-        loot.killEnemy(enemy);
-        expect(s.kills).toBe(1);
-        expect(s.playerExp).toBe(5);
-        expect(s.accountExp).toBe(5);
+        const hpBg = enemy.hpBg;
+        const hpFill = enemy.hpFill;
+        const data = loot.killEnemy(enemy);
+        expect(data.killsDelta).toBe(1);
+        expect(data.exp).toBe(5);
         expect(enemy.destroy).toHaveBeenCalled();
-        expect(enemy.hpBg.destroy).toHaveBeenCalled();
-        expect(enemy.hpFill.destroy).toHaveBeenCalled();
+        expect(hpBg.destroy).toHaveBeenCalled();
+        expect(hpFill.destroy).toHaveBeenCalled();
     });
 });

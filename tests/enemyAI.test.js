@@ -55,6 +55,7 @@ describe('EnemyAI', () => {
 
     it('chases player when within range', () => {
         const e = createMockEnemy({ speed: 50 }, { x: 250, y: 250 });
+        e._alerted = true;
         EnemyAI.updateWanderChase(e, player, scene);
         expect(e.body.setVelocity).toHaveBeenCalled();
         const [vx, vy] = e.body.setVelocity.mock.calls[0];
