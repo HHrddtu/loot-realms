@@ -216,7 +216,9 @@ export default class GameScene extends Phaser.Scene {
         if (this.loadOnStart) this.doLoad();
 
         if (this.loadOnStart && this._savedZone) {
-            if (this._savedZone === 'mine') {
+            if (this._savedZone === 'arena') {
+                this._setupZone('arena');
+            } else if (this._savedZone === 'mine') {
                 this._setupZone('mine');
             } else if (this._savedZone === 'cave') {
                 this._setupZone('cave');
