@@ -498,7 +498,10 @@ export default class GameScene extends Phaser.Scene {
             this._regenTimer -= 1000;
             const flat = this.computedRegenFlat || 0;
             const pct = this.computedRegenPercent || 0;
-            const heal = Math.floor(flat + (this.playerMaxHP * pct / 100));
+            let heal = Math.floor(flat + (this.playerMaxHP * pct / 100));
+            if (this.setBonuses && this.setBonuses.regenOnLow && this.playerHP < this.playerMaxHP * 0.3) {
+                heal = Math.floor(heal * 1.5);
+            }
             if (heal > 0) {
                 this.playerHP = Math.min(this.playerMaxHP, this.playerHP + heal);
             }

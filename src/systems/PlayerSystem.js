@@ -103,6 +103,7 @@ export class PlayerSystem {
 
         // Apply equipment set bonuses
         const setBonuses = getSetBonuses(this.scene.equipment, this.scene.accountEquipment);
+        this.scene.setBonuses = setBonuses;
         if (setBonuses.hpPercent) accHpPercent += setBonuses.hpPercent;
         if (setBonuses.damagePercent) accDmgPercent += setBonuses.damagePercent;
         if (setBonuses.speedPercent) accSpdPercent += setBonuses.speedPercent;

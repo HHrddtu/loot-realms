@@ -83,6 +83,9 @@ export class CombatCore {
             amount = Math.floor(amount * (1 - Math.min(s.computedDamageReduction, MAX_DAMAGE_REDUCTION_PCT) / 100));
             if (amount <= 0) amount = 1;
         }
+        if (s.setBonuses && s.setBonuses.drOnHit && s._drOnHitActive) {
+            amount = Math.max(1, Math.floor(amount * 0.9));
+        }
         if (s.shieldActive && s.shieldHP > 0) {
             if (s.lifeLinkActive) amount = Math.floor(amount * LIFELINK_DAMAGE_REDUCTION);
             const absorbed = Math.min(s.shieldHP, amount);
@@ -101,6 +104,10 @@ export class CombatCore {
             if (amount <= 0) return;
         }
         s.playerHP -= amount;
+        if (s.setBonuses && s.setBonuses.drOnHit) {
+            s._drOnHitActive = true;
+            s.time.delayedCall(3000, () => { s._drOnHitActive = false; });
+        }
         s.invincible = true;
         s.player.setTint(0xff4444).setAlpha(0.5);
         if (s.particles) s.particles.spawnDamageToPlayer(s.player.x, s.player.y);
@@ -117,11 +124,18 @@ export class CombatCore {
         }
 
         if (s.playerHP <= 0) {
-            s.playerHP = 0;
-            if (s.multiplayer && s.mpManager) {
-                this._enterDownedState();
+            if (s.talentEffects && s.talentEffects.cheatDeath && !s._cheatDeathUsed) {
+                s._cheatDeathUsed = true;
+                s.playerHP = Math.max(1, Math.floor(s.playerMaxHP * 0.3));
+                s.floatingText(s.player.x, s.player.y - 50, 'CHEAT DEATH!', '#f1c40f');
+                if (s.particles) s.particles.spawnLevelUp(s.player.x, s.player.y);
             } else {
-                this.respawnPlayer();
+                s.playerHP = 0;
+                if (s.multiplayer && s.mpManager) {
+                    this._enterDownedState();
+                } else {
+                    this.respawnPlayer();
+                }
             }
         }
         s.updateUI();
@@ -171,6 +185,7 @@ export class CombatCore {
 
     respawnPlayer() {
         const s = this.scene;
+        s._cheatDeathUsed = false;
         s.deaths = (s.deaths || 0) + 1;
 
         const goldLost = Math.floor(s.gold * DEATH_GOLD_LOSS_PCT);

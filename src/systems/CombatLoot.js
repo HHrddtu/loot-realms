@@ -110,7 +110,8 @@ export class CombatLoot {
         const petStats = getPetStats(s.equippedPet, (s.petLevels || {})[s.equippedPet] || 1);
         const lootBonus = (petStats.lootPercent || 0) / 100;
         const goldBonus = 1 + ((s.accountEffects ? s.accountEffects.goldPercent || 0 : 0) / 100) + lootBonus;
-        const finalGold = Math.floor(goldAmount * goldBonus);
+        let finalGold = Math.floor(goldAmount * goldBonus);
+        if (s.setBonuses && s.setBonuses.transmuteOnKill) finalGold = Math.floor(finalGold * 1.5);
 
         const items = [];
         if (Math.random() < EQUIP_DROP_CHANCE + lootBonus * 0.5) {

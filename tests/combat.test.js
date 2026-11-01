@@ -106,6 +106,7 @@ function createMockScene(overrides = {}) {
         diffMulti: { hp: 1, dmg: 1, exp: 1 },
         classData: { stats: { hp: 100, damage: 20, speed: 150 } },
         classKey: 'sage',
+        talentEffects: {},
         kills: 0,
         playerExp: 0,
         accountExp: 0,
@@ -125,7 +126,7 @@ function createMockScene(overrides = {}) {
         cameras: { main: { shake: vi.fn(), flash: vi.fn() } },
         time: { delayedCall: vi.fn() },
         tweens: { add: vi.fn() },
-        particles: { spawnDamageToPlayer: vi.fn(), spawnEnemyDeath: vi.fn(), spawnHitSpark: vi.fn() },
+        particles: { spawnDamageToPlayer: vi.fn(), spawnEnemyDeath: vi.fn(), spawnHitSpark: vi.fn(), spawnLevelUp: vi.fn() },
         ui: { showDamageFlash: vi.fn() },
         input: { keyboard: { once: vi.fn() } },
         add: {
@@ -160,6 +161,14 @@ describe('CombatCore.takeDamage', () => {
         core.takeDamage(20);
         expect(s.shieldHP).toBe(0);
         expect(s.playerHP).toBe(95);
+    });
+
+    it('cheats death once when the talent is unlocked', () => {
+        const s = createMockScene({ playerHP: 10, playerMaxHP: 100, talentEffects: { cheatDeath: true } });
+        const core = new CombatCore(s);
+        core.takeDamage(20);
+        expect(s.playerHP).toBe(30);
+        expect(s._cheatDeathUsed).toBe(true);
     });
 
     it('enters the death screen on fatal damage', () => {
