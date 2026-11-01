@@ -68,8 +68,8 @@ export class PauseMenu {
         }).setOrigin(0.5)));
 
         progress.forEach((achievement, i) => {
-            const col = Math.floor(i / 10);
-            const row = i % 10;
+            const col = Math.floor(i / 11);
+            const row = i % 11;
             const x = 215 + col * 370;
             const y = 120 + row * 38;
             const color = achievement.unlocked ? '#2ecc71' : '#666';
