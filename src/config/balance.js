@@ -110,14 +110,20 @@ export const HEAL_ZONE_HEAL_PER_SEC = 0.04;
 // ── Player ──
 export const BASE_CRIT_DAMAGE_MULT = 1.5;
 export const DEFAULT_CORRUPTION_DECAY = 0.08;
-export const LEVEL_UP_XP_BASE = 350;
-export const LEVEL_UP_XP_EXPONENT = 1.7;
+export const LEVEL_UP_XP_BASE = 300;
+export const LEVEL_UP_XP_EXPONENT = 1.6;
 
-export const UPGRADE_HP_PER_LVL = 4;
-export const UPGRADE_DMG_PER_LVL = 4;
-export const UPGRADE_SPD_PER_LVL = 3;
-export const UPGRADE_CRIT_PER_LVL = 2;
-export const UPGRADE_REGEN_PER_LVL = 1;
+export const UPGRADE_HP_PER_LVL = 5;
+export const UPGRADE_DMG_PER_LVL = 5;
+export const UPGRADE_SPD_PER_LVL = 5;
+export const UPGRADE_CRIT_PER_LVL = 3;
+export const UPGRADE_REGEN_PER_LVL = 2;
+
+export const HITSTOP_NORMAL_MS = 15;
+export const HITSTOP_CRIT_MS = 45;
+export const CRIT_SHAKE_DURATION = 90;
+export const CRIT_SHAKE_INTENSITY = 0.006;
+export const CRIT_FLASH_DURATION = 50;
 
 export const CONSUMABLE_DURATION_MS = 60000;
 export const CONSUMABLE_LIFESTEAL_DURATION_MS = 45000;

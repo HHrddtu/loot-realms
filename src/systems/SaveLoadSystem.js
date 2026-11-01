@@ -13,6 +13,30 @@ export class SaveLoadSystem {
         this.scene = scene;
     }
 
+    _collectCompletedZones() {
+        const s = this.scene;
+        const z = s.zones || {};
+        return {
+            meadow: true,
+            forest: !!(z.arena && z.arena.bossDefeated),
+            arena: !!(z.arena && z.arena.bossDefeated),
+            mine: !!(z.mine && z.mine.bossDefeated),
+            cave: !!(z.cave && z.cave.bossDefeated),
+            village: !!(z.village && z.village.bossDefeated),
+            cemetery: !!(z.village && z.village.bossDefeated),
+            hell: !!(z.hell && z.hell.bossDefeated),
+            snowy: !!(z.village && z.village.snowyBossDefeated),
+            castle: !!(z.castle && (z.castle.questDone || z.castle.bossDefeated)),
+            depths: !!(z.depths && z.depths.bossDefeated),
+            cursed: !!(z.cursed && z.cursed.bossDefeated),
+            shadow: !!(z.shadow && z.shadow.bossDefeated),
+            tower: !!(z.tower && z.tower.bossDefeated),
+            throne: !!(z.throne && z.throne.bossDefeated),
+            desert: !!(z.desert && z.desert.bossDefeated),
+            swamp: !!(z.swamp && z.swamp.bossDefeated)
+        };
+    }
+
     collectSaveData() {
         const s = this.scene;
         return {
@@ -26,6 +50,7 @@ export class SaveLoadSystem {
             playerX: s.player.x,
             playerY: s.player.y,
             zone: s.zone,
+            completedZones: this._collectCompletedZones(),
             equipment: s.equipment,
             materials: s.materials,
             consumable: s.consumable || null,

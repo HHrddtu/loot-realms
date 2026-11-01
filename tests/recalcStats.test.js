@@ -11,7 +11,15 @@ vi.mock('../src/config/index.js', () => ({
     MATERIAL_SLOTS: 100,
     EQUIP_BAG_SLOTS: 20,
     ACCOUNT_EQUIP_BAG_SLOTS: 20,
-    EMPTY_ACCOUNT_EQUIPMENT: { weapon: null, armor: null, accessory: null }
+    EMPTY_ACCOUNT_EQUIPMENT: { weapon: null, armor: null, accessory: null },
+    MASTERY_LEVEL_REQ: 15,
+    LEVEL_UP_XP_BASE: 300,
+    LEVEL_UP_XP_EXPONENT: 1.6,
+    UPGRADE_HP_PER_LVL: 5,
+    UPGRADE_DMG_PER_LVL: 5,
+    UPGRADE_SPD_PER_LVL: 5,
+    UPGRADE_CRIT_PER_LVL: 3,
+    UPGRADE_REGEN_PER_LVL: 2
 }));
 
 vi.mock('../src/classes.js', () => ({

@@ -1,6 +1,8 @@
 import {
     DIFF_MULT, MATERIAL_SLOTS, EQUIP_BAG_SLOTS, ACCOUNT_EQUIP_BAG_SLOTS, EMPTY_ACCOUNT_EQUIPMENT,
-    SHOP_EQUIP_PRICES, SELL_PRICE_RATIO, MASTERY_LEVEL_REQ
+    SHOP_EQUIP_PRICES, SELL_PRICE_RATIO, MASTERY_LEVEL_REQ,
+    LEVEL_UP_XP_BASE, LEVEL_UP_XP_EXPONENT,
+    UPGRADE_HP_PER_LVL, UPGRADE_DMG_PER_LVL, UPGRADE_SPD_PER_LVL, UPGRADE_CRIT_PER_LVL, UPGRADE_REGEN_PER_LVL
 } from '../config/index.js';
 import { getClassData, getClassStats } from '../classes.js';
 import { getTalentEffects } from '../talents.js';
@@ -127,11 +129,11 @@ export class PlayerSystem {
         });
 
         const upgradeLevels = this.scene.upgradeLevels || {};
-        const upgHp = (upgradeLevels.upg_hp || 0) * 5;
-        const upgDmg = (upgradeLevels.upg_dmg || 0) * 5;
-        const upgSpd = (upgradeLevels.upg_spd || 0) * 5;
-        const upgCrit = (upgradeLevels.upg_crit || 0) * 3;
-        const upgRegen = (upgradeLevels.upg_regen || 0) * 2;
+        const upgHp = (upgradeLevels.upg_hp || 0) * UPGRADE_HP_PER_LVL;
+        const upgDmg = (upgradeLevels.upg_dmg || 0) * UPGRADE_DMG_PER_LVL;
+        const upgSpd = (upgradeLevels.upg_spd || 0) * UPGRADE_SPD_PER_LVL;
+        const upgCrit = (upgradeLevels.upg_crit || 0) * UPGRADE_CRIT_PER_LVL;
+        const upgRegen = (upgradeLevels.upg_regen || 0) * UPGRADE_REGEN_PER_LVL;
         accHpPercent += upgHp;
         accDmgPercent += upgDmg;
         accSpdPercent += upgSpd;
@@ -454,7 +456,7 @@ export class PlayerSystem {
     }
 
     checkLevelUp() {
-        const req = Math.floor(300 * Math.pow(this.scene.playerLevel, 1.6));
+        const req = Math.floor(LEVEL_UP_XP_BASE * Math.pow(this.scene.playerLevel, LEVEL_UP_XP_EXPONENT));
         if (this.scene.playerExp >= req) {
             this.scene.playerExp -= req;
             this.scene.playerLevel++;

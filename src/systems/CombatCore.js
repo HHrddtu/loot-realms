@@ -17,7 +17,8 @@ import { GAME_WIDTH, GAME_HEIGHT, INVINCIBILITY_DURATION, DAMAGE_SHAKE_DURATION,
     THRUST_SHAKE_DURATION, THRUST_SHAKE_INTENSITY,
     BASH_SHAKE_DURATION, BASH_SHAKE_INTENSITY,
     SPIN_SHAKE_DURATION, SPIN_SHAKE_INTENSITY,
-    RESPAWN_SHAKE_DURATION, RESPAWN_SHAKE_INTENSITY
+    RESPAWN_SHAKE_DURATION, RESPAWN_SHAKE_INTENSITY,
+    HITSTOP_NORMAL_MS, HITSTOP_CRIT_MS, CRIT_SHAKE_DURATION, CRIT_SHAKE_INTENSITY, CRIT_FLASH_DURATION
 } from '../config/index.js';
 
 export class CombatCore {
@@ -589,6 +590,7 @@ export class CombatCore {
         const s = this.scene;
         if (opts.attackerPeerId) enemy._lastAttackerPeerId = opts.attackerPeerId;
         let finalDamage = damage;
+        let isCrit = false;
 
         // Class synergy damage buff
         if (s._synergyDmgBuff > 0) {
@@ -645,6 +647,7 @@ export class CombatCore {
             if (s.playerHP === s.playerMaxHP) { const b = (te.damagePercentFullHp||0)+(ae.damagePercentFullHp||0); if (b>0) finalDamage = Math.floor(finalDamage*(1+b/100)); }
             if (s.computedCritChance && Math.random() * 100 < s.computedCritChance + (s._consumableBonusCrit || 0)) {
                 finalDamage = Math.floor(finalDamage * s.computedCritDamage);
+                isCrit = true;
                 s.floatingText(enemy.x, enemy.y - 30, 'CRIT!', '#f1c40f');
                 const setB = getSetBonuses(s.equipment, s.accountEquipment);
                 if (setB.burnOnCrit && EnemyAI._applyStatus) EnemyAI._applyStatus(enemy, 'burn', { dps: 5, duration: 3 });
@@ -669,6 +672,7 @@ export class CombatCore {
         if (s.particles) s.particles.spawnHitSpark(enemy.x, enemy.y);
         s.tweens.add({ targets: enemy, scaleX: 1.2, scaleY: 1.2, duration: 60, yoyo: true, onComplete: () => { if (enemy.active) { enemy.clearTint(); enemy.setScale(1); } } });
         s.floatingText(enemy.x, enemy.y - 20, '-' + finalDamage, '#e74c3c');
+        this._impactFeedback(enemy, isCrit, !opts.bypassModifiers);
 
         const totalLifeSteal = s.computedLifeSteal + ((s._consumableBonusLifesteal || 0) * 100);
         if (totalLifeSteal > 0 && !opts.bypassLifeSteal) {
@@ -686,6 +690,35 @@ export class CombatCore {
             if (s.loot && s.loot.handleEnemyDeath) s.loot.handleEnemyDeath(enemy);
         }
         else { enemy.hpFill.width = enemy.hpBg.width * (enemy.stats.hp / enemy.stats.maxHp); }
+    }
+
+    _impactFeedback(enemy, isCrit, allowHitStop) {
+        const s = this.scene;
+        const color = isCrit ? 0xffd700 : 0xffffff;
+        const ring = s.add.circle(enemy.x, enemy.y, isCrit ? 10 : 7, color, isCrit ? 0.5 : 0.3).setDepth(14);
+        s.tweens.add({
+            targets: ring,
+            scale: isCrit ? 2.4 : 1.6,
+            alpha: 0,
+            duration: isCrit ? 220 : 140,
+            onComplete: () => { if (ring.active) ring.destroy(); }
+        });
+        if (isCrit) {
+            s.cameras.main.shake(CRIT_SHAKE_DURATION, CRIT_SHAKE_INTENSITY);
+            s.cameras.main.flash(CRIT_FLASH_DURATION, 255, 220, 120, false);
+        }
+        if (allowHitStop) this._hitStop(isCrit ? HITSTOP_CRIT_MS : HITSTOP_NORMAL_MS);
+    }
+
+    _hitStop(ms) {
+        const s = this.scene;
+        if (s.menuOpen || s.transitioning || s._hitStopActive) return;
+        s._hitStopActive = true;
+        s.physics.pause();
+        s.time.delayedCall(ms, () => {
+            s._hitStopActive = false;
+            if (!s.menuOpen && !s.transitioning) s.physics.resume();
+        });
     }
 
     hitStump(stump, damage, opts = {}) {
