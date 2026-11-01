@@ -41,7 +41,7 @@ export class CombatCore {
         e.body.setCollideWorldBounds(true);
         e.walkAnimKey = walkAnimKey;
         if (t.scale) e.setScale(t.scale);
-        e.stats = { key: t.key, name: t.name, hp: Math.floor(t.hp * s.diffMulti.hp), maxHp: Math.floor(t.hp * s.diffMulti.hp), damage: Math.floor(t.dmg * s.diffMulti.dmg), exp: Math.floor(t.exp * s.diffMulti.exp), bw: t.bw, bh: t.bh, wTimer: 0, wDir: 0, role: t.role || 'dps', hasShield: t.hasShield || false };
+        e.stats = { key: t.key, name: t.name, hp: Math.floor(t.hp * s.diffMulti.hp), maxHp: Math.floor(t.hp * s.diffMulti.hp), damage: Math.floor(t.dmg * s.diffMulti.dmg), exp: Math.floor(t.exp * s.diffMulti.exp), bw: t.bw, bh: t.bh, wTimer: 0, wDir: 0, role: t.role || 'dps', hasShield: t.hasShield || false, telegraphed: t.telegraphed || false };
         const hw = t.bw + 4;
         e.hpBg = s.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0x333333).setOrigin(0.5).setDepth(11);
         e.hpFill = s.add.rectangle(x, y - t.bh / 2 - 8, hw, 3, 0xe74c3c).setOrigin(0.5).setDepth(11);
