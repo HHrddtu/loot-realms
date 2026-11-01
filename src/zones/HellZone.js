@@ -47,11 +47,11 @@ export class HellZone extends BaseZone {
         s.hellImps = s.physics.add.group();
         s.hellLavaCircles = [];
         s.hellBoss = null;
-        this.bossDefeated = false;
         this.bossSpawned = false;
         s.hellHeatTimer = 0;
         s.hellLavaCooldown = false;
         s.hellReturnPortal = null;
+        s.hellReturnPortalHint = null;
 
         this.spawner.spawnHellCamps();
         this.spawner.spawnHellLavaCircles();
@@ -72,6 +72,20 @@ export class HellZone extends BaseZone {
         s.hintText.setText('SPACE=attack | I=inventory | TAB=stats | T=talents | C=craft | Q=quests | P=pause');
         if (s.particles) {
             s.particles.startHellEmbers(HELL_WIDTH, HELL_HEIGHT);
+        }
+
+        if (this.bossDefeated) this._spawnVictoryObjects();
+    }
+
+    _spawnVictoryObjects() {
+        const s = this.scene;
+        const ox = s.hellOffsetX;
+        if (!s.hellReturnPortal) {
+            s.hellReturnPortal = s.add.sprite(ox + HELL_WIDTH / 2, HELL_HEIGHT / 2 + 60, 'portal').setDepth(6).setScale(1.2).setTint(0xff2200);
+            s.hellReturnPortalHint = s.add.text(ox + HELL_WIDTH / 2, HELL_HEIGHT / 2 + 45, '', {
+                fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5).setDepth(12);
         }
     }
 
@@ -351,11 +365,7 @@ export class HellZone extends BaseZone {
             });
         });
 
-        s.hellReturnPortal = s.add.sprite(ox + HELL_WIDTH / 2, HELL_HEIGHT / 2 + 60, 'portal').setDepth(6).setScale(1.2).setTint(0xff2200);
-        s.hellReturnPortalHint = s.add.text(ox + HELL_WIDTH / 2, HELL_HEIGHT / 2 + 45, '', {
-            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
+        this._spawnVictoryObjects();
 
         s.time.delayedCall(3000, () => {
             if (s.zone === 'hell') {

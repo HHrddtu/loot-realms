@@ -23,6 +23,7 @@ export class SwampZone extends BaseZone {
 
     setup() {
         const s = this.scene;
+        s._destroyOrphanedCaveStairs();
         const ox = (GAME_WIDTH - SWAMP_WIDTH) / 2;
         s.cameras.main.setBackgroundColor('#0a1a0a');
         s.physics.world.setBounds(ox, 0, SWAMP_WIDTH, SWAMP_HEIGHT);
@@ -42,9 +43,9 @@ export class SwampZone extends BaseZone {
         s.swampMinions = s.physics.add.group();
         s.swampChests = s.physics.add.group();
         s.swampBoss = null;
-        this.bossDefeated = false;
         this.bossSpawned = false;
         s.swampReturnPortal = null;
+        s.swampReturnPortalHint = null;
 
         this.spawner.spawnSwampCamps();
         this.spawner.spawnSwampChests();
@@ -54,6 +55,20 @@ export class SwampZone extends BaseZone {
 
         s.zone = 'swamp';
         s.hintText.setText('SPACE=attack | I=inventory | TAB=stats | T=talents | C=craft | Q=quests | P=pause');
+
+        if (this.bossDefeated) this._spawnVictoryObjects();
+    }
+
+    _spawnVictoryObjects() {
+        const s = this.scene;
+        const ox = s.swampOffsetX;
+        if (!s.swampReturnPortal) {
+            s.swampReturnPortal = s.add.sprite(ox + SWAMP_WIDTH / 2, SWAMP_HEIGHT - 100, 'portal').setDepth(6).setScale(1.2).setTint(0x00aa00);
+            s.swampReturnPortalHint = s.add.text(ox + SWAMP_WIDTH / 2, SWAMP_HEIGHT - 115, '', {
+                fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5).setDepth(12);
+        }
     }
 
     _destroyZoneSpecific() {
@@ -165,11 +180,7 @@ export class SwampZone extends BaseZone {
             });
         });
 
-        s.swampReturnPortal = s.add.sprite(ox + SWAMP_WIDTH / 2, SWAMP_HEIGHT - 100, 'portal').setDepth(6).setScale(1.2).setTint(0x00aa00);
-        s.swampReturnPortalHint = s.add.text(ox + SWAMP_WIDTH / 2, SWAMP_HEIGHT - 115, '', {
-            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
+        this._spawnVictoryObjects();
 
         s.time.delayedCall(3000, () => {
             if (s.zone === 'swamp') {

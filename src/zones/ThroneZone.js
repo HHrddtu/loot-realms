@@ -42,9 +42,9 @@ export class ThroneZone extends BaseZone {
         s.enemies = s.physics.add.group();
         s.throneMinions = s.physics.add.group();
         s.throneBoss = null;
-        this.bossDefeated = false;
         this.bossSpawned = false;
         s.throneReturnPortal = null;
+        s.throneReturnPortalHint = null;
 
         this.setupEnemyOverlap();
 
@@ -63,6 +63,20 @@ export class ThroneZone extends BaseZone {
                 this.bossAI.spawnThroneBoss();
             }
         });
+
+        if (this.bossDefeated) this._spawnVictoryObjects();
+    }
+
+    _spawnVictoryObjects() {
+        const s = this.scene;
+        const ox = s.throneOffsetX;
+        if (!s.throneReturnPortal) {
+            s.throneReturnPortal = s.add.sprite(ox + THRONE_WIDTH / 2, THRONE_HEIGHT - 100, 'portal').setDepth(6).setScale(1.2).setTint(0xffd700);
+            s.throneReturnPortalHint = s.add.text(ox + THRONE_WIDTH / 2, THRONE_HEIGHT - 115, '', {
+                fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5).setDepth(12);
+        }
     }
 
     _destroyZoneSpecific() {
@@ -232,11 +246,7 @@ export class ThroneZone extends BaseZone {
         });
 
         // Return portal
-        s.throneReturnPortal = s.add.sprite(ox + THRONE_WIDTH / 2, THRONE_HEIGHT - 100, 'portal').setDepth(6).setScale(1.2).setTint(0xffd700);
-        s.throneReturnPortalHint = s.add.text(ox + THRONE_WIDTH / 2, THRONE_HEIGHT - 115, '', {
-            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
+        this._spawnVictoryObjects();
 
         s.time.delayedCall(5000, () => {
             if (s.zone === 'throne') {

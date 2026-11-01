@@ -44,9 +44,11 @@ export class ShadowZone extends BaseZone {
         s.shadowMinions = s.physics.add.group();
         s.shadowChests = s.physics.add.group();
         s.shadowBoss = null;
-        this.bossDefeated = false;
         this.bossSpawned = false;
         s.shadowReturnPortal = null;
+        s.shadowReturnPortalHint = null;
+        s.shadowTowerPortal = null;
+        s.shadowTowerPortalHint = null;
 
         this.spawner.spawnShadowCamps();
         this.spawner.spawnShadowChests();
@@ -67,6 +69,30 @@ export class ShadowZone extends BaseZone {
         s.hintText.setText('SPACE=attack | I=inventory | TAB=stats | T=talents | C=craft | Q=quests | P=pause');
         if (s.particles) {
             s.particles.startCaveDrip(SHADOW_WIDTH, SHADOW_HEIGHT);
+        }
+
+        if (this.bossDefeated) this._spawnVictoryObjects();
+    }
+
+    _spawnVictoryObjects() {
+        const s = this.scene;
+        const ox = s.shadowOffsetX;
+        if (!s.shadowReturnPortal) {
+            s.shadowReturnPortal = s.add.sprite(ox + SHADOW_WIDTH / 2, SHADOW_HEIGHT - 100, 'portal').setDepth(6).setScale(1.2).setTint(0x8800ff);
+            s.shadowReturnPortalHint = s.add.text(ox + SHADOW_WIDTH / 2, SHADOW_HEIGHT - 115, '', {
+                fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5).setDepth(12);
+        }
+        if (!s.shadowTowerPortal) {
+            const tpx = ox + SHADOW_WIDTH / 2;
+            const tpy = SHADOW_HEIGHT / 2;
+            s.shadowTowerPortal = s.add.sprite(tpx, tpy, 'portal').setDepth(6).setScale(1.2).setTint(0xcc8800);
+            s.tweens.add({ targets: s.shadowTowerPortal, y: tpy - 5, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+            s.shadowTowerPortalHint = s.add.text(tpx, tpy - 14, '', {
+                fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5).setDepth(12);
         }
     }
 
@@ -194,23 +220,7 @@ export class ShadowZone extends BaseZone {
             });
         });
 
-        s.shadowReturnPortal = s.add.sprite(ox + SHADOW_WIDTH / 2, SHADOW_HEIGHT - 100, 'portal').setDepth(6).setScale(1.2).setTint(0x8800ff);
-        s.shadowReturnPortalHint = s.add.text(ox + SHADOW_WIDTH / 2, SHADOW_HEIGHT - 115, '', {
-            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
-
-        // Tower portal
-        if (!s.shadowTowerPortal && this.bossDefeated) {
-            const tpx = ox + SHADOW_WIDTH / 2;
-            const tpy = SHADOW_HEIGHT / 2;
-            s.shadowTowerPortal = s.add.sprite(tpx, tpy, 'portal').setDepth(6).setScale(1.2).setTint(0xcc8800);
-            s.tweens.add({ targets: s.shadowTowerPortal, y: tpy - 5, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-            s.shadowTowerPortalHint = s.add.text(tpx, tpy - 14, '', {
-                fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-                stroke: '#000', strokeThickness: 2
-            }).setOrigin(0.5).setDepth(12);
-        }
+        this._spawnVictoryObjects();
 
         s.time.delayedCall(3000, () => {
             if (s.zone === 'shadow') {

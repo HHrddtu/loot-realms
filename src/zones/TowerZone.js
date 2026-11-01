@@ -31,6 +31,7 @@ export class TowerZone extends BaseZone {
         const ox = (GAME_WIDTH - TOWER_WIDTH) / 2;
         this.currentRoom = roomIndex;
         this.floorCleared = false;
+        this.bossSpawned = false;
 
         s.cameras.main.setBackgroundColor('#1a1408');
         s.physics.world.setBounds(ox, 0, TOWER_WIDTH, TOWER_ROOM_HEIGHT);
@@ -61,7 +62,9 @@ export class TowerZone extends BaseZone {
         s.towerStairsUp = null;
         s.towerStairsUpHint = null;
         s.towerReturnPortal = null;
+        s.towerReturnPortalHint = null;
         s.towerThronePortal = null;
+        s.towerThronePortalHint = null;
 
         this.spawner.spawnRoomEnemies(roomIndex);
         this.spawner.spawnRoomChest(roomIndex);
@@ -73,6 +76,29 @@ export class TowerZone extends BaseZone {
         s.hintText.setText('SPACE=attack | I=inventory | TAB=stats | T=talents | C=craft | Q=quests | P=pause');
         if (s.particles) {
             s.particles.startCaveDrip(TOWER_WIDTH, TOWER_ROOM_HEIGHT);
+        }
+
+        if (this.bossDefeated && this.currentRoom >= TOWER_ROOMS - 1) {
+            this._spawnVictoryPortals();
+        }
+    }
+
+    _spawnVictoryPortals() {
+        const s = this.scene;
+        const ox = s.towerOffsetX;
+        if (!s.towerThronePortal) {
+            s.towerThronePortal = s.add.sprite(ox + TOWER_WIDTH / 2, TOWER_ROOM_HEIGHT / 2, 'portal').setDepth(6).setScale(1.2).setTint(0xffd700);
+            s.towerThronePortalHint = s.add.text(ox + TOWER_WIDTH / 2, TOWER_ROOM_HEIGHT / 2 - 40, '', {
+                fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5).setDepth(12);
+        }
+        if (!s.towerReturnPortal) {
+            s.towerReturnPortal = s.add.sprite(ox + TOWER_WIDTH / 2, TOWER_ROOM_HEIGHT / 2 + 60, 'portal').setDepth(6).setScale(1.2).setTint(0x8800ff);
+            s.towerReturnPortalHint = s.add.text(ox + TOWER_WIDTH / 2, TOWER_ROOM_HEIGHT / 2 + 45, '', {
+                fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5).setDepth(12);
         }
     }
 
@@ -162,7 +188,6 @@ export class TowerZone extends BaseZone {
     _updateStairsUpHint() {
         const s = this.scene;
         if (s.zone !== 'tower' || s.menuOpen || s.transitioning) return;
-        if (this.bossDefeated) return;
         // No stairs in boss room
         if (this.currentRoom >= TOWER_ROOMS - 1) return;
 
@@ -356,19 +381,8 @@ export class TowerZone extends BaseZone {
             });
         });
 
-        // Throne portal
-        s.towerThronePortal = s.add.sprite(ox + TOWER_WIDTH / 2, TOWER_ROOM_HEIGHT / 2, 'portal').setDepth(6).setScale(1.2).setTint(0xffd700);
-        s.towerThronePortalHint = s.add.text(ox + TOWER_WIDTH / 2, TOWER_ROOM_HEIGHT / 2 - 40, '', {
-            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
-
-        // Return portal
-        s.towerReturnPortal = s.add.sprite(ox + TOWER_WIDTH / 2, TOWER_ROOM_HEIGHT / 2 + 60, 'portal').setDepth(6).setScale(1.2).setTint(0x8800ff);
-        s.towerReturnPortalHint = s.add.text(ox + TOWER_WIDTH / 2, TOWER_ROOM_HEIGHT / 2 + 45, '', {
-            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
+        // Throne + return portals
+        this._spawnVictoryPortals();
 
         s.time.delayedCall(3000, () => {
             if (s.zone === 'tower') {

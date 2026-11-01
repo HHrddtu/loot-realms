@@ -43,9 +43,11 @@ export class CursedZone extends BaseZone {
         s.cursedMinions = s.physics.add.group();
         s.cursedChests = s.physics.add.group();
         s.cursedBoss = null;
-        this.bossDefeated = false;
         this.bossSpawned = false;
         s.cursedReturnPortal = null;
+        s.cursedReturnPortalHint = null;
+        s.cursedShadowPortal = null;
+        s.cursedShadowPortalHint = null;
 
         this.spawner.spawnCursedCamps();
         this.spawner.spawnCursedChests();
@@ -57,6 +59,30 @@ export class CursedZone extends BaseZone {
         s.hintText.setText('SPACE=attack | I=inventory | TAB=stats | T=talents | C=craft | Q=quests | P=pause');
         if (s.particles) {
             s.particles.startCaveDrip(CURSED_WIDTH, CURSED_HEIGHT);
+        }
+
+        if (this.bossDefeated) this._spawnVictoryObjects();
+    }
+
+    _spawnVictoryObjects() {
+        const s = this.scene;
+        const ox = s.cursedOffsetX;
+        if (!s.cursedReturnPortal) {
+            s.cursedReturnPortal = s.add.sprite(ox + CURSED_WIDTH / 2, CURSED_HEIGHT - 100, 'portal').setDepth(6).setScale(1.2).setTint(0x00aa00);
+            s.cursedReturnPortalHint = s.add.text(ox + CURSED_WIDTH / 2, CURSED_HEIGHT - 115, '', {
+                fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5).setDepth(12);
+        }
+        if (!s.cursedShadowPortal) {
+            const spx = ox + CURSED_WIDTH / 2;
+            const spy = CURSED_HEIGHT / 2;
+            s.cursedShadowPortal = s.add.sprite(spx, spy, 'portal').setDepth(6).setScale(1.2).setTint(0x8800ff);
+            s.tweens.add({ targets: s.cursedShadowPortal, y: spy - 5, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+            s.cursedShadowPortalHint = s.add.text(spx, spy - 14, '', {
+                fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5).setDepth(12);
         }
     }
 
@@ -178,23 +204,7 @@ export class CursedZone extends BaseZone {
             });
         });
 
-        s.cursedReturnPortal = s.add.sprite(ox + CURSED_WIDTH / 2, CURSED_HEIGHT - 100, 'portal').setDepth(6).setScale(1.2).setTint(0x00aa00);
-        s.cursedReturnPortalHint = s.add.text(ox + CURSED_WIDTH / 2, CURSED_HEIGHT - 115, '', {
-            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
-
-        // Shadow Dimension portal
-        if (!s.cursedShadowPortal && this.bossDefeated) {
-            const spx = ox + CURSED_WIDTH / 2;
-            const spy = CURSED_HEIGHT / 2;
-            s.cursedShadowPortal = s.add.sprite(spx, spy, 'portal').setDepth(6).setScale(1.2).setTint(0x8800ff);
-            s.tweens.add({ targets: s.cursedShadowPortal, y: spy - 5, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-            s.cursedShadowPortalHint = s.add.text(spx, spy - 14, '', {
-                fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-                stroke: '#000', strokeThickness: 2
-            }).setOrigin(0.5).setDepth(12);
-        }
+        this._spawnVictoryObjects();
 
         s.time.delayedCall(3000, () => {
             if (s.zone === 'cursed') {

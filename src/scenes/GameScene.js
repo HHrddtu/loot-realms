@@ -237,7 +237,7 @@ export default class GameScene extends Phaser.Scene {
             } else if (this._savedZone === 'shadow') {
                 this._setupZone('shadow');
             } else if (this._savedZone === 'tower') {
-                this._setupZone('tower');
+                this._setupZone('tower', this.zones.tower.currentRoom || 0);
             } else if (this._savedZone === 'throne') {
                 this._setupZone('throne');
             } else if (this._savedZone === 'snowy') {

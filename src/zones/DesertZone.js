@@ -23,6 +23,7 @@ export class DesertZone extends BaseZone {
 
     setup() {
         const s = this.scene;
+        s._destroyOrphanedCaveStairs();
         const ox = (GAME_WIDTH - DESERT_WIDTH) / 2;
         s.cameras.main.setBackgroundColor('#1a1408');
         s.physics.world.setBounds(ox, 0, DESERT_WIDTH, DESERT_HEIGHT);
@@ -42,9 +43,11 @@ export class DesertZone extends BaseZone {
         s.desertMinions = s.physics.add.group();
         s.desertChests = s.physics.add.group();
         s.desertBoss = null;
-        this.bossDefeated = false;
         this.bossSpawned = false;
         s.desertReturnPortal = null;
+        s.desertReturnPortalHint = null;
+        s.desertSwampPortal = null;
+        s.desertSwampPortalHint = null;
 
         this.spawner.spawnDesertCamps();
         this.spawner.spawnDesertChests();
@@ -54,6 +57,30 @@ export class DesertZone extends BaseZone {
 
         s.zone = 'desert';
         s.hintText.setText('SPACE=attack | I=inventory | TAB=stats | T=talents | C=craft | Q=quests | P=pause');
+
+        if (this.bossDefeated) this._spawnVictoryObjects();
+    }
+
+    _spawnVictoryObjects() {
+        const s = this.scene;
+        const ox = s.desertOffsetX;
+        if (!s.desertReturnPortal) {
+            s.desertReturnPortal = s.add.sprite(ox + DESERT_WIDTH / 2, DESERT_HEIGHT - 100, 'portal').setDepth(6).setScale(1.2).setTint(0xc8a44a);
+            s.desertReturnPortalHint = s.add.text(ox + DESERT_WIDTH / 2, DESERT_HEIGHT - 115, '', {
+                fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5).setDepth(12);
+        }
+        if (!s.desertSwampPortal) {
+            const spx = ox + DESERT_WIDTH / 2;
+            const spy = DESERT_HEIGHT / 2;
+            s.desertSwampPortal = s.add.sprite(spx, spy, 'portal').setDepth(6).setScale(1.2).setTint(0x27ae60);
+            s.tweens.add({ targets: s.desertSwampPortal, y: spy - 5, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+            s.desertSwampPortalHint = s.add.text(spx, spy - 14, '', {
+                fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5).setDepth(12);
+        }
     }
 
     _destroyZoneSpecific() {
@@ -173,23 +200,7 @@ export class DesertZone extends BaseZone {
             });
         });
 
-        s.desertReturnPortal = s.add.sprite(ox + DESERT_WIDTH / 2, DESERT_HEIGHT - 100, 'portal').setDepth(6).setScale(1.2).setTint(0xc8a44a);
-        s.desertReturnPortalHint = s.add.text(ox + DESERT_WIDTH / 2, DESERT_HEIGHT - 115, '', {
-            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
-
-        // Swamp portal
-        if (!s.desertSwampPortal && this.bossDefeated) {
-            const spx = ox + DESERT_WIDTH / 2;
-            const spy = DESERT_HEIGHT / 2;
-            s.desertSwampPortal = s.add.sprite(spx, spy, 'portal').setDepth(6).setScale(1.2).setTint(0x27ae60);
-            s.tweens.add({ targets: s.desertSwampPortal, y: spy - 5, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-            s.desertSwampPortalHint = s.add.text(spx, spy - 14, '', {
-                fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-                stroke: '#000', strokeThickness: 2
-            }).setOrigin(0.5).setDepth(12);
-        }
+        this._spawnVictoryObjects();
 
         s.time.delayedCall(3000, () => {
             if (s.zone === 'desert') {

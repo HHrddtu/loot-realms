@@ -137,7 +137,6 @@ export class CaveZone extends BaseZone {
         }
         this.bossAlive = false;
         this.bossSpawned = false;
-        this.bossDefeated = false;
     }
 
     update(time, delta) {

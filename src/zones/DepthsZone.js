@@ -44,9 +44,11 @@ export class DepthsZone extends BaseZone {
         s.depthsMinions = s.physics.add.group();
         s.depthsChests = s.physics.add.group();
         s.depthsBoss = null;
-        this.bossDefeated = false;
         this.bossSpawned = false;
         s.depthsReturnPortal = null;
+        s.depthsReturnPortalHint = null;
+        s.depthsCursedPortal = null;
+        s.depthsCursedPortalHint = null;
 
         this.spawner.spawnDepthsCamps();
         this.spawner.spawnDepthsChests();
@@ -66,6 +68,30 @@ export class DepthsZone extends BaseZone {
         s.hintText.setText('SPACE=attack | I=inventory | TAB=stats | T=talents | C=craft | Q=quests | P=pause');
         if (s.particles) {
             s.particles.startCaveDrip(DEPTHS_WIDTH, DEPTHS_HEIGHT);
+        }
+
+        if (this.bossDefeated) this._spawnVictoryObjects();
+    }
+
+    _spawnVictoryObjects() {
+        const s = this.scene;
+        const ox = s.depthsOffsetX;
+        if (!s.depthsReturnPortal) {
+            s.depthsReturnPortal = s.add.sprite(ox + DEPTHS_WIDTH / 2, DEPTHS_HEIGHT - 100, 'portal').setDepth(6).setScale(1.2).setTint(0x8800ff);
+            s.depthsReturnPortalHint = s.add.text(ox + DEPTHS_WIDTH / 2, DEPTHS_HEIGHT - 115, '', {
+                fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5).setDepth(12);
+        }
+        if (!s.depthsCursedPortal) {
+            const cpx = ox + DEPTHS_WIDTH / 2;
+            const cpy = DEPTHS_HEIGHT / 2;
+            s.depthsCursedPortal = s.add.sprite(cpx, cpy, 'portal').setDepth(6).setScale(1.2).setTint(0x00aa00);
+            s.tweens.add({ targets: s.depthsCursedPortal, y: cpy - 5, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+            s.depthsCursedPortalHint = s.add.text(cpx, cpy - 40, '', {
+                fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5).setDepth(12);
         }
     }
 
@@ -215,23 +241,7 @@ export class DepthsZone extends BaseZone {
             });
         });
 
-        s.depthsReturnPortal = s.add.sprite(ox + DEPTHS_WIDTH / 2, DEPTHS_HEIGHT - 100, 'portal').setDepth(6).setScale(1.2).setTint(0x8800ff);
-        s.depthsReturnPortalHint = s.add.text(ox + DEPTHS_WIDTH / 2, DEPTHS_HEIGHT - 115, '', {
-            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setDepth(12);
-
-        // Cursed Lands portal appears after boss death
-        if (!s.depthsCursedPortal && this.bossDefeated) {
-            const cpx = ox + DEPTHS_WIDTH / 2;
-            const cpy = DEPTHS_HEIGHT / 2;
-            s.depthsCursedPortal = s.add.sprite(cpx, cpy, 'portal').setDepth(6).setScale(1.2).setTint(0x00aa00);
-            s.tweens.add({ targets: s.depthsCursedPortal, y: cpy - 5, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-            s.depthsCursedPortalHint = s.add.text(cpx, cpy - 40, '', {
-                fontSize: '11px', fill: '#f1c40f', fontFamily: 'Arial', fontStyle: 'bold',
-                stroke: '#000', strokeThickness: 2
-            }).setOrigin(0.5).setDepth(12);
-        }
+        this._spawnVictoryObjects();
 
         s.time.delayedCall(3000, () => {
             if (s.zone === 'depths') {
