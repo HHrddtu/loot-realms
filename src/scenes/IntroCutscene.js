@@ -22,12 +22,17 @@ export default class IntroCutscene extends Phaser.Scene {
         this.beatGroup = [];
         this.currentBeat = 0;
 
-        this._skipSpaceHandler = () => this._skip();
-        this._skipEscHandler = () => this._skip();
-        this._skipPointerHandler = () => this._skip();
-        this.input.keyboard.on('keydown-SPACE', this._skipSpaceHandler);
-        this.input.keyboard.on('keydown-ESC', this._skipEscHandler);
-        this.input.on('pointerdown', this._skipPointerHandler);
+        // Delay skip listeners so the click that started the cutscene
+        // (BEGIN JOURNEY) does not instantly skip the first beat.
+        this.time.delayedCall(350, () => {
+            if (this.skipRequested) return;
+            this._skipSpaceHandler = () => this._skip();
+            this._skipEscHandler = () => this._skip();
+            this._skipPointerHandler = () => this._skip();
+            this.input.keyboard.on('keydown-SPACE', this._skipSpaceHandler);
+            this.input.keyboard.on('keydown-ESC', this._skipEscHandler);
+            this.input.on('pointerdown', this._skipPointerHandler);
+        });
 
         this.time.delayedCall(200, () => {
             this.cameras.main.fadeIn(CUTSCENE.fadeIn, 0, 0, 0);

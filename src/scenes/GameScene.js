@@ -791,7 +791,12 @@ export default class GameScene extends Phaser.Scene {
     /* ===== GAME LOOP ===== */
 
     update(time, delta) {
-        if (this.menuOpen) return;
+        if (this.menuOpen) {
+            if (this.invOpen && this.iKey && Phaser.Input.Keyboard.JustDown(this.iKey)) {
+                this.closeInventory();
+            }
+            return;
+        }
         if (this.playerSys) this.playerSys.resetStatsRecalcFlag();
         this._handleInput();
         if (this.isDowned) {

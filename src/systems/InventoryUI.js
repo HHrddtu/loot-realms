@@ -135,7 +135,7 @@ export class InventoryUI {
             }).setOrigin(0.5)));
         }
 
-        this.scene.invGroup.push(mkInv(this.scene.add.text(350, consY - 8, 'Gold: ' + (this.scene.gold || 0), {
+        this.scene.invGroup.push(mkInv(this.scene.add.text(350, 265, 'Gold: ' + (this.scene.gold || 0), {
             fontSize: '13px', fill: '#f1c40f', fontFamily: 'Georgia, serif', fontStyle: 'bold'
         }).setOrigin(0.5)));
 
