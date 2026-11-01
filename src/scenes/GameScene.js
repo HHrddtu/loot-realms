@@ -569,10 +569,12 @@ export default class GameScene extends Phaser.Scene {
             // Zone gating: check if chapter requires an item
             const chapter = (zoneName === 'forest' || zoneName === 'arena' || zoneName === 'mine') ? null : this._getChapterForZone(zoneName);
             const required = chapter && chapter.requireItem;
-            if (required && !this._hasItem(required)) {
+            // On initial load the save is already inside that zone; do not block
+            // it if the key item was sold/lost, otherwise the player gets a black void.
+            if (required && !this._hasItem(required) && this.currentZone) {
                 const itemName = required.replace(/_/g, ' ');
                 this.floatingText(this.player.x, this.player.y - 30, 'Need: ' + itemName, '#e74c3c');
-                return;
+                return false;
             }
             this.currentZone = zone;
             this.zone = zoneName;
