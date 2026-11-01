@@ -18,8 +18,14 @@ export class BaseZone {
     spawnObstacles() {
         const s = this.scene;
         const data = ZONE_OBSTACLES[s.zone];
+        if (s.obstacles) {
+            if (s.obstacles.scene) {
+                s.obstacles.clear(true, true);
+                s.obstacles.destroy();
+            }
+            s.obstacles = null;
+        }
         if (!data || data.length === 0) return;
-        if (s.obstacles) { s.obstacles.clear(true, true); s.obstacles = null; }
         s.obstacles = s.physics.add.staticGroup();
         data.forEach(o => {
             const tex = this._obstacleTex(o.type, s.zone);

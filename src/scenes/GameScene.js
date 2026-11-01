@@ -775,7 +775,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     _checkSpikeDamage(delta) {
-        if (!this.obstacles || this.menuOpen || this.transitioning) return;
+        if (!this.obstacles || !this.obstacles.scene || this.menuOpen || this.transitioning) return;
         this._spikeTimer = (this._spikeTimer || 0) - delta;
         if (this._spikeTimer > 0) return;
         this._spikeTimer = 500;

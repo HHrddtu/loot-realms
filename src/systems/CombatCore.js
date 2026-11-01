@@ -559,7 +559,7 @@ export class CombatCore {
 
     _hitObstacles(ax, ay, radius, dmg) {
         const s = this.scene;
-        if (!s.obstacles) return;
+        if (!s.obstacles || !s.obstacles.scene) return;
         s.obstacles.getChildren().forEach(obs => {
             if (!obs.active) return;
             const d = Phaser.Math.Distance.Between(ax, ay, obs.x, obs.y);
