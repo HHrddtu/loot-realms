@@ -17,8 +17,8 @@ export const CLASS_DB = {
         meleeColor: 0xe74c3c,
         rSpell: 'meteor',
         stats: {
-            hp: 80,
-            damage: 18,
+            hp: 100,
+            damage: 20,
             speed: 170,
             corruptionMax: 100,
             corruptionDecay: 0.08,
@@ -49,8 +49,8 @@ export const CLASS_DB = {
         meleeColor: 0x27ae60,
         rSpell: 'chemical_cloud',
         stats: {
-            hp: 90,
-            damage: 18,
+            hp: 112,
+            damage: 20,
             speed: 160,
             corruptionMax: 80,
             corruptionDecay: 0.08,
@@ -83,8 +83,8 @@ export const CLASS_DB = {
         meleeHealPercent: 0.25,
         rSpell: 'divine_blessing',
         stats: {
-            hp: 75,
-            damage: 15,
+            hp: 95,
+            damage: 17,
             speed: 180,
             corruptionMax: 120,
             corruptionDecay: 0.10,

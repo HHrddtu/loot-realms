@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { ZONE_OBSTACLES, RANGED_INTERVAL_DEFAULT, MOB_ROLE_DEFAULTS, HEALER_HEAL_AMOUNT_DEFAULT, HEALER_HEAL_RANGE_DEFAULT, HEALER_ALLY_RANGE_DEFAULT } from '../config/index.js';
+import { ZONE_OBSTACLES, RANGED_INTERVAL_DEFAULT, MOB_ROLE_DEFAULTS, HEALER_HEAL_AMOUNT_DEFAULT, HEALER_HEAL_RANGE_DEFAULT, HEALER_ALLY_RANGE_DEFAULT, TRAP_DAMAGE_MIN, TRAP_DAMAGE_MAX } from '../config/index.js';
 import { EnemyAI } from './EnemyAI.js';
 
 export class BaseZone {
@@ -247,7 +247,7 @@ export class BaseZone {
         s.physics.add.overlap(s.player, trapGroup, (p, trap) => {
             if (!trap.active || trap.onCooldown || s.menuOpen || s.transitioning) return;
             trap.onCooldown = true;
-            const dmg = 10 + Math.floor(Math.random() * 11);
+            const dmg = TRAP_DAMAGE_MIN + Math.floor(Math.random() * (TRAP_DAMAGE_MAX - TRAP_DAMAGE_MIN + 1));
             s.combat.takeDamage(dmg);
             s.floatingText(trap.x, trap.y - 20, '-' + dmg, '#e74c3c');
             const angle = Math.atan2(p.y - trap.y, p.x - trap.x);

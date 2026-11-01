@@ -1,5 +1,5 @@
 // ── Combat ──
-export const INVINCIBILITY_DURATION = 500;
+export const INVINCIBILITY_DURATION = 600;
 export const MELEE_RANGE = 55;
 export const MELEE_COOLDOWN = 280;
 export const MELEE_DMG_MULT = 1.0;
@@ -43,6 +43,9 @@ export const LUCKY_HIT_MAX_COUNTER = 50;
 export const LUCKY_HIT_BASE_MULT = 1.5;
 export const LUCKY_HIT_COUNTER_SCALE = 0.05;
 export const LUCKY_HIT_COUNTER_MAX_FOR_MULT = 10;
+
+export const TRAP_DAMAGE_MIN = 6;
+export const TRAP_DAMAGE_MAX = 12;
 
 export const STUMP_RESPAWN_MS = 8000;
 export const VILLAGE_CHEST_DESTROY_DELAY = 2500;
@@ -110,7 +113,7 @@ export const HEAL_ZONE_HEAL_PER_SEC = 0.04;
 // ── Player ──
 export const BASE_CRIT_DAMAGE_MULT = 1.5;
 export const DEFAULT_CORRUPTION_DECAY = 0.08;
-export const LEVEL_UP_XP_BASE = 300;
+export const LEVEL_UP_XP_BASE = 240;
 export const LEVEL_UP_XP_EXPONENT = 1.6;
 
 export const UPGRADE_HP_PER_LVL = 5;
