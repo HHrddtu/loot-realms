@@ -167,7 +167,10 @@ export class CastleSpawner {
         this.scene.physics.add.existing(e, false);
         e.body.setSize(t.bw, t.bh);
         e.body.setCollideWorldBounds(true);
-        if (this.scene.anims.exists(animKey)) e.play(animKey);
+        if (this.scene.anims.exists(animKey)) {
+            e.play(animKey);
+            e.walkAnimKey = animKey;
+        }
 
         e.stats = {
             key: t.key, name: t.name,

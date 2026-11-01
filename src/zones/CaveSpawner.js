@@ -49,6 +49,7 @@ export class CaveSpawner {
         e.body.setSize(t.bw, t.bh);
         e.body.setCollideWorldBounds(true);
         e.play(animKey);
+        e.walkAnimKey = animKey;
 
         e.stats = {
             key: t.key, name: t.name,

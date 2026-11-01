@@ -61,7 +61,10 @@ export class TowerSpawner {
         s.physics.add.existing(e, false);
         e.body.setSize(t.bw, t.bh);
         e.body.setCollideWorldBounds(true);
-        if (s.anims.exists(animKey)) e.play(animKey);
+        if (s.anims.exists(animKey)) {
+            e.play(animKey);
+            e.walkAnimKey = animKey;
+        }
 
         const rangedInterval = RANGED_INTERVALS[t.role] || RANGED_INTERVAL_DEFAULT;
         e.stats = {

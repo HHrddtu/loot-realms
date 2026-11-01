@@ -45,7 +45,10 @@ export class SnowyZone extends BaseZone {
         this.scene.physics.add.existing(e, false);
         e.body.setSize(t.bw, t.bh);
         e.body.setCollideWorldBounds(true);
-        if (this.scene.anims.exists(animKey)) e.play(animKey);
+        if (this.scene.anims.exists(animKey)) {
+            e.play(animKey);
+            e.walkAnimKey = animKey;
+        }
 
         const rangedInterval = VILLAGE_RANGED_INTERVALS[t.role] || RANGED_INTERVAL_DEFAULT;
         e.stats = {
@@ -135,7 +138,10 @@ export class SnowyZone extends BaseZone {
         this.scene.physics.add.existing(e, false);
         e.body.setSize(SNOWY_VILLAGE_BOSS_TYPE.bw, SNOWY_VILLAGE_BOSS_TYPE.bh);
         e.body.setCollideWorldBounds(true);
-        if (this.scene.anims.exists(animKey)) e.play(animKey);
+        if (this.scene.anims.exists(animKey)) {
+            e.play(animKey);
+            e.walkAnimKey = animKey;
+        }
 
         const bt = SNOWY_VILLAGE_BOSS_TYPE;
         e.stats = {

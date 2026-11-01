@@ -183,16 +183,21 @@ export class EnemyAI {
             e.off('animationcomplete', e._attackAnimHandler);
             e._attackAnimHandler = null;
         }
+        const baseTexture = e.texture && e.texture.key;
+        const baseFrame = e.frame ? e.frame.name : 0;
         e.play(key, true);
-        if (e.walkAnimKey && scene.anims.exists(e.walkAnimKey)) {
-            const handler = (anim) => {
-                if (!e.active) return;
-                e._attackAnimHandler = null;
-                if (anim.key === key) e.play(e.walkAnimKey);
-            };
-            e._attackAnimHandler = handler;
-            e.once('animationcomplete', handler);
-        }
+        const handler = (anim) => {
+            if (!e.active) return;
+            e._attackAnimHandler = null;
+            if (anim.key !== key) return;
+            if (e.walkAnimKey && scene.anims.exists(e.walkAnimKey)) {
+                e.play(e.walkAnimKey);
+            } else if (baseTexture) {
+                e.setTexture(baseTexture, baseFrame);
+            }
+        };
+        e._attackAnimHandler = handler;
+        e.once('animationcomplete', handler);
     }
 
     static _rangedAttack(e, player, scene) {

@@ -39,7 +39,10 @@ export class VillageSpawner {
         this.scene.physics.add.existing(e, false);
         e.body.setSize(t.bw, t.bh);
         e.body.setCollideWorldBounds(true);
-        if (this.scene.anims.exists(animKey)) e.play(animKey);
+        if (this.scene.anims.exists(animKey)) {
+            e.play(animKey);
+            e.walkAnimKey = animKey;
+        }
         const diff = this.scene.diffMulti;
         e.stats = { key: t.key, name: t.name, hp: Math.floor(t.hp * diff.hp), maxHp: Math.floor(t.hp * diff.hp), damage: Math.floor(t.dmg * diff.dmg), exp: Math.floor(t.exp * diff.exp), bw: t.bw, bh: t.bh, wTimer: 0, wDir: 0, campIndex, role: t.role || 'dps', hasShield: t.hasShield || false, walkAnimKey: animKey };
         const hpW = t.bw + 6;
