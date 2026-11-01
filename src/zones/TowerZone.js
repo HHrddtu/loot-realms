@@ -8,6 +8,7 @@ import {
 import { rollEquip, rollZoneAccountEquip } from '../utils.js';
 import { rollBossCrystals } from '../config/pets.js';
 import { playBossDeath, playLoot, playPortal } from '../sound.js';
+import { onKill } from '../quests.js';
 
 import { BaseZone } from '../systems/BaseZone.js';
 import { CombatLoot } from '../systems/CombatLoot.js';
@@ -327,11 +328,15 @@ export class TowerZone extends BaseZone {
         const s = this.scene;
         if (this.bossDefeated) return;
         this.bossDefeated = true;
+        onKill('fallen_king');
         playBossDeath();
         CombatLoot.celebrateBossKill(s);
         const ox = s.towerOffsetX;
 
         if (s.towerBoss) {
+            CombatLoot.spawnDeathEcho(s, s.towerBoss.x, s.towerBoss.y, s.towerBoss.texture.key, {
+                scale: s.towerBoss.scaleX, tint: 0xf1c40f, duration: 700, drop: 24
+            });
             if (s.particles) s.particles.spawnBossDeath(s.towerBoss.x, s.towerBoss.y);
             if (s.towerBoss.hpBg) { s.towerBoss.hpBg.destroy(); s.towerBoss.hpBg = null; }
             if (s.towerBoss.hpFill) { s.towerBoss.hpFill.destroy(); s.towerBoss.hpFill = null; }
@@ -432,7 +437,6 @@ export class TowerZone extends BaseZone {
         playPortal();
         s.cameras.main.fadeOut(800, 0, 0, 0);
         s.time.delayedCall(800, () => {
-            this.clear();
             s._setupZone('shadow');
             s.cameras.main.fadeIn(500, 0, 0, 0);
             s.transitioning = false;
@@ -453,7 +457,6 @@ export class TowerZone extends BaseZone {
         playPortal();
         s.cameras.main.fadeOut(800, 200, 180, 100);
         s.time.delayedCall(800, () => {
-            this.clear();
             s._setupZone('throne');
             s.cameras.main.fadeIn(500, 200, 180, 100);
             s.transitioning = false;

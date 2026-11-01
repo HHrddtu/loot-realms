@@ -84,6 +84,9 @@ export { SPELLS } from './spells.js';
 // Obstacles
 export { ZONE_OBSTACLES } from './obstacles.js';
 
+// Zone hazards
+export { DESERT_SANDSTORM, SWAMP_HAZARD } from './zoneHazards.js';
+
 // Crafting
 export { QUEST_REWARD_CHANCE, CRAFT_CATEGORIES, CRAFTING_RECIPES } from './crafting.js';
 

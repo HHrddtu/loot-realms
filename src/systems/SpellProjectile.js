@@ -1,5 +1,6 @@
 import { VILLAGE_BOSS_TYPE } from '../config/index.js';
 import { recordKill } from '../bestiary.js';
+import { EnemyAI } from './EnemyAI.js';
 
 export class SpellProjectile {
     constructor(scene) {
@@ -58,6 +59,14 @@ export class SpellProjectile {
         fb.spellKey = spell.key;
         fb.dot = (spell.dot || 0) + (this.scene.computedDotPower || 0);
         fb.dotDuration = (spell.dotDuration || 0) + (this.scene.computedDotDuration || 0);
+        fb.pierce = !!this.scene.computedSpellPierce;
+        fb.chainCount = this.scene.computedSpellChain || 0;
+        fb.chainRange = 150;
+        fb.splashBurn = !!this.scene.computedSpellSplashBurn;
+        fb.splashBurnDone = false;
+        fb.spreadOnKill = !!this.scene.computedSpellSpreadOnKill;
+        fb.chained = false;
+        fb.hitEnemies = new Set();
         this.scene.fireballs.push(fb);
 
         const glow = this.scene.add.circle(px, py, 12, spell.color, 0.3).setDepth(14);
@@ -88,6 +97,12 @@ export class SpellProjectile {
         fb.healZoneDuration = spell.healZoneDuration || 3.0;
         fb.healZoneHealPerSec = spell.healZoneHealPerSec || 0.04;
         fb.dot = 0; fb.dotDuration = 0;
+        fb.pierce = false;
+        fb.chainCount = 0;
+        fb.splashBurn = false;
+        fb.spreadOnKill = false;
+        fb.chained = false;
+        fb.hitEnemies = new Set();
         this.scene.fireballs.push(fb);
 
         const glow = this.scene.add.circle(px, py, 12, 0xf1c40f, 0.4).setDepth(14);
@@ -366,17 +381,22 @@ export class SpellProjectile {
             group.getChildren().forEach(e => {
                 if (!e.active) return;
                 if (e === this.scene.boss || e === this.scene.mineBoss || e === this.scene.caveBoss || e === this.scene.villageBoss || e === this.scene.hellBoss) return;
+                if (fb.hitEnemies && fb.hitEnemies.has(e)) return;
                 if (Phaser.Math.Distance.Between(fb.x, fb.y, e.x, e.y) < 20) {
                     const totalDmg = fb.damage + (fb.dot || 0) * (fb.dotDuration || 0);
                     e.stats.hp -= totalDmg;
                     spellTotalDmg += totalDmg;
                     this.scene.floatingText(e.x, e.y - 20, '-' + totalDmg, '#e74c3c');
-                    hit = true;
+                    if (fb.hitEnemies) fb.hitEnemies.add(e);
+                    if (!fb.pierce) hit = true;
+                    if (fb.splashBurn) this._applySplashBurn(fb, e, totalDmg);
                     if (e.stats.hp <= 0) {
                         if (e.stats.isBossClone) this.scene.zones.village.boss.killBossClone(e);
                         else this.scene.killEnemy(e);
+                        if (fb.spreadOnKill) this._spreadDot(e, fb);
                     }
-                    if (this.scene.relicEffects && this.scene.relicEffects.fireball_chain && !fb.chained) {
+                    const chainSource = fb.chainCount > 0 || (this.scene.relicEffects && this.scene.relicEffects.fireball_chain);
+                    if (chainSource && !fb.chained) {
                         this._tryChain(fb, e, totalDmg);
                     }
                 }
@@ -572,6 +592,33 @@ export class SpellProjectile {
         });
         s.cameras.main.shake(200, 0.008);
         s.floatingText(worldPoint.x, worldPoint.y - 30, 'NOVA BLAST!', '#e74c3c');
+    }
+
+    _applySplashBurn(fb, hitEnemy, totalDmg) {
+        if (fb.splashBurnDone) return;
+        fb.splashBurnDone = true;
+        const dps = Math.max(2, Math.floor(totalDmg * 0.15));
+        this._getAllEnemies().forEach(e => {
+            if (!e.active || !e.stats || e === hitEnemy) return;
+            if (Phaser.Math.Distance.Between(hitEnemy.x, hitEnemy.y, e.x, e.y) < 80) {
+                EnemyAI._applyStatus(e, 'burn', { dps, duration: 3 });
+            }
+        });
+        this.scene.floatingText(hitEnemy.x, hitEnemy.y - 40, 'SPLASH!', '#ff8800');
+    }
+
+    _spreadDot(sourceEnemy, fb) {
+        let nearest = null;
+        let nearDist = 120;
+        this._getAllEnemies().forEach(e => {
+            if (!e.active || !e.stats || e === sourceEnemy) return;
+            const d = Phaser.Math.Distance.Between(sourceEnemy.x, sourceEnemy.y, e.x, e.y);
+            if (d < nearDist) { nearDist = d; nearest = e; }
+        });
+        if (!nearest) return;
+        const dot = Math.max(2, fb.dot || 3);
+        EnemyAI._applyStatus(nearest, 'poison', { dps: dot, duration: fb.dotDuration || 3 });
+        this.scene.floatingText(nearest.x, nearest.y - 30, 'SPREAD!', '#27ae60');
     }
 
     _tryChain(fb, hitEnemy, totalDmg) {

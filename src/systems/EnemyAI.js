@@ -1,13 +1,14 @@
 import Phaser from 'phaser';
 import { playHit, playBossAoE } from '../sound.js';
-import { ENEMY_WANDER_SPEED, ENEMY_CHASE_RANGE, ENEMY_WANDER_TICK, ENEMY_LEASH_DIST,
+import {
+    ENEMY_WANDER_SPEED, ENEMY_CHASE_RANGE, ENEMY_WANDER_TICK, ENEMY_LEASH_DIST,
     ENEMY_LEASH_RETURN_SPEED, ENEMY_LEASH_HP_REGEN,
     ENEMY_SEPARATION_RADIUS, ENEMY_SEPARATION_FORCE,
     ENEMY_ALERT_BASE_DELAY, ENEMY_ALERT_RANDOM_DELAY,
     ENEMY_CLOSE_RANGE_SPEED_MULT, ENEMY_CLOSE_RANGE_THRESHOLD,
     ENEMY_MAX_COUNT, ENEMY_ROLE_RANGES
 } from '../config/index.js';
-
+import { getEnemyAttackAnim } from '../config/animations.js';
 export class EnemyAI {
     static WANDER_SPEED = ENEMY_WANDER_SPEED;
     static CHASE_RANGE = ENEMY_CHASE_RANGE;
@@ -171,8 +172,32 @@ export class EnemyAI {
         else { e.body.setVelocity(0); if (e.stats.attackTimer >= 2000) { e.stats.attackTimer = 0; this._rangedAttack(e, player, scene); } }
     }
 
+    static playAttackAnim(e, scene) {
+        if (!e || !e.active || !e.stats) return;
+        const key = getEnemyAttackAnim(e.stats.key);
+        if (!key || !scene.anims.exists(key)) return;
+        const now = scene.time.now;
+        if (e._attackAnimUntil && now < e._attackAnimUntil) return;
+        e._attackAnimUntil = now + 700;
+        if (e._attackAnimHandler) {
+            e.off('animationcomplete', e._attackAnimHandler);
+            e._attackAnimHandler = null;
+        }
+        e.play(key, true);
+        if (e.walkAnimKey && scene.anims.exists(e.walkAnimKey)) {
+            const handler = (anim) => {
+                if (!e.active) return;
+                e._attackAnimHandler = null;
+                if (anim.key === key) e.play(e.walkAnimKey);
+            };
+            e._attackAnimHandler = handler;
+            e.once('animationcomplete', handler);
+        }
+    }
+
     static _rangedAttack(e, player, scene) {
         const dmg = e.stats.damage || 10;
+        this.playAttackAnim(e, scene);
         const dist = Phaser.Math.Distance.Between(e.x, e.y, player.x, player.y);
         if (dist > 250) return;
         const color = e.stats.role === 'mage' ? 0x9b59b6 : 0xe67e22;
@@ -230,6 +255,7 @@ export class EnemyAI {
         e.stats.tauntTimer = (e.stats.tauntTimer || 0) + scene.game.loop.delta;
         if (dist < 100 && e.stats.tauntTimer >= 5000) {
             e.stats.tauntTimer = 0;
+            this.playAttackAnim(e, scene);
             const ring = scene.add.circle(e.x, e.y, 5, 0xe74c3c, 0.6).setDepth(10);
             scene.tweens.add({ targets: ring, scale: 4, alpha: 0, duration: 600, onComplete: () => ring.destroy() });
             playBossAoE(); e.setTint(0xff4444); scene.floatingText(e.x, e.y - 35, 'TAUNT!', '#e74c3c');
@@ -244,6 +270,7 @@ export class EnemyAI {
         e.stats.dashTimer = (e.stats.dashTimer || 0) + scene.game.loop.delta;
         if (dist > 80 && dist < 200 && e.stats.dashTimer >= 3500) {
             e.stats.dashTimer = 0;
+            this.playAttackAnim(e, scene);
             const afterimage1 = scene.add.sprite(e.x, e.y, e.texture.key || 'shadow_stalker').setAlpha(0.4).setTint(0x8844ff).setDepth(8);
             const afterimage2 = scene.add.sprite(e.x, e.y, e.texture.key || 'shadow_stalker').setAlpha(0.2).setTint(0x8844ff).setDepth(8);
             const angle = Math.atan2(player.y - e.y, player.x - e.x);
@@ -276,6 +303,7 @@ export class EnemyAI {
     }
 
     static _mageAttack(e, player, scene) {
+        this.playAttackAnim(e, scene);
         const dmg = Math.floor(e.stats.damage * 0.9), radius = 55;
         playBossAoE();
         const warning = scene.add.circle(player.x, player.y, radius, 0xff4444, 0.15).setDepth(9);
@@ -396,6 +424,7 @@ export class EnemyAI {
         if (dist < 60) {
             if (e.stats.attackTimer >= 1500) {
                 e.stats.attackTimer = 0; const dmg = Math.floor(e.stats.damage * 0.7);
+                this.playAttackAnim(e, scene);
                 scene.combat.takeDamage(dmg); playHit(); scene.floatingText(player.x, player.y - 30, '-' + dmg + ' POISON', '#27ae60');
                 if (!scene._poisonDot) { scene._poisonDot = true; scene._poisonTimer = 3000; player.setTint(0x27ae60); }
                 else scene._poisonTimer = 3000;
@@ -437,6 +466,7 @@ export class EnemyAI {
         if (dist < 80) {
             if (e.stats.attackTimer >= 2000) {
                 e.stats.attackTimer = 0; const dmg = Math.floor(e.stats.damage * 0.9);
+                this.playAttackAnim(e, scene);
                 scene.combat.takeDamage(dmg); playHit(); scene.floatingText(player.x, player.y - 30, '-' + dmg + ' FIRE', '#e74c3c');
                 player.setTint(0xe74c3c); scene.time.delayedCall(200, () => { if (player.active) player.clearTint(); });
                 const fire = scene.add.circle(player.x, player.y, 20, 0xe74c3c, 0.5).setDepth(10);
@@ -456,7 +486,7 @@ export class EnemyAI {
         });
         const speedMult = 1 + nearbyAllies.length * 0.15;
         if (dist < 50) {
-            if (e.stats.swarmTimer >= 1000) { e.stats.swarmTimer = 0; const dmg = Math.floor(e.stats.damage * (0.8 + nearbyAllies.length * 0.1)); scene.combat.takeDamage(dmg); playHit(); scene.floatingText(player.x, player.y - 30, '-' + dmg + ' SWARM', '#e67e22'); }
+            if (e.stats.swarmTimer >= 1000) { e.stats.swarmTimer = 0; const dmg = Math.floor(e.stats.damage * (0.8 + nearbyAllies.length * 0.1)); this.playAttackAnim(e, scene); scene.combat.takeDamage(dmg); playHit(); scene.floatingText(player.x, player.y - 30, '-' + dmg + ' SWARM', '#e67e22'); }
         } else if (dist < this._detectRange(e, scene)) { const dx = player.x - e.x, dy = player.y - e.y; e.body.setVelocity((dx / dist) * 55 * speedMult, (dy / dist) * 55 * speedMult); e.setFlipX(dx < 0); }
         else this._wander(e);
     }

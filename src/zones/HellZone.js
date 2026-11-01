@@ -421,7 +421,6 @@ export class HellZone extends BaseZone {
         playPortal();
         s.cameras.main.fadeOut(800, 0, 0, 0);
         s.time.delayedCall(800, () => {
-            this.clear();
             s._setupZone('village', !s.zones.village.isRestored);
             s.cameras.main.fadeIn(500, 0, 0, 0);
             s.transitioning = false;

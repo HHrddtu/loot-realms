@@ -2,11 +2,13 @@ import Phaser from 'phaser';
 import {
     GAME_WIDTH,
     SWAMP_WIDTH, SWAMP_HEIGHT,
-    BOSS_DROP_CHANCE, ZONE_BOSS_SECOND_DROP_CHANCE, RARITY_COLORS
+    BOSS_DROP_CHANCE, ZONE_BOSS_SECOND_DROP_CHANCE, RARITY_COLORS,
+    SWAMP_HAZARD
 } from '../config/index.js';
 import { rollEquip, rollZoneAccountEquip } from '../utils.js';
 import { rollBossCrystals } from '../config/pets.js';
 import { playBossDeath, playLoot, playPortal } from '../sound.js';
+import { resolveSwampHazard } from '../systems/ZoneHazards.js';
 
 import { BaseZone } from '../systems/BaseZone.js';
 import { SwampSpawner } from './SwampSpawner.js';
@@ -17,6 +19,8 @@ export class SwampZone extends BaseZone {
         super(scene);
         this.bossDefeated = false;
         this.bossSpawned = false;
+        this.hazardTick = 0;
+        this.inHazard = false;
         this.spawner = new SwampSpawner(this);
         this.bossAI = new SwampBoss(this);
     }
@@ -50,6 +54,12 @@ export class SwampZone extends BaseZone {
         this.spawner.spawnSwampCamps();
         this.spawner.spawnSwampChests();
 
+        this.hazardTick = 0;
+        this.inHazard = false;
+        s._zoneSpeedMult = 1;
+        this._spawnSwampHazards();
+        if (s.particles) s.particles.startSwampMiasma(SWAMP_WIDTH, SWAMP_HEIGHT);
+
         this.setupEnemyOverlap();
         this._setupMinionOverlap(s.swampMinions);
 
@@ -57,6 +67,35 @@ export class SwampZone extends BaseZone {
         s.hintText.setText('SPACE=attack | I=inventory | TAB=stats | T=talents | C=craft | Q=quests | P=pause');
 
         if (this.bossDefeated) this._spawnVictoryObjects();
+    }
+
+    _spawnSwampHazards() {
+        const s = this.scene;
+        const ox = s.swampOffsetX;
+        s.swampPuddles = [];
+        s.swampIslands = [];
+        SWAMP_HAZARD.puddles.forEach(p => {
+            const c = s.add.circle(ox + p.x, p.y, SWAMP_HAZARD.puddleRadius,
+                SWAMP_HAZARD.puddleColor, SWAMP_HAZARD.puddleAlpha)
+                .setDepth(1)
+                .setStrokeStyle(2, 0x1f4a25, 0.6);
+            s.tweens.add({
+                targets: c,
+                alpha: { from: SWAMP_HAZARD.puddleAlpha * 0.7, to: SWAMP_HAZARD.puddleAlpha },
+                duration: 1600,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+            s.swampPuddles.push(c);
+        });
+        SWAMP_HAZARD.islands.forEach(i => {
+            const c = s.add.circle(ox + i.x, i.y, i.radius,
+                SWAMP_HAZARD.safeColor, SWAMP_HAZARD.safeAlpha)
+                .setDepth(2)
+                .setStrokeStyle(3, 0x5a7a3a, 0.8);
+            s.swampIslands.push(c);
+        });
     }
 
     _spawnVictoryObjects() {
@@ -89,6 +128,17 @@ export class SwampZone extends BaseZone {
         if (s.swampBg) { s.swampBg.destroy(); s.swampBg = null; }
         if (s.swampReturnPortal) { if (s.swampReturnPortal.destroy) s.swampReturnPortal.destroy(); s.swampReturnPortal = null; }
         if (s.swampReturnPortalHint) { if (s.swampReturnPortalHint.destroy) s.swampReturnPortalHint.destroy(); s.swampReturnPortalHint = null; }
+        if (s.swampPuddles) {
+            s.swampPuddles.forEach(p => { if (p && p.destroy) p.destroy(); });
+            s.swampPuddles = null;
+        }
+        if (s.swampIslands) {
+            s.swampIslands.forEach(i => { if (i && i.destroy) i.destroy(); });
+            s.swampIslands = null;
+        }
+        this.hazardTick = 0;
+        this.inHazard = false;
+        s._zoneSpeedMult = 1;
     }
 
     handleSpace() {
@@ -113,6 +163,39 @@ export class SwampZone extends BaseZone {
         this.bossAI.updateSwampBoss();
         this.updateSwampMinions();
         this.checkReturnPortal();
+        this.updateSwampHazards(delta);
+    }
+
+    updateSwampHazards(delta) {
+        const s = this.scene;
+        if (s.zone !== 'swamp' || s.menuOpen || s.transitioning) return;
+
+        const { inPuddle, onIsland } = resolveSwampHazard(
+            s.player.x, s.player.y, s.swampOffsetX, SWAMP_HAZARD
+        );
+        s._zoneSpeedMult = inPuddle ? SWAMP_HAZARD.slowMult : 1;
+
+        if (inPuddle) {
+            this.hazardTick += delta;
+            if (!this.inHazard) {
+                this.inHazard = true;
+                s.floatingText(s.player.x, s.player.y - 45, 'TOXIC BOG!', '#2ecc71');
+                if (s.hintText) s.hintText.setText('Toxic bog: slow + poison. Find safe ground!');
+            }
+            if (this.hazardTick >= SWAMP_HAZARD.tickInterval) {
+                this.hazardTick = 0;
+                s.combat.takeDamage(SWAMP_HAZARD.poisonDamage);
+                s.floatingText(s.player.x, s.player.y - 30,
+                    '-' + SWAMP_HAZARD.poisonDamage + ' TOXIC', '#27ae60');
+            }
+        } else {
+            this.hazardTick = 0;
+            if (this.inHazard) {
+                this.inHazard = false;
+                s.floatingText(s.player.x, s.player.y - 45,
+                    onIsland ? 'Safe ground' : 'Out of the bog', '#8fbc6a');
+            }
+        }
     }
 
     updateSwampMobs(delta) {
@@ -230,7 +313,6 @@ export class SwampZone extends BaseZone {
         playPortal();
         s.cameras.main.fadeOut(800, 0, 0, 0);
         s.time.delayedCall(800, () => {
-            this.clear();
             s._setupZone('desert');
             s.cameras.main.fadeIn(500, 0, 0, 0);
             s.transitioning = false;

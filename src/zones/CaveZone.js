@@ -199,7 +199,6 @@ export class CaveZone extends BaseZone {
         playPortal();
         s.cameras.main.fadeOut(800, 0, 0, 0);
         s.time.delayedCall(800, () => {
-            this.clear();
             s._setupZone('village');
             s.cameras.main.fadeIn(500, 0, 0, 0);
             s.transitioning = false;

@@ -100,6 +100,11 @@ export class CombatCore {
                 }
             }
 
+            if (absorbed > 0 && s.computedShieldStealPercent > 0) {
+                const stolen = Math.max(1, Math.floor(absorbed * s.computedShieldStealPercent / 100));
+                s.playerHP = Math.min(s.playerMaxHP, s.playerHP + stolen);
+                s.floatingText(s.player.x, s.player.y - 40, '+' + stolen + ' SIPHON', '#2ecc71');
+            }
             if (s.shieldHP <= 0) { s.shieldActive = false; s.lifeLinkActive = false; if (s.shieldVfx) { s.shieldVfx.destroy(); s.shieldVfx = null; } }
             if (amount <= 0) return;
         }

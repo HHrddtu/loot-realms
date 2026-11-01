@@ -5,6 +5,7 @@ import { rollZoneEquip, rollVillageAccountEquip } from '../utils.js';
 import { playBossDeath, playBossAoE, playLoot } from '../sound.js';
 import { BossAI } from '../systems/BossAI.js';
 import { CombatLoot } from '../systems/CombatLoot.js';
+import { onKill } from '../quests.js';
 
 export class PurpleDemonBoss {
     constructor(scene, zone) {
@@ -161,6 +162,7 @@ export class PurpleDemonBoss {
         clone.hpBg.destroy(); clone.hpBg = null; clone.hpFill.destroy(); clone.hpFill = null; clone.destroy();
         if (!clones || clones.length === 0) {
             s.zones.village.bossDefeated = true;
+            onKill('purple_demon');
             this._victoryBossClone();
         }
     }
@@ -170,6 +172,9 @@ export class PurpleDemonBoss {
         const ox = s.villageOffsetX;
         playBossDeath();
         CombatLoot.celebrateBossKill(s);
+        CombatLoot.spawnDeathEcho(s, ox + VILLAGE_WIDTH / 2, 200, 'purple_demon_walk', {
+            tint: 0x9b59b6, duration: 700, drop: 24
+        });
         if (s.particles) s.particles.spawnBossDeath(ox + VILLAGE_WIDTH / 2, 200);
         s.defeatedText = s.add.text(ox + VILLAGE_WIDTH / 2, 230, 'PURPLE DEMON DEFEATED!', { fontSize: '28px', fill: '#9b59b6', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 4 }).setOrigin(0.5).setScrollFactor(0);
         s.tweens.add({ targets: s.defeatedText, alpha: 0, duration: 5000, onComplete: () => { if (s.defeatedText) s.defeatedText.destroy(); s.defeatedText = null; } });

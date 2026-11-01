@@ -7,6 +7,7 @@ import {
 import { rollEquip, rollZoneAccountEquip } from '../utils.js';
 import { rollBossCrystals } from '../config/pets.js';
 import { playBossDeath, playLoot, playPortal } from '../sound.js';
+import { onKill } from '../quests.js';
 
 import { BaseZone } from '../systems/BaseZone.js';
 import { CombatLoot } from '../systems/CombatLoot.js';
@@ -162,6 +163,7 @@ export class DepthsZone extends BaseZone {
         const s = this.scene;
         if (this.bossDefeated) return;
         this.bossDefeated = true;
+        onKill('lich_king');
         playBossDeath();
         CombatLoot.celebrateBossKill(s);
         const ox = s.depthsOffsetX;
@@ -169,6 +171,9 @@ export class DepthsZone extends BaseZone {
         if (s.depthsBoss) {
             const bossX = s.depthsBoss.x;
             const bossY = s.depthsBoss.y;
+            CombatLoot.spawnDeathEcho(s, bossX, bossY, s.depthsBoss.texture.key, {
+                scale: s.depthsBoss.scaleX, tint: 0x8800ff, duration: 700, drop: 24
+            });
 
             // Screen shake
             s.cameras.main.shake(300, 0.02);
@@ -292,7 +297,6 @@ export class DepthsZone extends BaseZone {
         playPortal();
         s.cameras.main.fadeOut(800, 0, 0, 0);
         s.time.delayedCall(800, () => {
-            this.clear();
             s._setupZone('village');
             s.cameras.main.fadeIn(500, 0, 0, 0);
             s.transitioning = false;
@@ -313,7 +317,6 @@ export class DepthsZone extends BaseZone {
         playPortal();
         s.cameras.main.fadeOut(800, 10, 20, 10);
         s.time.delayedCall(800, () => {
-            this.clear();
             s._setupZone('cursed');
             s.cameras.main.fadeIn(500, 10, 20, 10);
             s.transitioning = false;

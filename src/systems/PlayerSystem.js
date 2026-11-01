@@ -203,8 +203,19 @@ export class PlayerSystem {
         this.scene.computedShieldPercent = te.shieldPercent || 0;
         this.scene.computedShieldReflect = te.shieldReflect || 0;
         this.scene.computedShieldDuration = te.shieldDuration || 0;
+        this.scene.computedShieldStealPercent = te.shieldStealPercent || 0;
+        this.scene.computedShieldAbsorbsCorruption = !!te.shieldAbsorbsCorruption;
         this.scene.computedArmorReduction = te.armorReduction || 0;
         this.scene.computedSpellSpeed = te.spellSpeed || 0;
+        this.scene.computedSpellPierce = !!te.spellPierce;
+        this.scene.computedSpellChain = te.spellChain || 0;
+        this.scene.computedSpellSplashBurn = !!te.spellSplashBurn;
+        this.scene.computedSpellSpreadOnKill = !!te.spellSpreadOnKill;
+        this.scene.computedHealBonusHp = te.healBonusHp || 0;
+        this.scene.computedPurifyHeal = te.purifyHeal || 0;
+        this.scene.computedPurifyCorReduce = te.purifyCorReduce || 0;
+        this.scene.computedPurifyRegenDuration = te.purifyRegenDuration || 0;
+        this.scene.computedPurifyShield = !!te.purifyShield;
 
         this.scene.computedInventorySlots = (te.inventorySlots || 0) + (ae.inventorySlots || 0);
         this.scene.maxMaterials = MATERIAL_SLOTS + this.scene.computedInventorySlots;

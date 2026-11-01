@@ -16,6 +16,39 @@ export class CombatLoot {
         this.scene = scene;
     }
 
+    static spawnDeathEcho(scene, x, y, textureKey, opts = {}) {
+        if (!textureKey || !scene.textures.exists(textureKey)) return null;
+        const ghost = scene.add.sprite(x, y, textureKey)
+            .setDepth(opts.depth || 6)
+            .setAlpha(opts.alpha ?? 0.9);
+        if (opts.scale) ghost.setScale(opts.scale);
+        if (opts.flipX) ghost.setFlipX(true);
+        if (opts.tint) ghost.setTint(opts.tint);
+
+        if (opts.animKey && scene.anims.exists(opts.animKey)) {
+            ghost.play(opts.animKey);
+            scene.tweens.add({
+                targets: ghost,
+                alpha: 0,
+                delay: opts.animDelay ?? 600,
+                duration: opts.fadeDuration ?? 500,
+                onComplete: () => { if (ghost.active) ghost.destroy(); }
+            });
+        } else {
+            scene.tweens.add({
+                targets: ghost,
+                angle: opts.spin ?? 90,
+                alpha: 0,
+                scaleY: (opts.scale || 1) * 0.5,
+                y: y + (opts.drop ?? 12),
+                duration: opts.duration ?? 420,
+                ease: 'Quad.easeIn',
+                onComplete: () => { if (ghost.active) ghost.destroy(); }
+            });
+        }
+        return ghost;
+    }
+
     handleEnemyDeath(enemy) {
         // Guard against multiple calls in same frame
         if (enemy._deathHandled) return;
@@ -137,6 +170,13 @@ export class CombatLoot {
             if (eliteItem) items.push({ kind: 'equip', item: eliteItem, x: enemy.x, y: enemy.y - 50, rarity: eliteItem.rarity });
         }
 
+        CombatLoot.spawnDeathEcho(s, enemy.x, enemy.y, enemy.texture && enemy.texture.key, {
+            scale: enemy.scaleX,
+            flipX: enemy.flipX,
+            tint: enemy.stats.isElite ? 0xffaa00 : 0xffffff,
+            spin: Phaser.Math.Between(-110, 110),
+            duration: 380
+        });
         if (enemy.hpBg) { enemy.hpBg.destroy(); enemy.hpBg = null; }
         if (enemy.hpFill) { enemy.hpFill.destroy(); enemy.hpFill = null; }
         if (enemy.shieldIcon) { enemy.shieldIcon.destroy(); enemy.shieldIcon = null; }
@@ -260,6 +300,9 @@ export class CombatLoot {
             s.time.delayedCall(100, () => { s.physics.world.timeScale = 1; });
         }
 
+        CombatLoot.spawnDeathEcho(s, b.x, b.y, b.texture.key, {
+            scale: b.scaleX, tint: 0xffffff, duration: 700, drop: 24
+        });
         s.tweens.add({ targets: b, alpha: 0, scaleX: 1.5, scaleY: 1.5, duration: 800, onComplete: () => { if (b.hpBg) b.hpBg.destroy(); if (b.hpFill) b.hpFill.destroy(); b.destroy(); s[cfg.bossRef] = null; } });
         if (b.aoeRing) { b.aoeRing.destroy(); b.aoeRing = null; }
         if (b.aoeRing2) { b.aoeRing2.destroy(); b.aoeRing2 = null; }

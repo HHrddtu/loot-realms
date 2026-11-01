@@ -37,7 +37,7 @@ export function getTalentEffects(unlockedIds) {
     const effects = {
         damagePercent: 0, damagePercentVs: {}, critChance: 0, critDamagePercent: 0,
         corruptionMax: 0, spellDamage: 0, hpPercent: 0, healPower: 0,
-        speedPercent: 0, revealHp: false, lifeSteal: 0, areaDamage: 0,
+        lifeSteal: 0, areaDamage: 0,
         bossDamagePercent: 0, damagePercentLowHp: 0, damagePercentFullHp: 0,
         regenPercent: 0, dodgePercent: 0, damageReduction: 0, damageReflection: 0,
         cooldownReduction: 0, moveSpeedPercent: 0, shieldPercent: 0, shieldReflect: 0,

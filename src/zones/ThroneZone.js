@@ -8,6 +8,7 @@ import { rollEquip, rollAccountEquip, rollZoneAccountEquip } from '../utils.js';
 import { rollBossCrystals } from '../config/pets.js';
 import { playBossDeath, playLoot, playPortal } from '../sound.js';
 import { LORE } from '../config/lore.js';
+import { onKill } from '../quests.js';
 
 import { BaseZone } from '../systems/BaseZone.js';
 import { CombatLoot } from '../systems/CombatLoot.js';
@@ -161,6 +162,7 @@ export class ThroneZone extends BaseZone {
         const s = this.scene;
         if (this.bossDefeated) return;
         this.bossDefeated = true;
+        onKill('eternity_lord');
         s.timeSlowUnlocked = true;
         s.doSave();
         playBossDeath();
@@ -169,6 +171,9 @@ export class ThroneZone extends BaseZone {
         const ox = s.throneOffsetX;
 
         if (s.throneBoss) {
+            CombatLoot.spawnDeathEcho(s, s.throneBoss.x, s.throneBoss.y, s.throneBoss.texture.key, {
+                scale: s.throneBoss.scaleX, tint: 0xffd700, duration: 800, drop: 26
+            });
             if (s.particles) s.particles.spawnBossDeath(s.throneBoss.x, s.throneBoss.y);
             if (s.throneBoss.hpBg) { s.throneBoss.hpBg.destroy(); s.throneBoss.hpBg = null; }
             if (s.throneBoss.hpFill) { s.throneBoss.hpFill.destroy(); s.throneBoss.hpFill = null; }
@@ -286,7 +291,6 @@ export class ThroneZone extends BaseZone {
         playPortal();
         s.cameras.main.fadeOut(800, 0, 0, 0);
         s.time.delayedCall(800, () => {
-            this.clear();
             s._setupZone('village');
             s.cameras.main.fadeIn(500, 0, 0, 0);
             s.transitioning = false;

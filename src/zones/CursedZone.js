@@ -7,6 +7,7 @@ import {
 import { rollEquip, rollZoneAccountEquip } from '../utils.js';
 import { rollBossCrystals } from '../config/pets.js';
 import { playBossDeath, playLoot, playPortal } from '../sound.js';
+import { onKill } from '../quests.js';
 
 import { BaseZone } from '../systems/BaseZone.js';
 import { CursedSpawner } from './CursedSpawner.js';
@@ -151,10 +152,14 @@ export class CursedZone extends BaseZone {
         const s = this.scene;
         if (this.bossDefeated) return;
         this.bossDefeated = true;
+        onKill('ancient_evil');
         playBossDeath();
         const ox = s.cursedOffsetX;
 
         if (s.cursedBoss) {
+            CombatLoot.spawnDeathEcho(s, s.cursedBoss.x, s.cursedBoss.y, s.cursedBoss.texture.key, {
+                scale: s.cursedBoss.scaleX, tint: 0x00aa00, animKey: 'ancient_evil_death'
+            });
             if (s.particles) s.particles.spawnBossDeath(s.cursedBoss.x, s.cursedBoss.y);
             if (s.cursedBoss.hpBg) { s.cursedBoss.hpBg.destroy(); s.cursedBoss.hpBg = null; }
             if (s.cursedBoss.hpFill) { s.cursedBoss.hpFill.destroy(); s.cursedBoss.hpFill = null; }
@@ -254,7 +259,6 @@ export class CursedZone extends BaseZone {
         playPortal();
         s.cameras.main.fadeOut(800, 0, 0, 0);
         s.time.delayedCall(800, () => {
-            this.clear();
             s._setupZone('depths');
             s.cameras.main.fadeIn(500, 0, 0, 0);
             s.transitioning = false;
@@ -326,7 +330,6 @@ export class CursedZone extends BaseZone {
         playPortal();
         s.cameras.main.fadeOut(800, 5, 0, 16);
         s.time.delayedCall(800, () => {
-            this.clear();
             s._setupZone('shadow');
             s.cameras.main.fadeIn(500, 5, 0, 16);
             s.transitioning = false;

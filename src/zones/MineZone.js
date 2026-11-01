@@ -454,7 +454,6 @@ export class MineZone extends BaseZone {
         playPortal();
         s.cameras.main.fadeOut(500, 0, 0, 0);
         s.time.delayedCall(500, () => {
-            this.clear();
             s._setupZone('forest');
             s.cameras.main.fadeIn(500, 0, 0, 0);
             s.transitioning = false;

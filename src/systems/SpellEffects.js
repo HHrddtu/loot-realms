@@ -10,8 +10,7 @@ export class SpellEffects {
         this.scene.shieldActive = true;
         const shieldHpBonus = this.scene.computedShieldPercent ? 1 + this.scene.computedShieldPercent / 100 : 1;
         this.scene.shieldHP = Math.floor((spell.absorption + Math.floor(this.scene.playerMaxHP * 0.1)) * shieldHpBonus);
-        const shieldDurBonus = this.scene.computedShieldDuration ? 1 + this.scene.computedShieldDuration / 100 : 1;
-        this.scene.shieldTimer = Math.floor(spell.duration * shieldDurBonus);
+        this.scene.shieldTimer = spell.duration + (this.scene.computedShieldDuration || 0);
         this.scene.shieldReflect = this.scene.computedShieldReflect || 0;
         this.scene.shieldVfx = this.scene.add.sprite(this.scene.player.x, this.scene.player.y, 'shield_vfx')
             .setDepth(15).setAlpha(0.8);
@@ -28,7 +27,9 @@ export class SpellEffects {
     }
 
     _castHeal(spell) {
-        const healAmt = Math.floor(this.scene.playerMaxHP * spell.healPercent);
+        const healPowerMult = 1 + (this.scene.computedHealPower || 0) / 100;
+        const healPercent = spell.healPercent + (this.scene.computedHealBonusHp || 0) / 100;
+        const healAmt = Math.floor(this.scene.playerMaxHP * healPercent * healPowerMult);
         this.scene.playerHP = Math.min(this.scene.playerMaxHP, this.scene.playerHP + healAmt);
         
         // Heal VFX - expanding light burst
@@ -67,16 +68,38 @@ export class SpellEffects {
     }
 
     _castPurify(spell) {
-        const reduce = spell.corruptionReduce || 0;
+        const te = this.scene.talentEffects || {};
+        const reduce = (spell.corruptionReduce || 0) + (this.scene.computedPurifyCorReduce || 0);
         this.scene.corruption = Math.max(0, this.scene.corruption - reduce);
         const purifyHealMult = (this.scene.relicEffects && this.scene.relicEffects.purify_heal) ? 1.05 : 1;
-        const healAmt = Math.floor(this.scene.playerMaxHP * spell.healPercent * purifyHealMult);
+        const healPowerMult = 1 + (this.scene.computedHealPower || 0) / 100;
+        const healPercent = spell.healPercent + (this.scene.computedHealBonusHp || 0) / 100;
+        const healAmt = Math.floor(this.scene.playerMaxHP * healPercent * purifyHealMult * healPowerMult)
+            + (this.scene.computedPurifyHeal || 0);
         this.scene.playerHP = Math.min(this.scene.playerMaxHP, this.scene.playerHP + healAmt);
         const purifyVfx = this.scene.add.sprite(this.scene.player.x, this.scene.player.y, 'heal_vfx').setDepth(15).setTint(0xf1c40f);
         this.scene.tweens.add({
             targets: purifyVfx, scaleX: 3, scaleY: 3, alpha: 0, duration: 800,
             onComplete: () => purifyVfx.destroy()
         });
+        const regenDuration = this.scene.computedPurifyRegenDuration || 0;
+        if (regenDuration > 0) {
+            const healPerTick = Math.max(1, Math.floor(this.scene.playerMaxHP * 0.02));
+            const timer = this.scene.time.addEvent({
+                delay: 1000,
+                repeat: regenDuration - 1,
+                callback: () => {
+                    if (!this.scene.player || this.scene.playerHP <= 0) return;
+                    this.scene.playerHP = Math.min(this.scene.playerMaxHP, this.scene.playerHP + healPerTick);
+                    this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, '+' + healPerTick + ' HP', '#2ecc71');
+                }
+            });
+            if (!this.scene._spellTimers) this.scene._spellTimers = [];
+            this.scene._spellTimers.push(timer);
+        }
+        if (this.scene.computedPurifyShield && !this.scene.shieldActive) {
+            this._castShield({ absorption: Math.floor(this.scene.playerMaxHP * 0.1), duration: 5 });
+        }
         this.scene.floatingText(this.scene.player.x, this.scene.player.y - 30, 'PURIFY! -' + reduce + ' COR', '#f1c40f');
         this.scene.updateUI();
     }

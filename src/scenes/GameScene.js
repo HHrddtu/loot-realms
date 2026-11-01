@@ -12,7 +12,7 @@ import { getAccountTalentEffects } from '../accountTalents.js';
 import { initBestiary, recordEncounter } from '../bestiary.js';
 import { initMaterialBook } from '../materialBook.js';
 import { initSoulBook } from '../soulBook.js';
-import { initQuests, onExplore, setGameScene, autoAcceptZoneQuest } from '../quests.js';
+import { initQuests, onExplore, setGameScene, autoAcceptZoneQuest, checkZoneTransitionGate } from '../quests.js';
 import { MAP_CHAPTERS } from '../config/mapData.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { CombatFacade } from '../systems/CombatFacade.js';
@@ -552,6 +552,13 @@ export default class GameScene extends Phaser.Scene {
     }
 
     _setupZone(zoneName, ...args) {
+        if (this.currentZone && this.zone !== zoneName) {
+            const gate = checkZoneTransitionGate(this.zone, zoneName);
+            if (gate.blocked) {
+                this._showZoneQuestGate(gate);
+                return false;
+            }
+        }
         if (this.particles) this.particles.stopEnvironment();
         this.petTarget = null;
         if (this.currentZone) {
@@ -593,6 +600,44 @@ export default class GameScene extends Phaser.Scene {
             this.tutorialMgr.showZoneTutorial(zoneName);
             if (this.prestigeSys) this.prestigeSys.applyZoneModifiers(zoneName);
         }
+    }
+
+    _showZoneQuestGate(gate) {
+        const quest = gate.quest;
+        const progress = gate.progress || { current: 0, total: quest.count || 0 };
+        const targetName = (quest.target || '').replace(/_/g, ' ');
+        const hint = gate.npc
+            ? `Turn it in to ${gate.npc.name}.`
+            : `Defeat ${targetName}.`;
+        if (this.hintText) {
+            this.hintText.setText(`Quest required: ${quest.name} (${progress.current}/${progress.total})` +
+                (gate.npc ? ` — talk to ${gate.npc.name}` : ''));
+        }
+        if (this._zoneGateText && this._zoneGateText.active) this._zoneGateText.destroy();
+        const text = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT * 0.3,
+            `The way forward is sealed.\nComplete the zone quest: ${quest.name} ` +
+            `(${progress.current}/${progress.total})\n${hint}`, {
+                fontSize: '18px',
+                fill: '#f1c40f',
+                fontFamily: 'Georgia, serif',
+                fontStyle: 'bold',
+                align: 'center',
+                stroke: '#000',
+                strokeThickness: 4,
+                lineSpacing: 6,
+                wordWrap: { width: GAME_WIDTH - 120 }
+            }).setOrigin(0.5).setScrollFactor(0).setDepth(400);
+        this._zoneGateText = text;
+        this.tweens.add({
+            targets: text,
+            alpha: 0,
+            delay: 2600,
+            duration: 700,
+            onComplete: () => {
+                if (text.active) text.destroy();
+                if (this._zoneGateText === text) this._zoneGateText = null;
+            }
+        });
     }
 
     /* ===== COMBAT DELEGATION ===== */

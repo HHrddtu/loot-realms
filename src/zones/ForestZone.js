@@ -284,7 +284,6 @@ export class ForestZone extends BaseZone {
         playPortal();
         s.cameras.main.fadeOut(500, 0, 0, 0);
         s.time.delayedCall(500, () => {
-            this.clear();
             s._setupZone('arena');
             s.cameras.main.fadeIn(500, 0, 0, 0);
             s.transitioning = false;

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { ZONE_OBSTACLES, RANGED_INTERVAL_DEFAULT, MOB_ROLE_DEFAULTS, HEALER_HEAL_AMOUNT_DEFAULT, HEALER_HEAL_RANGE_DEFAULT, HEALER_ALLY_RANGE_DEFAULT } from '../config/index.js';
+import { EnemyAI } from './EnemyAI.js';
 
 export class BaseZone {
     constructor(scene) {
@@ -43,6 +44,7 @@ export class BaseZone {
         s.physics.add.overlap(s.player, s.enemies, (p, e) => {
             if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
                 s.combat.takeDamage(e.stats.damage);
+                EnemyAI.playAttackAnim(e, s);
             }
         }, null, s);
     }
@@ -155,7 +157,7 @@ export class BaseZone {
 
             if (dist < 250) {
                 const roleDefaults = MOB_ROLE_DEFAULTS[e.stats.role] || MOB_ROLE_DEFAULTS.default;
-                const speed = (e.stats.speed || 50) * roleDefaults.speedMult;
+                const speed = (e.stats.speed || 50) * roleDefaults.speedMult * (s._zoneEnemySpeedMult || 1);
                 const engageDist = roleDefaults.engageDist;
                 if (dist > engageDist) {
                     e.body.setVelocity((dx / dist) * speed * roleDefaults.moveMult, (dy / dist) * speed * roleDefaults.moveMult);
@@ -235,6 +237,7 @@ export class BaseZone {
         s.physics.add.overlap(s.player, group, (p, e) => {
             if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
                 s.combat.takeDamage(e.stats.damage);
+                EnemyAI.playAttackAnim(e, s);
             }
         }, null, s);
     }

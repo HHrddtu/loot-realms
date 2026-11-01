@@ -188,7 +188,6 @@ export class ArenaZone extends BaseZone {
         playPortal();
         s.cameras.main.fadeOut(500, 0, 0, 0);
         s.time.delayedCall(500, () => {
-            this.clear();
             if (s.zones.mine.isUnlocked) {
                 s._setupZone('mine');
             } else {

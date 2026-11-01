@@ -40,7 +40,18 @@ npm test        # 66/66
 
 ## 3. Что осталось
 
-### 3.1 Жёсткий квест-гейт порталов
+### 3.1 Жёсткий квест-гейт порталов — СДЕЛАНО
+
+Реализовано в `checkZoneTransitionGate()` (`src/quests.js`) и вызывается из `GameScene._setupZone()`.
+
+- Блокируются только переходы вперёд по `ZONE_ORDER`; возврат назад и side-зоны (`hell`, `snowy`, `castle`, `desert`, `swamp`) не блокируются.
+- Гейтит boss-квест зоны из `ZONE_MAIN_QUESTS` (objective complete, turn-in не обязателен).
+- Если квест недоступен (не выполнены prerequisite) или босс уже мёртв — переход разрешается, objective кредитуется.
+- При блоке показывается баннер с прогрессом и подсказкой NPC.
+- Добавлен `onKill()` для боссов Depths/Cursed/Shadow/Tower/Throne/Village, иначе quests не прогрессировали.
+- Тесты: `tests/questGate.test.js` (7). Всего 73/73, build проходит.
+
+Исходная задача (для истории):
 
 Сейчас квесты автоматически берутся и дают силу, но переходы не блокируют.
 
@@ -65,7 +76,14 @@ npm test        # 66/66
 - Старый сейв не превращается в кирпич.
 - `npm run build` и `npm test` проходят.
 
-### 3.2 Уникальная механика для зон
+### 3.2 Уникальная механика для зон — СДЕЛАНО (Desert + Swamp)
+
+- `src/config/zoneHazards.js` (+ экспорт из `config/index.js`): `DESERT_SANDSTORM`, `SWAMP_HAZARD`.
+- Desert: циклическая песчаная буря с телеграфом, экранным затемнением, частицами и замедлением игрока/мобов. Реализация: `DesertZone.updateSandstorm()`, `ParticleSystem.startSandstorm()`, множители `scene._zoneSpeedMult` / `_zoneEnemySpeedMult`.
+- Swamp: токсичные лужи (замедление + периодический урон) и безопасные островки, которые перекрывают лужи. Реализация: `SwampZone.updateSwampHazards()`, `_spawnSwampHazards()`, чистая функция `resolveSwampHazard()` в `src/systems/ZoneHazards.js`, `ParticleSystem.startSwampMiasma()`.
+- Тесты: `tests/zoneHazards.test.js` (6). Всего 79/79, build проходит.
+
+Исходная задача (для истории):
 
 Сейчас зоны отличаются декором, боссом, элитником и цифрами, но не core-механикой.
 
@@ -109,7 +127,16 @@ npm test        # 66/66
 - `src/systems/BaseZone.js`
 - `src/config/zones.js`
 
-### 3.4 Сжатие деревьев талантов
+### 3.4 Сжатие деревьев талантов — СДЕЛАНО
+
+- `src/config/talents.js`: 9 ветвей по 10 узлов (было ~23–24). Суммарный бюджет силы сохранён (суммы эффектов сверены со старыми), каждый узел даёт заметный шаг; filler `+3–5%` убран.
+- Capstone-узлы: pierce, splash burn, echo/chain, spread DoT, cheat death, purify shield/regen.
+- Закрыты мёртвые эффекты: `spellPierce`, `spellChain`, `spellSplashBurn`, `spellSpreadOnKill`, `shieldAbsorbsCorruption`, `shieldStealPercent`, `healBonusHp`, `purifyHeal/CorReduce/RegenDuration/Shield` теперь читаются в `SpellProjectile`, `SpellEffects`, `SpellSystem`, `CombatCore`, `PlayerSystem`.
+- `shieldDuration` теперь трактуется в секундах (`_castShield`), а не как процент.
+- Старые сохранения: неизвестные ID узлов игнорируются без краша; ноды 1–10 сохранили прежние ID.
+- Тесты: `tests/talents.test.js` (6). Всего 85/85, build проходит.
+
+Исходная задача (для истории):
 
 Проблема: много узлов вида `+3–5%`, из-за чего рост не ощущается.
 
@@ -132,7 +159,15 @@ npm test        # 66/66
 - Нет мёртвых эффектов: если эффект объявлен, он читается в коде.
 - Build + tests проходят.
 
-### 3.5 Анимации атак и смерти
+### 3.5 Анимации атак и смерти — СДЕЛАНО
+
+- `src/config/animations.js`: добавлены attack-анимации для goblin/skeleton/skeleton_lord/shadow_child/ancient_evil + быстрые attack-циклы для slime, rat, village_brute, hell_guard, tower_knight; добавлен `ancient_evil_death` и `ancient_evil_walk_anim`.
+- `EnemyAI.playAttackAnim()` проигрывает attack-анимацию с кулдауном 700мс и возвращает walk-анимацию после завершения. Вызывается из ranged/mage/poison/fire/swarm/assassin/tank и контактного урона (`BaseZone`).
+- `CombatLoot.spawnDeathEcho()`: death-VFX для всех мобов (падение/вращение/фейд), для боссов Depths/Cursed/Shadow/Tower/Throne/Village и generic-boss'ов; у Ancient Evil проигрывается `ancient_evil_death`.
+- Hit-stop и `_impactFeedback` не тронуты.
+- Тесты: `tests/animations.test.js` (4). Всего 89/89, build проходит.
+
+Исходная задача (для истории):
 
 Сейчас есть 3-кадровые attack-анимации игроков, у большинства мобов — только walk. Ударный VFX — tween-спрайты.
 

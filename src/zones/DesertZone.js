@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
 import {
-    GAME_WIDTH,
+    GAME_WIDTH, GAME_HEIGHT,
     DESERT_WIDTH, DESERT_HEIGHT,
-    BOSS_DROP_CHANCE, ZONE_BOSS_SECOND_DROP_CHANCE, RARITY_COLORS
+    BOSS_DROP_CHANCE, ZONE_BOSS_SECOND_DROP_CHANCE, RARITY_COLORS,
+    DESERT_SANDSTORM
 } from '../config/index.js';
 import { rollEquip, rollZoneAccountEquip } from '../utils.js';
 import { rollBossCrystals } from '../config/pets.js';
@@ -17,6 +18,10 @@ export class DesertZone extends BaseZone {
         super(scene);
         this.bossDefeated = false;
         this.bossSpawned = false;
+        this.stormPhase = 'idle';
+        this.stormTimer = 0;
+        this.stormElapsed = 0;
+        this.stormEmitter = null;
         this.spawner = new DesertSpawner(this);
         this.bossAI = new DesertBoss(this);
     }
@@ -48,6 +53,17 @@ export class DesertZone extends BaseZone {
         s.desertReturnPortalHint = null;
         s.desertSwampPortal = null;
         s.desertSwampPortalHint = null;
+
+        this.stormPhase = 'idle';
+        this.stormTimer = 0;
+        this.stormElapsed = 0;
+        this.stormEmitter = null;
+        s._zoneSpeedMult = 1;
+        s._zoneEnemySpeedMult = 1;
+        s.desertStormOverlay = s.add.rectangle(
+            GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT,
+            DESERT_SANDSTORM.color, 0
+        ).setScrollFactor(0).setDepth(14);
 
         this.spawner.spawnDesertCamps();
         this.spawner.spawnDesertChests();
@@ -103,6 +119,16 @@ export class DesertZone extends BaseZone {
         if (s.desertReturnPortalHint) { if (s.desertReturnPortalHint.destroy) s.desertReturnPortalHint.destroy(); s.desertReturnPortalHint = null; }
         if (s.desertSwampPortal) { if (s.desertSwampPortal.destroy) s.desertSwampPortal.destroy(); s.desertSwampPortal = null; }
         if (s.desertSwampPortalHint) { if (s.desertSwampPortalHint.destroy) s.desertSwampPortalHint.destroy(); s.desertSwampPortalHint = null; }
+        if (s.desertStormOverlay) { s.desertStormOverlay.destroy(); s.desertStormOverlay = null; }
+        if (this.stormEmitter) {
+            try { this.stormEmitter.destroy(); } catch (e) { /* already destroyed */ }
+            this.stormEmitter = null;
+        }
+        this.stormPhase = 'idle';
+        this.stormTimer = 0;
+        this.stormElapsed = 0;
+        s._zoneSpeedMult = 1;
+        s._zoneEnemySpeedMult = 1;
     }
 
     handleSpace() {
@@ -133,6 +159,76 @@ export class DesertZone extends BaseZone {
         this.bossAI.updateDesertBoss();
         this.updateDesertMinions();
         this.checkReturnPortal();
+        this.updateSandstorm(delta);
+    }
+
+    updateSandstorm(delta) {
+        const s = this.scene;
+        if (s.zone !== 'desert' || s.menuOpen || s.transitioning) return;
+
+        if (this.stormPhase === 'idle') {
+            this.stormTimer += delta;
+            if (this.stormTimer >= DESERT_SANDSTORM.interval) {
+                this.stormTimer = 0;
+                this.stormPhase = 'warning';
+                s.floatingText(s.player.x, s.player.y - 60, 'Sandstorm incoming!', '#e8cf97');
+                if (s.hintText) s.hintText.setText('Sandstorm incoming! Movement will slow.');
+                if (s.desertStormOverlay) {
+                    s.tweens.add({
+                        targets: s.desertStormOverlay,
+                        alpha: DESERT_SANDSTORM.telegraphAlpha,
+                        duration: 400,
+                        yoyo: true,
+                        repeat: -1
+                    });
+                }
+            }
+        } else if (this.stormPhase === 'warning') {
+            this.stormTimer += delta;
+            if (this.stormTimer >= DESERT_SANDSTORM.telegraph) {
+                this._startSandstorm();
+            }
+        } else if (this.stormPhase === 'active') {
+            this.stormElapsed += delta;
+            if (this.stormElapsed >= DESERT_SANDSTORM.duration) {
+                this._endSandstorm();
+            }
+        }
+    }
+
+    _startSandstorm() {
+        const s = this.scene;
+        this.stormPhase = 'active';
+        this.stormElapsed = 0;
+        if (s.desertStormOverlay) {
+            s.tweens.killTweensOf(s.desertStormOverlay);
+            s.tweens.add({ targets: s.desertStormOverlay, alpha: DESERT_SANDSTORM.alpha, duration: 600 });
+        }
+        s._zoneSpeedMult = DESERT_SANDSTORM.speedMult;
+        s._zoneEnemySpeedMult = DESERT_SANDSTORM.enemySpeedMult;
+        this.stormEmitter = s.particles
+            ? s.particles.startSandstorm(DESERT_SANDSTORM.particleTint)
+            : null;
+        s.floatingText(s.player.x, s.player.y - 70, 'SANDSTORM!', '#e8cf97');
+        s.cameras.main.shake(250, 0.004);
+    }
+
+    _endSandstorm() {
+        const s = this.scene;
+        this.stormPhase = 'idle';
+        this.stormTimer = 0;
+        this.stormElapsed = 0;
+        if (s.desertStormOverlay) {
+            s.tweens.killTweensOf(s.desertStormOverlay);
+            s.tweens.add({ targets: s.desertStormOverlay, alpha: 0, duration: 800 });
+        }
+        s._zoneSpeedMult = 1;
+        s._zoneEnemySpeedMult = 1;
+        if (this.stormEmitter) {
+            try { this.stormEmitter.destroy(); } catch (e) { /* already destroyed */ }
+            this.stormEmitter = null;
+        }
+        s.floatingText(s.player.x, s.player.y - 70, 'The sandstorm subsides', '#c8a44a');
     }
 
     updateDesertMobs(delta) {
@@ -250,7 +346,6 @@ export class DesertZone extends BaseZone {
         playPortal();
         s.cameras.main.fadeOut(800, 0, 0, 0);
         s.time.delayedCall(800, () => {
-            this.clear();
             s._setupZone('village', s.zones.village.isFrozen);
             s.cameras.main.fadeIn(500, 0, 0, 0);
             s.transitioning = false;
@@ -271,7 +366,6 @@ export class DesertZone extends BaseZone {
         playPortal();
         s.cameras.main.fadeOut(800, 5, 15, 5);
         s.time.delayedCall(800, () => {
-            this.clear();
             s._setupZone('swamp');
             s.cameras.main.fadeIn(500, 5, 15, 5);
             s.transitioning = false;

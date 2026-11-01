@@ -23,7 +23,11 @@ export class SpellSystem {
         if (this.scene.spellCooldowns[slot] > 0) return;
         if (slot !== 'purify' && this.scene.corruption + spell.corruptionCost > this.scene.corruptionMax) return;
 
-        this.scene.corruption += spell.corruptionCost;
+        let corruptionCost = spell.corruptionCost;
+        if (this.scene.computedShieldAbsorbsCorruption && this.scene.shieldActive) {
+            corruptionCost = Math.floor(corruptionCost * 0.5);
+        }
+        this.scene.corruption += corruptionCost;
         this.scene.spellCooldowns[slot] = spell.cooldown;
 
         // Sage spells

@@ -457,6 +457,44 @@ export class ParticleSystem {
         return emitter;
     }
 
+    startSandstorm(tint) {
+        const cam = this.scene.cameras.main;
+        const emitter = this.scene.add.particles(0, 0, 'particle_dust', {
+            x: { min: -60, max: cam.width + 60 },
+            y: { min: 0, max: cam.height },
+            speedX: { min: -280, max: -160 },
+            speedY: { min: 15, max: 55 },
+            scale: { start: 1.2, end: 0.2 },
+            lifespan: { min: 700, max: 1400 },
+            quantity: 7,
+            frequency: 30,
+            tint: tint || [0xd8b46a, 0xc8a44a, 0xe8cf97],
+            alpha: { start: 0.7, end: 0 }
+        });
+        emitter.setScrollFactor(0);
+        emitter.setDepth(15);
+        this.activeEmitters.push(emitter);
+        return emitter;
+    }
+
+    startSwampMiasma(worldW, worldH) {
+        const emitter = this.scene.add.particles(0, 0, 'particle_mist', {
+            x: { min: 0, max: worldW },
+            y: { min: worldH * 0.6, max: worldH },
+            speedX: { min: -6, max: 6 },
+            speedY: { min: -4, max: -1 },
+            scale: { start: 2.5, end: 4.5 },
+            lifespan: { min: 5000, max: 9000 },
+            quantity: 1,
+            frequency: 420,
+            alpha: { start: 0.35, end: 0 },
+            tint: [0x3f7a4a, 0x2f6b35, 0x5a8a52]
+        });
+        emitter.setDepth(1);
+        this.activeEmitters.push(emitter);
+        return emitter;
+    }
+
     startCampfireSparks(worldX, worldY) {
         const emitter = this.scene.add.particles(worldX, worldY, 'particle_warm', {
             speedX: { min: -10, max: 10 },
