@@ -5,6 +5,7 @@ import { rollEquip } from '../utils.js';
 import { getLang } from '../i18n.js';
 import { t } from '../i18n.js';
 import { playPortal } from '../sound.js';
+import { getQuestTracker, getSystemQuestFlags } from './QuestTracker.js';
 
 export class NpcSystem {
     constructor(scene) {
@@ -486,6 +487,15 @@ export class NpcSystem {
                 }
             });
         }
+
+        const systemProgress = getQuestTracker().getProgress(getSystemQuestFlags(s));
+        const systemDone = systemProgress.filter(q => q.completed).length;
+        const nextSystemQuest = systemProgress.find(q => !q.completed);
+        const milestoneText = `Milestones: ${systemDone}/${systemProgress.length}` +
+            (nextSystemQuest ? ` — next: ${nextSystemQuest.name}` : ' — all complete');
+        s.questLogGroup.push(mk(s.add.text(400, 525, milestoneText, {
+            fontSize: '11px', fill: '#f1c40f', fontFamily: 'Georgia, serif', fontStyle: 'bold'
+        }).setOrigin(0.5)));
 
         const closeBtn = mk(s.add.rectangle(400, 560, 140, 35, 0x34495e)
             .setStrokeStyle(1, 0x555).setInteractive({ useHandCursor: true }));

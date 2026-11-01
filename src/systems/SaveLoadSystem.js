@@ -1,7 +1,8 @@
 import { EMPTY_ACCOUNT_EQUIPMENT } from '../config/index.js';
 import { saveGame, loadGame, saveAccount, loadAccount, GAME_SAVE_VERSION } from '../save.js';
 import { getClassStats } from '../classes.js';
-import { getTalentEffects } from '../talents.js';
+import { getTalentEffects, getTalentsForClass } from '../talents.js';
+import { getLegacyTalentCost } from '../config/legacyTalents.js';
 import { getAccountTalentEffects } from '../accountTalents.js';
 import { saveBestiary } from '../bestiary.js';
 import { saveMaterialBook } from '../materialBook.js';
@@ -231,6 +232,16 @@ export class SaveLoadSystem {
         const s = this.scene;
         const data = loadGame();
         if (data) {
+            const validIds = new Set(getTalentsForClass(s.classKey || data.classKey || 'sage').map(t => t.id));
+            const unlocked = data.unlockedTalents ?? [];
+            const removedIds = unlocked.filter(id => !validIds.has(id));
+            if (removedIds.length > 0) {
+                data.unlockedTalents = unlocked.filter(id => validIds.has(id));
+                const refund = removedIds.reduce((sum, id) => sum + getLegacyTalentCost(id), 0);
+                data.talentPoints = (data.talentPoints ?? 0) + refund;
+                saveGame(data);
+                s._legacyTalentRefund = refund;
+            }
             s.unlockedTalents = data.unlockedTalents ?? [];
             s.talentPoints = data.talentPoints ?? 0;
             s.unlockedMastery = data.unlockedMastery ?? [];

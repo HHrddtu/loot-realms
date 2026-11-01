@@ -13,6 +13,7 @@ import { initBestiary, recordEncounter } from '../bestiary.js';
 import { initMaterialBook } from '../materialBook.js';
 import { initSoulBook } from '../soulBook.js';
 import { initQuests, onExplore, setGameScene, autoAcceptZoneQuest, checkZoneTransitionGate } from '../quests.js';
+import { getQuestTracker, getSystemQuestFlags } from '../systems/QuestTracker.js';
 import { MAP_CHAPTERS } from '../config/mapData.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { CombatFacade } from '../systems/CombatFacade.js';
@@ -141,6 +142,8 @@ export default class GameScene extends Phaser.Scene {
         initSoulBook();
         initQuests();
         setGameScene(this);
+        this.questTracker = getQuestTracker();
+        this._systemQuestTimer = 0;
         this.bestiarySeen = {};
         this.npcSprites = [];
         this.questIcons = [];
@@ -157,6 +160,11 @@ export default class GameScene extends Phaser.Scene {
         this.masteryPoints = 0;
         this._loadAccountTalents = () => this.saveLoad.loadAccountTalents();
         this._loadAccountTalents();
+        if (this._legacyTalentRefund > 0) {
+            this.floatingText(this.player.x, this.player.y - 70,
+                '+' + this._legacyTalentRefund + ' talent points refunded', '#9b59b6');
+            this._legacyTalentRefund = 0;
+        }
 
         this.corruption = 0;
         this.corruptionMax = this.classStats ? this.classStats.corruptionMax : CORRUPTION.max;
@@ -606,6 +614,15 @@ export default class GameScene extends Phaser.Scene {
         }
     }
 
+    _checkSystemQuests() {
+        if (!this.questTracker || !this.player) return;
+        const newlyCompleted = this.questTracker.checkQuests(getSystemQuestFlags(this));
+        newlyCompleted.forEach(q => {
+            this.floatingText(this.player.x, this.player.y - 80,
+                'MILESTONE: ' + q.name, '#f1c40f');
+        });
+    }
+
     _showZoneQuestGate(gate) {
         const quest = gate.quest;
         const progress = gate.progress || { current: 0, total: quest.count || 0 };
@@ -840,6 +857,12 @@ export default class GameScene extends Phaser.Scene {
 
         if (this.currentZone) {
             this.currentZone.update(time, delta);
+        }
+
+        this._systemQuestTimer = (this._systemQuestTimer || 0) + delta;
+        if (this._systemQuestTimer >= 1000) {
+            this._systemQuestTimer = 0;
+            this._checkSystemQuests();
         }
 
         this.updateUI();

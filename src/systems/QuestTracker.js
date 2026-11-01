@@ -22,16 +22,16 @@ export class QuestTracker {
     }
 
     checkQuests(saveData) {
-        let newCompletion = false;
+        const newlyCompleted = [];
         SYSTEM_QUESTS.forEach(quest => {
             if (this.completed.includes(quest.id)) return;
             if (saveData[quest.target]) {
                 this.completed.push(quest.id);
-                newCompletion = true;
+                newlyCompleted.push(quest);
             }
         });
-        if (newCompletion) this._save();
-        return newCompletion;
+        if (newlyCompleted.length > 0) this._save();
+        return newlyCompleted;
     }
 
     getProgress(saveData) {
@@ -56,4 +56,15 @@ let instance = null;
 export function getQuestTracker() {
     if (!instance) instance = new QuestTracker();
     return instance;
+}
+
+export function getSystemQuestFlags(scene) {
+    const z = (scene && scene.zones) || {};
+    return {
+        depthsBossDefeated: !!(z.depths && z.depths.bossDefeated),
+        cursedBossDefeated: !!(z.cursed && z.cursed.bossDefeated),
+        shadowBossDefeated: !!(z.shadow && z.shadow.bossDefeated),
+        towerBossDefeated: !!(z.tower && z.tower.bossDefeated),
+        throneBossDefeated: !!(z.throne && z.throne.bossDefeated)
+    };
 }

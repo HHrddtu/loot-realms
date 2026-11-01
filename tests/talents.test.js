@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { CLASS_TALENTS } from '../src/config/talents.js';
 import { getTalentEffects } from '../src/talents.js';
+import { getLegacyTalentCost } from '../src/config/legacyTalents.js';
 
 const EFFECT_DEFAULTS = getTalentEffects([]);
 
@@ -66,5 +67,13 @@ describe('compressed talent trees', () => {
     it('ignores removed legacy node ids without throwing', () => {
         const effects = getTalentEffects(['s_fire_1', 's_fire_99', 'a_acid_24']);
         expect(effects.spellDamage).toBe(15);
+    });
+
+    it('refunds legacy nodes at their old row cost', () => {
+        expect(getLegacyTalentCost('s_fire_15')).toBe(5);
+        expect(getLegacyTalentCost('s_prot_23')).toBe(8);
+        expect(getLegacyTalentCost('g_pur_24')).toBe(8);
+        expect(getLegacyTalentCost('s_fire_3')).toBe(0);
+        expect(getLegacyTalentCost('unknown_id')).toBe(1);
     });
 });
