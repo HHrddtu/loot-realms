@@ -18,7 +18,9 @@ vi.mock('../src/sound.js', () => ({
 vi.mock('../src/bestiary.js', () => ({
     recordKill: vi.fn(),
     recordEncounter: vi.fn(),
-    getAllBestiaryBonuses: () => ({ hp: 0, dmg: 0, speed: 0 })
+    getAllBestiaryBonuses: () => ({ hp: 0, dmg: 0, speed: 0 }),
+    getPlayerAttackType: () => 'physical',
+    getWeaknessMultiplier: () => 1
 }));
 
 vi.mock('../src/soulBook.js', () => ({
@@ -120,16 +122,17 @@ function createMockScene(overrides = {}) {
         floatingText: vi.fn(),
         recalcStats: vi.fn(),
         _updateQuestIcons: vi.fn(),
-        cameras: { main: { shake: vi.fn() } },
+        cameras: { main: { shake: vi.fn(), flash: vi.fn() } },
         time: { delayedCall: vi.fn() },
         tweens: { add: vi.fn() },
-        particles: { spawnDamageToPlayer: vi.fn(), spawnEnemyDeath: vi.fn() },
+        particles: { spawnDamageToPlayer: vi.fn(), spawnEnemyDeath: vi.fn(), spawnHitSpark: vi.fn() },
         ui: { showDamageFlash: vi.fn() },
         input: { keyboard: { once: vi.fn() } },
         add: {
             sprite: vi.fn(chainable),
             text: vi.fn(chainable),
-            rectangle: vi.fn(chainable)
+            rectangle: vi.fn(chainable),
+            circle: vi.fn(chainable)
         },
         ...overrides
     };
@@ -166,6 +169,24 @@ describe('CombatCore.takeDamage', () => {
         expect(s.playerHP).toBe(0);
         expect(s.deaths).toBe(1);
         expect(s.menuOpen).toBe(true);
+    });
+});
+
+describe('CombatCore.hitEnemy status combos', () => {
+    it('detonates burn for bonus damage and consumes it', () => {
+        const s = createMockScene();
+        const core = new CombatCore(s);
+        const enemy = {
+            x: 200, y: 200, active: true,
+            stats: { key: 'test', name: 'Test', hp: 200, maxHp: 200, exp: 5 },
+            statuses: { burn: { dps: 5, timer: 1000 } },
+            setTint: vi.fn(), clearTint: vi.fn(), setScale: vi.fn(),
+            hpBg: { width: 20 }, hpFill: { width: 20 },
+            destroy: vi.fn()
+        };
+        core.hitEnemy(enemy, 100);
+        expect(enemy.stats.hp).toBe(70);
+        expect(enemy.statuses.burn).toBeUndefined();
     });
 });
 

@@ -102,6 +102,9 @@ function createMockScene(overrides = {}) {
         kills: 0,
         playerExp: 0,
         accountExp: 0,
+        talentPoints: 0,
+        masteryPoints: 0,
+        firstClearZones: {},
         gold: 0,
         crystals: 0,
         accountEffects: { expPercent: 0, goldPercent: 0 },
@@ -163,6 +166,17 @@ function createMockScene(overrides = {}) {
         ...overrides
     };
 }
+
+describe('CombatLoot first clear', () => {
+    it('grants the zone clear reward only once', () => {
+        const scene = createMockScene();
+        const loot = new CombatLoot(scene);
+        loot._grantFirstClear('forest');
+        loot._grantFirstClear('forest');
+        expect(scene.talentPoints).toBe(1);
+        expect(scene.masteryPoints).toBe(1);
+    });
+});
 
 describe('CombatLoot', () => {
     let scene;
