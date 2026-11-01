@@ -1,8 +1,8 @@
 // Forest enemies
 export const ENEMY_TYPES = [
-    { key: 'goblin', name: 'Goblin', nameRu: 'Гоблин', nameDe: 'Goblin', hp: 72, dmg: 8, exp: 15, bw: 18, bh: 20 },
-    { key: 'slime',  name: 'Slime',  nameRu: 'Слайм',  nameDe: 'Schleim', hp: 52, dmg: 6, exp: 12, bw: 16, bh: 14 },
-    { key: 'rat',    name: 'Rat',    nameRu: 'Крыса',   nameDe: 'Ratte',   hp: 34, dmg: 4, exp: 8,  bw: 16, bh: 12 }
+    { key: 'goblin', name: 'Goblin', nameRu: 'Гоблин', nameDe: 'Goblin', hp: 72, dmg: 8, exp: 15, bw: 18, bh: 20, telegraphed: true },
+    { key: 'slime',  name: 'Slime',  nameRu: 'Слайм',  nameDe: 'Schleim', hp: 52, dmg: 6, exp: 12, bw: 16, bh: 14, telegraphed: true },
+    { key: 'rat',    name: 'Rat',    nameRu: 'Крыса',   nameDe: 'Ratte',   hp: 34, dmg: 4, exp: 8,  bw: 16, bh: 12, telegraphed: true }
 ];
 export const ENEMY_COUNT = 3;
 export const EQUIP_DROP_CHANCE = 0.05;

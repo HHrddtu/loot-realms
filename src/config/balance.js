@@ -1,6 +1,12 @@
 // ── Combat ──
 export const INVINCIBILITY_DURATION = 600;
 export const MELEE_RANGE = 55;
+export const MELEE_TELEGRAPH_MS = 500;
+export const MELEE_LUNGE_MS = 200;
+export const MELEE_LUNGE_SPEED = 260;
+export const MELEE_ATTACK_RANGE = 46;
+export const MELEE_ATTACK_COOLDOWN_MS = 1100;
+export const MELEE_ATTACK_HIT_RADIUS = 42;
 export const MELEE_COOLDOWN = 280;
 export const MELEE_DMG_MULT = 1.0;
 export const MELEE_HIT_RADIUS = 35;

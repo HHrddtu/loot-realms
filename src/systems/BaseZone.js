@@ -49,6 +49,7 @@ export class BaseZone {
         const s = this.scene;
         s.physics.add.overlap(s.player, s.enemies, (p, e) => {
             if (e.active && e.stats && !s.menuOpen && !s.transitioning) {
+                if (e.stats.telegraphed) return;
                 s.combat.takeDamage(e.stats.damage);
                 EnemyAI.playAttackAnim(e, s);
             }

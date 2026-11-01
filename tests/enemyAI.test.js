@@ -101,4 +101,33 @@ describe('EnemyAI', () => {
         expect(e.hpBg.x).toBe(e.x);
         expect(e.hpBg.y).toBe(e.y - e.stats.bh / 2 - 8);
     });
+
+    it('telegraphs melee attacks and only damages after the lunge', () => {
+        const player = { x: 120, y: 100 };
+        const scene = {
+            player,
+            time: { now: 0, delayedCall: vi.fn((ms, cb) => cb()) },
+            add: { circle: vi.fn(() => ({ setDepth() { return this; }, destroy: vi.fn() })) },
+            tweens: { add: vi.fn() },
+            floatingText: vi.fn(),
+            combat: { takeDamage: vi.fn() }
+        };
+        const e = createMockEnemy(
+            { telegraphed: true, damage: 10 },
+            { x: 100, y: 100, setTint: vi.fn(), clearTint: vi.fn() }
+        );
+
+        EnemyAI._defaultBehavior(e, player, 20, scene);
+
+        expect(e.stats._attackPhase).toBe('windup');
+        expect(e.body.setVelocity).toHaveBeenCalledWith(0);
+        expect(e.setTint).toHaveBeenCalledWith(0xffaa00);
+        expect(scene.combat.takeDamage).not.toHaveBeenCalled();
+
+        scene.time.now = 600;
+        EnemyAI._defaultBehavior(e, player, 20, scene);
+
+        expect(e.stats._attackPhase).toBe('lunge');
+        expect(scene.combat.takeDamage).toHaveBeenCalledWith(10);
+    });
 });

@@ -6,7 +6,9 @@ import {
     ENEMY_SEPARATION_RADIUS, ENEMY_SEPARATION_FORCE,
     ENEMY_ALERT_BASE_DELAY, ENEMY_ALERT_RANDOM_DELAY,
     ENEMY_CLOSE_RANGE_SPEED_MULT, ENEMY_CLOSE_RANGE_THRESHOLD,
-    ENEMY_MAX_COUNT, ENEMY_ROLE_RANGES
+    ENEMY_MAX_COUNT, ENEMY_ROLE_RANGES,
+    MELEE_TELEGRAPH_MS, MELEE_LUNGE_MS, MELEE_LUNGE_SPEED,
+    MELEE_ATTACK_RANGE, MELEE_ATTACK_COOLDOWN_MS, MELEE_ATTACK_HIT_RADIUS
 } from '../config/index.js';
 import { getEnemyAttackAnim } from '../config/animations.js';
 export class EnemyAI {
@@ -147,6 +149,71 @@ export class EnemyAI {
     }
 
     static _defaultBehavior(e, player, dist, scene) {
+        if (e.stats && e.stats.telegraphed) {
+            this._telegraphedMelee(e, player, dist, scene);
+            return;
+        }
+        if (dist < this._detectRange(e, scene)) this._chase(e, player, dist);
+        else this._wander(e);
+    }
+
+    static _telegraphedMelee(e, player, dist, scene) {
+        const st = e.stats;
+        const now = scene.time.now;
+
+        if (st._attackPhase === 'windup') {
+            e.body.setVelocity(0);
+            if (now >= st._attackAt) {
+                st._attackPhase = 'lunge';
+                st._attackUntil = now + MELEE_LUNGE_MS;
+                const dx = player.x - e.x, dy = player.y - e.y;
+                const len = Math.sqrt(dx * dx + dy * dy) || 1;
+                e.body.setVelocity((dx / len) * MELEE_LUNGE_SPEED, (dy / len) * MELEE_LUNGE_SPEED);
+                scene.time.delayedCall(MELEE_LUNGE_MS, () => {
+                    if (!e.active || !e.stats) return;
+                    if (Phaser.Math.Distance.Between(e.x, e.y, scene.player.x, scene.player.y) < MELEE_ATTACK_HIT_RADIUS) {
+                        scene.combat.takeDamage(st.damage);
+                        scene.floatingText(scene.player.x, scene.player.y - 30, '-' + st.damage, '#e74c3c');
+                    }
+                });
+            } else if (now >= (st._telegraphPulse || 0)) {
+                st._telegraphPulse = now + 160;
+                const ring = scene.add.circle(e.x, e.y, 16, 0xffaa00, 0.2).setDepth(9);
+                scene.tweens.add({
+                    targets: ring, scaleX: 1.6, scaleY: 1.6, alpha: 0,
+                    duration: 220, onComplete: () => ring.destroy()
+                });
+            }
+            return;
+        }
+
+        if (st._attackPhase === 'lunge') {
+            if (now >= st._attackUntil) {
+                st._attackPhase = 'cooldown';
+                st._attackAt = now + MELEE_ATTACK_COOLDOWN_MS;
+                e.body.setVelocity(0);
+                e.clearTint();
+            }
+            return;
+        }
+
+        if (st._attackPhase === 'cooldown') {
+            if (now >= st._attackAt) {
+                st._attackPhase = null;
+            }
+        }
+
+        if (st._attackPhase !== 'cooldown' && dist < MELEE_ATTACK_RANGE && now >= (st._nextAttackAt || 0)) {
+            st._attackPhase = 'windup';
+            st._attackAt = now + MELEE_TELEGRAPH_MS;
+            st._nextAttackAt = now + MELEE_ATTACK_COOLDOWN_MS + MELEE_TELEGRAPH_MS;
+            st._telegraphPulse = 0;
+            e.body.setVelocity(0);
+            e.setTint(0xffaa00);
+            this.playAttackAnim(e, scene);
+            return;
+        }
+
         if (dist < this._detectRange(e, scene)) this._chase(e, player, dist);
         else this._wander(e);
     }
