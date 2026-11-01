@@ -1,6 +1,7 @@
 import { DIFF_COLORS, GAME_WIDTH, GAME_HEIGHT } from '../config/index.js';
 import { lighten } from '../utils.js';
 import { t } from '../i18n.js';
+import { getAchievementProgress, getAchievementStats } from '../achievements.js';
 
 export class PauseMenu {
     constructor(scene, ui) {
@@ -47,6 +48,50 @@ export class PauseMenu {
         makeSmallBtn(335, 280, t('pause.save'), 0x8e44ad, () => { this.scene.doSave(); this.closePause(); });
         makeSmallBtn(465, 280, t('pause.menu'), 0x2980b9, () => { this.scene.doSave(); this.closePause(); this.scene.scene.start('Menu'); });
         makeSmallBtn(400, 320, t('adv.title'), 0x555577, () => { this.closePause(); this._openPauseAdvanced(); });
+        makeSmallBtn(400, 360, 'Achievements', 0xf1c40f, () => { this.closePause(); this._openAchievements(); });
+    }
+
+    _openAchievements() {
+        this.scene.menuOpen = true;
+        this.scene.physics.pause();
+        this.scene.pauseGroup = [];
+        const mk = (el) => { el.setScrollFactor(0).setDepth(100); return el; };
+        this.scene.pauseGroup.push(mk(this.scene.add.rectangle(400, 300, 740, 520, 0x0a0a1a, 0.95).setStrokeStyle(2, 0x555577)));
+        this.scene.pauseGroup.push(mk(this.scene.add.text(400, 60, 'ACHIEVEMENTS', {
+            fontSize: '24px', fill: '#f1c40f', fontFamily: 'Georgia, serif', fontStyle: 'bold'
+        }).setOrigin(0.5)));
+
+        const progress = getAchievementProgress(getAchievementStats(this.scene));
+        const done = progress.filter(a => a.unlocked).length;
+        this.scene.pauseGroup.push(mk(this.scene.add.text(400, 88, `${done}/${progress.length} unlocked`, {
+            fontSize: '12px', fill: '#95a5a6', fontFamily: 'Arial'
+        }).setOrigin(0.5)));
+
+        progress.forEach((achievement, i) => {
+            const col = Math.floor(i / 10);
+            const row = i % 10;
+            const x = 215 + col * 370;
+            const y = 120 + row * 38;
+            const color = achievement.unlocked ? '#2ecc71' : '#666';
+            const marker = achievement.unlocked ? '\u2713 ' : '\u25CB ';
+            this.scene.pauseGroup.push(mk(this.scene.add.text(x, y, marker + achievement.name, {
+                fontSize: '11px', fill: color, fontFamily: 'Georgia, serif', fontStyle: 'bold'
+            }).setOrigin(0.5)));
+            const desc = achievement.description.length > 42
+                ? achievement.description.slice(0, 39) + '...'
+                : achievement.description;
+            this.scene.pauseGroup.push(mk(this.scene.add.text(x, y + 12, desc, {
+                fontSize: '8px', fill: achievement.unlocked ? '#7fbf8f' : '#555', fontFamily: 'Arial'
+            }).setOrigin(0.5)));
+        });
+
+        const back = mk(this.scene.add.rectangle(400, 540, 130, 28, 0x34495e)
+            .setStrokeStyle(1, 0x556677).setInteractive({ useHandCursor: true }));
+        const backLbl = mk(this.scene.add.text(400, 540, t('pause.back'), {
+            fontSize: '12px', fill: '#fff', fontFamily: 'Arial', fontStyle: 'bold'
+        }).setOrigin(0.5));
+        back.on('pointerdown', () => { this.closePause(); this.openPause(); });
+        this.scene.pauseGroup.push(back, backLbl);
     }
 
     _openPauseAdvanced() {

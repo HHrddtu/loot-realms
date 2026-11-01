@@ -1,0 +1,23 @@
+export const ACHIEVEMENTS = [
+    { id: 'first_blood', name: 'First Blood', description: 'Defeat your first enemy.', stat: 'kills', threshold: 1 },
+    { id: 'hunter', name: 'Hunter', description: 'Defeat 50 enemies.', stat: 'kills', threshold: 50 },
+    { id: 'slayer', name: 'Slayer', description: 'Defeat 250 enemies.', stat: 'kills', threshold: 250 },
+    { id: 'legend', name: 'Living Legend', description: 'Defeat 1000 enemies.', stat: 'kills', threshold: 1000 },
+    { id: 'level_5', name: 'Apprentice', description: 'Reach level 5.', stat: 'level', threshold: 5 },
+    { id: 'level_10', name: 'Veteran', description: 'Reach level 10.', stat: 'level', threshold: 10 },
+    { id: 'level_20', name: 'Ascendant', description: 'Reach level 20.', stat: 'level', threshold: 20 },
+    { id: 'forest_clear', name: 'Into the Woods', description: 'Defeat the Ancient Treant.', stat: 'forestCleared', threshold: 1 },
+    { id: 'mine_clear', name: 'Bone Breaker', description: 'Defeat the Skeleton Lord.', stat: 'mineCleared', threshold: 1 },
+    { id: 'cave_clear', name: 'Bat Bane', description: 'Defeat the Giant Bat.', stat: 'caveCleared', threshold: 1 },
+    { id: 'village_clear', name: 'Village Savior', description: 'Defeat the Purple Demon.', stat: 'villageCleared', threshold: 1 },
+    { id: 'depths_clear', name: 'Below the World', description: 'Defeat the Lich King.', stat: 'depthsCleared', threshold: 1 },
+    { id: 'cursed_clear', name: 'Cursebreaker', description: 'Defeat the Ancient Evil.', stat: 'cursedCleared', threshold: 1 },
+    { id: 'shadow_clear', name: 'Light in the Dark', description: 'Defeat the Shadow King.', stat: 'shadowCleared', threshold: 1 },
+    { id: 'tower_clear', name: 'Kingmaker', description: 'Defeat the Fallen King.', stat: 'towerCleared', threshold: 1 },
+    { id: 'throne_clear', name: 'Eternity', description: 'Defeat the Eternity Lord.', stat: 'throneCleared', threshold: 1 },
+    { id: 'desert_clear', name: 'Sandstorm', description: 'Defeat the Sand Wyrm.', stat: 'desertCleared', threshold: 1 },
+    { id: 'swamp_clear', name: 'Mirewalker', description: 'Defeat the Slime King.', stat: 'swampCleared', threshold: 1 },
+    { id: 'rich', name: 'Deep Pockets', description: 'Collect 10,000 gold.', stat: 'gold', threshold: 10000 },
+    { id: 'questmaster', name: 'Questmaster', description: 'Complete 10 quests.', stat: 'quests', threshold: 10 },
+    { id: 'talent_master', name: 'Talent Master', description: 'Unlock 20 talents.', stat: 'talents', threshold: 20 }
+];

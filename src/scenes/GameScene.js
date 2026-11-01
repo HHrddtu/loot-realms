@@ -14,6 +14,7 @@ import { initMaterialBook } from '../materialBook.js';
 import { initSoulBook } from '../soulBook.js';
 import { initQuests, onExplore, setGameScene, autoAcceptZoneQuest, checkZoneTransitionGate } from '../quests.js';
 import { getQuestTracker, getSystemQuestFlags } from '../systems/QuestTracker.js';
+import { initAchievements, checkAchievements, getAchievementStats } from '../achievements.js';
 import { MAP_CHAPTERS } from '../config/mapData.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { CombatFacade } from '../systems/CombatFacade.js';
@@ -144,6 +145,7 @@ export default class GameScene extends Phaser.Scene {
         setGameScene(this);
         this.systemQuestTracker = getQuestTracker();
         this._systemQuestTimer = 0;
+        initAchievements();
         this.bestiarySeen = {};
         this.npcSprites = [];
         this.questIcons = [];
@@ -614,6 +616,15 @@ export default class GameScene extends Phaser.Scene {
         }
     }
 
+    _checkAchievements() {
+        if (!this.player) return;
+        const newlyCompleted = checkAchievements(getAchievementStats(this));
+        newlyCompleted.forEach(a => {
+            this.floatingText(this.player.x, this.player.y - 100,
+                'ACHIEVEMENT: ' + a.name, '#f1c40f');
+        });
+    }
+
     _checkSystemQuests() {
         if (!this.systemQuestTracker || !this.player) return;
         const newlyCompleted = this.systemQuestTracker.checkQuests(getSystemQuestFlags(this));
@@ -863,6 +874,7 @@ export default class GameScene extends Phaser.Scene {
         if (this._systemQuestTimer >= 1000) {
             this._systemQuestTimer = 0;
             this._checkSystemQuests();
+            this._checkAchievements();
         }
 
         this.updateUI();
