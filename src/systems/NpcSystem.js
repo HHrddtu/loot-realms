@@ -221,6 +221,7 @@ export class NpcSystem {
                             s.floatingText(s.player.x + 30, s.player.y - 40, '+' + item.name, '#3498db');
                         }
                     }
+                    s.recalcStats();
                     this.updateQuestIcons();
                     saveQuests();
                 });

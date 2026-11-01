@@ -91,6 +91,7 @@ export class CombatLoot {
         }
         s.floatingText(s.player.x, s.player.y - 60, 'ZONE CLEARED: +1 Talent, +1 Mastery', '#f1c40f');
         if (item) s.floatingText(s.player.x, s.player.y - 78, '+' + item.name, '#3498db');
+        if (s.recalcStats) s.recalcStats();
         if (s.ui && s.ui.updateUI) s.ui.updateUI();
     }
 
