@@ -48,12 +48,13 @@ export default class MenuScene extends Phaser.Scene {
 
         // Main buttons
         this.menuBtn(400, 210, t('menu.start'), 0x27ae60, () => {
-            if (hasAccount()) {
+            const save = loadGame();
+            if (save) {
                 const acc = loadAccount();
-                const sv = loadGame();
                 this.scene.start('Game', {
                     difficulty: 'Normal',
-                    classKey: (acc && acc.classKey) || (sv && sv.classKey) || 'sage'
+                    classKey: (acc && acc.classKey) || save.classKey || 'sage',
+                    load: true
                 });
             } else {
                 this.scene.start('ClassSelect');
