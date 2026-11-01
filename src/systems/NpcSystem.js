@@ -455,7 +455,10 @@ export class NpcSystem {
                     fontSize: '15px', fill: color, fontFamily: 'Georgia, serif', fontStyle: 'bold'
                 })));
 
-                s.questLogGroup.push(mk(s.add.text(60, y + 20, q.description, {
+                const questDesc = q.description.length > 80
+                    ? q.description.slice(0, 77) + '...'
+                    : q.description;
+                s.questLogGroup.push(mk(s.add.text(60, y + 20, questDesc, {
                     fontSize: '12px', fill: '#bdc3c7', fontFamily: 'Georgia, serif',
                     wordWrap: { width: 520 }
                 })));
