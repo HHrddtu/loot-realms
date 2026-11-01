@@ -107,4 +107,28 @@ describe('BaseZone', () => {
         expect(scene.npcSprites).toEqual([]);
         expect(scene.nearbyNpc).toBeNull();
     });
+
+    it('spawnObstacles() disposes a stale group when the zone has no obstacles', () => {
+        scene.zone = 'desert';
+        const stale = { scene: {}, clear: vi.fn(), destroy: vi.fn() };
+        scene.obstacles = stale;
+
+        zone.spawnObstacles();
+
+        expect(stale.clear).toHaveBeenCalledWith(true, true);
+        expect(stale.destroy).toHaveBeenCalled();
+        expect(scene.obstacles).toBeNull();
+    });
+
+    it('spawnObstacles() drops a destroyed group without touching it', () => {
+        scene.zone = 'desert';
+        const stale = { clear: vi.fn(), destroy: vi.fn() };
+        scene.obstacles = stale;
+
+        zone.spawnObstacles();
+
+        expect(stale.clear).not.toHaveBeenCalled();
+        expect(stale.destroy).not.toHaveBeenCalled();
+        expect(scene.obstacles).toBeNull();
+    });
 });
