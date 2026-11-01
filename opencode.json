@@ -25,6 +25,15 @@
     }
   },
 
+  "mcp": {
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp@latest", "--browser", "msedge"],
+      "enabled": true,
+      "timeout": 60000
+    }
+  },
+
   "permission": {
     "edit": "allow",
     "bash": "allow",
