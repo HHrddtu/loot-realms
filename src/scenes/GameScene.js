@@ -142,7 +142,7 @@ export default class GameScene extends Phaser.Scene {
         initSoulBook();
         initQuests();
         setGameScene(this);
-        this.questTracker = getQuestTracker();
+        this.systemQuestTracker = getQuestTracker();
         this._systemQuestTimer = 0;
         this.bestiarySeen = {};
         this.npcSprites = [];
@@ -615,8 +615,8 @@ export default class GameScene extends Phaser.Scene {
     }
 
     _checkSystemQuests() {
-        if (!this.questTracker || !this.player) return;
-        const newlyCompleted = this.questTracker.checkQuests(getSystemQuestFlags(this));
+        if (!this.systemQuestTracker || !this.player) return;
+        const newlyCompleted = this.systemQuestTracker.checkQuests(getSystemQuestFlags(this));
         newlyCompleted.forEach(q => {
             this.floatingText(this.player.x, this.player.y - 80,
                 'MILESTONE: ' + q.name, '#f1c40f');
