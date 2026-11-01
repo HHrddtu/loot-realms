@@ -203,13 +203,13 @@ npm test        # 66/66
 ## 4. Известные ловушки
 
 - `getTalentEffects()` в `src/talents.js` мержит только ключи из дефолтного объекта. Новые флаги без добавления в дефолт будут молча теряться.
-- `getSetBonuses()` суммирует boolean-флаги как числа. Многие сет-флаги (`dragonBreath`, `divineShield`, `spellEcho` и др.) всё ещё не читаются.
+- `getSetBonuses()` суммирует boolean-флаги как числа. Сет-флаги уже читаются: `dragonBreath`, `divineShield`, `spellEcho`, `boneShield`, `curseOnKill`, `royalGuard`, `lifeStealPercent`, `expPercent`, `lootPercent`, `shieldPercent`. `shadowClone` заменён на dodge.
 - Hit-stop использует `physics.pause()`; проверять вручную, не конфликтует ли с меню/диалогами/смертью.
 - `_promoteZoneElite()` выбирает случайного моба после `setup()`. Если зона спавнит мобов позже, элитник не появится.
 - First-clear не выдаётся за Village Boss, потому что у него split-фаза. Если добавлять — обрабатывать split отдельно.
 - `completedZones` теперь пишется, но `MapScene` использует сохранение, а не состояние сцены.
-- `QuestTracker` и `systemQuests` всё ещё не подключены.
-- Achievements отсутствуют, хотя старые доки могут утверждать обратное.
+- `QuestTracker` подключён: milestone-тосты + строка прогресса в квест-логе (`N`).
+- Achievements реализованы: `src/achievements.js` + `src/config/achievements.js`, список в pause menu.
 
 ## 5. Правила
 
@@ -235,3 +235,11 @@ npm run dev
 4. First-clear награду после босса.
 5. Рост HP/DMG после зачистки зоны и сдачи квеста.
 6. Повторный вход в Tower/Depths/Cursed/Shadow — порталы на месте.
+
+## 7. Post-handoff QA (2026-11-01)
+
+- Подключён Playwright MCP (Edge) для авто-плейтестов.
+- Исправлены: `START GAME` маршрутизация, мгновенный skip интро, закрытие инвентаря `I`, наложение Gold, мёртвая `obstacles`-группа при рестарте, блокировка первичной загрузки `requireItem`, отсутствие `arena` в restore-ветке, коллизия `scene.questTracker` с HUD, переполнение квест-лога.
+- Ранний баланс: +HP/DMG классов, ослаблены Forest-мобы/ловушки, i-frames 600 мс, XP base 240.
+- Миграция талантов: удалённые узлы возвращают очки по старой стоимости.
+- Сет-бонусы и system quests подключены; добавлены achievements (21).
