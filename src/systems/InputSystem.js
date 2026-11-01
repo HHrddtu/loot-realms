@@ -3,7 +3,7 @@ import { getClassData } from '../classes.js';
 import { getKeybinds, parseKeyCode } from '../keybinds.js';
 import { playHit, playBossAoE } from '../sound.js';
 import { DODGE_ROLL_SPEED, DODGE_ROLL_DURATION_MS, DODGE_ROLL_COOLDOWN_MS,
-    DODGE_ROLL_SHAKE_DURATION, DODGE_ROLL_SHAKE_INTENSITY,
+    DODGE_ROLL_SHAKE_DURATION, DODGE_ROLL_SHAKE_INTENSITY, PERFECT_DODGE_RANGE,
     SHADOW_STEP_SPEED, SHADOW_STEP_DISTANCE, SHADOW_STEP_COOLDOWN_MS,
     TIME_SLOW_FACTOR, TIME_SLOW_DURATION_MS, TIME_SLOW_COOLDOWN_MS,
     REVIVE_PROXIMITY_RANGE, REVIVE_PROGRESS_INCREMENT, REVIVE_TIME_MS
@@ -186,6 +186,12 @@ export class InputSystem {
         s.isDodging = true;
         s.dodgeCooldown = true;
         s.invincible = true;
+
+        const threatened = s.enemies && s.enemies.scene && s.enemies.getChildren().some(e =>
+            e.active && e.stats && e.stats._attackPhase === 'windup' &&
+            Phaser.Math.Distance.Between(s.player.x, s.player.y, e.x, e.y) < PERFECT_DODGE_RANGE
+        );
+        if (threatened && s._perfectDodge) s._perfectDodge();
 
         const speed = DODGE_ROLL_SPEED;
         const dirs = { right: 1, left: -1, up: -1, down: 1 };

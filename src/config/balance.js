@@ -205,6 +205,12 @@ export const BOSS_HP_BAR_HEIGHT = 6;
 export const BOSS_MINION_SPEED = 80;
 
 // ── Dodge & Movement ──
+export const PERFECT_DODGE_RANGE = 140;
+export const PERFECT_DODGE_WINDOW_MS = 2000;
+export const PERFECT_DODGE_COUNTER_MULT = 1.8;
+export const PERFECT_DODGE_SLOWMO_SCALE = 0.45;
+export const PERFECT_DODGE_SLOWMO_MS = 220;
+
 export const DODGE_ROLL_SPEED = 450;
 export const DODGE_ROLL_DURATION_MS = 400;
 export const DODGE_ROLL_COOLDOWN_MS = 1200;

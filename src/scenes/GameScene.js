@@ -2,7 +2,8 @@ import Phaser from 'phaser';
 import {
     DIFF_MULT, MATERIAL_SLOTS, EQUIP_BAG_SLOTS, ACCOUNT_EQUIP_BAG_SLOTS, EMPTY_ACCOUNT_EQUIPMENT,
     CORRUPTION, ELITE_HP_MULT, ELITE_DMG_MULT, ELITE_EXP_MULT,
-    GAME_WIDTH, GAME_HEIGHT
+    GAME_WIDTH, GAME_HEIGHT,
+    PERFECT_DODGE_WINDOW_MS, PERFECT_DODGE_SLOWMO_SCALE, PERFECT_DODGE_SLOWMO_MS
 } from '../config/index.js';
 import { stopMusic, startZoneMusic } from '../sound.js';
 import { loadAccount, saveAccount } from '../save.js';
@@ -405,6 +406,8 @@ export default class GameScene extends Phaser.Scene {
         this.invincible = false;
         this.isDodging = false;
         this.dodgeCooldown = false;
+        this._counterReady = false;
+        this._counterTimer = 0;
         this.isDowned = false;
         this.downedTimer = 0;
         this.menuOpen = false;
@@ -614,6 +617,17 @@ export default class GameScene extends Phaser.Scene {
             this.tutorialMgr.showZoneTutorial(zoneName);
             if (this.prestigeSys) this.prestigeSys.applyZoneModifiers(zoneName);
         }
+    }
+
+    _perfectDodge() {
+        this._counterReady = true;
+        this._counterTimer = PERFECT_DODGE_WINDOW_MS;
+        this.floatingText(this.player.x, this.player.y - 55, 'PERFECT DODGE!', '#f1c40f');
+        this.cameras.main.flash(120, 241, 196, 15);
+        this.physics.world.timeScale = PERFECT_DODGE_SLOWMO_SCALE;
+        this.time.delayedCall(PERFECT_DODGE_SLOWMO_MS, () => {
+            this.physics.world.timeScale = 1;
+        });
     }
 
     _checkAchievements() {
@@ -854,6 +868,13 @@ export default class GameScene extends Phaser.Scene {
             this._synergyDmgTimer -= delta;
             if (this._synergyDmgTimer <= 0) {
                 this._synergyDmgBuff = 0;
+            }
+        }
+        if (this._counterReady) {
+            this._counterTimer -= delta;
+            if (this._counterTimer <= 0) {
+                this._counterReady = false;
+                this._counterTimer = 0;
             }
         }
         this.forestBossAI.update(time, delta);

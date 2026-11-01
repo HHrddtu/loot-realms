@@ -18,6 +18,7 @@ import { GAME_WIDTH, GAME_HEIGHT, INVINCIBILITY_DURATION, DAMAGE_SHAKE_DURATION,
     BASH_SHAKE_DURATION, BASH_SHAKE_INTENSITY,
     SPIN_SHAKE_DURATION, SPIN_SHAKE_INTENSITY,
     RESPAWN_SHAKE_DURATION, RESPAWN_SHAKE_INTENSITY,
+    PERFECT_DODGE_COUNTER_MULT,
     HITSTOP_NORMAL_MS, HITSTOP_CRIT_MS, CRIT_SHAKE_DURATION, CRIT_SHAKE_INTENSITY, CRIT_FLASH_DURATION,
     STATUS_SHATTER_MULT, STATUS_DETONATE_MULT, STATUS_TOXIN_MULT, STATUS_BURST_SHAKE_DURATION, STATUS_BURST_SHAKE_INTENSITY
 } from '../config/index.js';
@@ -730,6 +731,13 @@ export class CombatCore {
                 delete enemy.statuses.poison;
                 statusBurst = { text: 'TOXIN BURST!', color: 0x27ae60 };
             }
+        }
+
+        if (!opts.bypassModifiers && s._counterReady) {
+            finalDamage = Math.floor(finalDamage * PERFECT_DODGE_COUNTER_MULT);
+            s._counterReady = false;
+            s._counterTimer = 0;
+            s.floatingText(enemy.x, enemy.y - 50, 'COUNTER!', '#f1c40f');
         }
 
         enemy.stats.hp -= finalDamage;

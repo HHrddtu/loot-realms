@@ -199,6 +199,27 @@ describe('CombatCore.hitEnemy status combos', () => {
     });
 });
 
+describe('CombatCore perfect dodge counter', () => {
+    it('consumes the counter for bonus damage', () => {
+        const random = vi.spyOn(Math, 'random').mockReturnValue(0.99);
+        const s = createMockScene({ _counterReady: true, _counterTimer: 1000 });
+        const core = new CombatCore(s);
+        const enemy = {
+            x: 200, y: 200, active: true,
+            stats: { key: 'test', name: 'Test', hp: 200, maxHp: 200, exp: 5 },
+            setTint: vi.fn(), clearTint: vi.fn(), setScale: vi.fn(),
+            hpBg: { width: 20 }, hpFill: { width: 20 },
+            destroy: vi.fn()
+        };
+
+        core.hitEnemy(enemy, 100);
+
+        expect(enemy.stats.hp).toBe(20);
+        expect(s._counterReady).toBe(false);
+        random.mockRestore();
+    });
+});
+
 describe('CombatLoot.killEnemy', () => {
     it('destroys enemy and grants exp/gold', () => {
         const s = createMockScene();
