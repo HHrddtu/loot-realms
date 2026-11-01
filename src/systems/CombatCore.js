@@ -83,6 +83,9 @@ export class CombatCore {
             amount = Math.floor(amount * (1 - Math.min(s.computedDamageReduction, MAX_DAMAGE_REDUCTION_PCT) / 100));
             if (amount <= 0) amount = 1;
         }
+        if (s.setBonuses && s.setBonuses.royalGuard && s.playerHP <= s.playerMaxHP * 0.3) {
+            amount = Math.max(1, Math.floor(amount * 0.75));
+        }
         if (s.setBonuses && s.setBonuses.drOnHit && s._drOnHitActive) {
             amount = Math.max(1, Math.floor(amount * 0.9));
         }
@@ -109,6 +112,18 @@ export class CombatCore {
             if (amount <= 0) return;
         }
         s.playerHP -= amount;
+        if (s.setBonuses && s.setBonuses.divineShield && s.playerHP > 0 && s.playerHP <= s.playerMaxHP * 0.5) {
+            const now = (s.time && s.time.now) || Date.now();
+            if (!s._divineShieldAt || now - s._divineShieldAt >= 30000) {
+                s._divineShieldAt = now;
+                if (s.spellSys && s.spellSys.effects) {
+                    s.spellSys.effects._castShield({
+                        absorption: Math.floor(s.playerMaxHP * 0.2),
+                        duration: 5
+                    });
+                }
+            }
+        }
         if (s.setBonuses && s.setBonuses.drOnHit) {
             s._drOnHitActive = true;
             s.time.delayedCall(3000, () => { s._drOnHitActive = false; });
@@ -557,6 +572,17 @@ export class CombatCore {
         this._hitObstacles(ax, ay, hitRadius, dmg);
     }
 
+    _dragonBreathSplash(source, dps) {
+        const s = this.scene;
+        if (!s.enemies || !s.enemies.scene) return;
+        s.enemies.getChildren().forEach(e => {
+            if (!e.active || !e.stats || e === source || e.stats.hp <= 0) return;
+            if (Phaser.Math.Distance.Between(source.x, source.y, e.x, e.y) < 80) {
+                EnemyAI._applyStatus(e, 'burn', { dps, duration: 3 });
+            }
+        });
+    }
+
     _hitObstacles(ax, ay, radius, dmg) {
         const s = this.scene;
         if (!s.obstacles || !s.obstacles.scene) return;
@@ -713,6 +739,12 @@ export class CombatCore {
         s.floatingText(enemy.x, enemy.y - 20, '-' + finalDamage, '#e74c3c');
         this._impactFeedback(enemy, isCrit, !opts.bypassModifiers);
         if (statusBurst) this._statusBurst(enemy, statusBurst);
+
+        if (s.setBonuses && s.setBonuses.dragonBreath && !opts.bypassModifiers) {
+            const dps = Math.max(3, Math.floor(finalDamage * 0.08));
+            EnemyAI._applyStatus(enemy, 'burn', { dps, duration: 3 });
+            this._dragonBreathSplash(enemy, dps);
+        }
 
         const totalLifeSteal = s.computedLifeSteal + ((s._consumableBonusLifesteal || 0) * 100);
         if (totalLifeSteal > 0 && !opts.bypassLifeSteal) {

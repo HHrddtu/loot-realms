@@ -131,7 +131,7 @@ export const EQUIPMENT_SETS = {
         pieces: ['craft_shadow_blade', 'craft_void_armor', 'craft_mirror_ring'],
         bonuses: [
             { pieces: 2, name: 'Shadow Step', nameRu: 'Шаг Тени', effects: { critPercent: 8, dodgePercent: 5 } },
-            { pieces: 3, name: 'Mirror Image', nameRu: 'Зеркальное Отражение', effects: { critPercent: 15, dodgePercent: 12, speedPercent: 8, shadowClone: true } }
+            { pieces: 3, name: 'Mirror Image', nameRu: 'Зеркальное Отражение', effects: { critPercent: 15, dodgePercent: 20, speedPercent: 8 } }
         ]
     },
 

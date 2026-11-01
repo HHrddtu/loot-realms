@@ -10,6 +10,7 @@ import { recordKill } from '../bestiary.js';
 import { recordSoulCollect } from '../soulBook.js';
 import { onKill, onCollect } from '../quests.js';
 import { getMyId } from '../network.js';
+import { EnemyAI } from './EnemyAI.js';
 
 export class CombatLoot {
     constructor(scene) {
@@ -130,7 +131,8 @@ export class CombatLoot {
 
     killEnemy(enemy) {
         const s = this.scene;
-        const exp = enemy.stats.exp;
+        const setB = s.setBonuses || {};
+        const exp = Math.floor(enemy.stats.exp * (1 + (setB.expPercent || 0) / 100));
         playEnemyDeath();
         if (s.particles) s.particles.spawnEnemyDeath(enemy.x, enemy.y);
         if (enemy.stats.key) { recordKill(enemy.stats.key); recordSoulCollect(enemy.stats.key); onKill(enemy.stats.key); s._updateQuestIcons(); }
@@ -148,7 +150,7 @@ export class CombatLoot {
         if (s.setBonuses && s.setBonuses.transmuteOnKill) finalGold = Math.floor(finalGold * 1.5);
 
         const items = [];
-        if (Math.random() < EQUIP_DROP_CHANCE + lootBonus * 0.5) {
+        if (Math.random() < EQUIP_DROP_CHANCE + lootBonus * 0.5 + (setB.lootPercent || 0) / 100) {
             const item = rollEquip();
             if (item) items.push({ kind: 'equip', item, x: enemy.x, y: enemy.y - 45, rarity: item.rarity });
         }
@@ -170,6 +172,7 @@ export class CombatLoot {
             if (eliteItem) items.push({ kind: 'equip', item: eliteItem, x: enemy.x, y: enemy.y - 50, rarity: eliteItem.rarity });
         }
 
+        this._applyOnKillSetEffects(enemy, setB);
         CombatLoot.spawnDeathEcho(s, enemy.x, enemy.y, enemy.texture && enemy.texture.key, {
             scale: enemy.scaleX,
             flipX: enemy.flipX,
@@ -192,6 +195,27 @@ export class CombatLoot {
             goldX: enemy.x, goldY: enemy.y - 45,
             items
         };
+    }
+
+    _applyOnKillSetEffects(enemy, setB) {
+        const s = this.scene;
+        if (setB.boneShield && !s.shieldActive && s.spellSys && s.spellSys.effects) {
+            s.spellSys.effects._castShield({
+                absorption: Math.floor(s.playerMaxHP * 0.08),
+                duration: 4
+            });
+        }
+        if (setB.curseOnKill && s.enemies && s.enemies.scene) {
+            s.enemies.getChildren().forEach(e => {
+                if (!e.active || !e.stats || e === enemy || e.stats.hp <= 0) return;
+                if (Phaser.Math.Distance.Between(enemy.x, enemy.y, e.x, e.y) < 120) {
+                    EnemyAI._applyStatus(e, 'poison', {
+                        dps: Math.max(3, Math.floor((enemy.stats.damage || 5) * 0.5)),
+                        duration: 3
+                    });
+                }
+            });
+        }
     }
 
     killBoss() {
@@ -283,7 +307,7 @@ export class CombatLoot {
     killGenericBoss(cfg) {
         const s = this.scene;
         const b = s[cfg.bossRef];
-        const exp = b.stats.exp;
+        const exp = Math.floor(b.stats.exp * (1 + ((s.setBonuses && s.setBonuses.expPercent) || 0) / 100));
         playBossDeath(); recordKill(cfg.recordKey); recordSoulCollect(cfg.recordKey); onKill(cfg.recordKey);
         s._updateQuestIcons();
         if (s.particles) s.particles.spawnBossDeath(b.x, b.y);

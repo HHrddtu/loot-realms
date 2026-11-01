@@ -181,7 +181,7 @@ export class PlayerSystem {
         this.scene.computedCritChance = (te.critChance || 0) + accCritPercent;
         this.scene.computedCritDamage = 1.5 + (te.critDamagePercent || 0) / 100;
         this.scene.computedDodgePercent = (te.dodgePercent || 0) + accDodgePercent;
-        this.scene.computedLifeSteal = (te.lifeSteal || 0) + (ae.lifeSteal || 0);
+        this.scene.computedLifeSteal = (te.lifeSteal || 0) + (ae.lifeSteal || 0) + (setBonuses.lifeStealPercent || 0);
         this.scene.computedDamageReduction = (te.damageReduction || 0) + (ae.damageReduction || 0) + (petStats.damageReduction || 0) + boostDefPct + divineDefBuff * 100 + ((this.scene._consumableBonusDef || 0) * 100) + enchantDamageReduction;
         this.scene.computedDamageReflection = (te.damageReflection || 0) + (ae.damageReflection || 0);
         this.scene.computedCooldownReduction = (te.cooldownReduction || 0) + (ae.cooldownReduction || 0);
@@ -200,7 +200,7 @@ export class PlayerSystem {
         this.scene.computedRegenPercent = (te.regenPercent || 0) + (ae.regenPercent || 0) + (petStats.regenPercent || 0) + (setBonuses.regenPercent || 0) + enchantRegenPercent;
         this.scene.computedDotPower = te.dotPower || 0;
         this.scene.computedDotDuration = te.dotDuration || 0;
-        this.scene.computedShieldPercent = te.shieldPercent || 0;
+        this.scene.computedShieldPercent = (te.shieldPercent || 0) + (setBonuses.shieldPercent || 0);
         this.scene.computedShieldReflect = te.shieldReflect || 0;
         this.scene.computedShieldDuration = te.shieldDuration || 0;
         this.scene.computedShieldStealPercent = te.shieldStealPercent || 0;
@@ -208,7 +208,7 @@ export class PlayerSystem {
         this.scene.computedArmorReduction = te.armorReduction || 0;
         this.scene.computedSpellSpeed = te.spellSpeed || 0;
         this.scene.computedSpellPierce = !!te.spellPierce;
-        this.scene.computedSpellChain = te.spellChain || 0;
+        this.scene.computedSpellChain = (te.spellChain || 0) + (setBonuses.spellEcho ? 1 : 0);
         this.scene.computedSpellSplashBurn = !!te.spellSplashBurn;
         this.scene.computedSpellSpreadOnKill = !!te.spellSpreadOnKill;
         this.scene.computedHealBonusHp = te.healBonusHp || 0;
