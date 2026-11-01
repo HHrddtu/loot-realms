@@ -51,6 +51,7 @@ export class SaveLoadSystem {
             playerY: s.player.y,
             zone: s.zone,
             completedZones: this._collectCompletedZones(),
+            firstClearZones: s.firstClearZones || {},
             equipment: s.equipment,
             materials: s.materials,
             consumable: s.consumable || null,
@@ -198,6 +199,7 @@ export class SaveLoadSystem {
         s.zones.castle.bossDefeated = data.castleBossDefeated ?? false;
         s.zones.castle.keyObtained = data.castleKeyObtained ?? false;
         s.zones.castle.rescued = data.castleRescued ?? false;
+        s.firstClearZones = data.firstClearZones ?? {};
         s._savedZone = data.zone ?? 'forest';
         this.loadAccountTalents();
         const acc = loadAccount() || {};

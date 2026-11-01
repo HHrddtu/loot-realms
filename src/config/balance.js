@@ -125,6 +125,19 @@ export const CRIT_SHAKE_DURATION = 90;
 export const CRIT_SHAKE_INTENSITY = 0.006;
 export const CRIT_FLASH_DURATION = 50;
 
+export const STATUS_SHATTER_MULT = 1.25;
+export const STATUS_DETONATE_MULT = 1.3;
+export const STATUS_TOXIN_MULT = 1.15;
+export const STATUS_BURST_SHAKE_DURATION = 80;
+export const STATUS_BURST_SHAKE_INTENSITY = 0.004;
+
+export const ZONE_CLEAR_BONUS_PCT = 1;
+export const QUEST_CLEAR_BONUS_PCT = 0.5;
+
+export const ELITE_HP_MULT = 1.6;
+export const ELITE_DMG_MULT = 1.3;
+export const ELITE_EXP_MULT = 2;
+
 export const CONSUMABLE_DURATION_MS = 60000;
 export const CONSUMABLE_LIFESTEAL_DURATION_MS = 45000;
 

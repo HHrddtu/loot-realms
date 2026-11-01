@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import {
     DIFF_MULT, MATERIAL_SLOTS, EQUIP_BAG_SLOTS, ACCOUNT_EQUIP_BAG_SLOTS, EMPTY_ACCOUNT_EQUIPMENT,
-    CORRUPTION,
+    CORRUPTION, ELITE_HP_MULT, ELITE_DMG_MULT, ELITE_EXP_MULT,
     GAME_WIDTH, GAME_HEIGHT
 } from '../config/index.js';
 import { stopMusic, startZoneMusic } from '../sound.js';
@@ -12,7 +12,7 @@ import { getAccountTalentEffects } from '../accountTalents.js';
 import { initBestiary, recordEncounter } from '../bestiary.js';
 import { initMaterialBook } from '../materialBook.js';
 import { initSoulBook } from '../soulBook.js';
-import { initQuests, onExplore, setGameScene } from '../quests.js';
+import { initQuests, onExplore, setGameScene, autoAcceptZoneQuest } from '../quests.js';
 import { MAP_CHAPTERS } from '../config/mapData.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { CombatFacade } from '../systems/CombatFacade.js';
@@ -474,6 +474,23 @@ export default class GameScene extends Phaser.Scene {
     }
     _clearVillage() { if (this.zones.village) this.zones.village._destroyZoneSpecific(); }
 
+    _promoteZoneElite() {
+        if (!this.enemies || !this.enemies.getChildren) return;
+        const list = this.enemies.getChildren().filter(e => e && e.active && e.stats && !e.stats.isBoss && !e.stats.isElite);
+        if (list.length === 0) return;
+        const e = list[Math.floor(Math.random() * list.length)];
+        e.stats.isElite = true;
+        e.stats.name = 'Elite ' + e.stats.name;
+        e.stats.maxHp = Math.floor(e.stats.maxHp * ELITE_HP_MULT);
+        e.stats.hp = e.stats.maxHp;
+        e.stats.damage = Math.floor(e.stats.damage * ELITE_DMG_MULT);
+        e.stats.exp = Math.floor(e.stats.exp * ELITE_EXP_MULT);
+        e._roleTintApplied = true;
+        e.setTint(0xffaa00);
+        if (e.hpFill && e.hpFill.setFillStyle) e.hpFill.setFillStyle(0xffaa00);
+        this.floatingText(e.x, e.y - 40, 'ELITE!', '#ffaa00');
+    }
+
     _updateRegen(delta) {
         if (!this.player || this.playerHP <= 0 || this.playerHP >= this.playerMaxHP) return;
         this._regenTimer = (this._regenTimer || 0) + delta;
@@ -564,8 +581,11 @@ export default class GameScene extends Phaser.Scene {
                 zone.setup(...args);
             }
             if (zone.spawnObstacles) zone.spawnObstacles();
+            this._promoteZoneElite();
             this.tutorialMgr.cleanupZoneIntro();
             onExplore(zoneName);
+            const autoQuest = autoAcceptZoneQuest(zoneName);
+            if (autoQuest) this.floatingText(this.player.x, this.player.y - 70, 'New Quest: ' + autoQuest.name, '#f1c40f');
             this.tutorialMgr.showZoneIntro(zoneName);
             this.tutorialMgr.showZoneTutorial(zoneName);
             if (this.prestigeSys) this.prestigeSys.applyZoneModifiers(zoneName);

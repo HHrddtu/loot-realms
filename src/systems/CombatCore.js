@@ -18,7 +18,8 @@ import { GAME_WIDTH, GAME_HEIGHT, INVINCIBILITY_DURATION, DAMAGE_SHAKE_DURATION,
     BASH_SHAKE_DURATION, BASH_SHAKE_INTENSITY,
     SPIN_SHAKE_DURATION, SPIN_SHAKE_INTENSITY,
     RESPAWN_SHAKE_DURATION, RESPAWN_SHAKE_INTENSITY,
-    HITSTOP_NORMAL_MS, HITSTOP_CRIT_MS, CRIT_SHAKE_DURATION, CRIT_SHAKE_INTENSITY, CRIT_FLASH_DURATION
+    HITSTOP_NORMAL_MS, HITSTOP_CRIT_MS, CRIT_SHAKE_DURATION, CRIT_SHAKE_INTENSITY, CRIT_FLASH_DURATION,
+    STATUS_SHATTER_MULT, STATUS_DETONATE_MULT, STATUS_TOXIN_MULT, STATUS_BURST_SHAKE_DURATION, STATUS_BURST_SHAKE_INTENSITY
 } from '../config/index.js';
 
 export class CombatCore {
@@ -591,6 +592,7 @@ export class CombatCore {
         if (opts.attackerPeerId) enemy._lastAttackerPeerId = opts.attackerPeerId;
         let finalDamage = damage;
         let isCrit = false;
+        let statusBurst = null;
 
         // Class synergy damage buff
         if (s._synergyDmgBuff > 0) {
@@ -667,12 +669,30 @@ export class CombatCore {
             if (s.computedArmorReduction > 0) finalDamage = Math.floor(finalDamage * (1 + s.computedArmorReduction / 100));
         }
 
+        if (!opts.bypassModifiers && enemy.statuses) {
+            if (enemy.statuses.freeze || enemy.statuses.stun) {
+                finalDamage = Math.floor(finalDamage * STATUS_SHATTER_MULT);
+                delete enemy.statuses.freeze;
+                delete enemy.statuses.stun;
+                statusBurst = { text: 'SHATTER!', color: 0x88ccff };
+            } else if (enemy.statuses.burn) {
+                finalDamage = Math.floor(finalDamage * STATUS_DETONATE_MULT);
+                delete enemy.statuses.burn;
+                statusBurst = { text: 'DETONATE!', color: 0xff6622 };
+            } else if (enemy.statuses.poison) {
+                finalDamage = Math.floor(finalDamage * STATUS_TOXIN_MULT);
+                delete enemy.statuses.poison;
+                statusBurst = { text: 'TOXIN BURST!', color: 0x27ae60 };
+            }
+        }
+
         enemy.stats.hp -= finalDamage;
         enemy.setTint(0xffffff);
         if (s.particles) s.particles.spawnHitSpark(enemy.x, enemy.y);
         s.tweens.add({ targets: enemy, scaleX: 1.2, scaleY: 1.2, duration: 60, yoyo: true, onComplete: () => { if (enemy.active) { enemy.clearTint(); enemy.setScale(1); } } });
         s.floatingText(enemy.x, enemy.y - 20, '-' + finalDamage, '#e74c3c');
         this._impactFeedback(enemy, isCrit, !opts.bypassModifiers);
+        if (statusBurst) this._statusBurst(enemy, statusBurst);
 
         const totalLifeSteal = s.computedLifeSteal + ((s._consumableBonusLifesteal || 0) * 100);
         if (totalLifeSteal > 0 && !opts.bypassLifeSteal) {
@@ -719,6 +739,34 @@ export class CombatCore {
             s._hitStopActive = false;
             if (!s.menuOpen && !s.transitioning) s.physics.resume();
         });
+    }
+
+    _statusBurst(enemy, burst) {
+        const s = this.scene;
+        const hex = '#' + burst.color.toString(16).padStart(6, '0');
+        s.floatingText(enemy.x, enemy.y - 50, burst.text, hex);
+        s.cameras.main.shake(STATUS_BURST_SHAKE_DURATION, STATUS_BURST_SHAKE_INTENSITY);
+        const ring = s.add.circle(enemy.x, enemy.y, 12, burst.color, 0.45).setDepth(14);
+        s.tweens.add({
+            targets: ring,
+            scale: 2.6,
+            alpha: 0,
+            duration: 260,
+            onComplete: () => { if (ring.active) ring.destroy(); }
+        });
+        for (let i = 0; i < 6; i++) {
+            const angle = (i / 6) * Math.PI * 2;
+            const spark = s.add.circle(enemy.x, enemy.y, 2, burst.color, 0.9).setDepth(14);
+            s.tweens.add({
+                targets: spark,
+                x: enemy.x + Math.cos(angle) * 34,
+                y: enemy.y + Math.sin(angle) * 34,
+                alpha: 0,
+                duration: 260,
+                delay: i * 20,
+                onComplete: () => { if (spark.active) spark.destroy(); }
+            });
+        }
     }
 
     hitStump(stump, damage, opts = {}) {

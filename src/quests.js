@@ -26,6 +26,29 @@ export function saveQuests() {
     saveGame(save);
 }
 
+const ZONE_MAIN_QUESTS = {
+    meadow: 'meadow_intro',
+    forest: 'kill_goblins',
+    arena: 'treant_boss',
+    mine: 'quest_mine',
+    cave: 'giant_bat_boss',
+    village: 'clear_village_camps',
+    cemetery: 'clear_village_camps',
+    depths: 'depths_catacombs',
+    cursed: 'cursed_swamp',
+    shadow: 'shadow_stalkers',
+    tower: 'tower_knights',
+    throne: 'throne_final'
+};
+
+export function autoAcceptZoneQuest(zoneKey) {
+    const qKey = ZONE_MAIN_QUESTS[zoneKey];
+    if (!qKey) return null;
+    if (activeQuests.includes(qKey) || completedQuests.includes(qKey)) return null;
+    if (!acceptQuest(qKey)) return null;
+    return QUEST_DB[qKey] || null;
+}
+
 export function getAvailableQuests(npcKey) {
     const npc = NPC_DB[npcKey];
     if (!npc || !npc.quests) return [];
@@ -171,6 +194,10 @@ export function hasActiveQuest(qKey) {
 
 export function isQuestCompleted(qKey) {
     return completedQuests.includes(qKey);
+}
+
+export function getCompletedQuestCount() {
+    return completedQuests.length;
 }
 
 export function getQuestNpc(qKey) {

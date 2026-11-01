@@ -19,7 +19,9 @@ vi.mock('../src/config/index.js', () => ({
     UPGRADE_DMG_PER_LVL: 5,
     UPGRADE_SPD_PER_LVL: 5,
     UPGRADE_CRIT_PER_LVL: 3,
-    UPGRADE_REGEN_PER_LVL: 2
+    UPGRADE_REGEN_PER_LVL: 2,
+    ZONE_CLEAR_BONUS_PCT: 1,
+    QUEST_CLEAR_BONUS_PCT: 0.5
 }));
 
 vi.mock('../src/classes.js', () => ({
@@ -58,7 +60,8 @@ vi.mock('../src/soulBook.js', () => ({
 }));
 
 vi.mock('../src/quests.js', () => ({
-    onCollect: () => {}
+    onCollect: () => {},
+    getCompletedQuestCount: () => 0
 }));
 
 vi.mock('../src/sound.js', () => ({

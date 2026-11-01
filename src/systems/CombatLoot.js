@@ -23,6 +23,9 @@ export class CombatLoot {
 
         const s = this.scene;
 
+        const bossZone = this._bossZone(enemy);
+        if (bossZone) this._grantFirstClear(bossZone);
+
         // Generic boss handler: if boss has bossHandler, call it
         if (enemy.bossHandler) {
             enemy.bossHandler(enemy);
@@ -53,6 +56,42 @@ export class CombatLoot {
             const killer = enemy._lastAttackerPeerId || (typeof getMyId === 'function' ? getMyId() : null);
             if (s._distributeLoot) s._distributeLoot(lootData, killer);
         }
+    }
+
+    _bossZone(enemy) {
+        const s = this.scene;
+        if (enemy === s.boss) return 'forest';
+        if (enemy === s.mineBoss) return 'mine';
+        if (enemy === s.caveBoss) return 'cave';
+        if (enemy === s.hellBoss) return 'hell';
+        if (enemy === s.depthsBoss) return 'depths';
+        if (enemy === s.cursedBoss) return 'cursed';
+        if (enemy === s.shadowBoss) return 'shadow';
+        if (enemy === s.towerBoss) return 'tower';
+        if (enemy === s.throneBoss) return 'throne';
+        if (enemy === s.snowyIceSpirit) return 'snowy';
+        if (enemy === s.castleBoss) return 'castle';
+        if (enemy === s.desertBoss) return 'desert';
+        if (enemy === s.swampBoss) return 'swamp';
+        return null;
+    }
+
+    _grantFirstClear(zone) {
+        const s = this.scene;
+        if (!s.firstClearZones) s.firstClearZones = {};
+        if (s.firstClearZones[zone]) return;
+        s.firstClearZones[zone] = true;
+        s.talentPoints = (s.talentPoints || 0) + 1;
+        s.masteryPoints = (s.masteryPoints || 0) + 1;
+        s.accountExp = (s.accountExp || 0) + 50;
+        const item = rollZoneEquip(zone);
+        if (item) {
+            if (typeof s.addEquip === 'function') s.addEquip(item);
+            else { s.equipBag = s.equipBag || []; s.equipBag.push(item); }
+        }
+        s.floatingText(s.player.x, s.player.y - 60, 'ZONE CLEARED: +1 Talent, +1 Mastery', '#f1c40f');
+        if (item) s.floatingText(s.player.x, s.player.y - 78, '+' + item.name, '#3498db');
+        if (s.ui && s.ui.updateUI) s.ui.updateUI();
     }
 
     killEnemy(enemy) {
@@ -91,6 +130,11 @@ export class CombatLoot {
             items.push({ kind: 'material', item: pItem, x: enemy.x, y: enemy.y - 50, rarity: pItem.rarity });
         }
 
+        if (enemy.stats.isElite) {
+            const eliteItem = rollZoneEquip(s.zone || 'forest');
+            if (eliteItem) items.push({ kind: 'equip', item: eliteItem, x: enemy.x, y: enemy.y - 50, rarity: eliteItem.rarity });
+        }
+
         if (enemy.hpBg) { enemy.hpBg.destroy(); enemy.hpBg = null; }
         if (enemy.hpFill) { enemy.hpFill.destroy(); enemy.hpFill = null; }
         if (enemy.shieldIcon) { enemy.shieldIcon.destroy(); enemy.shieldIcon = null; }
@@ -102,7 +146,8 @@ export class CombatLoot {
         return {
             source: 'mob',
             exp, killsDelta: 1,
-            gold: finalGold, goldX: enemy.x, goldY: enemy.y - 45,
+            gold: finalGold + (enemy.stats.isElite ? finalGold : 0),
+            goldX: enemy.x, goldY: enemy.y - 45,
             items
         };
     }

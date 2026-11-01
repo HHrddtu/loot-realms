@@ -2,7 +2,8 @@ import {
     DIFF_MULT, MATERIAL_SLOTS, EQUIP_BAG_SLOTS, ACCOUNT_EQUIP_BAG_SLOTS, EMPTY_ACCOUNT_EQUIPMENT,
     SHOP_EQUIP_PRICES, SELL_PRICE_RATIO, MASTERY_LEVEL_REQ,
     LEVEL_UP_XP_BASE, LEVEL_UP_XP_EXPONENT,
-    UPGRADE_HP_PER_LVL, UPGRADE_DMG_PER_LVL, UPGRADE_SPD_PER_LVL, UPGRADE_CRIT_PER_LVL, UPGRADE_REGEN_PER_LVL
+    UPGRADE_HP_PER_LVL, UPGRADE_DMG_PER_LVL, UPGRADE_SPD_PER_LVL, UPGRADE_CRIT_PER_LVL, UPGRADE_REGEN_PER_LVL,
+    ZONE_CLEAR_BONUS_PCT, QUEST_CLEAR_BONUS_PCT
 } from '../config/index.js';
 import { getClassData, getClassStats } from '../classes.js';
 import { getTalentEffects } from '../talents.js';
@@ -13,7 +14,7 @@ import { getMaterialBonuses } from '../materialBook.js';
 import { getSoulBonuses } from '../soulBook.js';
 import { getSetBonuses } from '../config/sets.js';
 import { recordMaterialCollect } from '../materialBook.js';
-import { onCollect } from '../quests.js';
+import { onCollect, getCompletedQuestCount } from '../quests.js';
 import { playLevelUp } from '../sound.js';
 import { getAccountLevelUpReq, loadAccount } from '../save.js';
 import { getPetStats } from '../config/pets.js';
@@ -147,8 +148,10 @@ export class PlayerSystem {
         const divineDmgBuff = (this.scene._divineBlessingDmgBuff || 0) / 100;
         const divineDefBuff = (this.scene._divineBlessingDefBuff || 0) / 100;
 
-        const hpMult = 1 + (te.hpPercent || 0) / 100 + accHpPercent / 100;
-        const dmgMult = 1 + (te.damagePercent || 0) / 100 + accDmgPercent / 100 + boostDmgPct / 100 + divineDmgBuff;
+        const zoneClearBonus = (Object.keys(this.scene.firstClearZones || {}).length * ZONE_CLEAR_BONUS_PCT) / 100;
+        const questClearBonus = (getCompletedQuestCount() * QUEST_CLEAR_BONUS_PCT) / 100;
+        const hpMult = 1 + (te.hpPercent || 0) / 100 + accHpPercent / 100 + zoneClearBonus + questClearBonus;
+        const dmgMult = 1 + (te.damagePercent || 0) / 100 + accDmgPercent / 100 + boostDmgPct / 100 + divineDmgBuff + zoneClearBonus + questClearBonus;
         const moveSpeedBonus = (ae.moveSpeedPercent || 0) + (te.moveSpeedPercent || 0) + ((this.scene._consumableBonusSpd || 0) * 100);
         const spdMult = 1 + accSpdPercent / 100 + moveSpeedBonus / 100;
 
