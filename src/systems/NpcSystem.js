@@ -463,7 +463,7 @@ export class NpcSystem {
                 const prog = getQuestProgress(q.key);
                 const actionLabel = q.type === 'kill' ? t('quest.kill') : t('quest.collect');
                 const progText = `${actionLabel} ${q.target}: ${prog.current}/${prog.total}`;
-                s.questLogGroup.push(mk(s.add.text(640, y, progText, {
+                s.questLogGroup.push(mk(s.add.text(780, y, progText, {
                     fontSize: '12px', fill: complete ? '#2ecc71' : '#f39c12', fontFamily: 'Arial', fontStyle: 'bold'
                 }).setOrigin(1, 0)));
 
@@ -477,7 +477,7 @@ export class NpcSystem {
                     rewardParts.push(q.rewardItems.length + ' item(s)');
                 }
                 if (rewardParts.length > 0) {
-                    s.questLogGroup.push(mk(s.add.text(640, y + 20, t('quest.rewards') + ': ' + rewardParts.join('  '), {
+                    s.questLogGroup.push(mk(s.add.text(780, y + 20, t('quest.rewards') + ': ' + rewardParts.join('  '), {
                         fontSize: '11px', fill: '#f39c12', fontFamily: 'Arial'
                     }).setOrigin(1, 0)));
                 }
