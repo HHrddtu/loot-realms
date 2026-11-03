@@ -1,5 +1,6 @@
 import { ENEMY_TYPES } from '../config/enemies.js';
-import { getZoneEncounters } from '../config/encounters/index.js';
+import { getZoneApex, getZoneEncounters } from '../config/encounters/index.js';
+import { rollZoneEquip } from '../utils.js';
 import {
     ENCOUNTER_SNARE_SPEED_MULT,
     ENCOUNTER_SNARE_RADIUS,
@@ -13,7 +14,12 @@ import {
     ENCOUNTER_SPLIT_DMG_MULT,
     ENCOUNTER_SPLIT_EXP_MULT,
     ENCOUNTER_SPLIT_SCALE_MULT,
-    ENCOUNTER_DEFAULT_SPREAD
+    ENCOUNTER_DEFAULT_SPREAD,
+    ENCOUNTER_APEX_AURA_RADIUS,
+    ENCOUNTER_APEX_SUMMON_RADIUS,
+    ENCOUNTER_APEX_ENRAGE_HP,
+    ENCOUNTER_APEX_ENRAGE_DMG_MULT,
+    ENCOUNTER_APEX_ENRAGE_SPEED_MULT
 } from '../config/encounters/settings.js';
 
 export class EncounterManager {
@@ -21,15 +27,29 @@ export class EncounterManager {
         this.scene = scene;
         this.zone = null;
         this.snares = [];
+        this.packEnemies = [];
+        this.pendingPacks = [];
+        this.apexConfig = null;
+        this.apex = null;
+        this.apexAura = null;
+        this.apexSpawned = false;
+        this.apexDefeated = false;
+        this.huntComplete = false;
     }
 
     loadZone(zone) {
         this.clear();
         this.zone = zone;
         this.scene._encounterSpeedMult = 1;
+        this.apexConfig = getZoneApex(zone);
+        this.huntComplete = !this.apexConfig;
         const packs = getZoneEncounters(zone);
         packs.forEach(pack => {
             if (!pack.trigger || pack.trigger.type === 'onZoneEnter') {
+                this._spawnPack(pack);
+            } else if (pack.trigger.type === 'onProximity') {
+                this.pendingPacks.push(pack);
+            } else {
                 this._spawnPack(pack);
             }
         });
@@ -38,19 +58,69 @@ export class EncounterManager {
     clear() {
         this.snares.forEach(snare => this._destroySnare(snare));
         this.snares = [];
+        this._destroyApexAura();
+        this.packEnemies = [];
+        this.pendingPacks = [];
+        this.apexConfig = null;
+        this.apex = null;
+        this.apexSpawned = false;
+        this.apexDefeated = false;
+        this.huntComplete = false;
         this.zone = null;
         if (this.scene) this.scene._encounterSpeedMult = 1;
     }
 
-    update(time) {
+    update(time, delta) {
         const s = this.scene;
         if (!s) return;
+        const now = Number.isFinite(time) ? time : (s.time ? s.time.now : 0);
+        this._updatePacks();
+        this._updateSnares(now);
+        this._updateApex(Number.isFinite(delta) ? delta : 0);
+    }
+
+    getHuntStatus() {
+        if (!this.apexConfig) return { complete: true, text: 'Hunt clear', short: 'Hunt clear' };
+        if (this.huntComplete) return { complete: true, text: 'Hunt complete', short: 'Hunt complete' };
+        if (!this.apexSpawned) {
+            const activePacks = new Set(
+                this.packEnemies
+                    .filter(e => e && e.active && e.stats && e.stats.hp > 0)
+                    .map(e => e.stats.packId)
+            );
+            const packsLeft = this.pendingPacks.length + activePacks.size;
+            return { complete: false, packsLeft, text: 'Hunt: ' + packsLeft + ' packs', short: 'Hunt: ' + packsLeft + ' packs' };
+        }
+        return { complete: false, apex: true, text: 'Apex: ' + this.apexConfig.name, short: 'Apex: ' + this.apexConfig.name };
+    }
+
+    _updatePacks() {
+        if (this.pendingPacks.length === 0) return;
+        const player = this.scene.player;
+        if (!player) return;
+
+        const remaining = [];
+        for (const pack of this.pendingPacks) {
+            const trigger = pack.trigger;
+            const dx = player.x - (trigger.x ?? 0);
+            const dy = player.y - (trigger.y ?? 0);
+            const radius = trigger.radius ?? 200;
+            if (dx * dx + dy * dy <= radius * radius) {
+                this._spawnPack(pack);
+            } else {
+                remaining.push(pack);
+            }
+        }
+        this.pendingPacks = remaining;
+    }
+
+    _updateSnares(now) {
+        const s = this.scene;
         if (this.snares.length === 0) {
             s._encounterSpeedMult = 1;
             return;
         }
 
-        const now = Number.isFinite(time) ? time : (s.time ? s.time.now : 0);
         this.snares = this.snares.filter(snare => {
             if (now >= snare.expiresAt) {
                 this._destroySnare(snare);
@@ -76,6 +146,154 @@ export class EncounterManager {
             }
         }
         s._encounterSpeedMult = slowed ? ENCOUNTER_SNARE_SPEED_MULT : 1;
+    }
+
+    _updateApex(delta) {
+        if (!this.apexConfig) return;
+        if (!this.apexSpawned) {
+            if (this.pendingPacks.length === 0 && this.packEnemies.length > 0 && this._packMobsRemaining() === 0) {
+                this._spawnApex();
+            }
+            return;
+        }
+        if (this.apexDefeated) return;
+
+        const apex = this.apex;
+        if (!apex || !apex.active || (apex.stats && apex.stats.hp <= 0)) {
+            this._onApexDefeated();
+            return;
+        }
+
+        if (this.apexAura) {
+            this.apexAura.x = apex.x;
+            this.apexAura.y = apex.y;
+        }
+
+        const st = apex.stats;
+        if (!st.enraged && st.hp / st.maxHp <= ENCOUNTER_APEX_ENRAGE_HP) {
+            st.enraged = true;
+            st.damage = Math.floor(st.damage * ENCOUNTER_APEX_ENRAGE_DMG_MULT);
+            st.speed = Math.floor((st.speed || 50) * ENCOUNTER_APEX_ENRAGE_SPEED_MULT);
+            if (apex.setTint) apex.setTint(0xff4444);
+            if (this.scene.floatingText) this.scene.floatingText(apex.x, apex.y - 50, 'ENRAGED!', '#ff4444');
+        }
+
+        st.summonTimer = (st.summonTimer || 0) + delta;
+        if (st.summonTimer >= this.apexConfig.summonInterval && (st.summonCount || 0) < this.apexConfig.summonMax) {
+            st.summonTimer = 0;
+            this._summonApexMinions(apex);
+        }
+    }
+
+    _spawnApex() {
+        const s = this.scene;
+        const cfg = this.apexConfig;
+        if (!s || !cfg || !s.combat) return;
+        const base = this._baseType(cfg.key);
+        if (!base) return;
+
+        const x = cfg.x ?? 400;
+        const y = cfg.y ?? 150;
+        const apex = s.combat.makeEnemy(base, x, y);
+        if (!apex) return;
+
+        const st = apex.stats;
+        st.name = cfg.name;
+        st.role = 'trapper';
+        st.telegraphed = false;
+        st.isElite = true;
+        st.isApex = true;
+        st.isPackMob = false;
+        st.encounterId = cfg.id;
+        st.packId = cfg.id;
+        st.snareInterval = cfg.snareInterval;
+        st.summonTimer = 0;
+        st.summonCount = 0;
+        st.maxHp = Math.max(1, Math.floor(st.maxHp * cfg.hpMult));
+        st.hp = st.maxHp;
+        st.damage = Math.max(1, Math.floor(st.damage * cfg.dmgMult));
+        st.exp = Math.max(1, Math.floor(st.exp * cfg.expMult));
+        apex.setScale(cfg.scale);
+        if (apex.setTint) apex.setTint(0xff8844);
+
+        this.apex = apex;
+        this.apexSpawned = true;
+        if (s.add && s.add.circle) {
+            this.apexAura = s.add.circle(x, y, ENCOUNTER_APEX_AURA_RADIUS, 0xff8844, 0.14).setDepth(1);
+            if (s.tweens) {
+                s.tweens.add({
+                    targets: this.apexAura,
+                    scaleX: 1.2,
+                    scaleY: 1.2,
+                    alpha: 0.3,
+                    duration: 600,
+                    yoyo: true,
+                    repeat: -1
+                });
+            }
+        }
+        if (s.floatingText) s.floatingText(x, y - 60, 'APEX: ' + cfg.name, '#ff8844');
+    }
+
+    _summonApexMinions(apex) {
+        const s = this.scene;
+        const cfg = this.apexConfig;
+        if (!s || !cfg || !s.combat || !apex) return;
+        const base = this._baseType('goblin');
+        if (!base) return;
+
+        const st = apex.stats;
+        const count = Math.min(cfg.summonCount, cfg.summonMax - (st.summonCount || 0));
+        for (let i = 0; i < count; i++) {
+            const angle = (Math.PI * 2 * i) / Math.max(1, count);
+            const child = s.combat.makeEnemy(
+                base,
+                apex.x + Math.cos(angle) * ENCOUNTER_APEX_SUMMON_RADIUS,
+                apex.y + Math.sin(angle) * ENCOUNTER_APEX_SUMMON_RADIUS
+            );
+            if (!child) continue;
+            child.stats.name = 'Snarechief Goblin';
+            child.stats.isPackMob = false;
+            child.stats.isSummon = true;
+            child.stats.telegraphed = true;
+            child.stats.encounterId = cfg.id;
+            child.stats.packId = cfg.id;
+        }
+        st.summonCount = (st.summonCount || 0) + count;
+        if (s.floatingText) s.floatingText(apex.x, apex.y - 45, 'REINFORCEMENTS!', '#ff8844');
+    }
+
+    _onApexDefeated() {
+        if (this.apexDefeated) return;
+        const cfg = this.apexConfig;
+        const s = this.scene;
+        this.apexDefeated = true;
+        this.huntComplete = true;
+        this.apex = null;
+        this._destroyApexAura();
+        if (!s || !cfg) return;
+
+        const px = s.player ? s.player.x : cfg.x;
+        const py = s.player ? s.player.y : cfg.y;
+        if (s.floatingText) s.floatingText(px, py - 60, 'HUNT COMPLETE: ' + cfg.name, '#ff8844');
+        if (cfg.rewardGold) s.gold = (s.gold || 0) + cfg.rewardGold;
+        const item = rollZoneEquip('forest');
+        if (item && s.addEquip && s.addEquip(item) && s.floatingText) {
+            s.floatingText(px, py - 78, '+' + item.name, '#3498db');
+        }
+        if (s.recalcStats) s.recalcStats();
+        if (s.ui && s.ui.updateUI) s.ui.updateUI();
+    }
+
+    _packMobsRemaining() {
+        return this.packEnemies.filter(e => e && e.active && e.stats && e.stats.hp > 0).length;
+    }
+
+    _destroyApexAura() {
+        if (this.apexAura) {
+            this.apexAura.destroy();
+            this.apexAura = null;
+        }
     }
 
     spawnSnare(x, y) {
@@ -161,6 +379,11 @@ export class EncounterManager {
     _spawnPack(pack) {
         if (!pack || !Array.isArray(pack.enemies)) return;
         pack.enemies.forEach(entry => this._spawnEntry(pack, entry));
+        if (this.scene.floatingText && pack.name) {
+            const x = pack.trigger && pack.trigger.x !== undefined ? pack.trigger.x : 400;
+            const y = pack.trigger && pack.trigger.y !== undefined ? pack.trigger.y : 150;
+            this.scene.floatingText(x, y - 60, pack.name.toUpperCase(), '#ffd166');
+        }
     }
 
     _spawnEntry(pack, entry) {
@@ -179,7 +402,10 @@ export class EncounterManager {
             const x = originX + Math.cos(angle) * radius;
             const y = originY + Math.sin(angle) * radius;
             const enemy = s.combat.makeEnemy(base, x, y);
-            if (enemy) this._applyVariant(enemy, pack, entry);
+            if (enemy) {
+                this._applyVariant(enemy, pack, entry);
+                this.packEnemies.push(enemy);
+            }
         }
     }
 
@@ -188,6 +414,7 @@ export class EncounterManager {
         st.encounterId = pack.id;
         st.packId = pack.id;
         st.packName = pack.name;
+        st.isPackMob = true;
         if (entry.name) st.name = entry.name;
         if (entry.role) st.role = entry.role;
         if (entry.telegraphed !== undefined) st.telegraphed = entry.telegraphed;

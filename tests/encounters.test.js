@@ -8,6 +8,7 @@ function makeEnemy(base, x, y) {
     return {
         x,
         y,
+        active: true,
         scaleX: 1,
         scaleY: 1,
         texture: { key: base.key + '_walk' },
@@ -29,10 +30,19 @@ function makeEnemy(base, x, y) {
     };
 }
 
+function spawnAllPacks(scene, mgr) {
+    FOREST_ENCOUNTERS.forEach(pack => {
+        scene.player.x = pack.trigger.x;
+        scene.player.y = pack.trigger.y;
+        mgr.update(1000, 16);
+    });
+}
+
 function makeScene() {
     const spawned = [];
     return {
         spawned,
+        gold: 0,
         _encounterSpeedMult: 1,
         player: { x: 0, y: 0 },
         time: { now: 1000 },
@@ -53,7 +63,10 @@ function makeScene() {
             }))
         },
         tweens: { add: vi.fn() },
-        floatingText: vi.fn()
+        floatingText: vi.fn(),
+        addEquip: vi.fn(() => true),
+        recalcStats: vi.fn(),
+        ui: { updateUI: vi.fn() }
     };
 }
 
@@ -62,15 +75,21 @@ describe('Forest encounters', () => {
         expect(FOREST_ENCOUNTERS).toHaveLength(3);
         expect(getZoneEncounters('forest')).toBe(FOREST_ENCOUNTERS);
         expect(getZoneEncounters('mine')).toEqual([]);
+        expect(FOREST_ENCOUNTERS.every(p => p.trigger.type === 'onProximity')).toBe(true);
         expect(FOREST_ENCOUNTERS.some(p => p.enemies.some(e => e.role === 'trapper'))).toBe(true);
         expect(FOREST_ENCOUNTERS.some(p => p.enemies.some(e => e.splitOnDeath))).toBe(true);
         expect(FOREST_ENCOUNTERS.some(p => p.enemies.some(e => e.isElite))).toBe(true);
     });
 
-    it('spawns all onZoneEnter packs with authored variants', () => {
+    it('spawns packs only when the player approaches them', () => {
         const scene = makeScene();
         const mgr = new EncounterManager(scene);
         mgr.loadZone('forest');
+
+        expect(scene.combat.makeEnemy).toHaveBeenCalledTimes(0);
+        expect(mgr.getHuntStatus().packsLeft).toBe(3);
+
+        spawnAllPacks(scene, mgr);
 
         expect(scene.combat.makeEnemy).toHaveBeenCalledTimes(10);
         const trapper = scene.spawned.find(e => e.stats.name === 'Goblin Trapper');
@@ -126,6 +145,33 @@ describe('Forest encounters', () => {
         mgr.update(6000);
         expect(scene._encounterSpeedMult).toBe(1);
         expect(mgr.snares).toHaveLength(0);
+    });
+
+    it('spawns the apex after the packs are cleared and rewards the kill', () => {
+        const scene = makeScene();
+        const mgr = new EncounterManager(scene);
+        mgr.loadZone('forest');
+        spawnAllPacks(scene, mgr);
+
+        mgr.packEnemies.forEach(enemy => {
+            enemy.active = false;
+            enemy.stats.hp = 0;
+        });
+        mgr.update(2000, 16);
+
+        expect(mgr.apexSpawned).toBe(true);
+        expect(mgr.apex.stats.name).toBe('Goblin Snarechief');
+        expect(mgr.apex.stats.isApex).toBe(true);
+        expect(mgr.apex.stats.isElite).toBe(true);
+        expect(mgr.getHuntStatus().apex).toBe(true);
+
+        mgr.apex.active = false;
+        mgr.update(2100, 16);
+
+        expect(mgr.huntComplete).toBe(true);
+        expect(mgr.getHuntStatus().complete).toBe(true);
+        expect(scene.gold).toBe(120);
+        expect(scene.addEquip).toHaveBeenCalled();
     });
 
     it('clears snares and restores speed on zone transition', () => {

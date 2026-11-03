@@ -108,8 +108,8 @@ export class ForestZone extends BaseZone {
                     completeMsgRu: 'Бой освоен!'
                 },
                 {
-                    text: 'Go to the portal at the top (SPACE to enter Arena)',
-                    textRu: 'Иди к порталу наверху (SPACE для входа на Арену)',
+                    text: 'Clear the hunting packs and defeat the Apex, then enter the portal (SPACE)',
+                    textRu: 'Зачисти охотничьи стаи, победи Апекса и войди в портал (SPACE)',
                     check: (sc) => sc.zone === 'arena',
                     completeMsg: 'Arena awaits!',
                     completeMsgRu: 'Арена ждёт!'
@@ -253,7 +253,8 @@ export class ForestZone extends BaseZone {
         if (s.zone !== 'forest' || s.transitioning || s.menuOpen || !s.portalHint) return;
         const dist = Phaser.Math.Distance.Between(s.player.x, s.player.y, PORTAL_POS.x, PORTAL_POS.y);
         if (dist < PORTAL_ENTER_DIST) {
-            s.portalHint.setText('SPACE to enter');
+            const status = s.encounterMgr && s.encounterMgr.getHuntStatus ? s.encounterMgr.getHuntStatus() : null;
+            s.portalHint.setText(status && !status.complete ? status.short : 'SPACE to enter');
         } else {
             s.portalHint.setText('');
         }
@@ -265,6 +266,12 @@ export class ForestZone extends BaseZone {
         if (s.zone !== 'forest') return;
         const dist = Phaser.Math.Distance.Between(s.player.x, s.player.y, PORTAL_POS.x, PORTAL_POS.y);
         if (dist >= PORTAL_ENTER_DIST) return;
+
+        const status = s.encounterMgr && s.encounterMgr.getHuntStatus ? s.encounterMgr.getHuntStatus() : null;
+        if (status && !status.complete) {
+            s.floatingText(s.player.x, s.player.y - 40, status.text, '#ff8844');
+            return;
+        }
 
         s.transitioning = true;
         s.portalHint.setText('');

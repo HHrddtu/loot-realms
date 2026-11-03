@@ -1,10 +1,28 @@
+export const FOREST_APEX = {
+    id: 'forest_snarechief',
+    zone: 'forest',
+    name: 'Goblin Snarechief',
+    key: 'goblin',
+    x: 400,
+    y: 150,
+    scale: 1.8,
+    hpMult: 12,
+    dmgMult: 2,
+    expMult: 8,
+    snareInterval: 2100,
+    summonInterval: 7000,
+    summonCount: 2,
+    summonMax: 4,
+    rewardGold: 120
+};
+
 export const FOREST_ENCOUNTERS = [
     {
         id: 'forest_goblin_snare',
         zone: 'forest',
         name: 'Goblin Snare',
         tagline: 'A trapper pins you in place while goblins close in.',
-        trigger: { type: 'onZoneEnter' },
+        trigger: { type: 'onProximity', x: 190, y: 430, radius: 220 },
         enemies: [
             { key: 'goblin', count: 2, x: 190, y: 430, spread: 48 },
             {
@@ -25,7 +43,7 @@ export const FOREST_ENCOUNTERS = [
         zone: 'forest',
         name: 'Slime Nest',
         tagline: 'Kill the mother and the nest splits apart.',
-        trigger: { type: 'onZoneEnter' },
+        trigger: { type: 'onProximity', x: 600, y: 620, radius: 220 },
         enemies: [
             { key: 'slime', x: 600, y: 620, spread: 45 },
             {
@@ -47,7 +65,7 @@ export const FOREST_ENCOUNTERS = [
         zone: 'forest',
         name: 'Rat Warren',
         tagline: 'A swarm that grows bolder together, led by an alpha.',
-        trigger: { type: 'onZoneEnter' },
+        trigger: { type: 'onProximity', x: 640, y: 330, radius: 220 },
         enemies: [
             {
                 key: 'rat',

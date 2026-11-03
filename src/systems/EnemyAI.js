@@ -44,10 +44,6 @@ export class EnemyAI {
             if (fromSpawn < this.LEASH_DIST + 20 && e.stats.hp < e.stats.maxHp) {
                 e.stats.hp = Math.min(e.stats.maxHp, e.stats.hp + ENEMY_LEASH_HP_REGEN);
             }
-            if (!e._leashAlert) {
-                scene.floatingText(e.x, e.y - 30, 'LEASH!', '#ff4444');
-                e._leashAlert = true;
-            }
             return true;
         }
         e._leashAlert = false;
@@ -385,7 +381,8 @@ export class EnemyAI {
             e.body.setVelocity(0);
         }
         e.setFlipX(dx < 0);
-        if (e.stats.snareTimer >= ENCOUNTER_TRAPPER_INTERVAL_MS && dist < ENCOUNTER_TRAPPER_APPROACH_RANGE + 60) {
+        const snareInterval = e.stats.snareInterval || ENCOUNTER_TRAPPER_INTERVAL_MS;
+        if (e.stats.snareTimer >= snareInterval && dist < ENCOUNTER_TRAPPER_APPROACH_RANGE + 60) {
             e.stats.snareTimer = 0;
             this.playAttackAnim(e, scene);
             if (scene.encounterMgr && scene.encounterMgr.spawnSnare) {
