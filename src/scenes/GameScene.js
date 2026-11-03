@@ -32,6 +32,7 @@ import { PrestigeSystem } from '../systems/PrestigeSystem.js';
 import { TutorialManager } from '../systems/TutorialManager.js';
 import { LoreItemSystem } from '../systems/LoreItemSystem.js';
 import { ForestBossAI } from '../systems/ForestBossAI.js';
+import { EncounterManager } from '../systems/EncounterManager.js';
 import { EnemyAI } from '../systems/EnemyAI.js';
 import { StatusIcons } from '../systems/StatusIcons.js';
 import { ForestZone } from '../zones/ForestZone.js';
@@ -90,6 +91,7 @@ export default class GameScene extends Phaser.Scene {
         this.tutorialMgr = new TutorialManager(this);
         this.loreItems = new LoreItemSystem(this);
         this.forestBossAI = new ForestBossAI(this);
+        this.encounterMgr = new EncounterManager(this);
 
         this.zones = {
             forest: new ForestZone(this),
@@ -491,7 +493,7 @@ export default class GameScene extends Phaser.Scene {
 
     _promoteZoneElite() {
         if (!this.enemies || !this.enemies.getChildren) return;
-        const list = this.enemies.getChildren().filter(e => e && e.active && e.stats && !e.stats.isBoss && !e.stats.isElite);
+        const list = this.enemies.getChildren().filter(e => e && e.active && e.stats && !e.stats.isBoss && !e.stats.isElite && !e.stats.encounterId);
         if (list.length === 0) return;
         const e = list[Math.floor(Math.random() * list.length)];
         e.stats.isElite = true;
@@ -608,6 +610,7 @@ export default class GameScene extends Phaser.Scene {
                 zone.setup(...args);
             }
             if (zone.spawnObstacles) zone.spawnObstacles();
+            if (this.encounterMgr) this.encounterMgr.loadZone(zoneName);
             this._promoteZoneElite();
             this.tutorialMgr.cleanupZoneIntro();
             onExplore(zoneName);
@@ -890,6 +893,7 @@ export default class GameScene extends Phaser.Scene {
         if (this.currentZone) {
             this.currentZone.update(time, delta);
         }
+        if (this.encounterMgr) this.encounterMgr.update(time, delta);
 
         this._systemQuestTimer = (this._systemQuestTimer || 0) + delta;
         if (this._systemQuestTimer >= 1000) {

@@ -58,6 +58,7 @@ export class BaseZone {
 
     clear() {
         const s = this.scene;
+        if (s.encounterMgr) s.encounterMgr.clear();
         s.tweens.killAll();
         s.physics.world.colliders.destroy();
         if (s.ui && s.ui.hud) s.ui.hud.clearFloatingTexts();

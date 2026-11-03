@@ -172,6 +172,10 @@ export class CombatLoot {
             if (eliteItem) items.push({ kind: 'equip', item: eliteItem, x: enemy.x, y: enemy.y - 50, rarity: eliteItem.rarity });
         }
 
+        if (enemy.stats.splitOnDeath && !enemy.stats.isSpawn && s.encounterMgr) {
+            s.encounterMgr.handleSplit(enemy);
+        }
+
         this._applyOnKillSetEffects(enemy, setB);
         CombatLoot.spawnDeathEcho(s, enemy.x, enemy.y, enemy.texture && enemy.texture.key, {
             scale: enemy.scaleX,

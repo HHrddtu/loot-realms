@@ -1,8 +1,7 @@
 import Phaser from 'phaser';
 import {
-    GAME_WIDTH, FOREST_HEIGHT, ENEMY_COUNT,
-    PORTAL_POS, PORTAL_ENTER_DIST, FOREST_RETURN_POS,
-    ENEMY_TYPES
+    GAME_WIDTH, FOREST_HEIGHT,
+    PORTAL_POS, PORTAL_ENTER_DIST, FOREST_RETURN_POS
 } from '../config/index.js';
 import { playPortal, startZoneMusic } from '../sound.js';
 import { rollZoneEquip } from '../utils.js';
@@ -54,7 +53,6 @@ export class ForestZone extends BaseZone {
         s.trapGroup = s.physics.add.group();
         s.groundLootGroup = s.physics.add.group();
         s.forestChests = s.physics.add.group();
-        this.spawnEnemies();
         this.spawnForestTraps();
         this.spawnForestGroundLoot();
         this.spawnForestChests();
@@ -170,17 +168,6 @@ export class ForestZone extends BaseZone {
                 );
                 ch.hintText.setText(cdist < 45 ? 'Attack!' : '');
             });
-        }
-    }
-
-    spawnEnemies() {
-        const s = this.scene;
-        for (let i = 0; i < ENEMY_COUNT; i++) {
-            const t = ENEMY_TYPES[i];
-            const e = s.combat.makeEnemy(t, 100 + Math.random() * 600, 300 + Math.random() * 400);
-            if (s.multiplayer && s.mpSync && e) {
-                s.mpSync.assignMobId(e, t.key);
-            }
         }
     }
 

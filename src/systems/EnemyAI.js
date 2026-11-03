@@ -11,6 +11,12 @@ import {
     MELEE_ATTACK_RANGE, MELEE_ATTACK_COOLDOWN_MS, MELEE_ATTACK_HIT_RADIUS
 } from '../config/index.js';
 import { getEnemyAttackAnim } from '../config/animations.js';
+import {
+    ENCOUNTER_TRAPPER_INTERVAL_MS,
+    ENCOUNTER_TRAPPER_RETREAT_RANGE,
+    ENCOUNTER_TRAPPER_APPROACH_RANGE,
+    ENCOUNTER_TRAPPER_SPEED
+} from '../config/encounters/settings.js';
 export class EnemyAI {
     static WANDER_SPEED = ENEMY_WANDER_SPEED;
     static CHASE_RANGE = ENEMY_CHASE_RANGE;
@@ -144,6 +150,7 @@ export class EnemyAI {
             case 'necro': this._necroBehavior(e, player, dist, scene); break;
             case 'fire': this._fireBehavior(e, player, dist, scene); break;
             case 'swarm': this._swarmBehavior(e, player, dist, scene); break;
+            case 'trapper': this._trapperBehavior(e, player, dist, scene); break;
             default: this._defaultBehavior(e, player, dist, scene); break;
         }
     }
@@ -363,6 +370,28 @@ export class EnemyAI {
             scene.tweens.add({ targets: afterimage2, alpha: 0, duration: 500, delay: 100, onComplete: () => { if (afterimage2.active) afterimage2.destroy(); } });
         } else if (dist < 50) { const dx = player.x - e.x, dy = player.y - e.y; e.body.setVelocity((dx / dist) * 60, (dy / dist) * 60); e.setFlipX(dx < 0); }
         else { this._wander(e); }
+    }
+
+    static _trapperBehavior(e, player, dist, scene) {
+        e.stats.snareTimer = (e.stats.snareTimer || 0) + scene.game.loop.delta;
+        const dx = player.x - e.x, dy = player.y - e.y;
+        const range = dist || 1;
+        const speed = e.stats.speed || ENCOUNTER_TRAPPER_SPEED;
+        if (dist < ENCOUNTER_TRAPPER_RETREAT_RANGE) {
+            e.body.setVelocity((-dx / range) * speed, (-dy / range) * speed);
+        } else if (dist > ENCOUNTER_TRAPPER_APPROACH_RANGE) {
+            e.body.setVelocity((dx / range) * speed * 0.8, (dy / range) * speed * 0.8);
+        } else {
+            e.body.setVelocity(0);
+        }
+        e.setFlipX(dx < 0);
+        if (e.stats.snareTimer >= ENCOUNTER_TRAPPER_INTERVAL_MS && dist < ENCOUNTER_TRAPPER_APPROACH_RANGE + 60) {
+            e.stats.snareTimer = 0;
+            this.playAttackAnim(e, scene);
+            if (scene.encounterMgr && scene.encounterMgr.spawnSnare) {
+                scene.encounterMgr.spawnSnare(player.x, player.y);
+            }
+        }
     }
 
     static _mageBehavior(e, player, dist, scene) {

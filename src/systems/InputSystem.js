@@ -102,7 +102,7 @@ export class InputSystem {
 
             if (moveX !== 0 || moveY !== 0) {
                 const len = Math.sqrt(moveX * moveX + moveY * moveY);
-                const speedMult = s._zoneSpeedMult || 1;
+                const speedMult = (s._zoneSpeedMult || 1) * (s._encounterSpeedMult || 1);
                 body.setVelocityX((moveX / len) * s.playerSpeed * speedMult);
                 body.setVelocityY((moveY / len) * s.playerSpeed * speedMult);
                 if (moveX !== 0) s.facing = moveX < 0 ? 'left' : 'right';
